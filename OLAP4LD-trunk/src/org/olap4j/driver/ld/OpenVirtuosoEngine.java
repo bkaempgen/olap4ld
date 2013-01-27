@@ -818,6 +818,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	public List<Node[]> getCubes(Context context,
 			MetadataRequest metadataRequest, Object[] restrictions) {
 
+		readRestrictions(restrictions);
+
+		String additionalFilters = createFilterForRestrictions();
+
 		// If new cube is created, I empty the cache of the Linked Data Engine
 		// this.emptySparqlResultCache();
 
@@ -852,8 +856,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_SCHEM
 				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"CUBE\" as ?CUBE_TYPE ?DESCRIPTION ?CUBE_CAPTION "
 				+ askForFrom(true)
-				+ "where { ?CUBE_NAME a qb:DataStructureDefinition. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"\" )} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"\" )} }"
-				+ "order by ?CUBE_NAME ";
+				+ "where { ?CUBE_NAME a qb:DataStructureDefinition. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"\" )} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"\" )} "
+				+ additionalFilters + "}" + "order by ?CUBE_NAME ";
 
 		List<Node[]> cubeUris = sparql(query, true);
 
@@ -912,15 +916,17 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		 * We need "distinct" in case we have several measures per cube.
 		 */
 
-		if ((dimensionUniqueName != null && !dimensionUniqueName
-				.equals("Measures"))
-				|| (hierarchyUniqueName != null && !hierarchyUniqueName
-						.equals("Measures"))
-				|| (levelUniqueName != null && !levelUniqueName
-						.equals("Measures"))) {
-			// In this case, we do not ask for a measure dimension.
-		} else {
-
+		if (isMeasureQueriedFor()) {
+			
+			// Here, we again need specific filters, since only cube makes
+			// sense
+			String specificFilters = "";
+			if (cubeNamePattern != null) {
+				specificFilters = " FILTER (?CUBE_NAME = <"
+						+ LdOlap4jUtil.convertMDXtoURI(cubeNamePattern) + ">) ";
+			}
+			
+			// In this case, we do ask for a measure dimension.
 			query = LdOlap4jUtil.getStandardPrefixes()
 					+ "select distinct \""
 					+ TABLE_CAT
@@ -930,7 +936,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 					+ askForFrom(true)
 					+ " where { ?CUBE_NAME qb:component ?compSpec "
 					+ ". ?compSpec qb:measure ?MEASURE_PROPERTY. "
-					+ additionalFilters + "} "
+					+ specificFilters + "} "
 					+ "order by ?CUBE_NAME ?MEASURE_PROPERTY";
 
 			List<Node[]> memberUris2 = sparql(query, true);
@@ -949,6 +955,16 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		}
 
 		return result;
+	}
+
+	private boolean isMeasureQueriedFor() {
+		// If one is set, it should not be Measures, not.
+		return !(dimensionUniqueName != null && !dimensionUniqueName
+				.equals("Measures"))
+				|| (hierarchyUniqueName != null && !hierarchyUniqueName
+						.equals("Measures"))
+				|| (levelUniqueName != null && !levelUniqueName
+						.equals("Measures"));
 	}
 
 	/**
@@ -1041,14 +1057,17 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 		// Get measure dimensions, but only if neither dim, hier, lev is set and
 		// not "Measures".
-		if ((dimensionUniqueName != null && !dimensionUniqueName
-				.equals("Measures"))
-				|| (hierarchyUniqueName != null && !hierarchyUniqueName
-						.equals("Measures"))
-				|| (levelUniqueName != null && !levelUniqueName
-						.equals("Measures"))) {
-			// In this case, we do not ask for a measure hierarchy.
-		} else {
+		if (isMeasureQueriedFor()) {
+
+			// Here, we again need specific filters, since only cube makes
+			// sense
+			String specificFilters = "";
+			if (cubeNamePattern != null) {
+				specificFilters = " FILTER (?CUBE_NAME = <"
+						+ LdOlap4jUtil.convertMDXtoURI(cubeNamePattern) + ">) ";
+			}
+
+			// In this case, we do ask for a measure hierarchy.
 			query = LdOlap4jUtil.getStandardPrefixes()
 					+ "select distinct \""
 					+ TABLE_CAT
@@ -1058,7 +1077,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 					+ askForFrom(true)
 					+ " where { ?CUBE_NAME qb:component ?compSpec "
 					+ ". ?compSpec qb:measure ?MEASURE_PROPERTY. "
-					+ additionalFilters
+					+ specificFilters
 					+ "} order by ?CUBE_NAME ?MEASURE_PROPERTY ?HIERARCHY_NAME ";
 
 			List<Node[]> memberUris2 = sparql(query, true);
@@ -1088,7 +1107,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 					+ TABLE_CAT
 					+ "\" as ?CATALOG_NAME \""
 					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_CAPTION ?DESCRIPTION "
+					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_CAPTION ?DESCRIPTION "
 					+ askForFrom(true)
 					+ " where { ?CUBE_NAME qb:component ?compSpec "
 					+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. } OPTIONAL { ?DIMENSION_UNIQUE_NAME rdfs:label ?HIERARCHY_CAPTION } OPTIONAL {?DIMENSION_UNIQUE_NAME rdfs:comment ?DESCRIPTION } "
@@ -1179,15 +1198,17 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		// Second, ask for the measures (which are also members), but only if
 		// measure
 
-		if ((dimensionUniqueName != null && !dimensionUniqueName
-				.equals("Measures"))
-				|| (hierarchyUniqueName != null && !hierarchyUniqueName
-						.equals("Measures"))
-				|| (levelUniqueName != null && !levelUniqueName
-						.equals("Measures"))) {
-			// In this case, we do not ask for a measure dimension.
-		} else {
+		if (isMeasureQueriedFor()) {
 
+			// Here, we again need specific filters, since only cube makes
+			// sense
+			String specificFilters = "";
+			if (cubeNamePattern != null) {
+				specificFilters = " FILTER (?CUBE_NAME = <"
+						+ LdOlap4jUtil.convertMDXtoURI(cubeNamePattern) + ">) ";
+			}
+
+			// In this case, we do ask for a measure dimension.
 			query = LdOlap4jUtil.getStandardPrefixes()
 					+ "select distinct \""
 					+ TABLE_CAT
@@ -1197,7 +1218,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 					+ askForFrom(true)
 					+ " where { ?CUBE_NAME qb:component ?compSpec "
 					+ ". ?compSpec qb:measure ?MEASURE_PROPERTY. "
-					+ additionalFilters + "} " + "order by ?MEASURE_PROPERTY";
+					+ specificFilters + "} " + "order by ?MEASURE_PROPERTY";
 
 			List<Node[]> memberUris2 = sparql(query, true);
 
@@ -1454,28 +1475,14 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			// If we look for measures level, dimension or hierarchy or if
 			// member is
 			// defined and none .
-		} else if ((levelUniqueName != null && levelUniqueName
-				.equals("Measures"))
-				|| (hierarchyUniqueName != null && hierarchyUniqueName
-						.equals("Measures"))
-				|| (dimensionUniqueName != null && dimensionUniqueName
-						.equals("Measures"))) {
-
-			List<Node[]> memberUris = getMeasureMembers(memberUniqueName);
-
-			intermediaryresult = applyRestrictions(memberUris, restrictions);
-
-			addToResult(intermediaryresult, result);
-
 		} else {
 
 			// Possibly we are looking for a measure member:
-			if (memberUniqueName != null) {
+			if (isMeasureQueriedFor()) {
 
-				List<Node[]> memberUris2 = getMeasureMembers(memberUniqueName);
+				List<Node[]> memberUris = getMeasureMembers(memberUniqueName);
 
-				intermediaryresult = applyRestrictions(memberUris2,
-						restrictions);
+				intermediaryresult = applyRestrictions(memberUris, restrictions);
 
 				addToResult(intermediaryresult, result);
 
@@ -1522,6 +1529,9 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	}
 
 	private void readRestrictions(Object[] restrictions) {
+		// Reset
+		resetRestrictions();
+
 		for (int i = 0; i < restrictions.length; i = i + 2) {
 			if ("CATALOG_NAME".equals((String) restrictions[i])) {
 				catalog = (String) restrictions[i + 1];
@@ -1559,6 +1569,19 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				continue;
 			}
 		}
+	}
+
+	private void resetRestrictions() {
+		// Restrictions
+		catalog = null;
+		schemaPattern = null;
+		cubeNamePattern = null;
+		dimensionUniqueName = null;
+		hierarchyUniqueName = null;
+		levelUniqueName = null;
+		memberUniqueName = null;
+		tree = null;
+		treeOps = null;
 	}
 
 	/**

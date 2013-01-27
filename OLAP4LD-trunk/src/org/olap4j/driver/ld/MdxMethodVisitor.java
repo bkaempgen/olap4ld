@@ -355,7 +355,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 			// For now, always members
 			current = (Object) object;
 			/*
-			 * Now, that I now which element to filter, I can go through the
+			 * Now, that I know which element to filter, I can go through the
 			 * second part and replace currentmember with this member
 			 */
 
