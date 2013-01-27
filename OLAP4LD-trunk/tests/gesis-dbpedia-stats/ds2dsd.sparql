@@ -1,0 +1,28 @@
+# SPARQL CONSTRUCT Query zum Erstellen der Verlinkung von DS zu DSD gesis-dbpedia-stats:simpledsd
+
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX eus: <http://ontologycentral.com/2009/01/eurostat/ns#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gesis-dbpedia-stats: <http://lod.gesis.org/dbpedia-stats/ns#> 
+
+INSERT INTO GRAPH <http://lod.gesis.org/dbpedia-stats/ns#simpledsd> { 
+
+?ds qb:structure `iri(bif:concat(str (?ds), "d"))` .
+`iri(bif:concat(str (?ds), "d"))` a qb:DataStructureDefinition .
+`iri(bif:concat(str (?ds), "d"))` qb:component `iri(bif:concat(str (?ds), "component"))` .
+`iri(bif:concat(str (?ds), "component"))` qb:dimension gesis-dbpedia-stats:dim .
+`iri(bif:concat(str (?ds), "component"))` qb:measure sdmx-measure:obsValue .
+sdmx-measure:obsValue qb:aggregator "AVG" .
+
+}
+WHERE
+ {
+      ?obs qb:dataSet ?ds.
+      ?obs gesis-dbpedia-stats:dim ?o.
+ } 

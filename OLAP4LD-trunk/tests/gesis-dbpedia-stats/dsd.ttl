@@ -1,0 +1,19 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfh: <http://lod2.eu/schemas/rdfh#> .
+@prefix rdfh-inst: <http://lod2.eu/schemas/rdfh-inst#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skosclass: <http://ddialliance.org/ontologies/skosclass#> .
+@prefix gesis-dbpedia-stats: <http://lod.gesis.org/dbpedia-stats/ns#> .
+@prefix sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> . 
+
+gesis-dbpedia-stats:simpledsd
+	rdfs:label "Simple DSD of DBPedia Stats";
+	a qb:DataStructureDefinition ;
+	qb:component rdfh:lo_Comp .
+	
+rdfh:lo_Comp qb:dimension gesis-dbpedia-stats:dim.
+
+rdfh:lo_Comp qb:measure sdmx-measure:obsValue.
+sdmx-measure:obsValue qb:aggregator "AVG".

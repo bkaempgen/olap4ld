@@ -1,0 +1,67 @@
+This driver implements the Open Java API for OLAP (OLAP4J [1]). It can be used by clients that 
+support the API, e.g., Saiku, Palo. It allows access to Linked Data sources. 
+Those Linked Data sources are typically served over the Web by a triple store, e.g., Open Virtuoso, 
+Sesame.
+
+==Requirements==
+* olap4ld requires xercesImpl from olap4j  
+
+==How to run OLAP4LD with Saiku?==
+* Saiku-ui is starting point
+* Saiku-webapp is called by saiku-ui (in Saiku2.2 saiku-webapp should now be saiku)
+* Saiku-webapp (saiku) needs to be configured to use OLAP4LD driver: saiku-datasources [1].
+** The triple store queried so far is hard coded in the system. TODO: Configure named graphs, here.
+* OLAP4LD is called by saiku-webapp (saiku)
+* OLAP4J is implemented (and used) by OLAP4LD. 
+* Mondrian.jar has once been used by OLAP4LD, but should not be necessary anymore.
+* For OpenVirtuoso Triple Store, to transfrom sparql xml to nx, saxon.jar is needed. 
+This library, I need to have in Deployment Assembly of saiku-webapp, as OLAP4LD needs it.
+* The XSLT for transforming SPARQL XML into NX can be found within OLAP4LD.
+* OLAP4LD requires the nx parser [2].
+
+==OLAP4LD and SPARQL triple stores==
+* OLAP4LD tries not to make use of SPARQL 1.1 functionality in order to be applicable to 
+different triple stores
+* So far, only tested with Open Virtuoso
+* SPARQL features that OLAP4LD uses: ... AS ?... in select clause; if(?dimension = qb:dimension) 
+in select clause; OPTIONAL {} in where clause; order by ?... ?...; iri(?dimension); bound(?dimension)
+
+==Functionalities==
+* Members
+* Filter (but only up to 3 at the same time, otherwise it takes the first member, also,
+only the case is covered, when each position in the filter is made of one member, no crossjoin)
+* CrossJoin
+* Not yet covered:
+** Hierarchize, Order...
+
+==Testing==
+* olap4j has a testing environment which olap4ld uses
+* olap4ld provides its own test.properties
+* also olap4ld provides own test cases (preliminary)
+
+==Queries==
+
+===getCubes()===
+
+===getMeasures()===
+
+===getDimensions()===
+
+===getHierarchies()===
+
+===getLevels()===
+
+===getMembers()===
+
+ 
+
+
+[1] -------------
+type=OLAP
+name=XBRL Linked Data
+driver=org.olap4j.driver.ld.LdOlap4jDriver
+location=jdbc:ld:Jdbc=jdbc:mysql://localhost/cubedb?user=foodmart&password=foodmart;Catalog=res:foodmart/cubefile.xml;JdbcDrivers=com.mysql.jdbc.Driver;Server=http://localhost:8080/pentaho/Xmla?userid=joe&password=password;Database=LdDatabase;Datasets=http://vmdeb18.deri.ie:8080/saiku-ui-2.2.RC/grossprofitmargin#dsd;
+username=xbrl
+password=xbrl
+-------------------
+[2] <http://nxparser.googlecode.com/svn/trunk>

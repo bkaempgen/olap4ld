@@ -1,0 +1,38 @@
+==2013-01-19==
+* When filtering for members in SSB, I had to use function str(), otherwise I got an error "Virtuoso 22005 Error SR130 Bad type VARCHAR".
+
+==2013-01-17==
+* getSchemas and getCatalogs return different columns than previously used. See API.
+* Wildcards disabled: http://www.w3schools.com/sql/sql_wildcards.asp
+
+==2012-03-28==
+* Encoding all to UTF-8
+* Testing now works
+* Implementing of SPARQL concept 
+
+==2012-01-31==
+* License added
+* CROSSJOIN added
+
+==2012-01-29==
+* Add ordering for getXXX methods in LinkedDataEngine, according to [1]
+* Add handling of names
+* TODO: Clean up (old methods, VisitorClasses...) 
+
+
+[1] <http://olap4j.svn.sourceforge.net/viewvc/olap4j/trunk/doc/olap4j_fs.html#The_OlapDatabaseMetaData_interface_and_methods_which_return_schema_rowsets>
+
+==2012-01-28==
+* Tested with Saiku-2.2RC1
+* Filter axis supported
+* Single measures supported
+
+==2012-01-22==
+* OLAP4LD does not require mondrian or MySQL server, anymore.
+* No results are given, yet.
+
+==2011-12-12==
+* README added
+
+==2011-11-21==
+* Supports OpenVirtuoso triple store

@@ -1,0 +1,45 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfh: <http://lod2.eu/schemas/rdfh#> .
+@prefix rdfh-inst: <http://lod2.eu/schemas/rdfh-inst#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+rdfh-inst:lineitem_1_1
+    a rdfh:lineitem ;
+	a qb:Observation ;
+	a qb:Observation ;
+    rdfh:l_has_order rdfh-inst:orders_1 ;
+    rdfh:l_has_part rdfh-inst:part_155190 ;
+    rdfh:l_has_supplier rdfh-inst:supplier_7706 ;
+    rdfh:l_linenumber 1 ;
+    rdfh:l_linequantity 17e0 ;
+    rdfh:l_lineextendedprice 21168.23e0 ;
+    rdfh:l_linediscount 0.04e0 ;
+    rdfh:l_linetax 0.02e0 ;
+    rdfh:l_returnflag "N" ;
+    rdfh:l_linestatus "O" ;
+    rdfh:l_shipdate rdfh-inst:shipdate_1996-03-13 ;
+    rdfh:l_commitdate "1996-02-12"^^xsd:dateTime ;
+    rdfh:l_receiptdate "1996-03-22"^^xsd:dateTime ;
+    rdfh:l_shipinstruct "DELIVER IN PERSON" ;
+    rdfh:l_shipmode "TRUCK" ;
+    rdfh:l_comment "egular courts above the" .
+rdfh-inst:ds
+	a qb:DataSet ;
+	qb:structure rdfh-inst:dsd.
+rdfh-inst:dsd
+	a qb:DataStructureDefinition ;
+	qb:component _:l_linequantityComp ;
+	qb:component _:l_linequantityCompMea ;
+	qb:component _:l_lineextendedpriceComp ;
+	qb:component _:l_lineextendedpriceCompMea ;
+	qb:component _:l_shipdateComp ;
+	qb:component _:l_linediscountComp ;
+	qb:component _:l_linediscountCompMea .
+
+_:l_linequantityComp qb:dimension rdfh:l_linequantity.
+_:l_linequantityCompMea qb:measure rdfh:l_linequantity.
+_:l_lineextendedpriceComp qb:dimension rdfh:l_lineextendedprice.
+_:l_lineextendedpriceCompMea qb:measure rdfh:l_lineextendedprice.
+_:l_shipdateComp qb:dimension rdfh:l_shipdate.
+_:l_linediscountComp qb:measure rdfh:l_linediscount.
+_:l_linediscountCompMea qb:dimension rdfh:l_linediscount.
+
