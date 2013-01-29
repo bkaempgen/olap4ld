@@ -561,6 +561,14 @@ public class SSBMetadataTest extends TestCase {
 		assertContains(
 				"CATALOG_NAME=LdCatalog, SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, DIMENSION_UNIQUE_NAME=rdfh:lo_quantity, HIERARCHY_UNIQUE_NAME=rdfh:lo_quantity, LEVEL_NAME=rdfh:lo_quantity, LEVEL_UNIQUE_NAME=rdfh:lo_quantity, LEVEL_GUID=, LEVEL_CAPTION=rdfh:lo_quantity, LEVEL_NUMBER=1, LEVEL_CARDINALITY=0, LEVEL_TYPE=0x0000, CUSTOM_ROLLUP_SETTINGS=, LEVEL_UNIQUE_SETTINGS=, LEVEL_IS_VISIBLE=, DESCRIPTION=N/A",
 				s);
+		
+		// Ask specifically for the levels of the hierarchy of the dimension rdfh:lo_quantity
+		s = checkResultSet(olapDatabaseMetaData.getLevels(catalogName,
+				null, "rdfh-inst:dsd", "rdfh:lo_quantity", "rdfh:lo_quantity", null), LEVELS_COLUMN_NAMES);
+		assertContains(
+				"CATALOG_NAME=LdCatalog, SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, DIMENSION_UNIQUE_NAME=rdfh:lo_quantity, HIERARCHY_UNIQUE_NAME=rdfh:lo_quantity, LEVEL_NAME=rdfh:lo_quantity, LEVEL_UNIQUE_NAME=rdfh:lo_quantity, LEVEL_GUID=, LEVEL_CAPTION=rdfh:lo_quantity, LEVEL_NUMBER=1, LEVEL_CARDINALITY=0, LEVEL_TYPE=0x0000, CUSTOM_ROLLUP_SETTINGS=, LEVEL_UNIQUE_SETTINGS=, LEVEL_IS_VISIBLE=, DESCRIPTION=N/A",
+				s);
+		
 
 		// Check levels of one code list
 		s = checkResultSet(olapDatabaseMetaData.getLevels(catalogName, null,

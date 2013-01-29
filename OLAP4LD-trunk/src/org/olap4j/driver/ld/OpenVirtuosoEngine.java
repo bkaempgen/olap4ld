@@ -1236,12 +1236,22 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		}
 
 		// Add levels for dimensions without codelist, but only if necessary
-
 		if (hierarchyUniqueName != null
 				&& !hierarchyUniqueName.equals(dimensionUniqueName)) {
 			// we do not need to do this
 		} else {
-
+			
+			// We need specific filter 
+			String specificFilters = "";
+			if (cubeNamePattern != null) {
+				specificFilters += " FILTER (?CUBE_NAME = <"
+						+ LdOlap4jUtil.convertMDXtoURI(cubeNamePattern) + ">) ";
+			}
+			if (dimensionUniqueName != null) {
+				specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
+						+ LdOlap4jUtil.convertMDXtoURI(dimensionUniqueName) + ">) ";
+			}
+			
 			query = LdOlap4jUtil.getStandardPrefixes()
 					+ "select \""
 					+ TABLE_CAT
@@ -1251,7 +1261,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 					+ askForFrom(true)
 					+ " where { ?CUBE_NAME qb:component ?compSpec "
 					+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. }  "
-					+ additionalFilters
+					+ specificFilters
 					+ "} "
 					+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?LEVEL_NUMBER ";
 
@@ -1980,7 +1990,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				// Measure
 				// Measure property has aggregator attached to it " avg".
 				String measureProperty1 = LdOlap4jUtil.convertMDXtoURI(
-						measure1.getCaption()).replace(
+						measure1.getUniqueName()).replace(
 						" " + measure.getAggregator().name(), "");
 				String measurePropertyVariable1 = measure1.getCaption()
 						.replace(":", "_")
