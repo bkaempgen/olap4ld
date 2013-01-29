@@ -131,13 +131,11 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 		NEW, POPULATING, POPULATED
 	}
 
-	@Override
 	public String getName(Object element) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Map<String, T> asMap() {
 		// TODO Auto-generated method stub
 		return null;

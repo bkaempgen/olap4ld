@@ -352,7 +352,7 @@ public class LdOlap4jDriver implements Driver {
     /**
      * Properties supported by this driver.
      */
-    public enum Property {
+    public static enum Property {
         TESTPROXYCOOKIE(
             "String that uniquely identifies a proxy object via which to send "
             + "XMLA requests for testing purposes."),

@@ -38,6 +38,7 @@ import org.olap4j.metadata.Dimension;
 import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
+import org.olap4j.metadata.Measure.Aggregator;
 import org.olap4j.metadata.Member;
 import org.olap4j.metadata.NamedList;
 
@@ -54,7 +55,7 @@ import org.olap4j.metadata.NamedList;
  *         hierarchy list and measures
  * 
  */
-@SuppressWarnings("hiding")
+@SuppressWarnings("hiding") 
 public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 
 	private LdOlap4jStatement olap4jStatement;
@@ -128,7 +129,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 			Member calculatedMember = new LdOlap4jMeasure(
 					(LdOlap4jLevel) member1.getLevel(), calculatedMemberName,
 					calculatedMemberName, calculatedMemberName, "", null,
-					Measure.Aggregator.CALCULATED, callNode, Datatype.INTEGER,
+					Aggregator.CALCULATED, callNode, Datatype.INTEGER,
 					true, member1.getLevel().getMembers().size()
 							+ withMembers.size());
 			// We store the calculatedMember as a possible IdentifierNode
@@ -854,7 +855,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 					// Now, should be member
 					if (object2 instanceof Member) {
 						Member member = (Member) object2;
-						if (member.getMemberType() == Member.Type.MEASURE
+						if (member.getMemberType() == Measure.Type.MEASURE
 								|| member.getMemberType() == Member.Type.FORMULA) {
 							measureList.add((Measure) member);
 						}

@@ -8,16 +8,9 @@
  */
 package org.olap4j.driver.ld;
 
-import static org.olap4j.driver.ld.LdOlap4jUtil.ROWSET_NS;
-import static org.olap4j.driver.ld.LdOlap4jUtil.SOAP_NS;
-import static org.olap4j.driver.ld.LdOlap4jUtil.XMLA_NS;
-import static org.olap4j.driver.ld.LdOlap4jUtil.booleanElement;
-import static org.olap4j.driver.ld.LdOlap4jUtil.findChild;
 import static org.olap4j.driver.ld.LdOlap4jUtil.integerElement;
-import static org.olap4j.driver.ld.LdOlap4jUtil.parse;
 import static org.olap4j.driver.ld.LdOlap4jUtil.stringElement;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -51,9 +44,7 @@ import org.olap4j.PreparedOlapStatement;
 import org.olap4j.Scenario;
 import org.olap4j.driver.ld.proxy.XmlaOlap4jCachedProxy;
 import org.olap4j.driver.ld.proxy.XmlaOlap4jProxy;
-import org.olap4j.driver.ld.proxy.XmlaOlap4jProxyException;
 import org.olap4j.impl.ConnectStringParser;
-import org.olap4j.impl.LcidLocale;
 import org.olap4j.impl.Named;
 import org.olap4j.impl.Olap4jUtil;
 import org.olap4j.impl.UnmodifiableArrayList;
@@ -65,11 +56,12 @@ import org.olap4j.mdx.parser.MdxParserFactory;
 import org.olap4j.mdx.parser.MdxValidator;
 import org.olap4j.mdx.parser.impl.DefaultMdxParserImpl;
 import org.olap4j.metadata.Catalog;
-import org.olap4j.metadata.Database;
-import org.olap4j.metadata.Database.AuthenticationMode;
 import org.olap4j.metadata.Database.ProviderType;
+import org.olap4j.metadata.Database.AuthenticationMode;
+import org.olap4j.metadata.Database;
 import org.olap4j.metadata.Datatype;
 import org.olap4j.metadata.Dimension;
+import org.olap4j.metadata.Dimension.Type;
 import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
@@ -79,9 +71,7 @@ import org.olap4j.metadata.NamedList;
 import org.olap4j.metadata.Property;
 import org.olap4j.metadata.Schema;
 import org.semanticweb.yars.nx.Node;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 /**
  * Implementation of {@link org.olap4j.OlapConnection} for XML/A providers.
@@ -1327,6 +1317,7 @@ abstract class LdOlap4jConnection implements OlapConnection {
 					.get("?LEVEL_TYPE")]);
 			final Integer levelTypeCode = Integer.parseInt(
 					level_type.substring(2, level_type.length()), 16);
+			
 			final Level.Type levelType = Level.Type.getDictionary().forOrdinal(
 					levelTypeCode);
 			boolean calculated = (levelTypeCode & MDLEVEL_TYPE_CALCULATED) != 0;
