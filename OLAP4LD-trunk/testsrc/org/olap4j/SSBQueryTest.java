@@ -82,7 +82,7 @@ public class SSBQueryTest extends TestCase {
 	}
 	
 	public void testGenericQuery() {
-		String result = executeStatement("SELECT {[Measures].[Measures].[Measures].[rdfh:lo_CompMeas4]} ON COLUMNS, " +
+		String result = executeStatement("SELECT {[Measures].[Measures].[Measures].[rdfh:lo_revenue]} ON COLUMNS, " +
 				"{[rdfh:lo_custkey].[rdfh:lo_custkeyCodeList].[rdfh:lo_custkeyCustomerLevel].[rdfh-inst:customer_178]} ON ROWS " +
 				"FROM [rdfh-inst:dsd]");
 		
@@ -93,7 +93,7 @@ public class SSBQueryTest extends TestCase {
 	 * Query 1.1
 	 */
 	public void testSSB_Q_1_1() {
-		executeStatement("WITH MEMBER [Measures].[Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_CompMeas3] * [Measures].[Measures].[Measures].[rdfh:lo_CompMeas1]' "
+		executeStatement("WITH MEMBER [Measures].[Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_extendedprice] * [Measures].[Measures].[Measures].[rdfh:lo_discount]' "
 				+ "SELECT {[Measures].[Revenue]} ON COLUMNS, "
 				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel].[rdfh:lo_orderdateYear1993]} ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "
@@ -108,7 +108,7 @@ public class SSBQueryTest extends TestCase {
 	 * Query 1.2
 	 */
 	public void testSSB_Q_1_2() {
-		executeStatement("WITH MEMBER [Measures].[Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_CompMeas3] * [Measures].[Measures].[Measures].[rdfh:lo_CompMeas1]' "
+		executeStatement("WITH MEMBER [Measures].[Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_extendedprice] * [Measures].[Measures].[Measures].[rdfh:lo_discount]' "
 				+ "SELECT {[Measures].[Revenue]} ON COLUMNS, "
 				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearMonthNumLevel].[rdfh:lo_orderdateYearMonthNum199401]} ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "
@@ -123,7 +123,7 @@ public class SSBQueryTest extends TestCase {
 	 * Query 1.3
 	 */
 	public void testSSB_Q_1_3() {
-		executeStatement("WITH MEMBER [Measures].[Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_CompMeas3] * [Measures].[Measures].[Measures].[rdfh:lo_CompMeas1]' "
+		executeStatement("WITH MEMBER [Measures].[Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_extendedprice] * [Measures].[Measures].[Measures].[rdfh:lo_discount]' "
 				+ "SELECT {[Measures].[Revenue]} ON COLUMNS, "
 				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateWeeknuminyearCodeList].[rdfh:lo_orderdateWeeknuminyearLevel].[rdfh:lo_orderdateWeeknuminyear19946]} ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "
@@ -136,9 +136,11 @@ public class SSBQueryTest extends TestCase {
 
 	/**
 	 * Query 2.1
+	 * 
+	 * XXX: Does not fit, yet, since Children is not implemented, yet.
 	 */
 	public void testSSB_Q_2_1() {
-		executeStatement("SELECT {[Measures].[Measures].[Measures].[rdfh:lo_CompMeas4]} ON COLUMNS, "
+		executeStatement("SELECT {[Measures].[Measures].[Measures].[rdfh:lo_revenue]} ON COLUMNS, "
 				+ "CrossJoin(Members([rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel]), "
 				+ "{[rdfh:lo_partkey].[rdfh:lo_partkeyCodeList].[rdfh:lo_partkeyCategoryLevel].[rdfh:lo_partkeyCategoryMFGR-12]}) ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "
@@ -150,7 +152,7 @@ public class SSBQueryTest extends TestCase {
 	 * Query 2.2
 	 */
 	public void testSSB_Q_2_2() {
-		executeStatement("SELECT {[Measures].[Measures].[Measures].[rdfh:lo_CompMeas4]} ON COLUMNS, "
+		executeStatement("SELECT {[Measures].[Measures].[Measures].[rdfh:lo_revenue]} ON COLUMNS, "
 				+ "CrossJoin(Members([rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel]), "
 				+ "{[rdfh:lo_partkey].[rdfh:lo_partkeyCodeList].[rdfh:lo_partkeyCategoryLevel].[rdfh:lo_partkeyCategoryMFGR-12]}) ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "

@@ -1397,8 +1397,7 @@ abstract class LdOlap4jConnection implements OlapConnection {
 					.convertNodeToMDX(row[mapFields.get("?MEASURE_UNIQUE_NAME")]);
 			// Measure caption will contain the measure property
 			final String measureCaption = LdOlap4jUtil.makeCaption(LdOlap4jUtil
-					.convertNodeToMDX(row[mapFields.get("?MEASURE_CAPTION")]))
-					+ " " + measureAggregator.name();
+					.convertNodeToMDX(row[mapFields.get("?MEASURE_CAPTION")]));
 
 			/*
 			 * Node.toString is not enough. Integer/Boolean also

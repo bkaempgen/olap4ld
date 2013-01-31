@@ -1,3 +1,8 @@
+==2013-01-31==
+* Measures and aggregation functions: We say that the aggregation function of a measure is inherent 
+to the measure, i.e., it has to define itself how it aggregates if viewed from a lower granularity.
+From a measure, you can always derive new measures.   
+
 ==2013-01-19==
 * When filtering for members in SSB, I had to use function str(), otherwise I got an error "Virtuoso 22005 Error SR130 Bad type VARCHAR".
 

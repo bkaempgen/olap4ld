@@ -1004,7 +1004,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME  ?COMPONENT_SPECIFICATION as ?MEASURE_UNIQUE_NAME ?COMPONENT_SPECIFICATION as ?MEASURE_NAME ?MEASURE_PROPERTY as ?MEASURE_CAPTION \"5\" as ?DATA_TYPE \"true\" as ?MEASURE_IS_VISIBLE ?MEASURE_AGGREGATOR ?EXPRESSION"
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEASURE_NAME ?MEASURE_UNIQUE_NAME as ?MEASURE_CAPTION \"5\" as ?DATA_TYPE \"true\" as ?MEASURE_IS_VISIBLE ?MEASURE_AGGREGATOR ?EXPRESSION"
 				+ askForFrom(true)
 				// Hint: For now, MEASURE_CAPTION is simply the
 				// MEASURE_DIMENSION.
@@ -1012,9 +1012,9 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				// XXX: EXPRESSION also needs to be attached to
 				// ?COMPONENT_SPECIFICATION
 				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION "
-				+ ". ?COMPONENT_SPECIFICATION qb:measure ?MEASURE_PROPERTY. OPTIONAL {?COMPONENT_SPECIFICATION qb:aggregator ?MEASURE_AGGREGATOR } OPTIONAL {?MEASURE_PROPERTY qb:expression ?EXPRESSION } "
+				+ ". ?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?COMPONENT_SPECIFICATION qb:aggregator ?MEASURE_AGGREGATOR } OPTIONAL {?MEASURE_UNIQUE_NAME qb:expression ?EXPRESSION } "
 				+ additionalFilters + "} "
-				+ "order by ?CUBE_NAME ?MEASURE_PROPERTY ";
+				+ "order by ?CUBE_NAME ?MEASURE_UNIQUE_NAME ";
 		List<Node[]> measureUris = sparql(query, true);
 
 		List<Node[]> result = applyRestrictions(measureUris, restrictions);
@@ -1834,7 +1834,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		// Here, we need altered filters, since only unique member name
 		// makes sense
 		if (memberUniqueName != null) {
-			additionalFilters = " FILTER (?COMPONENT_SPECIFICATION = <"
+			additionalFilters = " FILTER (?MEASURE_UNIQUE_NAME = <"
 					+ LdOlap4jUtil.convertMDXtoURI(memberUniqueName) + ">) ";
 		} else {
 			additionalFilters = "";
@@ -1846,11 +1846,11 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?COMPONENT_SPECIFICATION as ?MEMBER_UNIQUE_NAME ?COMPONENT_SPECIFICATION as ?MEMBER_NAME ?MEASURE_PROPERTY as ?MEMBER_CAPTION \"3\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"0\" as ?PARENT_LEVEL "
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEASURE_UNIQUE_NAME as ?MEMBER_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_CAPTION \"3\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"0\" as ?PARENT_LEVEL "
 				+ askForFrom(true)
 				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION. "
-				+ "?COMPONENT_SPECIFICATION qb:measure ?MEASURE_PROPERTY. "
-				+ additionalFilters + "} " + "order by ?MEASURE_PROPERTY";
+				+ "?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. "
+				+ additionalFilters + "} " + "order by ?MEASURE_UNIQUE_NAME";
 
 		List<Node[]> memberUris2 = sparql(query, true);
 
@@ -1992,14 +1992,14 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				String measureProperty1 = LdOlap4jUtil.convertMDXtoURI(
 						measure1.getUniqueName()).replace(
 						" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable1 = measure1.getCaption()
+				String measurePropertyVariable1 = measure1.getUniqueName()
 						.replace(":", "_")
 						.replace(" " + measure.getAggregator().name(), "");
 
 				String measureProperty2 = LdOlap4jUtil.convertMDXtoURI(
-						measure2.getCaption()).replace(
+						measure2.getUniqueName()).replace(
 						" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable2 = measure2.getCaption()
+				String measurePropertyVariable2 = measure2.getUniqueName()
 						.replace(":", "_")
 						.replace(" " + measure.getAggregator().name(), "");
 
@@ -2025,9 +2025,9 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 				// Measure
 				String measureProperty = LdOlap4jUtil.convertMDXtoURI(
-						measure.getCaption()).replace(
+						measure.getUniqueName()).replace(
 						" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable = measure.getCaption()
+				String measurePropertyVariable = measure.getUniqueName()
 						.replace(":", "_")
 						.replace(" " + measure.getAggregator().name(), "");
 

@@ -591,18 +591,18 @@ public class SSBMetadataTest extends TestCase {
 		String s = checkResultSet(olapDatabaseMetaData.getMeasures(catalogName,
 				null, null, null, null), MEASURES_COLUMN_NAMES);
 		
-		// There should be the measure for rdfh:lo_quantity (which is also a dimension)
+		// There should be the measure for rdfh:lo_discount with the correct aggregation function AVG (which is also a dimension)
 		assertContains(
 				"CATALOG_NAME="
 						+ catalogName
-						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, MEASURE_NAME=rdfh:lo_CompMeas2, MEASURE_UNIQUE_NAME=rdfh:lo_CompMeas2, MEASURE_CAPTION=rdfh:lo_quantity, MEASURE_GUID=, MEASURE_AGGREGATOR=SUM, DATA_TYPE=5, MEASURE_IS_VISIBLE=true, LEVELS_LIST=, DESCRIPTION=",
+						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, MEASURE_NAME=rdfh:lo_discount, MEASURE_UNIQUE_NAME=rdfh:lo_discount, MEASURE_CAPTION=rdfh:lo_discount, MEASURE_GUID=, MEASURE_AGGREGATOR=AVG, DATA_TYPE=5, MEASURE_IS_VISIBLE=true, LEVELS_LIST=, DESCRIPTION=",
 				s);
 		
 		// ...and every other measure
 		assertContains(
 				"CATALOG_NAME="
 						+ catalogName
-						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, MEASURE_NAME=rdfh:lo_CompMeas3, MEASURE_UNIQUE_NAME=rdfh:lo_CompMeas3, MEASURE_CAPTION=rdfh:lo_extendedprice, MEASURE_GUID=, MEASURE_AGGREGATOR=SUM, DATA_TYPE=5, MEASURE_IS_VISIBLE=true, LEVELS_LIST=, DESCRIPTION=",
+						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, MEASURE_NAME=rdfh:sum_profit, MEASURE_UNIQUE_NAME=rdfh:sum_profit, MEASURE_CAPTION=rdfh:sum_profit, MEASURE_GUID=, MEASURE_AGGREGATOR=CALCULATED, DATA_TYPE=5, MEASURE_IS_VISIBLE=true, LEVELS_LIST=, DESCRIPTION=",
 				s);
 
 		// wildcard match not supported at the moment
@@ -612,9 +612,9 @@ public class SSBMetadataTest extends TestCase {
 		// MEASURES_COLUMN_NAMES);
 		// assertEquals(s, 7, linecount(s));
 
-		// exact match
+		// exact match for rdfh:lo_extendedprice
 		s = checkResultSet(olapDatabaseMetaData.getMeasures(catalogName, null,
-				"rdfh-inst:dsd", null, "rdfh:lo_CompMeas6"),
+				"rdfh-inst:dsd", null, "rdfh:lo_extendedprice"),
 				MEASURES_COLUMN_NAMES);
 		assertEquals(s, 1, linecount(s));
 	}
@@ -657,25 +657,6 @@ public class SSBMetadataTest extends TestCase {
 						+ catalogName
 						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, DIMENSION_UNIQUE_NAME=rdfh:lo_suppkey, HIERARCHY_UNIQUE_NAME=rdfh:lo_suppkeyCodeList, LEVEL_UNIQUE_NAME=rdfh:lo_suppkeyNationLevel, LEVEL_NUMBER=2, MEMBER_ORDINAL=, MEMBER_NAME=rdfh:lo_suppkeyNationMOROCCO, MEMBER_UNIQUE_NAME=rdfh:lo_suppkeyNationMOROCCO, MEMBER_TYPE=1, MEMBER_GUID=, MEMBER_CAPTION=rdfh:lo_suppkeyNationMOROCCO, CHILDREN_CARDINALITY=, PARENT_LEVEL=1, PARENT_UNIQUE_NAME=rdfh:lo_suppkeyRegionAFRICA, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
 				s);
-	}
-
-	public void testDatabaseMetaDataGetMeasureMember() throws SQLException {
-		ResultSet resultset;
-		String s;
-
-		// with treeop
-		resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
-				"rdfh-inst:dsd", null, null, null, "rdfh:lo_CompMeas1",
-				Olap4jUtil.enumSetOf(Member.TreeOp.SELF));
-		s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
-
-		// TestContext
-		// .assertEqualsVerbose
-		assertContains(
-				"CATALOG_NAME="
-						+ catalogName
-						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, DIMENSION_UNIQUE_NAME=Measures, HIERARCHY_UNIQUE_NAME=Measures, LEVEL_UNIQUE_NAME=Measures, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=rdfh:lo_CompMeas1, MEMBER_UNIQUE_NAME=rdfh:lo_CompMeas1, MEMBER_TYPE=3, MEMBER_GUID=, MEMBER_CAPTION=rdfh:lo_discount, CHILDREN_CARDINALITY=, PARENT_LEVEL=0, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
-				s);
 		
 		// Can we query for all members of the degenerated dimension rdfh:lo_quantity?
 		resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
@@ -688,6 +669,26 @@ public class SSBMetadataTest extends TestCase {
 						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, DIMENSION_UNIQUE_NAME=rdfh:lo_quantity, HIERARCHY_UNIQUE_NAME=rdfh:lo_quantity, LEVEL_UNIQUE_NAME=rdfh:lo_quantity, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=3, MEMBER_UNIQUE_NAME=3, MEMBER_TYPE=1, MEMBER_GUID=, MEMBER_CAPTION=3, CHILDREN_CARDINALITY=, PARENT_LEVEL=null, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
 				s);
 
+	}
+
+	public void testDatabaseMetaDataGetMeasureMember() throws SQLException {
+		ResultSet resultset;
+		String s;
+
+		// with treeop ask for specific measure rdfh:lo_discount (that also has is providing a degenerated dimension)
+		resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
+				"rdfh-inst:dsd", null, null, null, "rdfh:lo_discount",
+				Olap4jUtil.enumSetOf(Member.TreeOp.SELF));
+		s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
+
+		// TestContext
+		// .assertEqualsVerbose
+		assertContains(
+				"CATALOG_NAME="
+						+ catalogName
+						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, DIMENSION_UNIQUE_NAME=Measures, HIERARCHY_UNIQUE_NAME=Measures, LEVEL_UNIQUE_NAME=Measures, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=rdfh:lo_discount, MEMBER_UNIQUE_NAME=rdfh:lo_discount, MEMBER_TYPE=3, MEMBER_GUID=, MEMBER_CAPTION=rdfh:lo_discount, CHILDREN_CARDINALITY=, PARENT_LEVEL=0, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
+				s);
+		
 		// Can we query all measure members?
 		resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
 				"rdfh-inst:dsd", "Measures", null, null, null, null);
