@@ -1,3 +1,11 @@
+==2013-02-03==
+* Problem: If we run a test on data sources with metadata queries, olap4ld does not yet know
+how to translate prefixes to URIs. If I run OLAP queries, it does not since it populates the object
+metadata and gives names to all multidimensional elements. However, for metadata queries, it does
+not do it. After a metadata query is issued, for output, the elements are translated to MDX 
+expressions, i.e., after output, the prefixes are known. That means, for metadata queries, we have 
+to first query for cubes, then dimensions, then hierarchies etc.  
+
 ==2013-01-31==
 * Measures and aggregation functions: We say that the aggregation function of a measure is inherent 
 to the measure, i.e., it has to define itself how it aggregates if viewed from a lower granularity.

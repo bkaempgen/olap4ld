@@ -203,13 +203,22 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				|| call.getOperatorName().toLowerCase().equals("/")) {
 			return callNumBinOp(call);
 		}
-
+	
 		if (call.getOperatorName().toLowerCase().equals("and")) {
 			return callBooleanAND(call);
 		}
 
+		if (call.getOperatorName().toLowerCase().equals(":")) {
+			return callColon(call);
+		}
+		
 		throw new UnsupportedOperationException(
-				"This method is not supported by olap4ld, yet.");
+				"The "+call.getOperatorName().toLowerCase()+" method is not supported by olap4ld, yet.");
+	}
+
+	private Object callColon(CallNode call) {
+		// Here, we have two Identifier nodes, each having their own name, but we need to create a new i-node
+		return null;
 	}
 
 	private Object callCurrentMember(CallNode call) {
@@ -420,7 +429,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 					Hierarchy hierarchy = hierarchies.get(i);
 					NamedList<Level> levels = hierarchy.getLevels();
 					for (int j = 0; j < levels.size(); j++) {
-						Level level = levels.get(i);
+						Level level = levels.get(j);
 						List<Member> members = level.getMembers();
 						for (Member member : members) {
 							allMembers.add(member);

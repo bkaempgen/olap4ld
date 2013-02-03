@@ -3,11 +3,12 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="resources"/>
 	<classpathentry kind="src" path="testsrc"/>
-	<classpathentry kind="lib" path="lib/nxparser-1.2.3.jar"/>
-	<classpathentry kind="lib" path="lib/saxon-9.2.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/OLAP4J-trunk"/>
+	<classpathentry exported="true" kind="lib" path="lib/nxparser-1.2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/saxon-9.2.jar"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/OLAP4J-trunk"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
-	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

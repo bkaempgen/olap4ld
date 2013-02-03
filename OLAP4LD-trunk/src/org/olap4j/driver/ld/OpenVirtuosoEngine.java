@@ -79,8 +79,6 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 	private static final String TABLE_CAT = "LdCatalog";
 
-	private static final String DESCRIPTION = "Catalog of Linked Data.";
-
 	private static final String TABLE_SCHEM = "LdSchema";
 
 	/*
@@ -917,7 +915,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		 */
 
 		if (isMeasureQueriedFor()) {
-			
+
 			// Here, we again need specific filters, since only cube makes
 			// sense
 			String specificFilters = "";
@@ -925,7 +923,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				specificFilters = " FILTER (?CUBE_NAME = <"
 						+ LdOlap4jUtil.convertMDXtoURI(cubeNamePattern) + ">) ";
 			}
-			
+
 			// In this case, we do ask for a measure dimension.
 			query = LdOlap4jUtil.getStandardPrefixes()
 					+ "select distinct \""
@@ -1012,7 +1010,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				// XXX: EXPRESSION also needs to be attached to
 				// ?COMPONENT_SPECIFICATION
 				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION "
-				+ ". ?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?COMPONENT_SPECIFICATION qb:aggregator ?MEASURE_AGGREGATOR } OPTIONAL {?MEASURE_UNIQUE_NAME qb:expression ?EXPRESSION } "
+				+ ". ?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?COMPONENT_SPECIFICATION qb:aggregator ?MEASURE_AGGREGATOR } OPTIONAL {?COMPONENT_SPECIFICATION qb:expression ?EXPRESSION } "
 				+ additionalFilters + "} "
 				+ "order by ?CUBE_NAME ?MEASURE_UNIQUE_NAME ";
 		List<Node[]> measureUris = sparql(query, true);
@@ -1043,7 +1041,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_NAME ?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_CAPTION ?DESCRIPTION "
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_NAME ?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_CAPTION ?HIERARCHY_UNIQUE_NAME as ?DESCRIPTION "
 				+ askForFrom(true)
 				+ " where { ?CUBE_NAME qb:component ?compSpec "
 				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:label ?HIERARCHY_CAPTION FILTER ( lang(?HIERARCHY_CAPTION) = \"\" ) } OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:comment ?DESCRIPTION } "
@@ -1107,10 +1105,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 					+ TABLE_CAT
 					+ "\" as ?CATALOG_NAME \""
 					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_CAPTION ?DESCRIPTION "
+					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_CAPTION ?DIMENSION_UNIQUE_NAME as ?DESCRIPTION "
 					+ askForFrom(true)
 					+ " where { ?CUBE_NAME qb:component ?compSpec "
-					+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. } OPTIONAL { ?DIMENSION_UNIQUE_NAME rdfs:label ?HIERARCHY_CAPTION } OPTIONAL {?DIMENSION_UNIQUE_NAME rdfs:comment ?DESCRIPTION } "
+					+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. } "
 					+ additionalFilters
 					+ "} order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ";
 
@@ -1235,13 +1233,14 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			}
 		}
 
-		// Add levels for dimensions without codelist, but only if necessary
+		// Add levels for dimensions without codelist, but only if hierarchy and
+		// dimension names are equal
 		if (hierarchyUniqueName != null
 				&& !hierarchyUniqueName.equals(dimensionUniqueName)) {
 			// we do not need to do this
 		} else {
-			
-			// We need specific filter 
+
+			// We need specific filter
 			String specificFilters = "";
 			if (cubeNamePattern != null) {
 				specificFilters += " FILTER (?CUBE_NAME = <"
@@ -1249,9 +1248,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			}
 			if (dimensionUniqueName != null) {
 				specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
-						+ LdOlap4jUtil.convertMDXtoURI(dimensionUniqueName) + ">) ";
+						+ LdOlap4jUtil.convertMDXtoURI(dimensionUniqueName)
+						+ ">) ";
 			}
-			
+
 			query = LdOlap4jUtil.getStandardPrefixes()
 					+ "select \""
 					+ TABLE_CAT
@@ -1456,11 +1456,19 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				LdOlap4jUtil._log.info("TreeOp:SELF");
 
 				// Could be a measure member
-				intermediaryresult = getMeasureMembers(memberUniqueName);
+				if (isMeasureQueriedFor()) {
+					List<Node[]> memberUris = getMeasureMembers(memberUniqueName);
 
-				addToResult(intermediaryresult, result);
+					intermediaryresult = applyRestrictions(memberUris,
+							restrictions);
 
-				// Or, could be a typical member
+					addToResult(intermediaryresult, result);
+
+				} else {
+					// Or, could be a typical member
+					throw new UnsupportedOperationException(
+							"Currently not supported.");
+				}
 
 			} else {
 				// How can we remove only oneself?
@@ -1830,14 +1838,17 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	}
 
 	private List<Node[]> getMeasureMembers(String memberUniqueName) {
-		String additionalFilters;
-		// Here, we need altered filters, since only unique member name
+		String additionalFilters = "";
+		// Here, we need altered filters, since only cube name and unique member
+		// name
 		// makes sense
+		if (cubeNamePattern != null) {
+			additionalFilters += " FILTER (?CUBE_NAME = <"
+					+ LdOlap4jUtil.convertMDXtoURI(cubeNamePattern) + ">) ";
+		}
 		if (memberUniqueName != null) {
-			additionalFilters = " FILTER (?MEASURE_UNIQUE_NAME = <"
+			additionalFilters += " FILTER (?MEASURE_UNIQUE_NAME = <"
 					+ LdOlap4jUtil.convertMDXtoURI(memberUniqueName) + ">) ";
-		} else {
-			additionalFilters = "";
 		}
 
 		// Second, ask for the measures (which are also members)
@@ -1916,8 +1927,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			// .getUniqueName());
 			String dimensionProperty = LdOlap4jUtil.convertMDXtoURI(level
 					.getDimension().getUniqueName());
-			String dimensionPropertyVariable = level.getDimension()
-					.getUniqueName().replace(":", "_");
+			String dimensionPropertyVariable = makeParameter(level
+					.getDimension().getUniqueName());
 
 			String levelUniqueName = LdOlap4jUtil.convertMDXtoURI(level
 					.getUniqueName());
@@ -1992,16 +2003,16 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				String measureProperty1 = LdOlap4jUtil.convertMDXtoURI(
 						measure1.getUniqueName()).replace(
 						" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable1 = measure1.getUniqueName()
-						.replace(":", "_")
-						.replace(" " + measure.getAggregator().name(), "");
+				// We do not encode the aggregation function in the measure, any
+				// more.
+				String measurePropertyVariable1 = makeParameter(measure1
+						.getUniqueName());
 
 				String measureProperty2 = LdOlap4jUtil.convertMDXtoURI(
 						measure2.getUniqueName()).replace(
 						" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable2 = measure2.getUniqueName()
-						.replace(":", "_")
-						.replace(" " + measure.getAggregator().name(), "");
+				String measurePropertyVariable2 = makeParameter(measure2
+						.getUniqueName());
 
 				// We take the aggregator from the measure
 				conceptSelects += " " + measure1.getAggregator().name() + "(?"
@@ -2027,9 +2038,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				String measureProperty = LdOlap4jUtil.convertMDXtoURI(
 						measure.getUniqueName()).replace(
 						" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable = measure.getUniqueName()
-						.replace(":", "_")
-						.replace(" " + measure.getAggregator().name(), "");
+				String measurePropertyVariable = makeParameter(measure
+						.getUniqueName());
 
 				// We take the aggregator from the measure
 				conceptSelects += " " + measure.getAggregator().name() + "(?"
@@ -2084,8 +2094,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				String slicerDimensionProperty = LdOlap4jUtil
 						.convertMDXtoURI(slicerTuple.get(0).getDimension()
 								.getUniqueName());
-				String slicerDimensionPropertyVariable = slicerTuple.get(0)
-						.getDimension().getUniqueName().replace(":", "_");
+				String slicerDimensionPropertyVariable = makeParameter(slicerTuple
+						.get(0).getDimension().getUniqueName());
 
 				/*
 				 * slicerLevelNumber would give me the difference between the
@@ -2263,6 +2273,19 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		query += groupByPart + orderByPart;
 
 		return sparql(query, true);
+	}
+
+	/**
+	 * SPARQL does not allow all characters as parameter names, e.g.,
+	 * ?sdmx-measure:obsValue
+	 * 
+	 * @param uniqueName
+	 * @return
+	 */
+	private String makeParameter(String uniqueName) {
+		uniqueName = uniqueName.replace(":", "_");
+		uniqueName = uniqueName.replace("-", "_");
+		return uniqueName;
 	}
 
 }

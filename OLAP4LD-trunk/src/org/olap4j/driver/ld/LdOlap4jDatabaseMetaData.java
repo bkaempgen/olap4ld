@@ -1188,7 +1188,7 @@ abstract class LdOlap4jDatabaseMetaData implements OlapDatabaseMetaData {
 		// return betweenResult;
 		// XMLA doesn't support drillthrough so override
 		// whatever the server returns.
-		LdOlap4jUtil._log.info("MetaData getCubes()...");
+		LdOlap4jUtil._log.info("MetaData getCubes(catalog: "+catalog+", schemapattern"+schemaPattern+", cubenamepattern"+cubeNamePattern+")...");
 
 		final Map<LdOlap4jConnection.MetadataColumn, String> overrides = new HashMap<LdOlap4jConnection.MetadataColumn, String>();
 
@@ -1210,7 +1210,7 @@ abstract class LdOlap4jDatabaseMetaData implements OlapDatabaseMetaData {
 		// .getDimensions(catalog, schemaPattern, cubeNamePattern,
 		// dimensionNamePattern);
 		// return betweenResult;
-		LdOlap4jUtil._log.info("MetaData getDimensions()...");
+		LdOlap4jUtil._log.info("MetaData getDimensions(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", dimensionNamePattern: "+dimensionNamePattern+")...");
 
 		return getMetadataLd(
 				LdOlap4jConnection.MetadataRequest.MDSCHEMA_DIMENSIONS,
@@ -1246,7 +1246,7 @@ abstract class LdOlap4jDatabaseMetaData implements OlapDatabaseMetaData {
 		// .getHierarchies(catalog, schemaPattern, cubeNamePattern,
 		// dimensionUniqueName, hierarchyNamePattern);
 		// return betweenResult;
-		LdOlap4jUtil._log.info("MetaData getHierarchies()...");
+		LdOlap4jUtil._log.info("MetaData getHierarchies(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", dimensionUniqueName: "+dimensionUniqueName+", hierarchyNamePattern: "+hierarchyNamePattern);
 
 		return getMetadataLd(
 				LdOlap4jConnection.MetadataRequest.MDSCHEMA_HIERARCHIES,
@@ -1266,7 +1266,7 @@ abstract class LdOlap4jDatabaseMetaData implements OlapDatabaseMetaData {
 		// .getMeasures(catalog, schemaPattern, cubeNamePattern,
 		// measureNamePattern, measureUniqueName);
 		// return betweenResult;
-		LdOlap4jUtil._log.info("MetaData getMeasures()...");
+		LdOlap4jUtil._log.info("MetaData getMeasures(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", measureNamePattern: "+measureNamePattern+" measureUniqueName: "+measureUniqueName);
 
 		return getMetadataLd(
 				LdOlap4jConnection.MetadataRequest.MDSCHEMA_MEASURES,
@@ -1330,7 +1330,7 @@ abstract class LdOlap4jDatabaseMetaData implements OlapDatabaseMetaData {
 		// dimensionUniqueName, hierarchyUniqueName,
 		// levelNamePattern);
 		// return betweenResult;
-		LdOlap4jUtil._log.info("MetaData getLevels()...");
+		LdOlap4jUtil._log.info("MetaData getLevels(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", dimensionUniqueName: "+dimensionUniqueName+", hierarchyUniqueName: "+hierarchyUniqueName+", levelNamePattern: "+levelNamePattern);
 
 		return getMetadataLd(
 				LdOlap4jConnection.MetadataRequest.MDSCHEMA_LEVELS,
