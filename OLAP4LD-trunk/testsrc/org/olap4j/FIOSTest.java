@@ -405,6 +405,7 @@ public class FIOSTest extends TestCase {
 
 	/**
 	 * I am looking for master card SEC dataset and Yahoo Finance dataset.
+	 * 
 	 * @throws SQLException
 	 */
 	public void testDatabaseMetaDataGetCubes() throws SQLException {
@@ -413,20 +414,30 @@ public class FIOSTest extends TestCase {
 				CUBE_COLUMN_NAMES);
 
 		// Edgar Cube Mastercard with CIK 1141391
-		assertContains("CATALOG_NAME=" + catalogName
-				+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd, ", s);
-		
+		assertContains(
+				"CATALOG_NAME="
+						+ catalogName
+						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd, ",
+				s);
+
 		// Yahoo Cube with Ticker MA
-		assertContains("CATALOG_NAME=" + catalogName
-				+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpyahoofinancewrapappspotcomarchiveMA20130128:dsd, ", s);
+		assertContains(
+				"CATALOG_NAME="
+						+ catalogName
+						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpyahoofinancewrapappspotcomarchiveMA20130128:dsd, ",
+				s);
 
 	}
 
 	public void testDatabaseMetaDataGetDimensions() throws SQLException {
-		
+
 		// Ask for dimensions of Edgar Cube
-		String s = checkResultSet(olapDatabaseMetaData.getDimensions(
-				catalogName, null, "httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd", null), DIMENSIONS_COLUMN_NAMES);
+		String s = checkResultSet(
+				olapDatabaseMetaData.getDimensions(
+						catalogName,
+						null,
+						"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd",
+						null), DIMENSIONS_COLUMN_NAMES);
 
 		// Segment dimension
 		assertContains(
@@ -444,10 +455,11 @@ public class FIOSTest extends TestCase {
 
 		// There should be X dimensions (including Measures)
 		assertEquals(5, linecount(s));
-		
+
 		// Ask for dimensions of Yahoo Cube
-		s = checkResultSet(olapDatabaseMetaData.getDimensions(
-				catalogName, null, "httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", null), DIMENSIONS_COLUMN_NAMES);
+		s = checkResultSet(olapDatabaseMetaData.getDimensions(catalogName,
+				null, "httpyahoofinancewrapappspotcomarchiveMA20130128:dsd",
+				null), DIMENSIONS_COLUMN_NAMES);
 
 		// Segment dimension
 		assertContains(
@@ -488,25 +500,30 @@ public class FIOSTest extends TestCase {
 	}
 
 	public void testDatabaseMetaDataGetHierarchies() throws SQLException {
-		
+
 		// Check hierarchies of Edgar cube
-		String s = checkResultSet(olapDatabaseMetaData.getHierarchies(
-				catalogName, null, "httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd", null, null), HIERARCHIES_COLUMN_NAMES);
-		
+		String s = checkResultSet(
+				olapDatabaseMetaData.getHierarchies(
+						catalogName,
+						null,
+						"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd",
+						null, null), HIERARCHIES_COLUMN_NAMES);
+
 		// Should have the standard dimension hierarchy
 		assertContains(
 				"CATALOG_NAME="
 						+ catalogName
 						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd, DIMENSION_UNIQUE_NAME=httpedgarwrapontologycentralcomvocabedgar:segment, HIERARCHY_NAME=httpedgarwrapontologycentralcomvocabedgar:segment, HIERARCHY_UNIQUE_NAME=httpedgarwrapontologycentralcomvocabedgar:segment, HIERARCHY_GUID=, HIERARCHY_CAPTION=httpedgarwrapontologycentralcomvocabedgar:segment, DIMENSION_TYPE=, HIERARCHY_CARDINALITY=, DEFAULT_MEMBER=, ALL_MEMBER=, DESCRIPTION=httpedgarwrapontologycentralcomvocabedgar:segment, STRUCTURE=, IS_VIRTUAL=, IS_READWRITE=, DIMENSION_UNIQUE_SETTINGS=, DIMENSION_IS_VISIBLE=, HIERARCHY_IS_VISIBLE=, HIERARCHY_ORDINAL=, DIMENSION_IS_SHARED=, PARENT_CHILD=",
 				s);
-		
+
 		// There should be X hierarchies (including Measures)
 		assertEquals(5, linecount(s));
 
 		// Check hierarchies of Yahoo Finance cube
-		s = checkResultSet(olapDatabaseMetaData.getHierarchies(
-				catalogName, null, "httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", null, null), HIERARCHIES_COLUMN_NAMES);
-		
+		s = checkResultSet(olapDatabaseMetaData.getHierarchies(catalogName,
+				null, "httpyahoofinancewrapappspotcomarchiveMA20130128:dsd",
+				null, null), HIERARCHIES_COLUMN_NAMES);
+
 		// Should have the standard dimension hierarchy
 		assertContains(
 				"CATALOG_NAME="
@@ -516,14 +533,18 @@ public class FIOSTest extends TestCase {
 
 		// There should be X hierarchies (including Measures)
 		assertEquals(5, linecount(s));
-		
+
 	}
 
 	public void testDatabaseMetaDataGetLevels() throws SQLException {
-		
+
 		// Edgar Levels of segment
-		String s = checkResultSet(olapDatabaseMetaData.getLevels(catalogName,
-				null, "httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd", null, null, null), LEVELS_COLUMN_NAMES);
+		String s = checkResultSet(
+				olapDatabaseMetaData.getLevels(
+						catalogName,
+						null,
+						"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd",
+						null, null, null), LEVELS_COLUMN_NAMES);
 
 		// Get normal level
 		assertContains(
@@ -535,15 +556,21 @@ public class FIOSTest extends TestCase {
 				"CATALOG_NAME=LdCatalog, SCHEMA_NAME=LdSchema, CUBE_NAME=httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd, DIMENSION_UNIQUE_NAME=Measures, HIERARCHY_UNIQUE_NAME=Measures, LEVEL_NAME=Measures, LEVEL_UNIQUE_NAME=Measures, LEVEL_GUID=, LEVEL_CAPTION=Measures, LEVEL_NUMBER=1, LEVEL_CARDINALITY=0, LEVEL_TYPE=0x0000, CUSTOM_ROLLUP_SETTINGS=, LEVEL_UNIQUE_SETTINGS=, LEVEL_IS_VISIBLE=, DESCRIPTION=Measures",
 				s);
 
-		// Get specific level of hierarchy 
-		s = checkResultSet(olapDatabaseMetaData.getLevels(catalogName, null,
-				"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd", "httpedgarwrapontologycentralcomvocabedgar:segment", "httpedgarwrapontologycentralcomvocabedgar:segment", null),
-				LEVELS_COLUMN_NAMES);
+		// Get specific level of hierarchy
+		s = checkResultSet(
+				olapDatabaseMetaData.getLevels(
+						catalogName,
+						null,
+						"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd",
+						"httpedgarwrapontologycentralcomvocabedgar:segment",
+						"httpedgarwrapontologycentralcomvocabedgar:segment",
+						null), LEVELS_COLUMN_NAMES);
 		assertEquals(s, 1, linecount(s));
-		
+
 		// Yahoo Finance Levels of segment
-		s = checkResultSet(olapDatabaseMetaData.getLevels(catalogName,
-				null, "httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", null, null, null), LEVELS_COLUMN_NAMES);
+		s = checkResultSet(olapDatabaseMetaData.getLevels(catalogName, null,
+				"httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", null,
+				null, null), LEVELS_COLUMN_NAMES);
 
 		// Get normal level
 		assertContains(
@@ -555,12 +582,14 @@ public class FIOSTest extends TestCase {
 				"CATALOG_NAME=LdCatalog, SCHEMA_NAME=LdSchema, CUBE_NAME=httpyahoofinancewrapappspotcomarchiveMA20130128:dsd, DIMENSION_UNIQUE_NAME=Measures, HIERARCHY_UNIQUE_NAME=Measures, LEVEL_NAME=Measures, LEVEL_UNIQUE_NAME=Measures, LEVEL_GUID=, LEVEL_CAPTION=Measures, LEVEL_NUMBER=1, LEVEL_CARDINALITY=0, LEVEL_TYPE=0x0000, CUSTOM_ROLLUP_SETTINGS=, LEVEL_UNIQUE_SETTINGS=, LEVEL_IS_VISIBLE=, DESCRIPTION=Measures",
 				s);
 
-		// Get specific level of hierarchy 
+		// Get specific level of hierarchy
 		s = checkResultSet(olapDatabaseMetaData.getLevels(catalogName, null,
-				"httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", "httpyahoofinancewrapappspotcomvocabyahoo:segment", "httpyahoofinancewrapappspotcomvocabyahoo:segment", null),
+				"httpyahoofinancewrapappspotcomarchiveMA20130128:dsd",
+				"httpyahoofinancewrapappspotcomvocabyahoo:segment",
+				"httpyahoofinancewrapappspotcomvocabyahoo:segment", null),
 				LEVELS_COLUMN_NAMES);
 		assertEquals(s, 1, linecount(s));
-		
+
 	}
 
 	public void testDatabaseMetaDataGetLiterals2() throws SQLException {
@@ -574,10 +603,14 @@ public class FIOSTest extends TestCase {
 	}
 
 	public void testDatabaseMetaDataGetMeasures() throws SQLException {
-		
+
 		// Edgar Measure
-		String s = checkResultSet(olapDatabaseMetaData.getMeasures(catalogName,
-				null, "httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd", null, null), MEASURES_COLUMN_NAMES);
+		String s = checkResultSet(
+				olapDatabaseMetaData.getMeasures(
+						catalogName,
+						null,
+						"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd",
+						null, null), MEASURES_COLUMN_NAMES);
 		assertContains(
 				"CATALOG_NAME="
 						+ catalogName
@@ -585,93 +618,116 @@ public class FIOSTest extends TestCase {
 				s);
 
 		// Yahoo Finance Measure
-		s = checkResultSet(olapDatabaseMetaData.getMeasures(catalogName,
-				null, "httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", null, null), MEASURES_COLUMN_NAMES);
+		s = checkResultSet(olapDatabaseMetaData.getMeasures(catalogName, null,
+				"httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", null,
+				null), MEASURES_COLUMN_NAMES);
 		assertContains(
 				"CATALOG_NAME="
 						+ catalogName
 						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpyahoofinancewrapappspotcomarchiveMA20130128:dsd, MEASURE_NAME=sdmx-measure:obsValue, MEASURE_UNIQUE_NAME=sdmx-measure:obsValue, MEASURE_CAPTION=sdmx-measure:obsValue, MEASURE_GUID=, MEASURE_AGGREGATOR=null, DATA_TYPE=5, MEASURE_IS_VISIBLE=true, LEVELS_LIST=, DESCRIPTION=",
 				s);
-		
+
 	}
-	
+
 	public void testDatabaseMetaDataGetMeasureMember() throws SQLException {
-	ResultSet resultset;
-	String s;
+		ResultSet resultset;
+		String s;
 
-	// Edgar cube
-	// with treeop
-	resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
-			"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd", null, null, null, "sdmx-measure:obsValue",
-			Olap4jUtil.enumSetOf(Member.TreeOp.SELF));
-	s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
+		// Edgar cube
+		// with treeop
+		resultset = olapDatabaseMetaData
+				.getMembers(
+						catalogName,
+						"LdSchema",
+						"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd",
+						null, null, null, "sdmx-measure:obsValue",
+						Olap4jUtil.enumSetOf(Member.TreeOp.SELF));
+		s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
 
-	// TestContext
-	// .assertEqualsVerbose
-	assertContains(
-					"CATALOG_NAME="
-							+ catalogName
-							+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd, DIMENSION_UNIQUE_NAME=Measures, HIERARCHY_UNIQUE_NAME=Measures, LEVEL_UNIQUE_NAME=Measures, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=sdmx-measure:obsValue, MEMBER_UNIQUE_NAME=sdmx-measure:obsValue, MEMBER_TYPE=3, MEMBER_GUID=, MEMBER_CAPTION=sdmx-measure:obsValue, CHILDREN_CARDINALITY=, PARENT_LEVEL=0, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
-					s);
+		// TestContext
+		// .assertEqualsVerbose
+		assertContains(
+				"CATALOG_NAME="
+						+ catalogName
+						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd, DIMENSION_UNIQUE_NAME=Measures, HIERARCHY_UNIQUE_NAME=Measures, LEVEL_UNIQUE_NAME=Measures, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=sdmx-measure:obsValue, MEMBER_UNIQUE_NAME=sdmx-measure:obsValue, MEMBER_TYPE=3, MEMBER_GUID=, MEMBER_CAPTION=sdmx-measure:obsValue, CHILDREN_CARDINALITY=, PARENT_LEVEL=0, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
+				s);
 
-	// Yahoo Finance cube
-	// with treeop
-	resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
-			"httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", null, null, null, "sdmx-measure:obsValue",
-			Olap4jUtil.enumSetOf(Member.TreeOp.SELF));
-	s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
+		// Yahoo Finance cube
+		// with treeop
+		resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
+				"httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", null,
+				null, null, "sdmx-measure:obsValue",
+				Olap4jUtil.enumSetOf(Member.TreeOp.SELF));
+		s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
 
-	// TestContext
-	// .assertEqualsVerbose
-	assertContains(
-					"CATALOG_NAME="
-							+ catalogName
-							+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpyahoofinancewrapappspotcomarchiveMA20130128:dsd, DIMENSION_UNIQUE_NAME=Measures, HIERARCHY_UNIQUE_NAME=Measures, LEVEL_UNIQUE_NAME=Measures, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=sdmx-measure:obsValue, MEMBER_UNIQUE_NAME=sdmx-measure:obsValue, MEMBER_TYPE=3, MEMBER_GUID=, MEMBER_CAPTION=sdmx-measure:obsValue, CHILDREN_CARDINALITY=, PARENT_LEVEL=0, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
-					s);
-	
-}
+		// TestContext
+		// .assertEqualsVerbose
+		assertContains(
+				"CATALOG_NAME="
+						+ catalogName
+						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpyahoofinancewrapappspotcomarchiveMA20130128:dsd, DIMENSION_UNIQUE_NAME=Measures, HIERARCHY_UNIQUE_NAME=Measures, LEVEL_UNIQUE_NAME=Measures, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=sdmx-measure:obsValue, MEMBER_UNIQUE_NAME=sdmx-measure:obsValue, MEMBER_TYPE=3, MEMBER_GUID=, MEMBER_CAPTION=sdmx-measure:obsValue, CHILDREN_CARDINALITY=, PARENT_LEVEL=0, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
+				s);
+
+	}
 
 	public void testDatabaseMetaDataGetMembers() throws SQLException {
 		ResultSet resultset;
 		String s;
-		
+
 		// Edgar cube
-		// Ask for members of hierarchy httpedgarwrapontologycentralcomvocabedgar:issuer
-		resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
-				"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd", null, "httpedgarwrapontologycentralcomvocabedgar:issuer", null, null,
-				null);
+		// Ask for members of hierarchy
+		// httpedgarwrapontologycentralcomvocabedgar:issuer
+		resultset = olapDatabaseMetaData
+				.getMembers(
+						catalogName,
+						"LdSchema",
+						"httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd",
+						null,
+						"httpedgarwrapontologycentralcomvocabedgar:issuer",
+						null, null, null);
 		s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
 		assertContains(
 				"CATALOG_NAME="
 						+ catalogName
-						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpedgarwrapontologycentralcomarchive10002750513594530374838779:dsd, DIMENSION_UNIQUE_NAME=httpedgarwrapontologycentralcomvocabedgar:issuer, HIERARCHY_UNIQUE_NAME=httpedgarwrapontologycentralcomvocabedgar:issuer, LEVEL_UNIQUE_NAME=httpedgarwrapontologycentralcomvocabedgar:issuer, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=httpedgarwrapontologycentralcomcik1000275:id, MEMBER_UNIQUE_NAME=httpedgarwrapontologycentralcomcik1000275:id, MEMBER_TYPE=1, MEMBER_GUID=, MEMBER_CAPTION=httpedgarwrapontologycentralcomcik1000275:id, CHILDREN_CARDINALITY=, PARENT_LEVEL=null, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
+						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpedgarwrapontologycentralcomarchive1141391000119312509222058:dsd, DIMENSION_UNIQUE_NAME=httpedgarwrapontologycentralcomvocabedgar:issuer, HIERARCHY_UNIQUE_NAME=httpedgarwrapontologycentralcomvocabedgar:issuer, LEVEL_UNIQUE_NAME=httpedgarwrapontologycentralcomvocabedgar:issuer, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=httpedgarwrapontologycentralcomcik1141391:id, MEMBER_UNIQUE_NAME=httpedgarwrapontologycentralcomcik1141391:id, MEMBER_TYPE=1, MEMBER_GUID=, MEMBER_CAPTION=httpedgarwrapontologycentralcomcik1141391:id, CHILDREN_CARDINALITY=, PARENT_LEVEL=null, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
 				s);
+		// There should only be one issuer
+		assertEquals(s, 1, linecount(s));
 
-//		// by member unique name
-//		resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
-//				"rdfh-inst:dsd", null, null, null,
-//				"rdfh:lo_suppkeyRegionAFRICA", null);
-//		s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
-//		assertContains(
-//				"CATALOG_NAME="
-//						+ catalogName
-//						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, DIMENSION_UNIQUE_NAME=rdfh:lo_suppkey, HIERARCHY_UNIQUE_NAME=rdfh:lo_suppkeyCodeList, LEVEL_UNIQUE_NAME=rdfh:lo_suppkeyRegionLevel, LEVEL_NUMBER=1, MEMBER_ORDINAL=, MEMBER_NAME=rdfh:lo_suppkeyRegionAFRICA, MEMBER_UNIQUE_NAME=rdfh:lo_suppkeyRegionAFRICA, MEMBER_TYPE=1, MEMBER_GUID=, MEMBER_CAPTION=rdfh:lo_suppkeyRegionAFRICA, CHILDREN_CARDINALITY=, PARENT_LEVEL=null, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
-//				s);
-//
-//		// with treeop
-//		resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
-//				"rdfh-inst:dsd", null, null, null,
-//				"rdfh:lo_suppkeyRegionAFRICA",
-//				Olap4jUtil.enumSetOf(Member.TreeOp.CHILDREN));
-//		s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
-//
-//		assertContains(
-//				"CATALOG_NAME="
-//						+ catalogName
-//						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=rdfh-inst:dsd, DIMENSION_UNIQUE_NAME=rdfh:lo_suppkey, HIERARCHY_UNIQUE_NAME=rdfh:lo_suppkeyCodeList, LEVEL_UNIQUE_NAME=rdfh:lo_suppkeyNationLevel, LEVEL_NUMBER=2, MEMBER_ORDINAL=, MEMBER_NAME=rdfh:lo_suppkeyNationMOROCCO, MEMBER_UNIQUE_NAME=rdfh:lo_suppkeyNationMOROCCO, MEMBER_TYPE=1, MEMBER_GUID=, MEMBER_CAPTION=rdfh:lo_suppkeyNationMOROCCO, CHILDREN_CARDINALITY=, PARENT_LEVEL=1, PARENT_UNIQUE_NAME=rdfh:lo_suppkeyRegionAFRICA, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
-//				s);
+		// Yahoo Finance cube
+		// Ask for members of hierarchy
+		// httpyahoofinancewrapappspotcomvocabyahoo:issuer
+		resultset = olapDatabaseMetaData
+				.getMembers(
+						catalogName,
+						"LdSchema",
+						"httpyahoofinancewrapappspotcomarchiveMA20130128:dsd",
+						null,
+						"httpyahoofinancewrapappspotcomvocabyahoo:issuer",
+						null, null, null);
+		s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
+		assertContains(
+				"CATALOG_NAME="
+						+ catalogName
+						+ ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpyahoofinancewrapappspotcomarchiveMA20130128:dsd, DIMENSION_UNIQUE_NAME=httpyahoofinancewrapappspotcomvocabyahoo:issuer, HIERARCHY_UNIQUE_NAME=httpyahoofinancewrapappspotcomvocabyahoo:issuer, LEVEL_UNIQUE_NAME=httpyahoofinancewrapappspotcomvocabyahoo:issuer, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=httpyahoofinancewrapappspotcomtickerMA:id, MEMBER_UNIQUE_NAME=httpyahoofinancewrapappspotcomtickerMA:id, MEMBER_TYPE=1, MEMBER_GUID=, MEMBER_CAPTION=httpyahoofinancewrapappspotcomtickerMA:id, CHILDREN_CARDINALITY=, PARENT_LEVEL=null, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
+				s);
+		// There should only be one issuer
+		assertEquals(s, 1, linecount(s));
+
+		// Ask for specific members of dcterms:date: 2013-01-28
+		 // by member unique name
+		 resultset = olapDatabaseMetaData.getMembers(catalogName, "LdSchema",
+		 "httpyahoofinancewrapappspotcomarchiveMA20130128:dsd", "dcterms:date", null, null,
+		 "2013-01-28", null);
+		 s = checkResultSet(resultset, MEMBERS_COLUMN_NAMES);
+		 assertContains(
+		 "CATALOG_NAME="
+		 + catalogName
+		 +
+		 ", SCHEMA_NAME=LdSchema, CUBE_NAME=httpyahoofinancewrapappspotcomarchiveMA20130128:dsd, DIMENSION_UNIQUE_NAME=dcterms:date, HIERARCHY_UNIQUE_NAME=dcterms:date, LEVEL_UNIQUE_NAME=dcterms:date, LEVEL_NUMBER=0, MEMBER_ORDINAL=, MEMBER_NAME=2013-01-28, MEMBER_UNIQUE_NAME=2013-01-28, MEMBER_TYPE=1, MEMBER_GUID=, MEMBER_CAPTION=2013-01-28, CHILDREN_CARDINALITY=, PARENT_LEVEL=null, PARENT_UNIQUE_NAME=null, PARENT_COUNT=, TREE_OP=, DEPTH=\n",
+		 s);
+		 assertEquals(s, 1, linecount(s));
 	}
-
 
 	public void testDatabaseMetaDataGetSets() throws SQLException {
 		// not supported
