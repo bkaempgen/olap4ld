@@ -17,7 +17,10 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,8 +90,6 @@ abstract class LdOlap4jUtil {
 	 */
 	static HashMap<Integer, String> standard_prefix2uri = null;
 	static HashMap<Integer, String> standard_uri2prefix = null;
-	static HashMap<Integer, String> specific_prefix2uri = new HashMap<Integer, String>();
-	static HashMap<Integer, String> specific_uri2prefix = new HashMap<Integer, String>();
 
 	static final String NAMESPACES_FEATURE_ID = "http://xml.org/sax/features/namespaces";
 	static final String VALIDATION_FEATURE_ID = "http://xml.org/sax/features/validation";
@@ -604,7 +605,7 @@ abstract class LdOlap4jUtil {
 	 * to be parseable from and to MDX. In fact, having it URL encoded is not
 	 * enough, also, % and . need to be replaced.
 	 * 
-	 * @param uri
+	 * @param baseuri
 	 *            The pure uri string to be encoded for MDX
 	 * @return encoded string
 	 */
@@ -620,29 +621,34 @@ abstract class LdOlap4jUtil {
 		 * on.
 		 */
 		String qname = "";
+		String baseuri = "";
 		int lastIndexHash = uri.lastIndexOf("#");
 		if (lastIndexHash != -1) {
 			qname = uri.substring(lastIndexHash + 1);
-			uri = uri.substring(0, lastIndexHash + 1);
+			baseuri = uri.substring(0, lastIndexHash + 1);
 		} else {
 			int lastIndexSlash = uri.lastIndexOf("/");
 			qname = uri.substring(lastIndexSlash + 1);
-			uri = uri.substring(0, lastIndexSlash + 1);
+			baseuri = uri.substring(0, lastIndexSlash + 1);
 		}
 
-		// If there is no prefix stored, we have to come up with one ourselves (which if possible should be always the same):
-		String prefix = standard_uri2prefix.get(uri.hashCode());
+		// If there is no prefix stored, we have to come up with one ourselves
+		// (which if possible should be always the same):
+		String prefix = standard_uri2prefix.get(baseuri.hashCode());
 		if (prefix == null) {
-			// We simply remove all special characters
-			prefix = uri.replaceAll("[^a-zA-Z0-9]+","");
-			// We add this to our hashmaps
-			specific_prefix2uri.put(prefix.hashCode(), uri);
-			
-			specific_uri2prefix.put(uri.hashCode(), prefix);
+			// We simply use the URI again, but with url encode
+			try {
+				String encodedURI = URLEncoder.encode(uri, "UTF-8");
+				return encodedURI.replace("%", "XXX");
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			throw new UnsupportedOperationException(
+					"URL encoding should typically work.");
+		} else {
+			return prefix + ":" + qname;
 		}
-		
-		
-		return prefix + ":" + qname;
 	}
 
 	/**
@@ -654,26 +660,27 @@ abstract class LdOlap4jUtil {
 	 * @param uri
 	 * @return
 	 */
-	private static String decodeUriWithPrefix(String prefixnotation) {
+	private static String decodeUriWithPrefix(String prefix) {
 
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
 		}
 
 		// In this case, the : is the sign
-		int lastIndexColon = prefixnotation.lastIndexOf(":");
-		String qname = prefixnotation.substring(lastIndexColon + 1);
+		int lastIndexColon = prefix.lastIndexOf(":");
+		String qname = prefix.substring(lastIndexColon + 1);
 		// Without colon
-		prefixnotation = prefixnotation.substring(0, lastIndexColon);
+		prefix = prefix.substring(0, lastIndexColon);
 
-		String prefix = standard_prefix2uri.get(prefixnotation.hashCode());
-		
+		String prefixuri = standard_prefix2uri.get(prefix.hashCode());
+
 		// Possibly stored in specific prefixes.
-		if (prefix == null) {
-			prefix = specific_prefix2uri.get(prefixnotation.hashCode());
+		if (prefixuri == null) {
+			throw new UnsupportedOperationException(
+					"If we have a prefix used, it should not happen that we do not have its URI equivalent.");
 		}
-		
-		return prefix + qname;
+
+		return prefixuri + qname;
 	}
 
 	/**
@@ -728,9 +735,16 @@ abstract class LdOlap4jUtil {
 
 	public static String convertMDXtoURI(String mdx) {
 		// check whether prefix notation
-		if (mdx.contains("http://")) {
-			// no conversion needed
-			return mdx;
+		if (mdx.contains("httpXXX3AXXX2FXXX2F")) {
+			try {
+				String decodedURI = mdx.replace("XXX", "%");
+				return URLDecoder.decode(decodedURI, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			throw new UnsupportedOperationException(
+					"URL decoding should typically work.");
 		} else if (mdx.lastIndexOf(":") != -1) {
 			return decodeUriWithPrefix(mdx);
 		} else {
@@ -772,12 +786,15 @@ abstract class LdOlap4jUtil {
 	}
 
 	/**
-	 * Regarding prefixes, we use them to store MDX compliant names for metadata. If we use those
-	 * names in SPARQL queries, we either need to define them explicitly or translate the metadata into uris.
-	 * We have standard prefixes that are used for encoding and decoding. It is a smaller list, therefore,
-	 * it can be explicitly defined at the beginning of a SPARQL query (even though not all might be used by the
-	 * query). We also store a separate list of specific prefixes that are created at run time
-	 * and which do encoding/decoding, but which are not explicitly defined in a SPARQL query.
+	 * Regarding prefixes, we use them to store MDX compliant names for
+	 * metadata. If we use those names in SPARQL queries, we either need to
+	 * define them explicitly or translate the metadata into uris. We have
+	 * standard prefixes that are used for encoding and decoding. It is a
+	 * smaller list, therefore, it can be explicitly defined at the beginning of
+	 * a SPARQL query (even though not all might be used by the query). We also
+	 * store a separate list of specific prefixes that are created at run time
+	 * and which do encoding/decoding, but which are not explicitly defined in a
+	 * SPARQL query.
 	 * 
 	 * @return
 	 */
@@ -785,14 +802,14 @@ abstract class LdOlap4jUtil {
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
 		}
-		
+
 		String standardprefixes = "";
 		Collection<String> uris = standard_prefix2uri.values();
 		for (String uri : uris) {
 			String prefix = standard_uri2prefix.get(uri.hashCode());
 			standardprefixes += "PREFIX " + prefix + ": <" + uri + "> \n";
 		}
-		
+
 		return standardprefixes;
 	}
 

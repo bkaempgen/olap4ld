@@ -333,7 +333,7 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 			String measure = measures.getString(4);
 		
 			String s = checkResultSet(olapDatabaseMetaData.getMembers(catalogName,
-					null, null, null, null, null, measure, Olap4jUtil.enumSetOf(Member.TreeOp.SELF)), MEMBERS_COLUMN_NAMES);
+					null, cubeNamePattern, null, null, null, measure, Olap4jUtil.enumSetOf(Member.TreeOp.SELF)), MEMBERS_COLUMN_NAMES);
 			
 			System.out.println("getMembers("+measure+"): " + s);
 			
@@ -351,7 +351,7 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 			String level = levels.getString(6);
 			
 			String s = checkResultSet(olapDatabaseMetaData.getMembers(catalogName,
-					null, null, null, null, level, null, null), MEMBERS_COLUMN_NAMES);
+					null, cubeNamePattern, null, null, level, null, null), MEMBERS_COLUMN_NAMES);
 
 			System.out.println("getMembers(Level:"+level+"): " + s);
 		}

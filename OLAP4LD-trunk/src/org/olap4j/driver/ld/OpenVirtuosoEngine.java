@@ -2254,8 +2254,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	 * @return
 	 */
 	private String makeParameter(String uniqueName) {
-		uniqueName = uniqueName.replace(":", "_");
-		uniqueName = uniqueName.replace("-", "_");
+		// We simply remove all special characters
+		uniqueName = uniqueName.replaceAll("[^a-zA-Z0-9]+","");
 		return uniqueName;
 	}
 

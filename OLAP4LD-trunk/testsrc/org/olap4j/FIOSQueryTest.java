@@ -81,15 +81,18 @@ public class FIOSQueryTest extends TestCase {
 		}
 	}
 	
-	/**
-	 * Query 1.1
-	 */
 	public void testFIOS_1() {
-		String result = executeStatement("SELECT {[httpyahoofinancewrapappspotcomvocabyahoo:issuer].[httpyahoofinancewrapappspotcomvocabyahoo:issuer].[httpyahoofinancewrapappspotcomvocabyahoo:issuer].[httpyahoofinancewrapappspotcomtickerMA:id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2006-06-01]} ON ROWS FROM [httpyahoofinancewrapappspotcomarchiveMA20060601:dsd]");
+		String result = executeStatement("SELECT {[http%3A%2F%2Fyahoofinancewrap.appspot.com%2Fvocab%2Fyahoo%23issuer].[http%3A%2F%2Fyahoofinancewrap.appspot.com%2Fvocab%2Fyahoo%23issuer].[http%3A%2F%2Fyahoofinancewrap.appspot.com%2Fvocab%2Fyahoo%23issuer].[http%3A%2F%2Fyahoofinancewrap.appspot.com%2Fticker%2FMA%23id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2006-06-01]} ON ROWS FROM [http%3A%2F%2Fyahoofinancewrap.appspot.com%2Farchive%2FMA%2F2006-06-01%23dsd]");
 		
 		assertContains("6", result);
 	}
 
+	public void testFIOS_2() {
+		String result = executeStatement("SELECT {[http%3A%2F%2Fedgarwrap.ontologycentral.com%2Fvocab%2Fedgar%23issuer].[http%3A%2F%2Fedgarwrap.ontologycentral.com%2Fvocab%2Fedgar%23issuer].[http%3A%2F%2Fedgarwrap.ontologycentral.com%2Fvocab%2Fedgar%23issuer].[http%3A%2F%2Fedgarwrap.ontologycentral.com%2Fcik%2F1141391%23id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2008-09-30]} ON ROWS FROM [http%3A%2F%2Fedgarwrap.ontologycentral.com%2Farchive%2F1141391%2F0001193125-09-222058%23dsd]");
+		
+		assertContains("1", result);
+	}
+	
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
 			fail("expected to find '" + seek + "' in '" + s + "'");

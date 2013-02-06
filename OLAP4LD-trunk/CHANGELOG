@@ -4,7 +4,10 @@ how to translate prefixes to URIs. If I run OLAP queries, it does not since it p
 metadata and gives names to all multidimensional elements. However, for metadata queries, it does
 not do it. After a metadata query is issued, for output, the elements are translated to MDX 
 expressions, i.e., after output, the prefixes are known. That means, for metadata queries, we have 
-to first query for cubes, then dimensions, then hierarchies etc.  
+to first query for cubes, then dimensions, then hierarchies etc. 
+
+* Solution: We use prefixes as mentioned in the standardprefixes.csv. If we do not find prefixes,
+we encode the URLs ourselves. This will not be pretty, but for those reasons we need labels.  
 
 ==2013-01-31==
 * Measures and aggregation functions: We say that the aggregation function of a measure is inherent 
