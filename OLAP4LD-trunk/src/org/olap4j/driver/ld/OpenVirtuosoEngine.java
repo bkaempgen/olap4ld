@@ -28,12 +28,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.olap4j.OlapException;
-import org.olap4j.driver.ld.LdOlap4jConnection.Context;
-import org.olap4j.driver.ld.LdOlap4jConnection.MetadataRequest;
 import org.olap4j.driver.ld.LdOlap4jConnection.Restrictions;
 import org.olap4j.mdx.CallNode;
 import org.olap4j.mdx.MemberNode;
@@ -618,114 +614,6 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		}
 
 		return myBindings;
-	}
-
-	private List<Node[]> applyRestrictions(List<Node[]> result,
-			Object[] restrictions) {
-
-		/*
-		 * We go through all the nodes. For each node, if it does not fulfill
-		 * one of the restrictions, we remove that node from the result (lets
-		 * see how that works).
-		 * 
-		 * Removing is bad, since this result may come from a cache. Therefore I
-		 * create an add-list and then return this.
-		 */
-		boolean isFirst = true;
-		Map<String, Integer> mapFields = null;
-		ArrayList<Node[]> addList = new ArrayList<Node[]>();
-		for (Node[] node : result) {
-			boolean isToRemove = false;
-			if (isFirst) {
-				mapFields = LdOlap4jUtil.getNodeResultFields(node);
-				isFirst = false;
-			} else {
-				// restrictions are structured: %2=0 restriction name, %2=1
-				// restriction value
-				for (int i = 0; i <= restrictions.length - 1; i = i + 2) {
-					// TREE_OP is special, needs to be handled differently
-					if (restrictions[i].toString().equals("TREE_OP")) {
-
-						// TODO: In this case, we should prioritize treeOp
-
-						int tree = new Integer(restrictions[i + 1].toString());
-						if ((tree & 1) == 1) {
-							// CHILDREN
-							LdOlap4jUtil._log.info("TreeOp:CHILDREN");
-						} else {
-							// Remove all children
-							// TODO: So far, we do not support children.
-						}
-						if ((tree & 2) == 2) {
-							// SIBLINGS
-							LdOlap4jUtil._log.info("TreeOp:SIBLINGS");
-
-						} else {
-							// How to remove all siblings?
-							/*
-							 * We can assume that we are at a specific cube,
-							 * dim, hier, level
-							 */
-						}
-						if ((tree & 4) == 4) {
-							// PARENT
-							LdOlap4jUtil._log.info("TreeOp:PARENT");
-						} else {
-							// Remove all parents
-							// TODO: So far, we do not support parents.
-						}
-						if ((tree & 8) == 8) {
-							// SELF
-							LdOlap4jUtil._log.info("TreeOp:SELF");
-						} else {
-							// How can we remove only oneself?
-
-						}
-						if ((tree & 16) == 16) {
-							// DESCENDANTS
-							LdOlap4jUtil._log.info("TreeOp:DESCENDANTS");
-
-						} else {
-							// Remove all descendants
-							// TODO: So far, we do not support descendants.
-						}
-						if ((tree & 32) == 32) {
-							// ANCESTORS
-							LdOlap4jUtil._log.info("TreeOp:ANCESTORS");
-						} else {
-							// Remove all ancestors
-							// TODO: So far, we do not support ancestors.
-						}
-
-					} else {
-
-						// We compare the restriction (which should already be
-						// abbreviated) and the
-						// result from the query (which still needs to be
-						// abbreviated)
-						String restriction = restrictions[i + 1].toString();
-
-						String value = LdOlap4jUtil
-								.convertNodeToMDX(node[mapFields.get("?"
-										+ restrictions[i].toString())]);
-
-						if (restriction == null || restriction.equals(value)) {
-							// fine
-						} else {
-							isToRemove = true;
-							// TODO does it jump out of the whole thing?
-							// We need to go to the next node
-							break;
-						}
-					}
-				}
-			}
-			// If node is marked as delete, nothing, else add it to addList
-			if (!isToRemove) {
-				addList.add(node);
-			}
-		}
-		return addList;
 	}
 
 	/**
@@ -1322,51 +1210,22 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	 * are in rdf represented as skos:Concept and this is the proper way to give
 	 * them a representation.
 	 * 
+	 * Assumptions of this method:
+	 * 
+	 * The restrictions are set up only as follows 1) cube, dim, hier, level 2)
+	 * cube, dim, hier, level, member, null 3) cube, dim, hier, level, member,
+	 * treeOp
+	 * 
+	 * The members are only modelled as follows 1) Measure Member (member of the
+	 * measure dimension) 2) Level Member (member of a regular dimension) 3) Top
+	 * Concept Member (member via skos:topConcept) 4) Degenerated Member (member
+	 * without code list)
+	 * 
 	 * @return Node[]{?memberURI ?name}
 	 * @throws MalformedURLException
 	 */
 	public List<Node[]> getMembers(Restrictions restrictions) {
-		/*
-		 * For each dimension, get the possible members
-		 */
 
-		// TODO: Ordering misses ORDINAL (the most important one) - Ad-hoc
-		// workaround we replace it by Member unique name
-		// TODO: Currently, no special lang filtered for in caption: FILTER (
-		// lang(?MEMBER_CAPTION) = \"\")
-
-		/*
-		 * We ask for different kind of members (we assume that only one of them
-		 * fits)
-		 * 
-		 * If (TREE_MASK set)
-		 * 
-		 * We assume that if TREE_OP is set, we have a unique member given and
-		 * either want its children, its siblings, its parent, self, ascendants,
-		 * or descendants.
-		 * 
-		 * Else if (Dimension, Hierarchy, Level = Measures)
-		 * 
-		 * 1) We ask for the measures (which are also members) - This, we only
-		 * need to do if Level = Measures
-		 * 
-		 * Else (typical member query)
-		 * 
-		 * 0) possibly a measure member (with not explicitly saying so)
-		 * 
-		 * 1) Asking for all members of all hierarchies, of all levels, per
-		 * skos:hasTopConcept
-		 * 
-		 * 2) Asking for all members of hierarchies with levels without notation
-		 * 
-		 * 3) Finally, get all members of hierarchies with levels with notations
-		 * 
-		 * IF STILL NO MEMBERS FOUND
-		 * 
-		 * 4) Ask for members of all dimensions that do not define a codeList.
-		 * For now, I use separate queries for skos:Concepts and Literal values
-		 */
-		String query = null;
 		List<Node[]> result = new ArrayList<Node[]>();
 		List<Node[]> intermediaryresult = null;
 
@@ -1383,33 +1242,168 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				new Variable("?PARENT_LEVEL") };
 		result.add(header);
 
+		// Measure Member
+		if (isMeasureQueriedFor(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
+			intermediaryresult = getMeasureMembers(restrictions);
+
+			addToResult(intermediaryresult, result);
+
+		}
+
+		// Normal Member
+		if ((restrictions.dimensionUniqueName == null || !restrictions.dimensionUniqueName
+				.equals("Measures"))
+				|| (restrictions.hierarchyUniqueName == null || !restrictions.hierarchyUniqueName
+						.equals("Measures"))
+				|| (restrictions.levelUniqueName == null || !restrictions.levelUniqueName
+						.equals("Measures"))) {
+
+			intermediaryresult = getLevelMembers(restrictions);
+
+			addToResult(intermediaryresult, result);
+
+		}
+
+		// If we still do not have members, then we might have top members
+		// only
+		if (result.size() == 1) {
+
+			intermediaryresult = getHasTopConceptMembers(restrictions);
+
+			addToResult(intermediaryresult, result);
+		}
+
+		// If we still do not have members, then we might have degenerated
+		// members
+		if (result.size() == 1) {
+			// Members without codeList
+			intermediaryresult = getDegeneratedMembers(restrictions);
+
+			addToResult(intermediaryresult, result);
+
+		}
+
+		return result;
+	}
+
+	private List<Node[]> getMeasureMembers(Restrictions restrictions) {
+		String additionalFilters = "";
+	
 		/*
 		 * I would assume that if TREE_OP is set, we have a unique member given
 		 * and either want its children, its siblings, its parent, self,
 		 * ascendants, or descendants.
 		 */
-		if (restrictions.tree != null) {
-
+		if (restrictions.tree != null && (restrictions.tree & 8) != 8) {
+	
 			// Assumption 1: Treeop only uses Member
 			if (restrictions.memberUniqueName == null) {
 				throw new UnsupportedOperationException(
 						"If a treeMask is given, we should also have a unique member name!");
 			}
-
-			// Assumption 2: We do not ask for a measure member
-
-			// Assumption 3: The members have got levels, hierarchies etc.
-
+	
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
 				LdOlap4jUtil._log.info("TreeOp:CHILDREN");
-
-				// Here, we need a specific filter
-				String additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
+	
+			}
+			if ((restrictions.tree & 2) == 2) {
+				// SIBLINGS
+				LdOlap4jUtil._log.info("TreeOp:SIBLINGS");
+	
+				if (restrictions.cubeNamePattern != null) {
+					additionalFilters += " FILTER (?CUBE_NAME = <"
+							+ LdOlap4jUtil
+									.convertMDXtoURI(restrictions.cubeNamePattern)
+							+ ">) ";
+				}
+			}
+			if ((restrictions.tree & 4) == 4) {
+				// PARENT
+				LdOlap4jUtil._log.info("TreeOp:PARENT");
+			}
+			if ((restrictions.tree & 16) == 16) {
+				// DESCENDANTS
+				LdOlap4jUtil._log.info("TreeOp:DESCENDANTS");
+	
+			}
+			if ((restrictions.tree & 32) == 32) {
+				// ANCESTORS
+				LdOlap4jUtil._log.info("TreeOp:ANCESTORS");
+			}
+	
+		} else {
+			// TreeOp = Self or null
+			LdOlap4jUtil._log.info("TreeOp:SELF");
+	
+			if (restrictions.cubeNamePattern != null) {
+				additionalFilters += " FILTER (?CUBE_NAME = <"
+						+ LdOlap4jUtil
+								.convertMDXtoURI(restrictions.cubeNamePattern)
+						+ ">) ";
+			}
+			if (restrictions.memberUniqueName != null) {
+				additionalFilters += " FILTER (?MEASURE_UNIQUE_NAME = <"
 						+ LdOlap4jUtil
 								.convertMDXtoURI(restrictions.memberUniqueName)
 						+ ">) ";
+			}
+	
+		}
+	
+		// Second, ask for the measures (which are also members)
+		String query = LdOlap4jUtil.getStandardPrefixes()
+				+ "Select \""
+				+ TABLE_CAT
+				+ "\" as ?CATALOG_NAME \""
+				+ TABLE_SCHEM
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEASURE_UNIQUE_NAME as ?MEMBER_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_CAPTION \"3\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"0\" as ?PARENT_LEVEL "
+				+ askForFrom(true)
+				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION. "
+				+ "?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. "
+				+ additionalFilters + "} " + "order by ?MEASURE_UNIQUE_NAME";
+	
+		List<Node[]> memberUris2 = sparql(query, true);
+	
+		return memberUris2;
+	}
 
+	/**
+	 * Finds specific typical members.
+	 * 
+	 * @param restrictions
+	 * 
+	 * @return
+	 */
+	private List<Node[]> getLevelMembers(Restrictions restrictions) {
+		String query = "";
+		String additionalFilters = createFilterForRestrictions(restrictions);
+		List<Node[]> intermediaryresult;
+	
+		/*
+		 * I would assume that if TREE_OP is set, we have a unique member given
+		 * and either want its children, its siblings, its parent, self,
+		 * ascendants, or descendants.
+		 */
+		if (restrictions.tree != null && (restrictions.tree & 8) != 8) {
+	
+			// Assumption 1: Treeop only uses Member
+			if (restrictions.memberUniqueName == null) {
+				throw new UnsupportedOperationException(
+						"If a treeMask is given, we should also have a unique member name!");
+			}
+	
+			if ((restrictions.tree & 1) == 1) {
+				// CHILDREN
+				LdOlap4jUtil._log.info("TreeOp:CHILDREN");
+	
+				// Here, we need a specific filter
+				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
+						+ LdOlap4jUtil
+								.convertMDXtoURI(restrictions.memberUniqueName)
+						+ ">) ";
+	
 				query = LdOlap4jUtil.getStandardPrefixes()
 						+ "Select \""
 						+ TABLE_CAT
@@ -1424,147 +1418,78 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 						+ "} "
 						+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
 				intermediaryresult = sparql(query, true);
-
-				// Restrictions do not work with treeOp
-				// intermediaryresult = applyRestrictions(memberUris1,
-				// restrictions);
-				addToResult(intermediaryresult, result);
-
-			} else {
-				// In this case we do not add the children
+				
+				return intermediaryresult;
+	
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
 				LdOlap4jUtil._log.info("TreeOp:SIBLINGS");
-
-			} else {
-				// How to remove all siblings?
-				/*
-				 * We can assume that we are at a specific cube, dim, hier,
-				 * level
-				 */
+	
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
 				LdOlap4jUtil._log.info("TreeOp:PARENT");
-			} else {
-				// Remove all parents
-				// TODO: So far, we do not support parents.
-			}
-			if ((restrictions.tree & 8) == 8) {
-				// SELF
-				LdOlap4jUtil._log.info("TreeOp:SELF");
-
-				// Could be a measure member
-				if (isMeasureQueriedFor(restrictions.dimensionUniqueName,
-						restrictions.hierarchyUniqueName,
-						restrictions.levelUniqueName)) {
-					intermediaryresult = getMeasureMembers(
-							restrictions.cubeNamePattern,
-							restrictions.memberUniqueName);
-
-					// intermediaryresult = applyRestrictions(memberUris,
-					// restrictions);
-
-					addToResult(intermediaryresult, result);
-
-				} 
-				
-				// However, could also be a normal member
-
-			} else {
-				// How can we remove only oneself?
-
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
 				LdOlap4jUtil._log.info("TreeOp:DESCENDANTS");
-
-			} else {
-				// Remove all descendants
-				// TODO: So far, we do not support descendants.
+	
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
 				LdOlap4jUtil._log.info("TreeOp:ANCESTORS");
-			} else {
-				// Remove all ancestors
-				// TODO: So far, we do not support ancestors.
 			}
-
-			// If we look for measures level, dimension or hierarchy or if
-			// member is
-			// defined and none .
+			
+			throw new UnsupportedOperationException("TreeOp and getLevelMember failed.");
+	
 		} else {
-
-			// Possibly we are looking for a measure member:
-			if (isMeasureQueriedFor(restrictions.dimensionUniqueName,
-					restrictions.hierarchyUniqueName,
-					restrictions.levelUniqueName)) {
-
-				intermediaryresult = getMeasureMembers(
-						restrictions.cubeNamePattern,
-						restrictions.memberUniqueName);
-
-				// intermediaryresult = applyRestrictions(memberUris,
-				// restrictions);
-
-				addToResult(intermediaryresult, result);
-
-			}
-
-			// Normal case if either not set or not Measures.
-			if ((restrictions.dimensionUniqueName == null || !restrictions.dimensionUniqueName
-					.equals("Measures"))
-					|| (restrictions.hierarchyUniqueName == null || !restrictions.hierarchyUniqueName
-							.equals("Measures"))
-					|| (restrictions.levelUniqueName == null || !restrictions.levelUniqueName
-							.equals("Measures"))) {
-
-				intermediaryresult = getLevelMembers(restrictions);
-
-				// intermediaryresult = applyRestrictions(memberUris11,
-				// restrictions);
-
-				addToResult(intermediaryresult, result);
-
-			}
-
-			// If we still do not have members, then we might have top members
-			// only
-			if (result.size() == 1) {
-
-				intermediaryresult = getHasTopConceptMembers(
-						restrictions.cubeNamePattern,
-						restrictions.dimensionUniqueName);
-
-				// intermediaryresult = applyRestrictions(memberUris,
-				// restrictions);
-
-				addToResult(intermediaryresult, result);
-			}
-
-			// If we still do not have members, then we might have degenerated
-			// members
-			if (result.size() == 1) {
-				// Members without codeList
-				intermediaryresult = getDegeneratedMembers(
-						restrictions.cubeNamePattern,
-						restrictions.dimensionUniqueName,
-						restrictions.hierarchyUniqueName,
-						restrictions.levelUniqueName);
-
-				// If we already have results, and only this specific dimension
-				// was
-				// queried for, we do not need to go further
-				// intermediaryresult = applyRestrictions(memberUris1,
-				// restrictions);
-
-				addToResult(intermediaryresult, result);
-
-			}
+			// TreeOp = Self or null
+			LdOlap4jUtil._log.info("TreeOp:SELF");
+	
+			// Also, get all members of hierarchies with levels without
+			// notation
+			query = LdOlap4jUtil.getStandardPrefixes()
+					+ "Select \""
+					+ TABLE_CAT
+					+ "\" as ?CATALOG_NAME \""
+					+ TABLE_SCHEM
+					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE ?PARENT_UNIQUE_NAME ?PARENT_LEVEL "
+					+ askForFrom(true)
+					+ " where { ?CUBE_NAME qb:component ?compSpec. "
+					+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?MEMBER_UNIQUE_NAME skos:member ?LEVEL_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
+					+ "OPTIONAL {?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL.}"
+					+ " FILTER NOT EXISTS {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION } "
+					+ additionalFilters
+					+ "} "
+					+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
+			List<Node[]> memberUris1 = sparql(query, true);
+	
+			// Finally, get all members of hierarchies with levels with
+			// notations
+			// (members will be literals)
+			// (Literals)
+			query = LdOlap4jUtil.getStandardPrefixes()
+					+ "Select \""
+					+ TABLE_CAT
+					+ "\" as ?CATALOG_NAME \""
+					+ TABLE_SCHEM
+					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE as ?PARENT_UNIQUE_NAME ?PARENT_LEVEL "
+					+ askForFrom(true)
+					+ " where { ?CUBE_NAME qb:component ?compSpec. "
+					+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?MEMBER_CONCEPT skos:member ?LEVEL_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
+					+ "OPTIONAL { ?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL. }"
+					+ " ?MEMBER_CONCEPT skos:notation ?MEMBER_UNIQUE_NAME "
+					+ additionalFilters
+					+ "} "
+					+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
+	
+			List<Node[]> memberUris2 = sparql(query, true);
+	
+			addToResult(memberUris1, memberUris2);
+	
+			return memberUris2;
 		}
-		return result;
 	}
 
 	/**
@@ -1576,41 +1501,87 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	 * @param cubeNamePattern
 	 * @return
 	 */
-	private List<Node[]> getHasTopConceptMembers(String cubeNamePattern,
-			String dimensionUniqueName) {
-		// Here, we again need specific filters, since only cube makes
-		// sense
-		String specificFilters = "";
-		if (cubeNamePattern != null) {
-			specificFilters += " FILTER (?CUBE_NAME = <"
-					+ LdOlap4jUtil.convertMDXtoURI(cubeNamePattern) + ">) ";
+	private List<Node[]> getHasTopConceptMembers(Restrictions restrictions) {
+		String query = "";
+
+		/*
+		 * I would assume that if TREE_OP is set, we have a unique member given
+		 * and either want its children, its siblings, its parent, self,
+		 * ascendants, or descendants.
+		 */
+		if (restrictions.tree != null && (restrictions.tree & 8) != 8) {
+
+			// Assumption 1: Treeop only uses Member
+			if (restrictions.memberUniqueName == null) {
+				throw new UnsupportedOperationException(
+						"If a treeMask is given, we should also have a unique member name!");
+			}
+
+			if ((restrictions.tree & 1) == 1) {
+				// CHILDREN
+				LdOlap4jUtil._log.info("TreeOp:CHILDREN");
+
+			}
+			if ((restrictions.tree & 2) == 2) {
+				// SIBLINGS
+				LdOlap4jUtil._log.info("TreeOp:SIBLINGS");
+
+			}
+			if ((restrictions.tree & 4) == 4) {
+				// PARENT
+				LdOlap4jUtil._log.info("TreeOp:PARENT");
+			}
+			if ((restrictions.tree & 16) == 16) {
+				// DESCENDANTS
+				LdOlap4jUtil._log.info("TreeOp:DESCENDANTS");
+
+			}
+			if ((restrictions.tree & 32) == 32) {
+				// ANCESTORS
+				LdOlap4jUtil._log.info("TreeOp:ANCESTORS");
+			}
+			
+			throw new UnsupportedOperationException("TreeOp and getLevelMember failed.");
+
+		} else {
+			// TreeOp = Self or null
+			LdOlap4jUtil._log.info("TreeOp:SELF");
+
+			// Here, we again need specific filters, since only cube makes
+			// sense
+			String specificFilters = "";
+			if (restrictions.cubeNamePattern != null) {
+				specificFilters += " FILTER (?CUBE_NAME = <"
+						+ LdOlap4jUtil.convertMDXtoURI(restrictions.cubeNamePattern) + ">) ";
+			}
+			if (restrictions.dimensionUniqueName != null) {
+				specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
+						+ LdOlap4jUtil.convertMDXtoURI(restrictions.dimensionUniqueName) + ">) ";
+			}
+
+			// First, ask for all members
+			// Get all members of hierarchies without levels, that simply
+			// define
+			// skos:hasTopConcept members with skos:notation.
+			query = LdOlap4jUtil.getStandardPrefixes()
+					+ "Select \""
+					+ TABLE_CAT
+					+ "\" as ?CATALOG_NAME \""
+					+ TABLE_SCHEM
+					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
+					+ askForFrom(true)
+					+ " where { ?CUBE_NAME qb:component ?compSpec. "
+					+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?HIERARCHY_UNIQUE_NAME skos:hasTopConcept ?MEMBER_UNIQUE_NAME. "
+					+ " ?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION. "
+					+ specificFilters
+					+ " } "
+					+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
+
+			List<Node[]> memberUris = sparql(query, true);
+
+			return memberUris;
+
 		}
-		if (dimensionUniqueName != null) {
-			specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
-					+ LdOlap4jUtil.convertMDXtoURI(dimensionUniqueName) + ">) ";
-		}
-
-		// First, ask for all members
-		// Get all members of hierarchies without levels, that simply
-		// define
-		// skos:hasTopConcept members with skos:notation.
-		String query = LdOlap4jUtil.getStandardPrefixes()
-				+ "Select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?compSpec. "
-				+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?HIERARCHY_UNIQUE_NAME skos:hasTopConcept ?MEMBER_UNIQUE_NAME. "
-				+ " ?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION. "
-				+ specificFilters
-				+ " } "
-				+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-
-		List<Node[]> memberUris = sparql(query, true);
-
-		return memberUris;
 
 	}
 
@@ -1620,146 +1591,192 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	 * 
 	 * @return
 	 */
-	private List<Node[]> getDegeneratedMembers(String cubeNamePattern,
-			String dimensionUniqueName, String hierarchyUniqueName,
-			String levelUniqueName) {
-		// First we ask for the dimensionWithoutHierarchies
-		String dimensionWithoutHierarchies = null;
-		if (dimensionUniqueName != null) {
-			dimensionWithoutHierarchies = LdOlap4jUtil
-					.convertMDXtoURI(dimensionUniqueName);
-		} else if (hierarchyUniqueName != null) {
-			dimensionWithoutHierarchies = LdOlap4jUtil
-					.convertMDXtoURI(hierarchyUniqueName);
-		} else if (levelUniqueName != null) {
-			dimensionWithoutHierarchies = LdOlap4jUtil
-					.convertMDXtoURI(levelUniqueName);
+	private List<Node[]> getDegeneratedMembers(Restrictions restrictions) {
+		
+		if (restrictions.tree != null && (restrictions.tree & 8) != 8) {
+
+			// Assumption 1: Treeop only uses Member
+			if (restrictions.memberUniqueName == null) {
+				throw new UnsupportedOperationException(
+						"If a treeMask is given, we should also have a unique member name!");
+			}
+
+			if ((restrictions.tree & 1) == 1) {
+				// CHILDREN
+				LdOlap4jUtil._log.info("TreeOp:CHILDREN");
+
+			}
+			if ((restrictions.tree & 2) == 2) {
+				// SIBLINGS
+				LdOlap4jUtil._log.info("TreeOp:SIBLINGS");
+
+			}
+			if ((restrictions.tree & 4) == 4) {
+				// PARENT
+				LdOlap4jUtil._log.info("TreeOp:PARENT");
+			}
+			if ((restrictions.tree & 16) == 16) {
+				// DESCENDANTS
+				LdOlap4jUtil._log.info("TreeOp:DESCENDANTS");
+
+			}
+			if ((restrictions.tree & 32) == 32) {
+				// ANCESTORS
+				LdOlap4jUtil._log.info("TreeOp:ANCESTORS");
+			}
+			
+			throw new UnsupportedOperationException("TreeOp and getLevelMember failed.");
+
+		} else {
+			// TreeOp = Self or null
+			LdOlap4jUtil._log.info("TreeOp:SELF");
+
+			// First we ask for the dimensionWithoutHierarchies
+			String dimensionWithoutHierarchies = null;
+			if (restrictions.dimensionUniqueName != null) {
+				dimensionWithoutHierarchies = LdOlap4jUtil
+						.convertMDXtoURI(restrictions.dimensionUniqueName);
+			} else if (restrictions.hierarchyUniqueName != null) {
+				dimensionWithoutHierarchies = LdOlap4jUtil
+						.convertMDXtoURI(restrictions.hierarchyUniqueName);
+			} else if (restrictions.levelUniqueName != null) {
+				dimensionWithoutHierarchies = LdOlap4jUtil
+						.convertMDXtoURI(restrictions.levelUniqueName);
+			} 
+
+			// Here, we need specific filters, since only cube and dimension unique name makes sense
+			String alteredadditionalFilters = "";
+			if (restrictions.cubeNamePattern != null) {
+				alteredadditionalFilters += " FILTER (?CUBE_NAME = <"
+						+ LdOlap4jUtil.convertMDXtoURI(restrictions.cubeNamePattern) + ">) ";
+			}
+			if (restrictions.memberUniqueName != null) {
+				alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = <"
+						+ LdOlap4jUtil.convertMDXtoURI(restrictions.memberUniqueName) + ">) ";
+			}
+
+			// It is possible that dimensionWithoutHierarchies is null
+			List<Node[]> memberUris1 = null;
+			String query = null;
+			if (dimensionWithoutHierarchies == null) {
+				
+				query = LdOlap4jUtil.getStandardPrefixes()
+						+ "Select distinct \""
+						+ TABLE_CAT
+						+ "\" as ?CATALOG_NAME \""
+						+ TABLE_SCHEM
+						+ "\" as ?SCHEMA_NAME ?CUBE_NAME "
+						+ " ?DIMENSION_UNIQUE_NAME "
+						+ " ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME "
+						+ "?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
+						// Since we query for instances
+						+ askForFrom(true) + askForFrom(false)
+						+ " where { ?CUBE_NAME qb:component ?compSpec. "
+						+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. "
+						+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. "
+						+ "?obs ?DIMENSION_UNIQUE_NAME ?MEMBER_UNIQUE_NAME. "
+						+ " ?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION "
+						+ alteredadditionalFilters + "} "
+						+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
+				
+				memberUris1 = sparql(query, true);
+				
+				/*
+				 * ... and Literal values / values that do not serve a skos:notation.
+				 * 
+				 * Need to include instance graph.
+				 */
+				query = LdOlap4jUtil.getStandardPrefixes()
+						+ "Select distinct \""
+						+ TABLE_CAT
+						+ "\" as ?CATALOG_NAME \""
+						+ TABLE_SCHEM
+						+ "\" as ?SCHEMA_NAME ?CUBE_NAME "
+						+ "?DIMENSION_UNIQUE_NAME "
+						+ "?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME "
+						+ "?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
+						// Since we query for instances
+						+ askForFrom(true)
+						+ askForFrom(false)
+						+ " where { ?CUBE_NAME qb:component ?compSpec. "
+						+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. "
+						+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. "
+						+ "?obs ?DIMENSION_UNIQUE_NAME ?MEMBER_UNIQUE_NAME."
+						+ " FILTER NOT EXISTS {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION } "
+						+ alteredadditionalFilters + "} "
+						+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
+
+				List<Node[]> memberUris2 = sparql(query, true);
+
+				addToResult(memberUris2, memberUris1);
+				
+			} else {
+			
+			query = LdOlap4jUtil.getStandardPrefixes()
+					+ "Select distinct \""
+					+ TABLE_CAT
+					+ "\" as ?CATALOG_NAME \""
+					+ TABLE_SCHEM
+					+ "\" as ?SCHEMA_NAME ?CUBE_NAME \""
+					+ dimensionWithoutHierarchies
+					+ "\" as ?DIMENSION_UNIQUE_NAME \""
+					+ dimensionWithoutHierarchies
+					+ "\" as ?HIERARCHY_UNIQUE_NAME \""
+					+ dimensionWithoutHierarchies
+					+ "\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
+					// Since we query for instances
+					+ askForFrom(true) + askForFrom(false)
+					+ " where { ?CUBE_NAME qb:component ?compSpec. "
+					+ "?compSpec qb:dimension <" + dimensionWithoutHierarchies
+					+ ">. "
+					+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. ?obs <"
+					+ dimensionWithoutHierarchies + "> ?MEMBER_UNIQUE_NAME. "
+					+ " ?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION "
+					+ alteredadditionalFilters + "} "
+					+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
+			
+			memberUris1 = sparql(query, true);
+			
+			/*
+			 * ... and Literal values / values that do not serve a skos:notation.
+			 * 
+			 * Need to include instance graph.
+			 */
+			query = LdOlap4jUtil.getStandardPrefixes()
+					+ "Select distinct \""
+					+ TABLE_CAT
+					+ "\" as ?CATALOG_NAME \""
+					+ TABLE_SCHEM
+					+ "\" as ?SCHEMA_NAME ?CUBE_NAME \""
+					+ dimensionWithoutHierarchies
+					+ "\" as ?DIMENSION_UNIQUE_NAME \""
+					+ dimensionWithoutHierarchies
+					+ "\" as ?HIERARCHY_UNIQUE_NAME \""
+					+ dimensionWithoutHierarchies
+					+ "\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
+					// Since we query for instances
+					+ askForFrom(true)
+					+ askForFrom(false)
+					+ " where { ?CUBE_NAME qb:component ?compSpec. "
+					+ "?compSpec qb:dimension <"
+					+ dimensionWithoutHierarchies
+					+ ">. "
+					+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. ?obs <"
+					+ dimensionWithoutHierarchies
+					+ "> ?MEMBER_UNIQUE_NAME."
+					+ " FILTER NOT EXISTS {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION } "
+					+ alteredadditionalFilters + "} "
+					+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
+
+			List<Node[]> memberUris2 = sparql(query, true);
+
+			addToResult(memberUris2, memberUris1);
+			}
+
+			return memberUris1;
+
 		}
 
-		// Here, we need specific filters, since only cube makes sense
-		String alteredadditionalFilters = "";
-		if (cubeNamePattern != null) {
-			alteredadditionalFilters = " FILTER (?CUBE_NAME = <"
-					+ LdOlap4jUtil.convertMDXtoURI(cubeNamePattern) + ">) ";
-		}
-
-		String query = LdOlap4jUtil.getStandardPrefixes()
-				+ "Select distinct \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \""
-				+ dimensionWithoutHierarchies
-				+ "\" as ?DIMENSION_UNIQUE_NAME \""
-				+ dimensionWithoutHierarchies
-				+ "\" as ?HIERARCHY_UNIQUE_NAME \""
-				+ dimensionWithoutHierarchies
-				+ "\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
-				// Since we query for instances
-				+ askForFrom(true) + askForFrom(false)
-				+ " where { ?CUBE_NAME qb:component ?compSpec. "
-				+ "?compSpec qb:dimension <" + dimensionWithoutHierarchies
-				+ ">. "
-				+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. ?obs <"
-				+ dimensionWithoutHierarchies + "> ?MEMBER_UNIQUE_NAME. "
-				+ " ?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION "
-				+ alteredadditionalFilters + "} "
-				+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-
-		List<Node[]> memberUris1 = sparql(query, true);
-
-		/*
-		 * ... and Literal values / values that do not serve a skos:notation.
-		 * 
-		 * Need to include instance graph.
-		 */
-		query = LdOlap4jUtil.getStandardPrefixes()
-				+ "Select distinct \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \""
-				+ dimensionWithoutHierarchies
-				+ "\" as ?DIMENSION_UNIQUE_NAME \""
-				+ dimensionWithoutHierarchies
-				+ "\" as ?HIERARCHY_UNIQUE_NAME \""
-				+ dimensionWithoutHierarchies
-				+ "\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
-				// Since we query for instances
-				+ askForFrom(true)
-				+ askForFrom(false)
-				+ " where { ?CUBE_NAME qb:component ?compSpec. "
-				+ "?compSpec qb:dimension <"
-				+ dimensionWithoutHierarchies
-				+ ">. "
-				+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. ?obs <"
-				+ dimensionWithoutHierarchies
-				+ "> ?MEMBER_UNIQUE_NAME."
-				+ " FILTER NOT EXISTS {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION } "
-				+ alteredadditionalFilters + "} "
-				+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-
-		List<Node[]> memberUris2 = sparql(query, true);
-
-		addToResult(memberUris2, memberUris1);
-
-		return memberUris1;
-
-	}
-
-	/**
-	 * Finds specific typical members.
-	 * 
-	 * @param restrictions
-	 * 
-	 * @return
-	 */
-	private List<Node[]> getLevelMembers(Restrictions restrictions) {
-
-		String additionalFilters = createFilterForRestrictions(restrictions);
-
-		// Also, get all members of hierarchies with levels without
-		// notation
-		String query = LdOlap4jUtil.getStandardPrefixes()
-				+ "Select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE ?PARENT_UNIQUE_NAME ?PARENT_LEVEL "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?compSpec. "
-				+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?MEMBER_UNIQUE_NAME skos:member ?LEVEL_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
-				+ "OPTIONAL {?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL.}"
-				+ " FILTER NOT EXISTS {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION } "
-				+ additionalFilters
-				+ "} "
-				+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-		List<Node[]> memberUris1 = sparql(query, true);
-
-		// Finally, get all members of hierarchies with levels with
-		// notations
-		// (members will be literals)
-		// (Literals)
-		query = LdOlap4jUtil.getStandardPrefixes()
-				+ "Select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE as ?PARENT_UNIQUE_NAME ?PARENT_LEVEL "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?compSpec. "
-				+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?MEMBER_CONCEPT skos:member ?LEVEL_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
-				+ "OPTIONAL { ?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL. }"
-				+ " ?MEMBER_CONCEPT skos:notation ?MEMBER_UNIQUE_NAME "
-				+ additionalFilters
-				+ "} "
-				+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-
-		List<Node[]> memberUris2 = sparql(query, true);
-
-		addToResult(memberUris1, memberUris2);
-
-		return memberUris2;
 	}
 
 	private String createFilterForRestrictions(Restrictions restrictions) {
@@ -1784,42 +1801,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ LdOlap4jUtil.convertMDXtoURI(restrictions.memberUniqueName)
 				+ ">)) "
 				: "";
-
+	
 		return cubeNamePatternFilter + dimensionUniqueNameFilter
 				+ hierarchyUniqueNameFilter + levelUniqueNameFilter
 				+ memberUniqueNameFilter;
-	}
-
-	private List<Node[]> getMeasureMembers(String cubeNamePattern,
-			String memberUniqueName) {
-		String additionalFilters = "";
-		// Here, we need altered filters, since only cube name and unique member
-		// name
-		// makes sense
-		if (cubeNamePattern != null) {
-			additionalFilters += " FILTER (?CUBE_NAME = <"
-					+ LdOlap4jUtil.convertMDXtoURI(cubeNamePattern) + ">) ";
-		}
-		if (memberUniqueName != null) {
-			additionalFilters += " FILTER (?MEASURE_UNIQUE_NAME = <"
-					+ LdOlap4jUtil.convertMDXtoURI(memberUniqueName) + ">) ";
-		}
-
-		// Second, ask for the measures (which are also members)
-		String query = LdOlap4jUtil.getStandardPrefixes()
-				+ "Select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEASURE_UNIQUE_NAME as ?MEMBER_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_CAPTION \"3\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"0\" as ?PARENT_LEVEL "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION. "
-				+ "?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. "
-				+ additionalFilters + "} " + "order by ?MEASURE_UNIQUE_NAME";
-
-		List<Node[]> memberUris2 = sparql(query, true);
-
-		return memberUris2;
 	}
 
 	/**

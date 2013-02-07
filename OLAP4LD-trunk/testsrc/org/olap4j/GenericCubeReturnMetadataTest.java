@@ -359,7 +359,15 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 
 			System.out.println("getMembers(Level:"+level+"): " + s);
 		}
+		
+		// Get single member
+		String s = checkResultSet(olapDatabaseMetaData.getMembers(catalogName,
+				null, cubeNamePattern, null, null, null, "httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FcikXXX2F1141391XXX23:id", Olap4jUtil.enumSetOf(Member.TreeOp.SELF)), MEMBERS_COLUMN_NAMES);
+		assertContains("httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FcikXXX2F1141391XXX23:id",s);
+		System.out.println("getMembers(Level:): " + s);
 	}
+	
+	
 
 	public void testDatabaseMetaDataGetSets() throws SQLException {
 		// String s = checkResultSet(

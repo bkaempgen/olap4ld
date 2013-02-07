@@ -19,6 +19,14 @@ restrictions.
 ===Problem: How about tree operators===
 * Currently, if tree operators are used, we assume that we are looking for a measure member.
 * Now that we do not have applyRestrictions any more, it becomes more difficult.
+* The following treeOps are possible:
+** Interesting: 
+	 * <p>The <code>treeOps</code> parameter allows you to retrieve members
+     * relative to a given member. It is only applicable if a
+     * <code>memberUniqueName</code> is also specified; otherwise it is
+     * ignored. The following example retrieves all descendants and ancestors
+     * of California, but not California itself:
+** Parent, Siblings, Children, Self, Ancestors, Descendants
 
 ==2013-02-03==
 * Problem: If we run a test on data sources with metadata queries, olap4ld does not yet know
