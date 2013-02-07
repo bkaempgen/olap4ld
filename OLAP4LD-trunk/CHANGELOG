@@ -1,3 +1,25 @@
+==2013-02-07==
+* Added to Tomcat for executing Saiku: "set CATALINA_OPTS=-Xms512m -Xmx768m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8 
+-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true" , as explained here: 
+http://ask.analytical-labs.com/questions/943/saiku-dont-execute-in-the-browser?focusedAnswerId=1143&sort=votes&page=2
+
+* Logging refactored: Logging is enabled/disabled in LdOlap4jDriver.java (line 193):
+** Disabled: LdOlap4jUtil._log.setLevel(Level.SEVERE);
+** Enabled: LdOlap4jUtil._log.setLevel(Level.INFO);
+
+===Problem: LinkedDataEngine may be called many times synchronously===
+* So far, we have one LinkedDataEngine per Connection. 
+* However, several metadata lists may get populated at the same time. Also, Saiku may be used by
+several people at the same time. 
+* Currently, the LinkedDataEngine has a state, since it has the current context stored as object
+properties. 
+* Solution: We create an internal class similar to "context", that stores the needed names from 
+restrictions.  
+
+===Problem: How about tree operators===
+* Currently, if tree operators are used, we assume that we are looking for a measure member.
+* Now that we do not have applyRestrictions any more, it becomes more difficult.
+
 ==2013-02-03==
 * Problem: If we run a test on data sources with metadata queries, olap4ld does not yet know
 how to translate prefixes to URIs. If I run OLAP queries, it does not since it populates the object
@@ -8,6 +30,11 @@ to first query for cubes, then dimensions, then hierarchies etc.
 
 * Solution: We use prefixes as mentioned in the standardprefixes.csv. If we do not find prefixes,
 we encode the URLs ourselves. This will not be pretty, but for those reasons we need labels.  
+* Next solution: We now use Base64, since it would completely encode a URI and would hopefully 
+not leave any problematic characters (http://blog.axxg.de/2012/02/java-kodierung-base64/)
+* For that, we had to add apache commons (http://commons.apache.org/codec/apidocs/overview-summary.html)
+* Note: Base64 had to be used with 0 linelength so that it would not add a linebreak.
+* Encoding/Decoding yourself at: http://www.yellowpipe.com/yis/tools/encrypter/index.php
 
 ==2013-01-31==
 * Measures and aggregation functions: We say that the aggregation function of a measure is inherent 

@@ -136,7 +136,11 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	 */
 	public GenericCubeReturnMetadataTest() throws SQLException {
 
-		this.cubeNamePattern = "aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vYXJjaGl2ZS9NQS8yMDA2LTA2LTAxIw==:dsd";
+		//SEC Example
+		this.cubeNamePattern = "httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd";
+		
+		//Yahoo Finance Example
+		//this.cubeNamePattern = "httpXXX3AXXX2FXXX2Fyahoofinancewrap.appspot.comXXX2FarchiveXXX2FMAXXX2F2006-06-01XXX23:dsd";
 	}
 
 	protected void setUp() throws SQLException {
@@ -397,17 +401,6 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 		}
 		assertTrue(k >= 0);
 		assertTrue(resultSet.isAfterLast());
-
-		/*
-		 * Visualize. We do not need visualization, since we already have gone
-		 * through all result sets with next() and can return them at the end.
-		 */
-		try {
-			this.resultDecorator.write(resultSet);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 		return buf.toString();
 	}

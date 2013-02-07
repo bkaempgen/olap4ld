@@ -166,13 +166,6 @@ abstract class LdOlap4jConnection implements OlapConnection {
 
 	private final URL serverUrlObject;
 
-	/**
-	 * This is a private property used for development only. Enabling it makes
-	 * the connection print out all queries to {@link System#out}
-	 */
-	// TODO: deactivate debugging state
-	private static final boolean DEBUG = true;
-
 	// ///////Needed for LD///////////////////
 	/**
 	 * The back end OLAP.
@@ -927,10 +920,50 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			Context context, MetadataRequest metadataRequest,
 			Object[] restrictions) {
 
-		if (DEBUG) {
-			System.out.println("********************************************");
-			System.out.println("** SENDING REQUEST :");
-		}
+			LdOlap4jUtil._log.info("********************************************");
+			LdOlap4jUtil._log.info("** SENDING REQUEST :");
+			String restrictionString = "";
+			for (int i = 0; i < restrictions.length; i = i + 2) {
+				if ("CATALOG_NAME".equals((String) restrictions[i])) {
+					restrictionString += "catalog_name = "+(String) restrictions[i + 1];
+					// we do not consider catalogs for now.
+					continue;
+				}
+				if ("SCHEMA_NAME".equals((String) restrictions[i])) {
+					restrictionString += "schema_name = "+(String) restrictions[i + 1];
+					// we do not consider schema for now
+					continue;
+				}
+				if ("CUBE_NAME".equals((String) restrictions[i])) {
+					restrictionString += "cube_name = "+(String) restrictions[i + 1];
+					continue;
+				}
+				if ("DIMENSION_UNIQUE_NAME".equals((String) restrictions[i])) {
+					restrictionString += "dimension_unique_name = "+(String) restrictions[i + 1];
+					continue;
+				}
+				if ("HIERARCHY_UNIQUE_NAME".equals((String) restrictions[i])) {
+					restrictionString += "hierarchy_unique_name = "+(String) restrictions[i + 1];
+					continue;
+				}
+				if ("LEVEL_UNIQUE_NAME".equals((String) restrictions[i])) {
+					restrictionString += "level_unique_name = "+(String) restrictions[i + 1];
+					continue;
+				}
+				if ("MEMBER_UNIQUE_NAME".equals((String) restrictions[i])) {
+					restrictionString += "member_unique_name = "+(String) restrictions[i + 1];
+					continue;
+				}
+				if ("TREE_OP".equals((String) restrictions[i])) {
+					restrictionString += "tree_op = "+new Integer((String) restrictions[i + 1]);
+					// treeOps erstellen wie in OpenVirtuoso
+					continue;
+				}
+				
+			}
+
+			LdOlap4jUtil._log.info("executeMetadataRequestOnLd("+metadataRequest.name()+") with "+restrictionString+";");
+			LdOlap4jUtil._log.info("********************************************");
 
 		/*
 		 * Specification of those metadata requests, see MetaDataRequest,
@@ -945,25 +978,27 @@ abstract class LdOlap4jConnection implements OlapConnection {
 		 * XmlaOlap4jUtil.prettyPrint(fault) + "\n" + "Request was:\n" +
 		 * request);
 		 */
+			
+		// Restrictions are wrapped in own object
+		Restrictions myRestrictionsObject = new Restrictions(restrictions);
 
 		// Create result
 		switch (metadataRequest) {
 		case DISCOVER_DATASOURCES:
 
-			return this.myLinkedData.getDatabases();
+			return this.myLinkedData.getDatabases(myRestrictionsObject);
 
 		case DBSCHEMA_CATALOGS:
 
-			return this.myLinkedData.getCatalogs();
+			return this.myLinkedData.getCatalogs(myRestrictionsObject);
 
 		case DBSCHEMA_SCHEMATA:
 
-			return this.myLinkedData.getSchemas();
+			return this.myLinkedData.getSchemas(myRestrictionsObject);
 
 		case MDSCHEMA_CUBES:
 
-			return this.myLinkedData.getCubes(context, metadataRequest,
-					restrictions);
+			return this.myLinkedData.getCubes(myRestrictionsObject);
 
 		case MDSCHEMA_DIMENSIONS:
 			/*
@@ -971,33 +1006,27 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			 * dimensions are asked for, or the dimensions of certain cubes.
 			 */
 
-			return this.myLinkedData.getDimensions(context, metadataRequest,
-					restrictions);
+			return this.myLinkedData.getDimensions(myRestrictionsObject);
 
 		case MDSCHEMA_MEASURES:
 
-			return this.myLinkedData.getMeasures(context, metadataRequest,
-					restrictions);
+			return this.myLinkedData.getMeasures(myRestrictionsObject);
 
 		case MDSCHEMA_SETS:
 
-			return this.myLinkedData.getSets(context, metadataRequest,
-					restrictions);
+			return this.myLinkedData.getSets(myRestrictionsObject);
 
 		case MDSCHEMA_HIERARCHIES:
 
-			return this.myLinkedData.getHierarchies(context, metadataRequest,
-					restrictions);
+			return this.myLinkedData.getHierarchies(myRestrictionsObject);
 
 		case MDSCHEMA_LEVELS:
 
-			return this.myLinkedData.getLevels(context, metadataRequest,
-					restrictions);
+			return this.myLinkedData.getLevels(myRestrictionsObject);
 
 		case MDSCHEMA_MEMBERS:
 
-			return this.myLinkedData.getMembers(context, metadataRequest,
-					restrictions);
+			return this.myLinkedData.getMembers(myRestrictionsObject);
 
 		default:
 			/*
@@ -1824,6 +1853,73 @@ abstract class LdOlap4jConnection implements OlapConnection {
 	static abstract class HandlerImpl<T extends Named> implements Handler<T> {
 		public void sortList(List<T> list) {
 			// do nothing - assume XMLA returned list in correct order
+		}
+	}
+	
+	static class Restrictions {
+		// Restrictions
+		public String catalog = null;
+		public String schemaPattern = null;
+		public String cubeNamePattern = null;
+		public String dimensionUniqueName = null;
+		public String hierarchyUniqueName = null;
+		public String levelUniqueName = null;
+		public String memberUniqueName = null;
+		public Integer tree = null;
+		public Set<Member.TreeOp> treeOps = null;
+		
+		private Restrictions(Object[] restrictions) {
+
+			for (int i = 0; i < restrictions.length; i = i + 2) {
+				if ("CATALOG_NAME".equals((String) restrictions[i])) {
+					catalog = (String) restrictions[i + 1];
+					// we do not consider catalogs for now.
+					continue;
+				}
+				if ("SCHEMA_NAME".equals((String) restrictions[i])) {
+					schemaPattern = (String) restrictions[i + 1];
+					// we do not consider schema for now
+					continue;
+				}
+				if ("CUBE_NAME".equals((String) restrictions[i])) {
+					cubeNamePattern = (String) restrictions[i + 1];
+					continue;
+				}
+				if ("DIMENSION_UNIQUE_NAME".equals((String) restrictions[i])) {
+					dimensionUniqueName = (String) restrictions[i + 1];
+					continue;
+				}
+				if ("HIERARCHY_UNIQUE_NAME".equals((String) restrictions[i])) {
+					hierarchyUniqueName = (String) restrictions[i + 1];
+					continue;
+				}
+				if ("LEVEL_UNIQUE_NAME".equals((String) restrictions[i])) {
+					levelUniqueName = (String) restrictions[i + 1];
+					continue;
+				}
+				if ("MEMBER_UNIQUE_NAME".equals((String) restrictions[i])) {
+					memberUniqueName = (String) restrictions[i + 1];
+					continue;
+				}
+				if ("TREE_OP".equals((String) restrictions[i])) {
+					tree = new Integer((String) restrictions[i + 1]);
+					// treeOps erstellen wie in OpenVirtuoso
+					continue;
+				}
+			}
+		}
+
+		private void resetRestrictions() {
+			// Restrictions
+			catalog = null;
+			schemaPattern = null;
+			cubeNamePattern = null;
+			dimensionUniqueName = null;
+			hierarchyUniqueName = null;
+			levelUniqueName = null;
+			memberUniqueName = null;
+			tree = null;
+			treeOps = null;
 		}
 	}
 

@@ -320,7 +320,7 @@ abstract class LdOlap4jDatabaseMetaData implements OlapDatabaseMetaData {
 	 */
 	public String getDatabaseProductName() throws SQLException {
 		return LdOlap4jUtil.convertNodeToMDX(olap4jConnection.myLinkedData
-				.getDatabases().get(0)[0]);
+				.getDatabases(null).get(0)[0]);
 		// final ResultSet rs = this.getDatabaseProperties(null, null);
 		// try {
 		// while (rs.next()) {
@@ -337,7 +337,7 @@ abstract class LdOlap4jDatabaseMetaData implements OlapDatabaseMetaData {
 
 	public String getDatabaseProductVersion() throws SQLException {
 		return LdOlap4jUtil.convertNodeToMDX(olap4jConnection.myLinkedData
-				.getDatabases().get(0)[3]);
+				.getDatabases(null).get(0)[3]);
 		// final ResultSet rs = this.getDatabaseProperties(null, null);
 		// try {
 		// while (rs.next()) {
@@ -1290,7 +1290,7 @@ abstract class LdOlap4jDatabaseMetaData implements OlapDatabaseMetaData {
 		} else {
 			treeOpRestriction = "";
 			for (TreeOp treeOp : treeOps) {
-				treeOpRestriction += treeOp.getDescription();
+				treeOpRestriction += treeOp.name();
 			}
 		}
 		LdOlap4jUtil._log.info("MetaData getMembers(" + catalog + ","

@@ -82,14 +82,13 @@ public class FIOSQueryTest extends TestCase {
 	}
 	
 	public void testFIOS_1() {
-		String result = executeStatement("SELECT {[aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vdm9jYWIveWFob28j:issuer].[aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vdm9jYWIveWFob28j:issuer].[aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vdm9jYWIveWFob28j:issuer].[aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vdGlja2VyL01BIw==:id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2006-06-01]} ON ROWS FROM [aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vYXJjaGl2ZS9NQS8yMDA2LTA2LTAxIw==:dsd]");
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FvocabXXX2FyahooXXX23:issuer].[httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FvocabXXX2FyahooXXX23:issuer].[httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FvocabXXX2FyahooXXX23:issuer].[httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FtickerXXX2FMAXXX23:id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2006-06-01]} ON ROWS FROM [httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FarchiveXXX2FMAXXX2F2006-06-01XXX23:dsd]");
 		
 		assertContains("6", result);
 	}
 
 	public void testFIOS_2() {
-		 String result =
-		 executeStatement("SELECT {[aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL3ZvY2FiL2VkZ2FyIw==:issuer].[aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL3ZvY2FiL2VkZ2FyIw==:issuer].[aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL3ZvY2FiL2VkZ2FyIw==:issuer].[aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL2Npay8xMTQxMzkxIw==:id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2008-09-30]} ON ROWS FROM [aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL2FyY2hpdmUvMTE0MTM5MS8wMDAxMTkzMTI1LTA5LTIyMjA1OCM=:dsd]");
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23:issuer].[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23:issuer].[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23:issuer].[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FcikXXX2F1141391XXX23:id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2008-09-30]} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd]");
 		
 		 assertContains("1", result);
 	}

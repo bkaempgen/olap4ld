@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.olap4j.driver.ld.LdOlap4jConnection.Context;
 import org.olap4j.driver.ld.LdOlap4jConnection.MetadataRequest;
+import org.olap4j.driver.ld.LdOlap4jConnection.Restrictions;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
@@ -42,15 +43,15 @@ public interface LinkedDataEngine {
 	 * 
 	 * @return
 	 */
-	public List<Node[]> getDatabases();
+	public List<Node[]> getDatabases(Restrictions restrictions);
 
-	public List<Node[]> getCatalogs();
+	public List<Node[]> getCatalogs(Restrictions restrictions);
 
 	/**
 	 * 
 	 * @return
 	 */
-	public List<Node[]> getSchemas();
+	public List<Node[]> getSchemas(Restrictions restrictions);
 
 	/**
 	 * 
@@ -66,8 +67,7 @@ public interface LinkedDataEngine {
 	 * 
 	 * @return Node[]{}
 	 */
-	public List<Node[]> getCubes(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions);
+	public List<Node[]> getCubes(Restrictions restrictions);
 
 	/**
 	 * Get possible dimensions (component properties) for each cube from the
@@ -81,8 +81,7 @@ public interface LinkedDataEngine {
 	 * @return Node[]{?dsd ?dimension ?compPropType ?name}
 	 * @throws MalformedURLException
 	 */
-	public List<Node[]> getDimensions(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions);
+	public List<Node[]> getDimensions(Restrictions restrictions);
 
 	/**
 	 * Every measure also needs to be listed as member. When I create the dsd, I
@@ -102,8 +101,7 @@ public interface LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getMeasures(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions);
+	public List<Node[]> getMeasures(Restrictions restrictions);
 
 	/**
 	 * 
@@ -114,8 +112,7 @@ public interface LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getHierarchies(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions);
+	public List<Node[]> getHierarchies(Restrictions restrictions);
 
 	/**
 	 * 
@@ -124,8 +121,7 @@ public interface LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getLevels(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions);
+	public List<Node[]> getLevels(Restrictions restrictions);
 
 	/**
 	 * Important issues to remember: Every measure also needs to be listed as
@@ -151,11 +147,9 @@ public interface LinkedDataEngine {
 	 * @return Node[]{?memberURI ?name}
 	 * @throws MalformedURLException
 	 */
-	public List<Node[]> getMembers(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions);
+	public List<Node[]> getMembers(Restrictions restrictions);
 
-	public List<Node[]> getSets(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions);
+	public List<Node[]> getSets(Restrictions restrictions);
 
 	/**
 	 * In the current Olap4LD implementation, an OLAP query is issued from the

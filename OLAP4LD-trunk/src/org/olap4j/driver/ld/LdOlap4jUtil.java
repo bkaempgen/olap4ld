@@ -17,7 +17,10 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +34,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xml.serialize.OutputFormat;
@@ -637,9 +639,23 @@ abstract class LdOlap4jUtil {
 			// BASE64Encoder myEncoder = new BASE64Encoder();
 			// String encodedURI = myEncoder.encode(baseuri.getBytes());
 			// encodedURI = encodedURI.replace("/(\r\n|\n|\r)/gm","");
-			Base64 myEncoder = new Base64(0);
-			String encodedURI = myEncoder.encodeToString(baseuri.getBytes());
-			return encodedURI + ":" + qname;
+			// Base64 myEncoder = new Base64(0);
+			// String encodedURI = myEncoder.encodeToString(baseuri.getBytes());
+			try {
+				prefix = URLEncoder.encode(baseuri, "UTF-8");
+				/*
+				 * I also encode the following:
+				 * 
+				 * % = XXX
+				 * . = YYY
+				 */
+				prefix = prefix.replace("%", "XXX");
+				prefix = prefix.replace(".", "YYY");
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return prefix + ":" + qname;
 		} else {
 			return prefix + ":" + qname;
 		}
@@ -672,8 +688,22 @@ abstract class LdOlap4jUtil {
 		if (prefixuri == null) {
 			// BASE64Decoder myDecoder = new BASE64Decoder();
 			// prefixuri = new String(myDecoder.decodeBuffer(prefix));
-			Base64 myDecoder = new Base64(0);
-			prefixuri = new String(myDecoder.decode(prefix.getBytes()));
+			// Base64 myDecoder = new Base64(0);
+			// prefixuri = new String(myDecoder.decode(prefix.getBytes()));
+			try {
+				/*
+				 * I first decode the following:
+				 * 
+				 * % = XXX
+				 * . = YYY
+				 */
+				prefix = prefix.replace("XXX", "%");
+				prefix = prefix.replace("YYY", ".");
+				prefixuri = new String(URLDecoder.decode(prefix, "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		return prefixuri + qname;
@@ -731,9 +761,8 @@ abstract class LdOlap4jUtil {
 
 	public static String convertMDXtoURI(String mdx) {
 		// check whether prefix notation
-		if (mdx.contains("http://")) {
-			throw new UnsupportedOperationException(
-					"Typically, it should not be a uri.");
+		if (mdx.contains("httpXXX3AXXX2FXXX2F")) {
+			return decodeUriWithPrefix(mdx);
 		} else if (mdx.lastIndexOf(":") != -1) {
 			return decodeUriWithPrefix(mdx);
 		} else {

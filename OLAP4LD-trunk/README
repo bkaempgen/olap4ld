@@ -1,4 +1,4 @@
-This driver implements the Open Java API for OLAP (OLAP4J [1]). It can be used by clients that 
+This driver implements the Open Java API for OLAP (olap4j [1]). It can be used by clients that 
 support the API, e.g., Saiku, Palo. It allows access to Linked Data sources. 
 Those Linked Data sources are typically served over the Web by a triple store, e.g., Open Virtuoso, 
 Sesame.
@@ -6,24 +6,25 @@ Sesame.
 ==Requirements==
 * olap4ld requires xercesImpl from olap4j  
 
-==How to run OLAP4LD with Saiku?==
+==How to run olap4ld with Saiku?==
 * Saiku-ui is starting point
 * Saiku-webapp is called by saiku-ui (in Saiku2.2 saiku-webapp should now be saiku)
-* Saiku-webapp (saiku) needs to be configured to use OLAP4LD driver: saiku-datasources [1].
+* Saiku-webapp (saiku) needs to be configured to use olap4ld driver: saiku-datasources [1].
 ** The triple store queried so far is hard coded in the system. TODO: Configure named graphs, here.
-* OLAP4LD is called by saiku-webapp (saiku)
-* OLAP4J is implemented (and used) by OLAP4LD. 
-* Mondrian.jar has once been used by OLAP4LD, but should not be necessary anymore.
+* olap4ld is called by saiku-webapp (saiku)
+* olap4j is implemented (and used) by olap4ld. 
+* Mondrian.jar has once been used by olap4ld, but should not be necessary anymore.
 * For OpenVirtuoso Triple Store, to transfrom sparql xml to nx, saxon.jar is needed. 
-This library, I need to have in Deployment Assembly of saiku-webapp, as OLAP4LD needs it.
-* The XSLT for transforming SPARQL XML into NX can be found within OLAP4LD.
-* OLAP4LD requires the nx parser [2].
+This library, I need to have in Deployment Assembly of saiku-webapp, as olap4ld needs it.
+* The XSLT for transforming SPARQL XML into NX can be found within olap4ld.
+* olap4ld requires the nx parser [2].
+* Saiku-webapp requires as deployment assembly all libraries used by olap4ld.  
 
-==OLAP4LD and SPARQL triple stores==
-* OLAP4LD tries not to make use of SPARQL 1.1 functionality in order to be applicable to 
+==olap4ld and SPARQL triple stores==
+* olap4ld tries not to make use of SPARQL 1.1 functionality in order to be applicable to 
 different triple stores
 * So far, only tested with Open Virtuoso
-* SPARQL features that OLAP4LD uses: ... AS ?... in select clause; if(?dimension = qb:dimension) 
+* SPARQL features that olap4ld uses: ... AS ?... in select clause; if(?dimension = qb:dimension) 
 in select clause; OPTIONAL {} in where clause; order by ?... ?...; iri(?dimension); bound(?dimension)
 
 ==Functionalities==
