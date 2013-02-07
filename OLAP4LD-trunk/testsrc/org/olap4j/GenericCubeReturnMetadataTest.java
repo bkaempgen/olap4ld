@@ -136,7 +136,7 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	 */
 	public GenericCubeReturnMetadataTest() throws SQLException {
 
-		this.cubeNamePattern = "http://edgarwrap.ontologycentral.com/archive/1141391/0001193125-09-222058#dsd";
+		this.cubeNamePattern = "aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vYXJjaGl2ZS9NQS8yMDA2LTA2LTAxIw==:dsd";
 	}
 
 	protected void setUp() throws SQLException {

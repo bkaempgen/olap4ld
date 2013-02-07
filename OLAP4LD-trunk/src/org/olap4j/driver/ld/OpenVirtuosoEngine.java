@@ -707,7 +707,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 					} else {
 
+						// We compare the restriction (which should already be abbreviated) and the
+						// result from the query (which still needs to be abbreviated)
 						String restriction = restrictions[i + 1].toString();
+						
 						String value = LdOlap4jUtil
 								.convertNodeToMDX(node[mapFields.get("?"
 										+ restrictions[i].toString())]);

@@ -82,15 +82,16 @@ public class FIOSQueryTest extends TestCase {
 	}
 	
 	public void testFIOS_1() {
-		String result = executeStatement("SELECT {[http%3A%2F%2Fyahoofinancewrap.appspot.com%2Fvocab%2Fyahoo%23issuer].[http%3A%2F%2Fyahoofinancewrap.appspot.com%2Fvocab%2Fyahoo%23issuer].[http%3A%2F%2Fyahoofinancewrap.appspot.com%2Fvocab%2Fyahoo%23issuer].[http%3A%2F%2Fyahoofinancewrap.appspot.com%2Fticker%2FMA%23id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2006-06-01]} ON ROWS FROM [http%3A%2F%2Fyahoofinancewrap.appspot.com%2Farchive%2FMA%2F2006-06-01%23dsd]");
+		String result = executeStatement("SELECT {[aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vdm9jYWIveWFob28j:issuer].[aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vdm9jYWIveWFob28j:issuer].[aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vdm9jYWIveWFob28j:issuer].[aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vdGlja2VyL01BIw==:id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2006-06-01]} ON ROWS FROM [aHR0cDovL3lhaG9vZmluYW5jZXdyYXAuYXBwc3BvdC5jb20vYXJjaGl2ZS9NQS8yMDA2LTA2LTAxIw==:dsd]");
 		
 		assertContains("6", result);
 	}
 
 	public void testFIOS_2() {
-		String result = executeStatement("SELECT {[http%3A%2F%2Fedgarwrap.ontologycentral.com%2Fvocab%2Fedgar%23issuer].[http%3A%2F%2Fedgarwrap.ontologycentral.com%2Fvocab%2Fedgar%23issuer].[http%3A%2F%2Fedgarwrap.ontologycentral.com%2Fvocab%2Fedgar%23issuer].[http%3A%2F%2Fedgarwrap.ontologycentral.com%2Fcik%2F1141391%23id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2008-09-30]} ON ROWS FROM [http%3A%2F%2Fedgarwrap.ontologycentral.com%2Farchive%2F1141391%2F0001193125-09-222058%23dsd]");
+		 String result =
+		 executeStatement("SELECT {[aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL3ZvY2FiL2VkZ2FyIw==:issuer].[aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL3ZvY2FiL2VkZ2FyIw==:issuer].[aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL3ZvY2FiL2VkZ2FyIw==:issuer].[aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL2Npay8xMTQxMzkxIw==:id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2008-09-30]} ON ROWS FROM [aHR0cDovL2VkZ2Fyd3JhcC5vbnRvbG9neWNlbnRyYWwuY29tL2FyY2hpdmUvMTE0MTM5MS8wMDAxMTkzMTI1LTA5LTIyMjA1OCM=:dsd]");
 		
-		assertContains("1", result);
+		 assertContains("1", result);
 	}
 	
 	private void assertContains(String seek, String s) {

@@ -17,10 +17,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +31,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xml.serialize.OutputFormat;
@@ -636,16 +634,12 @@ abstract class LdOlap4jUtil {
 		// (which if possible should be always the same):
 		String prefix = standard_uri2prefix.get(baseuri.hashCode());
 		if (prefix == null) {
-			// We simply use the URI again, but with url encode
-			try {
-				String encodedURI = URLEncoder.encode(uri, "UTF-8");
-				return encodedURI.replace("%", "XXX");
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			throw new UnsupportedOperationException(
-					"URL encoding should typically work.");
+			// BASE64Encoder myEncoder = new BASE64Encoder();
+			// String encodedURI = myEncoder.encode(baseuri.getBytes());
+			// encodedURI = encodedURI.replace("/(\r\n|\n|\r)/gm","");
+			Base64 myEncoder = new Base64(0);
+			String encodedURI = myEncoder.encodeToString(baseuri.getBytes());
+			return encodedURI + ":" + qname;
 		} else {
 			return prefix + ":" + qname;
 		}
@@ -660,24 +654,26 @@ abstract class LdOlap4jUtil {
 	 * @param uri
 	 * @return
 	 */
-	private static String decodeUriWithPrefix(String prefix) {
+	private static String decodeUriWithPrefix(String prefixeduri) {
 
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
 		}
 
 		// In this case, the : is the sign
-		int lastIndexColon = prefix.lastIndexOf(":");
-		String qname = prefix.substring(lastIndexColon + 1);
+		int lastIndexColon = prefixeduri.lastIndexOf(":");
+		String qname = prefixeduri.substring(lastIndexColon + 1);
 		// Without colon
-		prefix = prefix.substring(0, lastIndexColon);
+		String prefix = prefixeduri.substring(0, lastIndexColon);
 
 		String prefixuri = standard_prefix2uri.get(prefix.hashCode());
 
 		// Possibly stored in specific prefixes.
 		if (prefixuri == null) {
-			throw new UnsupportedOperationException(
-					"If we have a prefix used, it should not happen that we do not have its URI equivalent.");
+			// BASE64Decoder myDecoder = new BASE64Decoder();
+			// prefixuri = new String(myDecoder.decodeBuffer(prefix));
+			Base64 myDecoder = new Base64(0);
+			prefixuri = new String(myDecoder.decode(prefix.getBytes()));
 		}
 
 		return prefixuri + qname;
@@ -735,16 +731,9 @@ abstract class LdOlap4jUtil {
 
 	public static String convertMDXtoURI(String mdx) {
 		// check whether prefix notation
-		if (mdx.contains("httpXXX3AXXX2FXXX2F")) {
-			try {
-				String decodedURI = mdx.replace("XXX", "%");
-				return URLDecoder.decode(decodedURI, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		if (mdx.contains("http://")) {
 			throw new UnsupportedOperationException(
-					"URL decoding should typically work.");
+					"Typically, it should not be a uri.");
 		} else if (mdx.lastIndexOf(":") != -1) {
 			return decodeUriWithPrefix(mdx);
 		} else {
