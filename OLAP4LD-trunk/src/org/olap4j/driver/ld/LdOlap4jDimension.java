@@ -73,7 +73,9 @@ class LdOlap4jDimension
                 this, null, null),
             new LdOlap4jConnection.HierarchyHandler(olap4jCube),
             dimensionRestrictions);
-        int pop = hierarchies.size();
+
+        //Populate immediately?
+        hierarchies.size();
     }
 
     public NamedList<Hierarchy> getHierarchies() {

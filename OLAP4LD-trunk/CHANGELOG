@@ -1,3 +1,6 @@
+==2013-02-08 - ParseTree to SPARQL query==
+
+
 ==2013-02-07==
 * Added to Tomcat for executing Saiku: "set CATALINA_OPTS=-Xms512m -Xmx768m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8 
 -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true" , as explained here: 
@@ -15,6 +18,17 @@ several people at the same time.
 properties. 
 * Solution: We create an internal class similar to "context", that stores the needed names from 
 restrictions.  
+
+===Problem: Created MDX in Saiku does not surround entity names with square brackets===
+* The MDX parser requires entity names to be wrapped by square brackets.
+* So far, only a cubes unique name is wrapped by square brackets. 
+* All other elements are defined by XmlaOlap4jElement and they do not add square brackets.
+* To consider
+** Unique names of elements are used for filtering in SPARQL queries.
+* Possible Solution: We just add the brackets as "MDX"-specific. 
+** However, we should only transform SPARQL outputs if they are needed in MDX.
+* Next problem: From segment identifier objects, the [] are already removed.
+* Any possibility to know the cube when we are looking for an identifier?
 
 ===Problem: How about tree operators===
 * Currently, if tree operators are used, we assume that we are looking for a measure member.

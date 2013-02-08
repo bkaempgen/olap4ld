@@ -46,6 +46,9 @@ abstract class XmlaOlap4jElement implements MetadataElement, Named {
         return name;
     }
 
+    /**
+     * Note, getUniqueName is automatically wrapped with squared brackets by the system.
+     */
     public String getUniqueName() {
         return uniqueName;
     }

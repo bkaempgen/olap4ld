@@ -4,7 +4,9 @@
 package org.olap4j.driver.ld;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,6 +47,22 @@ import org.olap4j.metadata.NamedList;
 /**
  * @author b-kaempgen
  * 
+ *         * In olap4ld, the following process is executed, if an MDX query is
+ *         issued: 
+ *         
+ *         * The MDX query is parsed and validated. A
+ *         "Parse tree model for an MDX SELECT statement" is created: SelectNode
+ *         implements ParseTreeNode 
+ *         
+ *         * executeOlapSparqlQuery(SelectNode
+ *         selectNode) is executed on this SelectNode 
+ *         
+ *         * A MdxMethodVisitor is instantiated and goes through the entire MDX tree
+ *         to create the needed information for the SPARQL OLAP query.
+ *         
+ *         An MdxMethodVisitor has as Input a SelectNode and as Output 
+ * 
+ * 
  *         MdxMethodVisitor goes through a MDX parse tree and returns the
  *         multidimensional element (e.g., cube, level, list of list of
  *         members,...)
@@ -55,7 +73,7 @@ import org.olap4j.metadata.NamedList;
  *         hierarchy list and measures
  * 
  */
-@SuppressWarnings("hiding") 
+@SuppressWarnings("hiding")
 public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 
 	private LdOlap4jStatement olap4jStatement;
@@ -72,10 +90,189 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		withMembers = new ArrayList<Member>();
 	}
 
-	@Override
+	/**
+	 * This is the starting point of going through a MDX select parse tree.
+	 */
 	public Object visit(SelectNode selectNode) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		// We do not implement with, yet.
+		if (!selectNode.getWithList().isEmpty()) {
+			for (ParseTreeNode with : selectNode.getWithList()) {
+				/*
+				 * For each with, we need to create a new calculated measure and
+				 * set the expression
+				 * 
+				 * For that, however, we need to identify the elements in the
+				 * expression, so that the OLAP engine does not need to identify
+				 * them, any more.
+				 */
+				// We do not need to use it, since the visitor stores it in
+				// itself.
+				// TODO: This is a hack. Instead, I want to use calculated
+				// measures with their expression.
+				// TODO: Accept should work also.
+				Object calculatedMeasure = this.visit((WithMemberNode) with);
+			}
+		}
+
+		// I know, that getFrom gives me a cubeNode, therefore, I know the cube
+		Cube cube = (Cube) selectNode.getFrom().accept(this);
+
+		try {
+			// Our cubes have exactly one schema and one catalog.
+			this.olap4jStatement.olap4jConnection.setCatalog(cube.getSchema()
+					.getCatalog().getName());
+		} catch (SQLException e) {
+			throw new UnsupportedOperationException("It should be possible to set a catalog.");
+		}
+
+		// Filter (create MetaData for the filter axis)
+		AxisNode filter = selectNode.getFilterAxis();
+
+		List<Position> filterPositions = new ArrayList<Position>();
+		List<Hierarchy> filterHierarchies = new ArrayList<Hierarchy>();
+
+		if (filter.getExpression() != null) {
+			/*
+			 * If a set of tuples is supplied as the slicer expression, MDX will
+			 * attempt to evaluate the set, aggregating the result cells in
+			 * every tuple along the set. In other words, MDX will attempt to
+			 * use the Aggregate function on the set, aggregating each measure
+			 * by its associated aggregation function. The following examples
+			 * show a valid WHERE clause using a set of tuples:
+			 * 
+			 * WHERE { ([Time].[1st half], [Route].[nonground]), ([Time].[1st
+			 * half], [Route].[ground]) }
+			 * 
+			 * If the «slicer_specification» cannot be resolved into a single
+			 * tuple, an error will occur.
+			 * 
+			 * For us, a tuple is a position in the axis.
+			 */
+
+			// I should create a visitor that goes through the AxisNode (axis)
+			// and returns with positions
+			// MdxMethodVisitor<Object> ldMethodVisitor = new
+			// MdxMethodVisitor<Object>(
+			// olap4jStatement);
+			Object result = filter.accept(this);
+			List<Object> listResult = (List<Object>) result;
+
+			/*
+			 * From the method visitor, we get a list of (possible list of)
+			 * members
+			 */
+			filterPositions = this.createPositionsList(listResult);
+			filterHierarchies = this.createHierarchyList(listResult);
+
+			// pw.println();
+			// pw.print("WHERE ");
+			// filterAxis.unparse(writer);
+		}
+
+		// I need to create a filter axis metadata
+		final LdOlap4jCellSetAxisMetaData filterAxisMetaData = new LdOlap4jCellSetAxisMetaData(
+				olap4jStatement.olap4jConnection, filter.getAxis(),
+				Collections.<Hierarchy> unmodifiableList(filterHierarchies),
+				Collections.<LdOlap4jCellSetMemberProperty> emptyList());
+
+		// I need to create a filter axis
+		// Do we really need it?
+//		final LdOlap4jCellSetAxis filterCellSetAxis = new LdOlap4jCellSetAxis(
+//				this, filter.getAxis(),
+//				Collections.unmodifiableList(filterPositions));
+//		filterAxis = filterCellSetAxis;
+
+		// Axis (create MetaData for one specific axis)
+		final List<LdOlap4jCellSetAxisMetaData> axisMetaDataList = new ArrayList<LdOlap4jCellSetAxisMetaData>();
+
+		// When going through the axes: Prepare groupbylist, a set of levels
+		// Prepare list of levels (excluding Measures!)
+		// Go through tuple get dimensions, if not measure
+		ArrayList<Level> groupbylist = new ArrayList<Level>();
+
+		for (AxisNode axis : selectNode.getAxisList()) {
+
+			// I need to add the list of hierarchies
+			/*
+			 * Consider
+			 * "select Time.members * Customer.members on 0 from Sales". The
+			 * columns axis will have a list of tuples, and each tuple will have
+			 * a member of the Time hierarchy and a member of the Customer
+			 * hierarchy. Therefore getHierarchies should return a list { <time
+			 * hierarchy>, <customers hierarchy> }.
+			 * 
+			 * If you don't know which hierarchies, I suppose you could return a
+			 * list of nulls. If you don't even know the arity of the axis, you
+			 * could return null rather than a list. The spec doesn't say
+			 * whether either of these are allowed. Arguably it should, but
+			 * anyway.
+			 * 
+			 * The list of hierarchies for the axes (also filter axis) can be
+			 * used as a signature to determine, which dimensions are covered by
+			 * the axes. All other dimensions are assumed to be slicer
+			 * dimensions and filter with their default members (in a query).
+			 */
+
+			// I should create a visitor that goes through the AxisNode (axis)
+			// and returns with positions
+			// MdxMethodVisitor<Object> ldMethodVisitor = new
+			// MdxMethodVisitor<Object>(
+			// olap4jStatement);
+			Object result = axis.accept(this);
+			List<Object> listResult = (List<Object>) result;
+
+			/*
+			 * From the method visitor, we get a list of (possible list of)
+			 * members
+			 */
+			List<Position> positions = this.createPositionsList(listResult);
+			List<Hierarchy> hierarchies = this
+					.createHierarchyList(listResult);
+			List<Level> levels = this.createLevelList(listResult);
+			for (Level level : levels) {
+				// Since any dimension can only be mentioned once per axis,
+				// there should not be inserted a level twice.
+				if (!level.getUniqueName().equals("Measures")) {
+					groupbylist.add(level);
+				}
+			}
+
+			// TODO: Properties are not computed, yet.
+			List<LdOlap4jCellSetMemberProperty> propertyList = new ArrayList<LdOlap4jCellSetMemberProperty>();
+			List<LdOlap4jCellSetMemberProperty> properties = propertyList;
+
+			// Add cellSetAxis to list of axes
+//			final LdOlap4jCellSetAxis cellSetAxis = new LdOlap4jCellSetAxis(
+//					this, axis.getAxis(),
+//					Collections.unmodifiableList(positions));
+//			axisList.add(cellSetAxis);
+
+			// Add axisMetaData to list of axes metadata
+			final LdOlap4jCellSetAxisMetaData axisMetaData = new LdOlap4jCellSetAxisMetaData(
+					olap4jStatement.olap4jConnection, axis.getAxis(),
+					hierarchies, properties);
+
+			axisMetaDataList.add(axisMetaData);
+		}
+
+		List<LdOlap4jCellProperty> cellProperties = new ArrayList<LdOlap4jCellProperty>();
+		// I do not support cell properties, yet.
+		if (!selectNode.getCellPropertyList().isEmpty()) {
+			// pw.println();
+			// pw.print("CELL PROPERTIES ");
+			// k = 0;
+			// for (IdentifierNode cellProperty : cellPropertyList) {
+			// if (k++ > 0) {
+			// pw.print(", ");
+			// }
+			// cellProperty.unparse(writer);
+			// }
+		}
+
+		return (Object) new LdOlap4jCellSetMetaData(olap4jStatement,
+				(LdOlap4jCube) cube, filterAxisMetaData, axisMetaDataList,
+				cellProperties);
 	}
 
 	@Override
@@ -129,15 +326,15 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 			Member calculatedMember = new LdOlap4jMeasure(
 					(LdOlap4jLevel) member1.getLevel(), calculatedMemberName,
 					calculatedMemberName, calculatedMemberName, "", null,
-					Aggregator.CALCULATED, callNode, Datatype.INTEGER,
-					true, member1.getLevel().getMembers().size()
-							+ withMembers.size());
+					Aggregator.CALCULATED, callNode, Datatype.INTEGER, true,
+					member1.getLevel().getMembers().size() + withMembers.size());
 			// We store the calculatedMember as a possible IdentifierNode
 			withMembers.add(calculatedMember);
 			return (Object) calculatedMember;
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
-			throw new UnsupportedOperationException("Probably no members of the level were found.");
+			throw new UnsupportedOperationException(
+					"Probably no members of the level were found.");
 		}
 	}
 
@@ -203,7 +400,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				|| call.getOperatorName().toLowerCase().equals("/")) {
 			return callNumBinOp(call);
 		}
-	
+
 		if (call.getOperatorName().toLowerCase().equals("and")) {
 			return callBooleanAND(call);
 		}
@@ -211,13 +408,15 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		if (call.getOperatorName().toLowerCase().equals(":")) {
 			return callColon(call);
 		}
-		
-		throw new UnsupportedOperationException(
-				"The "+call.getOperatorName().toLowerCase()+" method is not supported by olap4ld, yet.");
+
+		throw new UnsupportedOperationException("The "
+				+ call.getOperatorName().toLowerCase()
+				+ " method is not supported by olap4ld, yet.");
 	}
 
 	private Object callColon(CallNode call) {
-		// Here, we have two Identifier nodes, each having their own name, but we need to create a new i-node
+		// Here, we have two Identifier nodes, each having their own name, but
+		// we need to create a new i-node
 		return null;
 	}
 
@@ -380,7 +579,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		}
 		return (Object) elementList;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Object callChildren(CallNode call) {
 
@@ -388,7 +587,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				this.olap4jStatement);
 
 		/*
-		 * Children can only be for a member 
+		 * Children can only be for a member
 		 */
 		Object object = call.getArgList().get(0).accept(newvisitor);
 
@@ -398,7 +597,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				NamedList<? extends Member> children = member.getChildMembers();
 				return (Object) children;
 			} else {
-				throw new UnsupportedOperationException("Children can only be executed on members!");
+				throw new UnsupportedOperationException(
+						"Children can only be executed on members!");
 			}
 
 		} catch (OlapException e) {
@@ -535,7 +735,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		 * TODO: .members is then seen as part of the name which is not ideal.
 		 */
 		int segmentIndex = 0;
-		String segmentName = segmentList.get(segmentIndex).getName();
+		// .name() would remove the squared brackets, therefore toString()
+		String segmentName = segmentList.get(segmentIndex).toString();
 		segmentIndex++;
 		// Now, we check whether name is available
 		try {
@@ -599,7 +800,9 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 						segmentIndex++;
 						if (hierarchy == null) {
 							throw new UnsupportedOperationException(
-									"MDX identifier not properly given:"+segmentList.get(segmentIndex).getName());
+									"MDX identifier not properly given:"
+											+ segmentList.get(segmentIndex)
+													.getName());
 						} else if (hierarchy != null
 								&& segmentIndex >= segmentList.size()) {
 							return (Object) hierarchy;
@@ -609,7 +812,9 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 							segmentIndex++;
 							if (level == null) {
 								throw new UnsupportedOperationException(
-										"MDX identifier not properly given:"+segmentList.get(segmentIndex).getName());
+										"MDX identifier not properly given:"
+												+ segmentList.get(segmentIndex)
+														.getName());
 							} else if (level != null
 									&& segmentIndex >= segmentList.size()) {
 								return (Object) level;
@@ -637,7 +842,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 			identifier += segmentList.get(i).getName();
 		}
 		throw new UnsupportedOperationException(
-				"There should be an OLAP element for each identifier, also this one:"+identifier);
+				"There should be an OLAP element for each identifier, also this one:"
+						+ identifier);
 	}
 
 	@Override
@@ -795,8 +1001,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 
 	/**
 	 * TODO: From the parsed list of lists of members, it should be possible to
-	 * create a level list. Note, we do also include the measures
-	 * level, here this is done for hierarchies also.
+	 * create a level list. Note, we do also include the measures level, here
+	 * this is done for hierarchies also.
 	 * 
 	 * @param list
 	 * @return
@@ -841,7 +1047,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		}
 		return levelList;
 	}
-	
+
 	/**
 	 * From the parsed list of lists of members, it should be possible to create
 	 * the measures list.

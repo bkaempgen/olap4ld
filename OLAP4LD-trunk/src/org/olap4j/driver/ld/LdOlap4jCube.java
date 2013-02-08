@@ -133,11 +133,14 @@ class LdOlap4jCube implements Cube, Named {
 	}
 
 	/**
-	 * The unique name of a cube is simply [XXX], I hope this won't be a problem
-	 * later.
+	 * The unique name of a cube is simply the name;
+	 * 
+	 * Note, squared brackets are added by the system and not added to a cube
+	 * itself.
 	 */
 	public String getUniqueName() {
-		return "[" + name + "]";
+		// return "[" + name + "]";
+		return name;
 	}
 
 	public String getCaption() {
@@ -323,7 +326,8 @@ class LdOlap4jCube implements Cube, Named {
 			// being empty. Possibly, it does not make sense to query for
 			// measures here, also, since
 			// we have a list of measures for a cube, and we have a list of
-			// measures for the measure dimension. Thus, we look here in the cube measure list.
+			// measures for the measure dimension. Thus, we look here in the
+			// cube measure list.
 			if (!measures.isEmpty()) {
 				LdOlap4jMeasure measure = measures.get(memberUniqueName);
 				if (measure != null) {
@@ -559,27 +563,31 @@ class LdOlap4jCube implements Cube, Named {
 							.cast(level.olap4jHierarchy.olap4jDimension.olap4jCube.measures);
 				}
 				break;
+			default:
+				olap4jSchema.olap4jCatalog.olap4jDatabaseMetaData.olap4jConnection
+						.populateList(
+								list,
+								context,
+								LdOlap4jConnection.MetadataRequest.MDSCHEMA_MEMBERS,
+								new LdOlap4jConnection.MemberHandler(),
+								new Object[] {
+										"CATALOG_NAME",
+										olap4jSchema.olap4jCatalog.getName(),
+										"SCHEMA_NAME",
+										olap4jSchema.getName(),
+										"CUBE_NAME",
+										getName(),
+										"DIMENSION_UNIQUE_NAME",
+										level.olap4jHierarchy.olap4jDimension
+												.getUniqueName(),
+										"HIERARCHY_UNIQUE_NAME",
+										level.olap4jHierarchy.getUniqueName(),
+										"LEVEL_UNIQUE_NAME",
+										level.getUniqueName() });
+				return list;
 			}
-			olap4jSchema.olap4jCatalog.olap4jDatabaseMetaData.olap4jConnection
-					.populateList(
-							list,
-							context,
-							LdOlap4jConnection.MetadataRequest.MDSCHEMA_MEMBERS,
-							new LdOlap4jConnection.MemberHandler(),
-							new Object[] {
-									"CATALOG_NAME",
-									olap4jSchema.olap4jCatalog.getName(),
-									"SCHEMA_NAME",
-									olap4jSchema.getName(),
-									"CUBE_NAME",
-									getName(),
-									"DIMENSION_UNIQUE_NAME",
-									level.olap4jHierarchy.olap4jDimension
-											.getUniqueName(),
-									"HIERARCHY_UNIQUE_NAME",
-									level.olap4jHierarchy.getUniqueName(),
-									"LEVEL_UNIQUE_NAME", level.getUniqueName() });
-			return list;
+			throw new UnsupportedOperationException(
+					"The right type of dimension should have been found.");
 		}
 	}
 }

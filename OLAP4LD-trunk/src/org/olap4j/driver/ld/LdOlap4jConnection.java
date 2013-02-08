@@ -1080,16 +1080,16 @@ abstract class LdOlap4jConnection implements OlapConnection {
 				Map<String, Integer> mapFields, Context context,
 				List<LdOlap4jDatabase> list) throws OlapException {
 			// I want to ask first for the field names
-			String dsName = LdOlap4jUtil.convertNodeToMDX(row[mapFields
-					.get("?DATA_SOURCE_NAME")]);
-			String dsDesc = LdOlap4jUtil.convertNodeToMDX(row[mapFields
-					.get("?DATA_SOURCE_DESCRIPTION")]);
-			String url = LdOlap4jUtil.convertNodeToMDX(row[mapFields
-					.get("?URL")]);
-			String dsInfo = LdOlap4jUtil.convertNodeToMDX(row[mapFields
-					.get("?DATA_SOURCE_INFO")]);
-			String providerName = LdOlap4jUtil.convertNodeToMDX(row[mapFields
-					.get("?PROVIDER_NAME")]);
+			String dsName = row[mapFields
+					.get("?DATA_SOURCE_NAME")].toString();
+			String dsDesc = row[mapFields
+					.get("?DATA_SOURCE_DESCRIPTION")].toString();
+			String url = row[mapFields
+					.get("?URL")].toString();
+			String dsInfo = row[mapFields
+					.get("?DATA_SOURCE_INFO")].toString();
+			String providerName = row[mapFields
+					.get("?PROVIDER_NAME")].toString();
 
 			// Simply empty
 			List<ProviderType> pTypesList = new ArrayList<ProviderType>();
@@ -1176,9 +1176,8 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			// From this result only integer values should be returned (can we
 			// actually do this with SPARQL?
 			// TODO: SO far, only unkown(0) is returned, here.
-			final int dimensionType = new Integer(
-					LdOlap4jUtil.convertNodeToMDX(row[mapFields
-							.get("?DIMENSION_TYPE")]));
+			final int dimensionType = new Integer(row[mapFields
+							.get("?DIMENSION_TYPE")].toString());
 			final Dimension.Type type = Dimension.Type.getDictionary()
 					.forOrdinal(dimensionType);
 			// the max of hierarchies
@@ -1187,9 +1186,8 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			// TODO: For default hierarchy it is similar...
 			final String defaultHierarchyUniqueName = null;
 			// simply 0 is returned here
-			final Integer dimensionOrdinal = new Integer(
-					LdOlap4jUtil.convertNodeToMDX(row[mapFields
-							.get("?DIMENSION_ORDINAL")]));
+			final Integer dimensionOrdinal = new Integer(row[mapFields
+							.get("?DIMENSION_ORDINAL")].toString());
 			LdOlap4jDimension dimension = new LdOlap4jDimension(
 					context.olap4jCube, dimensionUniqueName, dimensionName,
 					dimensionCaption, description, type,
@@ -1333,17 +1331,16 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			if (LdOlap4jUtil.convertNodeToMDX(row[mapFields
 					.get("?LEVEL_NUMBER")]) != null) {
 				// Since we use depth, we need to reduce the size with 1.
-				levelNumber = new Integer(
-						LdOlap4jUtil.convertNodeToMDX(row[mapFields
-								.get("?LEVEL_NUMBER")])) - 1;
+				levelNumber = new Integer(row[mapFields
+								.get("?LEVEL_NUMBER")].toString()) - 1;
 				if (levelNumber < 0) {
 					throw new UnsupportedOperationException(
 							"The levelNumber cannot be negative!");
 				}
 			}
 			// Is Hexadecimal therefore little more complicated
-			String level_type = LdOlap4jUtil.convertNodeToMDX(row[mapFields
-					.get("?LEVEL_TYPE")]);
+			String level_type = row[mapFields
+					.get("?LEVEL_TYPE")].toString();
 			final Integer levelTypeCode = Integer.parseInt(
 					level_type.substring(2, level_type.length()), 16);
 			
@@ -1351,8 +1348,8 @@ abstract class LdOlap4jConnection implements OlapConnection {
 					levelTypeCode);
 			boolean calculated = (levelTypeCode & MDLEVEL_TYPE_CALCULATED) != 0;
 			final int levelCardinality = new Integer(
-					LdOlap4jUtil.convertNodeToMDX(row[mapFields
-							.get("?LEVEL_CARDINALITY")]));
+					row[mapFields
+							.get("?LEVEL_CARDINALITY")].toString());
 			LdOlap4jLevel level = new LdOlap4jLevel(context.getHierarchy(row,
 					mapFields), levelUniqueName, levelName, levelCaption,
 					description, levelNumber, levelType, calculated,
@@ -1443,8 +1440,8 @@ abstract class LdOlap4jConnection implements OlapConnection {
 
 				// If it is encoded as number, fine also.
 				datatype = Datatype.getDictionary().forOrdinal(
-						new Integer(LdOlap4jUtil.convertNodeToMDX(row[mapFields
-								.get("?DATA_TYPE")])));
+						new Integer(row[mapFields
+								.get("?DATA_TYPE")].toString()));
 			} else {
 				datatype = ordinalDatatype;
 			}
@@ -1574,8 +1571,8 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			 */
 			if (false) {
 				int levelNumber = new Integer(
-						LdOlap4jUtil.convertNodeToMDX(row[mapFields
-								.get("?LEVEL_NUMBER")]));
+						row[mapFields
+								.get("?LEVEL_NUMBER")].toString());
 			}
 			// TODO: FOr now, we only have member ordinal = 0
 			int memberOrdinal = 0;
@@ -1592,8 +1589,8 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			// We see, an Integer is used, which means we need to return the
 			// type in terms of the number
 			Member.Type memberType = MEMBER_TYPE_VALUES[new Integer(
-					LdOlap4jUtil.convertNodeToMDX(row[mapFields
-							.get("?MEMBER_TYPE")]))];
+					row[mapFields
+							.get("?MEMBER_TYPE")].toString())];
 
 			String memberCaption = LdOlap4jUtil.makeCaption(LdOlap4jUtil
 					.convertNodeToMDX(row[mapFields.get("?MEMBER_CAPTION")]));

@@ -292,42 +292,7 @@ class LdOlap4jStatement implements OlapStatement {
 		// Question is, can we do something with the parsed mdx select?
 
 		return executeOlapQuery(select);
-		/*
-		 * final String catalog = olap4jConnection.getCatalog(); final String
-		 * dataSourceInfo = olap4jConnection.getDatabase(); StringBuilder buf =
-		 * new StringBuilder( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-		 * "<soapenv:Envelope\n" +
-		 * "    xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\n" +
-		 * "    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
-		 * "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" +
-		 * "    <soapenv:Body>\n" +
-		 * "        <Execute xmlns=\"urn:schemas-microsoft-com:xml-analysis\">\n"
-		 * + "        <Command>\n" + "        <Statement>\n" +
-		 * "           <![CDATA[\n" + mdx + "]]>\n" + "         </Statement>\n"
-		 * + "        </Command>\n" + "        <Properties>\n" +
-		 * "          <PropertyList>\n"); if (catalog != null) {
-		 * buf.append("            <Catalog>"); buf.append(catalog);
-		 * buf.append("</Catalog>\n"); } if (dataSourceInfo != null) {
-		 * buf.append("            <DataSourceInfo>");
-		 * buf.append(dataSourceInfo); buf.append("</DataSourceInfo>\n"); }
-		 * buf.append( "            <Format>Multidimensional</Format>\n" +
-		 * "            <AxisFormat>TupleFormat</AxisFormat>\n" +
-		 * "          </PropertyList>\n" + "        </Properties>\n" +
-		 * "</Execute>\n" + "</soapenv:Body>\n" + "</soapenv:Envelope>"); final
-		 * String request = buf.toString();
-		 * 
-		 * // Close the previous open CellSet, if there is one. synchronized
-		 * (this) { if (openCellSet != null) { final XmlaOlap4jCellSet cs =
-		 * openCellSet; openCellSet = null; try { cs.close(); } catch
-		 * (SQLException e) { throw getHelper().createException(
-		 * "Error while closing previous CellSet", e); } }
-		 * 
-		 * this.future = olap4jConnection.proxy.submit(
-		 * olap4jConnection.serverInfos, request); openCellSet =
-		 * olap4jConnection.factory.newCellSet(this); } // Release the monitor
-		 * before calling populate, so that cancel can // grab the monitor if it
-		 * needs to. openCellSet.populate(); return openCellSet;
-		 */
+
 	}
 
 	/**

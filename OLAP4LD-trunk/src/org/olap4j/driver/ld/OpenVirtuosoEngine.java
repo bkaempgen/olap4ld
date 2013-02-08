@@ -1847,9 +1847,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		// HashMaps for already contained levels and measures
 		HashMap<Integer, Boolean> containedMap = new HashMap<Integer, Boolean>();
 
-		// Note: The cube is surrounded by square brackets.
-		String dsd = LdOlap4jUtil.convertMDXtoURI(mycube.getUniqueName()
-				.substring(1, mycube.getUniqueName().length() - 1));
+		String dsd = LdOlap4jUtil.convertMDXtoURI(mycube.getUniqueName());
 
 		// Now, we have all neccessary data
 		String memberPart = "";

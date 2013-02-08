@@ -93,6 +93,14 @@ public class FIOSQueryTest extends TestCase {
 		 assertContains("1", result);
 	}
 	
+	public void testFIOS_3() {
+		
+		String result = executeStatement("SELECT NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FcikXXX2F1141391XXX23:id]})} ON COLUMNS, NON EMPTY {Hierarchize({[sdmx-measure:obsValue]})} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd]");
+		
+		 assertContains("1", result);
+
+	}
+	
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
 			fail("expected to find '" + seek + "' in '" + s + "'");

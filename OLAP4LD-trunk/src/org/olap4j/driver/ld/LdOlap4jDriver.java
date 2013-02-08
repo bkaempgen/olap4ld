@@ -190,7 +190,7 @@ public class LdOlap4jDriver implements Driver {
     	
     	// We set the logging level
     	// Set the level to a particular level
-    	LdOlap4jUtil._log.setLevel(Level.SEVERE);
+    	LdOlap4jUtil._log.setLevel(Level.INFO);
     	
     	// We want to log to a file.
 		// try {

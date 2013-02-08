@@ -129,6 +129,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 	 * structure of the result cube before retrieving the information from the
 	 * cube to be queried.
 	 * 
+	 * 
 	 * @param selectNode
 	 * @throws OlapException
 	 */
@@ -141,199 +142,8 @@ abstract class LdOlap4jCellSet implements CellSet {
 				olap4jStatement);
 
 		// Here, I need to accept more
-		// selectNode.accept(ldVisitor);
-
-		// We do not implement with, yet.
-		if (!selectNode.getWithList().isEmpty()) {
-			for (ParseTreeNode with : selectNode.getWithList()) {
-				/*
-				 * For each with, we need to create a new calculated measure and
-				 * set the expression
-				 * 
-				 * For that, however, we need to identify the elements in the
-				 * expression, so that the OLAP engine does not need to identify
-				 * them, any more.
-				 */
-				// We do not need to use it, since the visitor stores it in
-				// itself.
-				// TODO: This is a hack. Instead, I want to use calculated
-				// measures with their expression.
-				Object calculatedMeasure = visitor.visit((WithMemberNode) with);
-			}
-		}
-
-		// From
-		// MdxMethodVisitor<Object> cubeldMethodVisitor = new
-		// MdxMethodVisitor<Object>(
-		// olap4jStatement);
-		// I know, that getFrom gives me a cubeNode, therefore, I know the cube
-		Cube cube = (Cube) selectNode.getFrom().accept(visitor);
-
-		// REVIEW: We should not modify the connection. It is not safe, because
-		// connection might be shared between multiple statements with different
-		// cubes. Caller should call
-		//
-		// connection.setCatalog(
-		// cellSet.getMetaData().getCube().getSchema().getCatalog().getName())
-		//
-		// before doing metadata queries.
-		try {
-			// Our cubes have exactly one schema and one catalog.
-			this.olap4jStatement.olap4jConnection.setCatalog(cube.getSchema()
-					.getCatalog().getName());
-		} catch (SQLException e) {
-			throw getHelper().createException(
-					"Internal error: setting catalog '"
-							+ cube.getSchema().getCatalog().getName()
-							+ "' caused error");
-		}
-
-		// Filter (create MetaData for the filter axis)
-		AxisNode filter = selectNode.getFilterAxis();
-
-		List<Position> filterPositions = new ArrayList<Position>();
-		List<Hierarchy> filterHierarchies = new ArrayList<Hierarchy>();
-
-		if (filter.getExpression() != null) {
-			/*
-			 * If a set of tuples is supplied as the slicer expression, MDX will
-			 * attempt to evaluate the set, aggregating the result cells in
-			 * every tuple along the set. In other words, MDX will attempt to
-			 * use the Aggregate function on the set, aggregating each measure
-			 * by its associated aggregation function. The following examples
-			 * show a valid WHERE clause using a set of tuples:
-			 * 
-			 * WHERE { ([Time].[1st half], [Route].[nonground]), ([Time].[1st
-			 * half], [Route].[ground]) }
-			 * 
-			 * If the «slicer_specification» cannot be resolved into a single
-			 * tuple, an error will occur.
-			 * 
-			 * For us, a tuple is a position in the axis.
-			 */
-
-			// I should create a visitor that goes through the AxisNode (axis)
-			// and returns with positions
-			// MdxMethodVisitor<Object> ldMethodVisitor = new
-			// MdxMethodVisitor<Object>(
-			// olap4jStatement);
-			Object result = filter.accept(visitor);
-			List<Object> listResult = (List<Object>) result;
-
-			/*
-			 * From the method visitor, we get a list of (possible list of)
-			 * members
-			 */
-			filterPositions = visitor.createPositionsList(listResult);
-			filterHierarchies = visitor.createHierarchyList(listResult);
-
-			// pw.println();
-			// pw.print("WHERE ");
-			// filterAxis.unparse(writer);
-		}
-
-		// I need to create a filter axis metadata
-		final LdOlap4jCellSetAxisMetaData filterAxisMetaData = new LdOlap4jCellSetAxisMetaData(
-				olap4jStatement.olap4jConnection, filter.getAxis(),
-				Collections.<Hierarchy> unmodifiableList(filterHierarchies),
-				Collections.<LdOlap4jCellSetMemberProperty> emptyList());
-
-		// I need to create a filter axis
-		final LdOlap4jCellSetAxis filterCellSetAxis = new LdOlap4jCellSetAxis(
-				this, filter.getAxis(),
-				Collections.unmodifiableList(filterPositions));
-		filterAxis = filterCellSetAxis;
-
-		// Axis (create MetaData for one specific axis)
-		final List<LdOlap4jCellSetAxisMetaData> axisMetaDataList = new ArrayList<LdOlap4jCellSetAxisMetaData>();
-
-		// When going through the axes: Prepare groupbylist, a set of levels
-		// Prepare list of levels (excluding Measures!)
-		// Go through tuple get dimensions, if not measure
-		this.groupbylist = new ArrayList<Level>();
-
-		for (AxisNode axis : selectNode.getAxisList()) {
-
-			// I need to add the list of hierarchies
-			/*
-			 * Consider
-			 * "select Time.members * Customer.members on 0 from Sales". The
-			 * columns axis will have a list of tuples, and each tuple will have
-			 * a member of the Time hierarchy and a member of the Customer
-			 * hierarchy. Therefore getHierarchies should return a list { <time
-			 * hierarchy>, <customers hierarchy> }.
-			 * 
-			 * If you don't know which hierarchies, I suppose you could return a
-			 * list of nulls. If you don't even know the arity of the axis, you
-			 * could return null rather than a list. The spec doesn't say
-			 * whether either of these are allowed. Arguably it should, but
-			 * anyway.
-			 * 
-			 * The list of hierarchies for the axes (also filter axis) can be
-			 * used as a signature to determine, which dimensions are covered by
-			 * the axes. All other dimensions are assumed to be slicer
-			 * dimensions and filter with their default members (in a query).
-			 */
-
-			// I should create a visitor that goes through the AxisNode (axis)
-			// and returns with positions
-			// MdxMethodVisitor<Object> ldMethodVisitor = new
-			// MdxMethodVisitor<Object>(
-			// olap4jStatement);
-			Object result = axis.accept(visitor);
-			List<Object> listResult = (List<Object>) result;
-
-			/*
-			 * From the method visitor, we get a list of (possible list of)
-			 * members
-			 */
-			List<Position> positions = visitor.createPositionsList(listResult);
-			List<Hierarchy> hierarchies = visitor
-					.createHierarchyList(listResult);
-			List<Level> levels = visitor.createLevelList(listResult);
-			for (Level level : levels) {
-				// Since any dimension can only be mentioned once per axis,
-				// there should not be inserted a level twice.
-				if (!level.getUniqueName().equals("Measures")) {
-					groupbylist.add(level);
-				}
-			}
-
-			// TODO: Properties are not computed, yet.
-			List<LdOlap4jCellSetMemberProperty> propertyList = new ArrayList<LdOlap4jCellSetMemberProperty>();
-			List<LdOlap4jCellSetMemberProperty> properties = propertyList;
-
-			// Add cellSetAxis to list of axes
-			final LdOlap4jCellSetAxis cellSetAxis = new LdOlap4jCellSetAxis(
-					this, axis.getAxis(),
-					Collections.unmodifiableList(positions));
-			axisList.add(cellSetAxis);
-
-			// Add axisMetaData to list of axes metadata
-			final LdOlap4jCellSetAxisMetaData axisMetaData = new LdOlap4jCellSetAxisMetaData(
-					olap4jStatement.olap4jConnection, axis.getAxis(),
-					hierarchies, properties);
-
-			axisMetaDataList.add(axisMetaData);
-		}
-
-		List<LdOlap4jCellProperty> cellProperties = new ArrayList<LdOlap4jCellProperty>();
-		// I do not support cell properties, yet.
-		if (!selectNode.getCellPropertyList().isEmpty()) {
-			// pw.println();
-			// pw.print("CELL PROPERTIES ");
-			// k = 0;
-			// for (IdentifierNode cellProperty : cellPropertyList) {
-			// if (k++ > 0) {
-			// pw.print(", ");
-			// }
-			// cellProperty.unparse(writer);
-			// }
-		}
-
-		this.metaData = new LdOlap4jCellSetMetaData(olap4jStatement,
-				(LdOlap4jCube) cube, filterAxisMetaData, axisMetaDataList,
-				cellProperties);
+		LdOlap4jCellSetMetaData metaData = (LdOlap4jCellSetMetaData) selectNode
+				.accept(visitor);
 
 		/*
 		 * It should be possible to execute the query and to built up a hash map
@@ -369,17 +179,24 @@ abstract class LdOlap4jCellSet implements CellSet {
 		// No dimension is to be mentioned in several axes, therefore, we can do
 		// the following
 		int numberOfDimensions = 0;
-		for (LdOlap4jCellSetAxisMetaData axisMetaData : axisMetaDataList) {
+		
+		
+		for (CellSetAxisMetaData axisMetaData : metaData.getAxesMetaData()) {
 			numberOfDimensions += axisMetaData.getHierarchies().size();
 		}
-		numberOfDimensions += filterHierarchies.size();
-
+		LdOlap4jCellSetAxisMetaData filterAxisMetaData = (LdOlap4jCellSetAxisMetaData) metaData.getFilterAxisMetaData();
+		
+		numberOfDimensions += filterAxisMetaData.getHierarchies().size();
+		
 		// Create list for each dimension to be restricted
 		for (int i = 0; i < numberOfDimensions; i++) {
 			selectionpredicates.add(new ArrayList<Member>());
 			selectionhashmaps.add(new HashMap<Integer, Member>());
 		}
 
+		  LdOlap4jCellSetAxisMetaData filterCellSetAxisMetaData = (LdOlap4jCellSetAxisMetaData) metaData.getFilterAxisMetaData();
+		  filterCellSetAxisMetaData.getAxis();
+		
 		// Go through all positions of filter
 		for (Position list : filterCellSetAxis.positions) {
 			// For each position, we get a new member for each restriction set
@@ -484,12 +301,11 @@ abstract class LdOlap4jCellSet implements CellSet {
 
 		/*
 		 * If groupbylist or measurelist is empty, we do not need to proceed.
-		 * 
 		 */
 		if (groupbylist.isEmpty() || measurelist.isEmpty()) {
 			return;
 		}
-		
+
 		List<Node[]> olapQueryResult = this.olap4jStatement.olap4jConnection.myLinkedData
 				.getOlapResult(groupbylist, measurelist, selectionpredicates,
 						cube);
@@ -1065,12 +881,12 @@ abstract class LdOlap4jCellSet implements CellSet {
 		 */
 		String[] hashedCells = newValueMap.get(concatNr.hashCode());
 		if (hashedCells != null && hashedCells[index] != null) {
-			return new LdOlap4jCell(this, coordinatesToOrdinal(coordinates), hashedCells[index],
-					hashedCells[index],
+			return new LdOlap4jCell(this, coordinatesToOrdinal(coordinates),
+					hashedCells[index], hashedCells[index],
 					Collections.<Property, Object> emptyMap());
 		} else {
-			return new LdOlap4jCell(this, coordinatesToOrdinal(coordinates), "", "",
-					Collections.<Property, Object> emptyMap());
+			return new LdOlap4jCell(this, coordinatesToOrdinal(coordinates),
+					"", "", Collections.<Property, Object> emptyMap());
 		}
 		//
 		// // Filter axis we need to consider, also

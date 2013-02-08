@@ -756,10 +756,15 @@ abstract class LdOlap4jUtil {
 					.severe("Here, we do not know what to do with a result node from Linked Data Engine.");
 			myValue = null;
 		}
-		return myValue;
+		
+		// We wrap any node value with brackets.
+		return "["+myValue+"]";
 	}
 
 	public static String convertMDXtoURI(String mdx) {
+		// First, we remove the squared brackets
+		mdx = mdx.substring(1, mdx.length() - 1);
+		
 		// check whether prefix notation
 		if (mdx.contains("httpXXX3AXXX2FXXX2F")) {
 			return decodeUriWithPrefix(mdx);
