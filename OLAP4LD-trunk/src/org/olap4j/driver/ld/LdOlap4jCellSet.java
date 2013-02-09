@@ -88,17 +88,6 @@ abstract class LdOlap4jCellSet implements CellSet {
 	private LdOlap4jCellSetAxis filterAxis;
 	// TODO Remove
 	private Map<Integer, Integer> hierarchyCellMap;
-	/*
-	 * OLAP query datastructure:
-	 * 
-	 * groupbylist - set of inquired dimensions measurelist - set of measures
-	 * selectionpredicates - set of set of members of dimensions to restrict
-	 */
-	private ArrayList<Level> groupbylist;
-	private ArrayList<Measure> measurelist;
-	private ArrayList<List<Member>> selectionpredicates;
-	// TODO: debugging is done?
-	private static final boolean DEBUG = true;
 
 	private static final List<String> standardProperties = Arrays.asList(
 			"UName", "Caption", "LName", "LNum", "DisplayInfo");
@@ -142,13 +131,20 @@ abstract class LdOlap4jCellSet implements CellSet {
 				olap4jStatement);
 
 		// Here, I need to accept more
-		LdOlap4jCellSetMetaData metaData = (LdOlap4jCellSetMetaData) selectNode
+		metaData = (LdOlap4jCellSetMetaData) selectNode
 				.accept(visitor);
-
-		/*
-		 * It should be possible to execute the query and to built up a hash map
-		 * for the results, which can be used in the cells.
-		 */
+		List<LdOlap4jCellSetAxis> myAxisList = visitor.getAxisList();
+		for (LdOlap4jCellSetAxis ldOlap4jCellSetAxis : myAxisList) {
+			axisList.add(ldOlap4jCellSetAxis);
+		}
+		filterAxis = visitor.getFilterAxis();
+	}
+	
+	/**
+	 * Method now uses the information of metaData, axisList and filterAxis to
+	 * execute an OLAP query on the Linked Data Engine and caches the results.
+	 */
+	void executeOlapQuery() {	
 
 		/*
 		 * I take the first Tuple of Members, get their Dimensions (apart from
@@ -169,10 +165,18 @@ abstract class LdOlap4jCellSet implements CellSet {
 		 * For now, we check first, whether a certain member already is
 		 * contained.
 		 */
-
+		
+		/*
+		 * OLAP query datastructure:
+		 * 
+		 * groupbylist - set of inquired dimensions measurelist - set of measures
+		 * selectionpredicates - set of set of members of dimensions to restrict
+		 */
+		LdOlap4jCube cube = metaData.cube;
+		
 		// Prepare selectionpredicates, a list of list of members of dimensions
 		// (including measure dimension, since we filter it out later).
-		selectionpredicates = new ArrayList<List<Member>>();
+		ArrayList<List<Member>> selectionpredicates = new ArrayList<List<Member>>();
 
 		List<HashMap<Integer, Member>> selectionhashmaps = new ArrayList<HashMap<Integer, Member>>();
 
@@ -193,10 +197,10 @@ abstract class LdOlap4jCellSet implements CellSet {
 			selectionpredicates.add(new ArrayList<Member>());
 			selectionhashmaps.add(new HashMap<Integer, Member>());
 		}
-
-		  LdOlap4jCellSetAxisMetaData filterCellSetAxisMetaData = (LdOlap4jCellSetAxisMetaData) metaData.getFilterAxisMetaData();
-		  filterCellSetAxisMetaData.getAxis();
 		
+		LdOlap4jCellSetAxis filterCellSetAxis = filterAxis;
+		List<Hierarchy> filterHierarchies = filterCellSetAxis.getAxisMetaData().getHierarchies();
+		  
 		// Go through all positions of filter
 		for (Position list : filterCellSetAxis.positions) {
 			// For each position, we get a new member for each restriction set
@@ -247,7 +251,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 		}
 
 		// Prepare measurelist, a set of measures
-		this.measurelist = new ArrayList<Measure>();
+		ArrayList<Measure> measurelist = new ArrayList<Measure>();
 
 		HashMap<Integer, Measure> measurehashmap = new HashMap<Integer, Measure>();
 
@@ -299,13 +303,34 @@ abstract class LdOlap4jCellSet implements CellSet {
 			}
 		}
 
+		// When going through the axes: Prepare groupbylist, a set of levels
+		// Prepare list of levels (excluding Measures!)
+		// Go through tuple get dimensions, if not measure
+		ArrayList<Level> groupbylist = new ArrayList<Level>();
+
+		for (LdOlap4jCellSetAxis cellSetAxis : axisList) {
+			
+			List<Position> positions = cellSetAxis.positions;
+			/* 
+			 * For now, we assume that for each hierarchy, we query for members of
+			 * one specific level, only.
+			 */
+			Position position = positions.get(0);
+			
+			List<Member> members = position.getMembers();
+			
+			for (Member member : members) {
+				groupbylist.add(member.getLevel());
+			}
+		}
+		
 		/*
 		 * If groupbylist or measurelist is empty, we do not need to proceed.
 		 */
 		if (groupbylist.isEmpty() || measurelist.isEmpty()) {
 			return;
 		}
-
+				
 		List<Node[]> olapQueryResult = this.olap4jStatement.olap4jConnection.myLinkedData
 				.getOlapResult(groupbylist, measurelist, selectionpredicates,
 						cube);
@@ -406,9 +431,9 @@ abstract class LdOlap4jCellSet implements CellSet {
 		// </SOAP-ENV:Body>
 		// </SOAP-ENV:Envelope>
 		final Element envelope = doc.getDocumentElement();
-		if (DEBUG) {
-			System.out.println(LdOlap4jUtil.toString(doc, true));
-		}
+		// if (DEBUG) {
+		// System.out.println(LdOlap4jUtil.toString(doc, true));
+		// }
 		assert envelope.getLocalName().equals("Envelope");
 		assert envelope.getNamespaceURI().equals(SOAP_NS);
 		Element body = findChild(envelope, SOAP_NS, "Body");

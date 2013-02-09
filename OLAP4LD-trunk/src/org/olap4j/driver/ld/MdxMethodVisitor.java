@@ -1093,4 +1093,14 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		return measureList;
 	}
 
+	public List<LdOlap4jCellSetAxis> getAxisList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public LdOlap4jCellSetAxis getFilterAxis() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
