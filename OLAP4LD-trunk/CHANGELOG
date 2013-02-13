@@ -1,5 +1,34 @@
-==2013-02-08 - ParseTree to SPARQL query==
+==2013-02-13 - From MDX to populated cellset==
+1) MDX: 
+SELECT 
+<COLUMNAXIS> ON COLUMNS,
+<ROWAXIS> ON ROWS,
+FROM <CUBE>
+WHERE <FILTERAXIS>
 
+2) MdxMethodVisitor
+<CUBE> => cube
+<COLUMNAXIS> => list of positions for columns
+<ROWAXIS> => list of positions for rows
+<FILTERAXIS> => list of positions for filters
+list of positions for columns => levels for column axis
+list of positions for rows => levels for row axis
+list of positions for filter => levels for filter axis
+
+3) CellSetMetaData
+cube => metadata
+levels for column axis => hierarchies for column axis
+levels for row axis => hierarchies for row axis
+levels for filter axis => hierarchies for filter axis
+
+4) OLAP query
+cube => cube
+levels for column axis + levels for row axis => slicesrollups
+list of positions for filter => dices
+check list of positions for mentioned members => projections
+
+5) SPARQL query
+* See pseudocode for ssb paper
 
 ==2013-02-07==
 * Added to Tomcat for executing Saiku: "set CATALINA_OPTS=-Xms512m -Xmx768m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8 

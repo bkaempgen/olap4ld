@@ -296,7 +296,7 @@ class LdOlap4jStatement implements OlapStatement {
 	}
 
 	/**
-	 * Similar to executeOlapQuery and populate.
+	 * ExecuteOlapQuery and populate.
 	 * 
 	 * Runs SPARQL query on Linked Data. Goes through result from SPARQL query
 	 * and populates CellSet axes and cells.
@@ -306,8 +306,9 @@ class LdOlap4jStatement implements OlapStatement {
 	 * @return
 	 * @throws OlapException
 	 */
-	private CellSet executeOlapSparqlQuery(SelectNode selectNode)
-			throws OlapException {
+	public CellSet executeOlapQuery(SelectNode selectNode) throws OlapException {
+		final String mdx = toString(selectNode);
+		LdOlap4jUtil._log.info("Execute MDX: " + mdx);
 
 		// Close the previous open CellSet, if there is one.
 		synchronized (this) {
@@ -337,7 +338,7 @@ class LdOlap4jStatement implements OlapStatement {
 		 * structure of the result cube before retrieving the information from
 		 * the cube to be queried.
 		 */
-		openCellSet.createMetaDataFromSelectNode(selectNode);
+		openCellSet.populateFromSelectNode(selectNode);
 
 		// return openCellSet;
 
@@ -371,18 +372,6 @@ class LdOlap4jStatement implements OlapStatement {
 		}
 
 		return nonEmptyCellSet;
-
-	}
-
-	public CellSet executeOlapQuery(SelectNode selectNode) throws OlapException {
-		final String mdx = toString(selectNode);
-		LdOlap4jUtil._log.info("Execute MDX: " + mdx);
-
-		return executeOlapSparqlQuery(selectNode);
-		/*
-		 * final String mdx = toString(selectNode); return
-		 * executeOlapQuery(mdx);
-		 */
 	}
 
 	public void addListener(CellSetListener.Granularity granularity,

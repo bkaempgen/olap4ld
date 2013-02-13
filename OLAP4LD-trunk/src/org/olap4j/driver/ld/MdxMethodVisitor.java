@@ -48,19 +48,19 @@ import org.olap4j.metadata.NamedList;
  * @author b-kaempgen
  * 
  *         * In olap4ld, the following process is executed, if an MDX query is
- *         issued: 
- *         
+ *         issued:
+ * 
  *         * The MDX query is parsed and validated. A
  *         "Parse tree model for an MDX SELECT statement" is created: SelectNode
- *         implements ParseTreeNode 
- *         
- *         * executeOlapSparqlQuery(SelectNode
- *         selectNode) is executed on this SelectNode 
- *         
- *         * A MdxMethodVisitor is instantiated and goes through the entire MDX tree
- *         to create the needed information for the SPARQL OLAP query.
- *         
- *         An MdxMethodVisitor has as Input a SelectNode and as Output 
+ *         implements ParseTreeNode
+ * 
+ *         * executeOlapSparqlQuery(SelectNode selectNode) is executed on this
+ *         SelectNode
+ * 
+ *         * A MdxMethodVisitor is instantiated and goes through the entire MDX
+ *         tree to create the needed information for the SPARQL OLAP query.
+ * 
+ *         An MdxMethodVisitor has as Input a SelectNode and as Output
  * 
  * 
  *         MdxMethodVisitor goes through a MDX parse tree and returns the
@@ -82,6 +82,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	private Object current;
 	private List<Member> withMembers;
 
+	private Cube cube;
+
 	public MdxMethodVisitor(LdOlap4jStatement olap4jStatement) {
 		this.olap4jStatement = olap4jStatement;
 		olap4jContext = new Context(olap4jStatement.olap4jConnection, null,
@@ -94,7 +96,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	 * This is the starting point of going through a MDX select parse tree.
 	 */
 	public Object visit(SelectNode selectNode) {
-		
+
 		// We do not implement with, yet.
 		if (!selectNode.getWithList().isEmpty()) {
 			for (ParseTreeNode with : selectNode.getWithList()) {
@@ -111,20 +113,16 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				// TODO: This is a hack. Instead, I want to use calculated
 				// measures with their expression.
 				// TODO: Accept should work also.
-				Object calculatedMeasure = this.visit((WithMemberNode) with);
+				Member calculatedMeasure = (Member) this
+						.visit((WithMemberNode) with);
+
+				// We store the calculatedMember as a possible IdentifierNode
+				withMembers.add(calculatedMeasure);
 			}
 		}
 
 		// I know, that getFrom gives me a cubeNode, therefore, I know the cube
-		Cube cube = (Cube) selectNode.getFrom().accept(this);
-
-		try {
-			// Our cubes have exactly one schema and one catalog.
-			this.olap4jStatement.olap4jConnection.setCatalog(cube.getSchema()
-					.getCatalog().getName());
-		} catch (SQLException e) {
-			throw new UnsupportedOperationException("It should be possible to set a catalog.");
-		}
+		cube = (Cube) selectNode.getFrom().accept(this);
 
 		// Filter (create MetaData for the filter axis)
 		AxisNode filter = selectNode.getFilterAxis();
@@ -177,11 +175,10 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				Collections.<LdOlap4jCellSetMemberProperty> emptyList());
 
 		// I need to create a filter axis
-		// Do we really need it?
-//		final LdOlap4jCellSetAxis filterCellSetAxis = new LdOlap4jCellSetAxis(
-//				this, filter.getAxis(),
-//				Collections.unmodifiableList(filterPositions));
-//		filterAxis = filterCellSetAxis;
+		final LdOlap4jCellSetAxis filterCellSetAxis = new LdOlap4jCellSetAxis(
+				this, filter.getAxis(),
+				Collections.unmodifiableList(filterPositions));
+		filterAxis = filterCellSetAxis;
 
 		// Axis (create MetaData for one specific axis)
 		final List<LdOlap4jCellSetAxisMetaData> axisMetaDataList = new ArrayList<LdOlap4jCellSetAxisMetaData>();
@@ -189,7 +186,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		// When going through the axes: Prepare groupbylist, a set of levels
 		// Prepare list of levels (excluding Measures!)
 		// Go through tuple get dimensions, if not measure
-		ArrayList<Level> groupbylist = new ArrayList<Level>();
+		// ArrayList<Level> groupbylist = new ArrayList<Level>();
 
 		for (AxisNode axis : selectNode.getAxisList()) {
 
@@ -226,27 +223,26 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 			 * From the method visitor, we get a list of (possible list of)
 			 * members
 			 */
-			List<Position> positions = this.createPositionsList(listResult);
-			List<Hierarchy> hierarchies = this
-					.createHierarchyList(listResult);
-			List<Level> levels = this.createLevelList(listResult);
-			for (Level level : levels) {
-				// Since any dimension can only be mentioned once per axis,
-				// there should not be inserted a level twice.
-				if (!level.getUniqueName().equals("Measures")) {
-					groupbylist.add(level);
-				}
-			}
+			// List<Position> positions = this.createPositionsList(listResult);
+			List<Hierarchy> hierarchies = this.createHierarchyList(listResult);
+			// List<Level> levels = this.createLevelList(listResult);
+			// for (Level level : levels) {
+			// // Since any dimension can only be mentioned once per axis,
+			// // there should not be inserted a level twice.
+			// if (!level.getUniqueName().equals("Measures")) {
+			// groupbylist.add(level);
+			// }
+			// }
 
 			// TODO: Properties are not computed, yet.
 			List<LdOlap4jCellSetMemberProperty> propertyList = new ArrayList<LdOlap4jCellSetMemberProperty>();
 			List<LdOlap4jCellSetMemberProperty> properties = propertyList;
 
 			// Add cellSetAxis to list of axes
-//			final LdOlap4jCellSetAxis cellSetAxis = new LdOlap4jCellSetAxis(
-//					this, axis.getAxis(),
-//					Collections.unmodifiableList(positions));
-//			axisList.add(cellSetAxis);
+			 final LdOlap4jCellSetAxis cellSetAxis = new LdOlap4jCellSetAxis(
+			 this, axis.getAxis(),
+			 Collections.unmodifiableList(positions));
+			 axisList.add(cellSetAxis);
 
 			// Add axisMetaData to list of axes metadata
 			final LdOlap4jCellSetAxisMetaData axisMetaData = new LdOlap4jCellSetAxisMetaData(
@@ -323,14 +319,12 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		// withMembers.size
 		// TODO: LEVEL_CARDINALITY is not solved, yet.
 		try {
-			Member calculatedMember = new LdOlap4jMeasure(
+			Member calculatedMeasure = new LdOlap4jMeasure(
 					(LdOlap4jLevel) member1.getLevel(), calculatedMemberName,
 					calculatedMemberName, calculatedMemberName, "", null,
 					Aggregator.CALCULATED, callNode, Datatype.INTEGER, true,
 					member1.getLevel().getMembers().size() + withMembers.size());
-			// We store the calculatedMember as a possible IdentifierNode
-			withMembers.add(calculatedMember);
-			return (Object) calculatedMember;
+			return (Object) calculatedMeasure;
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
 			throw new UnsupportedOperationException(
@@ -918,7 +912,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Position> createPositionsList(List<Object> list) {
+	private List<Position> createPositionsList(List<Object> list) {
 		// I go through list, and check whether again a list
 		List<Position> positions = new ArrayList<Position>();
 
@@ -959,7 +953,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Hierarchy> createHierarchyList(List<Object> list) {
+	private List<Hierarchy> createHierarchyList(List<Object> list) {
 		/*
 		 * The list of hierarchies used in an axis, the dimensionality in terms
 		 * of hierarchies
@@ -1008,7 +1002,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Level> createLevelList(List<Object> list) {
+	private List<Level> createLevelList(List<Object> list) {
 		/*
 		 * The list of hierarchies used in an axis, the dimensionality in terms
 		 * of hierarchies
@@ -1056,7 +1050,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Measure> createMeasureList(List<Object> list) {
+	private List<Measure> createMeasureList(List<Object> list) {
 		/*
 		 * The list of measures used in an axis
 		 */

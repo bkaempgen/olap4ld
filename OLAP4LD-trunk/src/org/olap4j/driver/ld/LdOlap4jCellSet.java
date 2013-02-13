@@ -86,8 +86,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 	private final List<CellSetAxis> immutableAxisList = Olap4jUtil
 			.cast(Collections.unmodifiableList(axisList));
 	private LdOlap4jCellSetAxis filterAxis;
-	// TODO Remove
-	private Map<Integer, Integer> hierarchyCellMap;
+	private LdOlapQuery olapquery;
 
 	private static final List<String> standardProperties = Arrays.asList(
 			"UName", "Caption", "LName", "LNum", "DisplayInfo");
@@ -116,35 +115,47 @@ abstract class LdOlap4jCellSet implements CellSet {
 	/**
 	 * MDX evaluates the axis and slicer dimensions first, building the
 	 * structure of the result cube before retrieving the information from the
-	 * cube to be queried.
+	 * cube to be queried and then issuing the query.
 	 * 
 	 * 
 	 * @param selectNode
 	 * @throws OlapException
 	 */
 	@SuppressWarnings("unchecked")
-	void createMetaDataFromSelectNode(SelectNode selectNode)
+	void populateFromSelectNode(SelectNode selectNode)
 			throws OlapException {
 
+		/*
+		 * First, populate metadata from select node
+		 */
+		
 		// Create visitor that we will use throughout.
 		MdxMethodVisitor<Object> visitor = new MdxMethodVisitor<Object>(
 				olap4jStatement);
 
 		// Here, I need to accept more
-		metaData = (LdOlap4jCellSetMetaData) selectNode
-				.accept(visitor);
+		metaData = (LdOlap4jCellSetMetaData) selectNode.accept(visitor);
 		List<LdOlap4jCellSetAxis> myAxisList = visitor.getAxisList();
 		for (LdOlap4jCellSetAxis ldOlap4jCellSetAxis : myAxisList) {
 			axisList.add(ldOlap4jCellSetAxis);
 		}
 		filterAxis = visitor.getFilterAxis();
+		
+		/*
+		 * Now, create OLAP query and populate data
+		 */
+		olapquery = createOlapQueryFromMetadata();
+		
+		populateDataFromOlapQuery();
+		
 	}
-	
+
 	/**
 	 * Method now uses the information of metaData, axisList and filterAxis to
 	 * execute an OLAP query on the Linked Data Engine and caches the results.
+	 * @return 
 	 */
-	void executeOlapQuery() {	
+	private LdOlapQuery createOlapQueryFromMetadata() {
 
 		/*
 		 * I take the first Tuple of Members, get their Dimensions (apart from
@@ -165,42 +176,44 @@ abstract class LdOlap4jCellSet implements CellSet {
 		 * For now, we check first, whether a certain member already is
 		 * contained.
 		 */
-		
+
 		/*
 		 * OLAP query datastructure:
 		 * 
-		 * groupbylist - set of inquired dimensions measurelist - set of measures
-		 * selectionpredicates - set of set of members of dimensions to restrict
+		 * groupbylist - set of inquired dimensions measurelist - set of
+		 * measures selectionpredicates - set of set of members of dimensions to
+		 * restrict
 		 */
 		LdOlap4jCube cube = metaData.cube;
-		
+
 		// Prepare selectionpredicates, a list of list of members of dimensions
 		// (including measure dimension, since we filter it out later).
-		ArrayList<List<Member>> selectionpredicates = new ArrayList<List<Member>>();
+		ArrayList<List<Member>> dices = new ArrayList<List<Member>>();
 
 		List<HashMap<Integer, Member>> selectionhashmaps = new ArrayList<HashMap<Integer, Member>>();
 
 		// No dimension is to be mentioned in several axes, therefore, we can do
 		// the following
 		int numberOfDimensions = 0;
-		
-		
+
 		for (CellSetAxisMetaData axisMetaData : metaData.getAxesMetaData()) {
 			numberOfDimensions += axisMetaData.getHierarchies().size();
 		}
-		LdOlap4jCellSetAxisMetaData filterAxisMetaData = (LdOlap4jCellSetAxisMetaData) metaData.getFilterAxisMetaData();
-		
+		LdOlap4jCellSetAxisMetaData filterAxisMetaData = (LdOlap4jCellSetAxisMetaData) metaData
+				.getFilterAxisMetaData();
+
 		numberOfDimensions += filterAxisMetaData.getHierarchies().size();
-		
+
 		// Create list for each dimension to be restricted
 		for (int i = 0; i < numberOfDimensions; i++) {
-			selectionpredicates.add(new ArrayList<Member>());
+			dices.add(new ArrayList<Member>());
 			selectionhashmaps.add(new HashMap<Integer, Member>());
 		}
-		
+
 		LdOlap4jCellSetAxis filterCellSetAxis = filterAxis;
-		List<Hierarchy> filterHierarchies = filterCellSetAxis.getAxisMetaData().getHierarchies();
-		  
+		List<Hierarchy> filterHierarchies = filterCellSetAxis.getAxisMetaData()
+				.getHierarchies();
+
 		// Go through all positions of filter
 		for (Position list : filterCellSetAxis.positions) {
 			// For each position, we get a new member for each restriction set
@@ -215,7 +228,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 					selectionhashmaps.get(i).put(
 							members.get(i).getUniqueName().hashCode(),
 							members.get(i));
-					selectionpredicates.get(i).add(members.get(i));
+					dices.get(i).add(members.get(i));
 				}
 			}
 		}
@@ -241,9 +254,8 @@ abstract class LdOlap4jCellSet implements CellSet {
 								i + axisIndex + filterHierarchies.size()).put(
 								members.get(i).getUniqueName().hashCode(),
 								members.get(i));
-						selectionpredicates.get(
-								i + axisIndex + filterHierarchies.size()).add(
-								members.get(i));
+						dices.get(i + axisIndex + filterHierarchies.size())
+								.add(members.get(i));
 					}
 				}
 			}
@@ -251,7 +263,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 		}
 
 		// Prepare measurelist, a set of measures
-		ArrayList<Measure> measurelist = new ArrayList<Measure>();
+		ArrayList<Measure> projections = new ArrayList<Measure>();
 
 		HashMap<Integer, Measure> measurehashmap = new HashMap<Integer, Measure>();
 
@@ -267,7 +279,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 									.getUniqueName().hashCode())) {
 						measurehashmap.put(members.get(i).getUniqueName()
 								.hashCode(), (Measure) members.get(i));
-						measurelist.add((Measure) members.get(i));
+						projections.add((Measure) members.get(i));
 					}
 				}
 			}
@@ -285,18 +297,18 @@ abstract class LdOlap4jCellSet implements CellSet {
 								.getUniqueName().hashCode())) {
 					measurehashmap.put(members.get(i).getUniqueName()
 							.hashCode(), (Measure) members.get(i));
-					measurelist.add((Measure) members.get(i));
+					projections.add((Measure) members.get(i));
 				}
 			}
 		}
 
 		// If no measure, then find default
-		if (measurelist.isEmpty()) {
+		if (projections.isEmpty()) {
 			// Default is simply the first we find.
 			LdOlap4jUtil._log
 					.info("Get default (first available) measure in cube.");
 			if (!cube.getMeasures().isEmpty()) {
-				measurelist.add(cube.getMeasures().get(0));
+				projections.add(cube.getMeasures().get(0));
 			} else {
 				throw new UnsupportedOperationException(
 						"There should always be at least one measure in the cube.");
@@ -306,34 +318,38 @@ abstract class LdOlap4jCellSet implements CellSet {
 		// When going through the axes: Prepare groupbylist, a set of levels
 		// Prepare list of levels (excluding Measures!)
 		// Go through tuple get dimensions, if not measure
-		ArrayList<Level> groupbylist = new ArrayList<Level>();
+		ArrayList<Level> slicesrollups = new ArrayList<Level>();
 
 		for (LdOlap4jCellSetAxis cellSetAxis : axisList) {
-			
+
 			List<Position> positions = cellSetAxis.positions;
-			/* 
-			 * For now, we assume that for each hierarchy, we query for members of
-			 * one specific level, only.
+			/*
+			 * For now, we assume that for each hierarchy, we query for members
+			 * of one specific level, only.
 			 */
 			Position position = positions.get(0);
-			
+
 			List<Member> members = position.getMembers();
-			
+
 			for (Member member : members) {
-				groupbylist.add(member.getLevel());
+				slicesrollups.add(member.getLevel());
 			}
 		}
-		
+
+		return new LdOlapQuery(cube, slicesrollups, dices,
+				projections);
+	}
+
+	private void populateDataFromOlapQuery() {	
 		/*
 		 * If groupbylist or measurelist is empty, we do not need to proceed.
 		 */
-		if (groupbylist.isEmpty() || measurelist.isEmpty()) {
+		if (olapquery.slicesrollups.isEmpty() || olapquery.projections.isEmpty()) {
 			return;
 		}
-				
+
 		List<Node[]> olapQueryResult = this.olap4jStatement.olap4jConnection.myLinkedData
-				.getOlapResult(groupbylist, measurelist, selectionpredicates,
-						cube);
+				.getOlapResult(olapquery.cube, olapquery.slicesrollups, olapquery.dices, olapquery.projections);
 
 		// Now, insert into hash map
 
@@ -365,20 +381,20 @@ abstract class LdOlap4jCellSet implements CellSet {
 			 * list, but this dimension list does not correspond to the
 			 * positions.
 			 * 
-			 * We now create a hash map which consist of Numeric representation
-			 * of concatenation of all dimension members An array with the
+			 * We now create a hash map which consist of: 1) Numeric representation
+			 * of concatenation of all dimension members 2) An array with the
 			 * values for each measure, ordered.
 			 */
 
-			for (int i = 0; i < groupbylist.size(); i++) {
+			for (int i = 0; i < olapquery.slicesrollups.size(); i++) {
 				concatNr += node[i].toString();
 			}
 
-			String[] valueArray = new String[measurelist.size()];
+			String[] valueArray = new String[olapquery.projections.size()];
 
-			for (int e = groupbylist.size(); e < groupbylist.size()
-					+ measurelist.size(); e++) {
-				valueArray[e - groupbylist.size()] = node[e].toString();
+			for (int e = olapquery.slicesrollups.size(); e < olapquery.slicesrollups.size()
+					+ olapquery.projections.size(); e++) {
+				valueArray[e - olapquery.slicesrollups.size()] = node[e].toString();
 			}
 
 			newValueMap.put(concatNr.hashCode(), valueArray);
@@ -796,6 +812,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 	 * @throws OlapException
 	 *             on error
 	 */
+	@Deprecated
 	private LdOlap4jCube lookupCube(LdOlap4jDatabaseMetaData databaseMetaData,
 			String cubeName) throws OlapException {
 		for (Catalog catalog : databaseMetaData.olap4jConnection
@@ -826,6 +843,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 	 * @throws OlapException
 	 *             on error
 	 */
+	@Deprecated
 	private Hierarchy lookupHierarchy(LdOlap4jCube cube, String hierarchyName)
 			throws OlapException {
 		Hierarchy hierarchy = cube.getHierarchies().get(hierarchyName);
@@ -853,6 +871,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 	 *            Name of axis
 	 * @return Axis
 	 */
+	@Deprecated
 	private Axis lookupAxis(String axisName) {
 		if (axisName.startsWith("Axis")) {
 			final Integer ordinal = Integer.valueOf(axisName.substring("Axis"
@@ -894,8 +913,8 @@ abstract class LdOlap4jCellSet implements CellSet {
 		 * We need to know the number of the measure
 		 */
 		int index = 0;
-		for (int i = 0; i < this.measurelist.size() && measure != null; i++) {
-			if (measurelist.get(i).getName().equals(measure.getName())) {
+		for (int i = 0; i < olapquery.projections.size() && measure != null; i++) {
+			if (olapquery.projections.get(i).getName().equals(measure.getName())) {
 				index = i;
 				break;
 			}

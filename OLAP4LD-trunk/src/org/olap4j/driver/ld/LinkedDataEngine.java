@@ -21,8 +21,6 @@ package org.olap4j.driver.ld;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import org.olap4j.driver.ld.LdOlap4jConnection.Context;
-import org.olap4j.driver.ld.LdOlap4jConnection.MetadataRequest;
 import org.olap4j.driver.ld.LdOlap4jConnection.Restrictions;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
@@ -159,8 +157,8 @@ public interface LinkedDataEngine {
 	 *  
 	 * @return
 	 */
-	public List<Node[]> getOlapResult(List<Level> groupbylist,
-			List<Measure> measurelist,
-			List<List<Member>> selectionpredicatelist, Cube cube);
+	public List<Node[]> getOlapResult(Cube cube, List<Level> slicesrollups,
+			List<List<Member>> dices, 
+			List<Measure> projections);
 
 }
