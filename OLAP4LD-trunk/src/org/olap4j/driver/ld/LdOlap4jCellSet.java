@@ -82,9 +82,8 @@ abstract class LdOlap4jCellSet implements CellSet {
 	 * of the uniquely identifying list of members.
 	 */
 	private final Map<Integer, String[]> newValueMap = new HashMap<Integer, String[]>();
-	private final List<LdOlap4jCellSetAxis> axisList = new ArrayList<LdOlap4jCellSetAxis>();
-	private final List<CellSetAxis> immutableAxisList = Olap4jUtil
-			.cast(Collections.unmodifiableList(axisList));
+	private List<LdOlap4jCellSetAxis> axisList;
+	private List<CellSetAxis> immutableAxisList;
 	private LdOlap4jCellSetAxis filterAxis;
 	private LdOlapQuery olapquery;
 
@@ -116,31 +115,22 @@ abstract class LdOlap4jCellSet implements CellSet {
 	 * MDX evaluates the axis and slicer dimensions first, building the
 	 * structure of the result cube before retrieving the information from the
 	 * cube to be queried and then issuing the query.
+	 * @param filterAxis2 
+	 * @param axisList2 
+	 * @param metadata2 
 	 * 
 	 * 
 	 * @param selectNode
 	 * @throws OlapException
 	 */
-	@SuppressWarnings("unchecked")
-	void populateFromSelectNode(SelectNode selectNode)
+	void populateFromMdx(LdOlap4jCellSetMetaData metadata, List<LdOlap4jCellSetAxis> axisList, LdOlap4jCellSetAxis filterCellSetAxis)
 			throws OlapException {
 
-		/*
-		 * First, populate metadata from select node
-		 */
-		
-		// Create visitor that we will use throughout.
-		MdxMethodVisitor<Object> visitor = new MdxMethodVisitor<Object>(
-				olap4jStatement);
-
-		// Here, I need to accept more
-		metaData = (LdOlap4jCellSetMetaData) selectNode.accept(visitor);
-		List<LdOlap4jCellSetAxis> myAxisList = visitor.getAxisList();
-		for (LdOlap4jCellSetAxis ldOlap4jCellSetAxis : myAxisList) {
-			axisList.add(ldOlap4jCellSetAxis);
-		}
-		filterAxis = visitor.getFilterAxis();
-		
+		this.metaData = metadata;
+		this.axisList = axisList;
+		this.immutableAxisList = Olap4jUtil
+					.cast(Collections.unmodifiableList(axisList));
+		this.filterAxis = filterCellSetAxis;
 		/*
 		 * Now, create OLAP query and populate data
 		 */
