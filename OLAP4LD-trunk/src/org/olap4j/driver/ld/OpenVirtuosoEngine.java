@@ -853,11 +853,11 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		boolean notExplicitlyStated = dimensionUniqueName == null
 				&& hierarchyUniqueName == null && levelUniqueName == null;
 		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName
-				.equals("Measures"))
+				.equals("[Measures]"))
 				|| (hierarchyUniqueName != null && hierarchyUniqueName
-						.equals("Measures"))
+						.equals("[Measures]"))
 				|| (levelUniqueName != null && levelUniqueName
-						.equals("Measures"));
+						.equals("[Measures]"));
 
 		return notExplicitlyStated || explicitlyStated;
 
@@ -1253,11 +1253,11 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 		// Normal Member
 		if ((restrictions.dimensionUniqueName == null || !restrictions.dimensionUniqueName
-				.equals("Measures"))
+				.equals("[Measures]"))
 				|| (restrictions.hierarchyUniqueName == null || !restrictions.hierarchyUniqueName
-						.equals("Measures"))
+						.equals("[Measures]"))
 				|| (restrictions.levelUniqueName == null || !restrictions.levelUniqueName
-						.equals("Measures"))) {
+						.equals("[Measures]"))) {
 
 			intermediaryresult = getLevelMembers(restrictions);
 

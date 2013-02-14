@@ -73,7 +73,6 @@ import org.olap4j.metadata.NamedList;
  *         hierarchy list and measures
  * 
  */
-@SuppressWarnings("hiding")
 public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 
 	private LdOlap4jStatement olap4jStatement;
@@ -179,7 +178,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		columnPositions = this.createPositionsList(listResult);
 
 		// Second is rows
-		AxisNode rowAxis = axisList.get(0);
+		AxisNode rowAxis = axisList.get(1);
 		result = rowAxis.accept(this);
 		List<Object> listResult2 = (List<Object>) result;
 
@@ -187,6 +186,10 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		 * From the method visitor, we get a list of (possible list of) members
 		 */
 		rowPositions = this.createPositionsList(listResult2);
+		
+		if (axisList.size() > 2) {
+			throw new UnsupportedOperationException("Only columns and rows are supported in MDX query!");
+		}
 
 		return null;
 	}
@@ -631,7 +634,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 			String[] identifierArray = new String[segmentList.size()];
 
 			for (int i = 0; i < segmentList.size(); i++) {
-				identifierArray[i] = segmentList.get(i).getName();
+				identifierArray[i] = "[" + segmentList.get(i).getName() + "]";
 			}
 
 			String calculatedMemberName = LdOlap4jUtil.implodeArray(
@@ -719,33 +722,33 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 						return (Object) dimension;
 
 					} else if (dimension != null) {
+						segmentName = segmentList.get(segmentIndex).toString();
 
 						Hierarchy hierarchy = dimension.getHierarchies().get(
-								segmentList.get(segmentIndex).getName());
+								segmentName);
 						segmentIndex++;
 						if (hierarchy == null) {
 							throw new UnsupportedOperationException(
 									"MDX identifier not properly given:"
-											+ segmentList.get(segmentIndex)
-													.getName());
+											+ segmentName);
 						} else if (hierarchy != null
 								&& segmentIndex >= segmentList.size()) {
 							return (Object) hierarchy;
 						} else {
-							Level level = hierarchy.getLevels().get(
-									segmentList.get(segmentIndex).getName());
+							segmentName = segmentList.get(segmentIndex).toString();
+
+							Level level = hierarchy.getLevels()
+									.get(segmentName);
 							segmentIndex++;
 							if (level == null) {
 								throw new UnsupportedOperationException(
 										"MDX identifier not properly given:"
-												+ segmentList.get(segmentIndex)
-														.getName());
+												+ segmentName);
 							} else if (level != null
 									&& segmentIndex >= segmentList.size()) {
 								return (Object) level;
 							} else {
-								segmentName = segmentList.get(segmentIndex)
-										.getName();
+								segmentName = segmentList.get(segmentIndex).toString();
 
 								for (Member member : level.getMembers()) {
 									if (member.getName().equals(segmentName)) {
@@ -764,7 +767,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		}
 		String identifier = "";
 		for (int i = 0; i < segmentList.size(); i++) {
-			identifier += segmentList.get(i).getName();
+			identifier += segmentList.get(i).toString();
 		}
 		throw new UnsupportedOperationException(
 				"There should be an OLAP element for each identifier, also this one:"

@@ -136,7 +136,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 		 */
 		olapquery = createOlapQueryFromMetadata();
 		
-		populateDataFromOlapQuery();
+		cacheDataFromOlapQuery();
 		
 	}
 
@@ -330,7 +330,7 @@ abstract class LdOlap4jCellSet implements CellSet {
 				projections);
 	}
 
-	private void populateDataFromOlapQuery() {	
+	private void cacheDataFromOlapQuery() {	
 		/*
 		 * If groupbylist or measurelist is empty, we do not need to proceed.
 		 */

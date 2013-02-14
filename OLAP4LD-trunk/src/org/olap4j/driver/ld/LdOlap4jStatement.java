@@ -356,7 +356,7 @@ class LdOlap4jStatement implements OlapStatement {
 		 * 3) CellSetMetaData
 		 */
 		Cube cube = visitor.getCube();
-		
+
 		// Axes Metadata (create MetaData for one specific axis)
 		List<LdOlap4jCellSetAxisMetaData> axisMetaDataList = new ArrayList<LdOlap4jCellSetAxisMetaData>();
 		// Axes
@@ -364,7 +364,7 @@ class LdOlap4jStatement implements OlapStatement {
 		// Properties are not computed, yet.
 		List<LdOlap4jCellSetMemberProperty> propertyList = new ArrayList<LdOlap4jCellSetMemberProperty>();
 		List<LdOlap4jCellSetMemberProperty> properties = propertyList;
-		
+
 		Axis columnAxis = Axis.COLUMNS;
 		List<Position> columnPositions = visitor.getColumnPositions();
 		List<Hierarchy> columnHierarchies = new ArrayList<Hierarchy>();
@@ -374,17 +374,17 @@ class LdOlap4jStatement implements OlapStatement {
 
 		// Add axisMetaData to list of axes metadata
 		final LdOlap4jCellSetAxisMetaData columnAxisMetaData = new LdOlap4jCellSetAxisMetaData(
-				this.olap4jConnection, columnAxis,
-				columnHierarchies, properties);
+				this.olap4jConnection, columnAxis, columnHierarchies,
+				properties);
 
 		axisMetaDataList.add(columnAxisMetaData);
-		
+
 		// Add cellSetAxis to list of axes
-		 final LdOlap4jCellSetAxis columnCellSetAxis = new LdOlap4jCellSetAxis(
-		 openCellSet, columnAxis,
-		 Collections.unmodifiableList(columnPositions));
-		 axisList.add(columnCellSetAxis);
-		
+		final LdOlap4jCellSetAxis columnCellSetAxis = new LdOlap4jCellSetAxis(
+				openCellSet, columnAxis,
+				Collections.unmodifiableList(columnPositions));
+		axisList.add(columnCellSetAxis);
+
 		Axis rowAxis = Axis.ROWS;
 		List<Position> rowPositions = visitor.getRowPositions();
 		List<Hierarchy> rowHierarchies = new ArrayList<Hierarchy>();
@@ -394,15 +394,14 @@ class LdOlap4jStatement implements OlapStatement {
 
 		// Add axisMetaData to list of axes metadata
 		final LdOlap4jCellSetAxisMetaData rowAxisMetaData = new LdOlap4jCellSetAxisMetaData(
-				this.olap4jConnection, rowAxis,
-				rowHierarchies, properties);
-		axisMetaDataList.add(rowAxisMetaData );
-		
+				this.olap4jConnection, rowAxis, rowHierarchies, properties);
+		axisMetaDataList.add(rowAxisMetaData);
+
 		// Add cellSetAxis to list of axes
-		 final LdOlap4jCellSetAxis rowCellSetAxis = new LdOlap4jCellSetAxis(
-		 openCellSet, rowAxis,
-		 Collections.unmodifiableList(rowPositions));
-		 axisList.add(rowCellSetAxis);
+		final LdOlap4jCellSetAxis rowCellSetAxis = new LdOlap4jCellSetAxis(
+				openCellSet, rowAxis,
+				Collections.unmodifiableList(rowPositions));
+		axisList.add(rowCellSetAxis);
 
 		Axis filterAxis = Axis.FILTER;
 		List<Position> filterPositions = visitor.getFilterPositions();
@@ -420,7 +419,7 @@ class LdOlap4jStatement implements OlapStatement {
 		LdOlap4jCellSetAxis filterCellSetAxis = new LdOlap4jCellSetAxis(
 				openCellSet, filterAxis,
 				Collections.unmodifiableList(filterPositions));
-		
+
 		List<LdOlap4jCellProperty> cellProperties = new ArrayList<LdOlap4jCellProperty>();
 		// I do not support cell properties, yet.
 		if (!selectNode.getCellPropertyList().isEmpty()) {
@@ -435,8 +434,9 @@ class LdOlap4jStatement implements OlapStatement {
 			// }
 		}
 
-		LdOlap4jCellSetMetaData metadata = new LdOlap4jCellSetMetaData(this, (LdOlap4jCube) cube,
-				filterAxisMetaData, axisMetaDataList, cellProperties);
+		LdOlap4jCellSetMetaData metadata = new LdOlap4jCellSetMetaData(this,
+				(LdOlap4jCube) cube, filterAxisMetaData, axisMetaDataList,
+				cellProperties);
 
 		// Transform into list of levels
 
@@ -496,26 +496,30 @@ class LdOlap4jStatement implements OlapStatement {
 		// We have a list of tuples (lists)
 
 		// List of "positions"
-		Position position = axisPositions.get(0);
+		if (!axisPositions.isEmpty()) {
 
-		List<Member> list1 = position.getMembers();
-		for (Object object2 : list1) {
-			// Now, should be member
-			if (object2 instanceof Member) {
-				if (object2 instanceof Measure) {
-					// Measures are used, also.
-					hierarchyList.add(((Member) object2).getHierarchy());
+			Position position = axisPositions.get(0);
+
+			List<Member> list1 = position.getMembers();
+			for (Object object2 : list1) {
+				// Now, should be member
+				if (object2 instanceof Member) {
+					if (object2 instanceof Measure) {
+						// Measures are used, also.
+						hierarchyList.add(((Member) object2).getHierarchy());
+					} else {
+						hierarchyList.add(((Member) object2).getHierarchy());
+					}
 				} else {
-					hierarchyList.add(((Member) object2).getHierarchy());
+					throw new UnsupportedOperationException(
+							"Inside the list we should only have members.");
 				}
-			} else {
-				throw new UnsupportedOperationException(
-						"Inside the list we should only have members.");
 			}
 		}
+
 		return hierarchyList;
 	}
-	
+
 	/**
 	 * TODO: From the parsed list of lists of members, it should be possible to
 	 * create a level list. Note, we do also include the measures level, here
@@ -534,21 +538,24 @@ class LdOlap4jStatement implements OlapStatement {
 		// We have a list of tuples (lists)
 
 		// List of "positions"
-		Position position = axisPositions.get(0);
+		if (!axisPositions.isEmpty()) {
 
-		List<Member> list1 = position.getMembers();
-		for (Object object2 : list1) {
-			// Now, should be member
-			if (object2 instanceof Member) {
-				if (object2 instanceof Measure) {
-					// Measures are used, also.
-					levelList.add(((Member) object2).getLevel());
+			Position position = axisPositions.get(0);
+
+			List<Member> list1 = position.getMembers();
+			for (Object object2 : list1) {
+				// Now, should be member
+				if (object2 instanceof Member) {
+					if (object2 instanceof Measure) {
+						// Measures are used, also.
+						levelList.add(((Member) object2).getLevel());
+					} else {
+						levelList.add(((Member) object2).getLevel());
+					}
 				} else {
-					levelList.add(((Member) object2).getLevel());
+					throw new UnsupportedOperationException(
+							"Inside the list we should only have members.");
 				}
-			} else {
-				throw new UnsupportedOperationException(
-						"Inside the list we should only have members.");
 			}
 		}
 		return levelList;

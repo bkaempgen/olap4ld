@@ -1,3 +1,63 @@
+==2013-02-14 - MDX-to-SPARQL debugging==
+java.lang.RuntimeException: lookup on http://public.b-kaempgen.de:8890/sparql?query=PREFIX+dc%3A+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E+%0APREFIX+sdmx-measure%3A+%3Chttp%3A%2F%2Fpurl.org%2Flinked-data%2Fsdmx%2F2009%2Fmeasure%23%3E+%0APREFIX+edgar%3A+%3Chttp%3A%2F%2Fedgarwrap.ontologycentral.com%2Fvocab%2F%3E+%0APREFIX+gesis-dbpedia-stats2%3A+%3Chttp%3A%2F%2Flod.gesis.org%2Fdbpedia-stats%2F%3E+%0APREFIX+smartdbwrap%3A+%3Chttp%3A%2F%2Fsmartdbwrap.appspot.com%2F%3E+%0APREFIX+qb%3A+%3Chttp%3A%2F%2Fpurl.org%2Flinked-data%2Fcube%23%3E+%0APREFIX+refgovukyear%3A+%3Chttp%3A%2F%2Freference.data.gov.uk%2Fid%2Fyear%2F%3E+%0APREFIX+refgovukmonth%3A+%3Chttp%3A%2F%2Freference.data.gov.uk%2Fid%2Fmonth%2F%3E+%0APREFIX+dcterms%3A+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%3E+%0APREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E+%0APREFIX+skosclass%3A+%3Chttp%3A%2F%2Fddialliance.org%2Fontologies%2Fskosclass%23%3E+%0APREFIX+dropedia%3A+%3Chttp%3A%2F%2Fagkwebserver2.agk.uni-karlsruhe.de%2F%7Edropedia%2Findex.php%2FSpecial%3AURIResolver%2F%3E+%0APREFIX+eus%3A+%3Chttp%3A%2F%2Fontologycentral.com%2F2009%2F01%2Feurostat%2Fns%23%3E+%0APREFIX+smartlocation%3A+%3Chttp%3A%2F%2Fsmartdbwrap.appspot.com%2Fid%2Flocation%2F%3E+%0APREFIX+dbpedia%3A+%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F%3E+%0APREFIX+owl%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E+%0APREFIX+smartanalysisobject%3A+%3Chttp%3A%2F%2Fsmartdbwrap.appspot.com%2Fid%2Fanalysisobject%2F%3E+%0APREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E+%0APREFIX+rdfh%3A+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh%23%3E+%0APREFIX+dropedialocal%3A+%3Chttp%3A%2F%2Flocalhost%2FDropedia%2Findex.php%2FSpecial%3AURIResolver%2F%3E+%0APREFIX+skos%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E+%0APREFIX+gesis-dbpedia-stats%3A+%3Chttp%3A%2F%2Flod.gesis.org%2Fdbpedia-stats%2Fns%23%3E+%0APREFIX+refgovukday%3A+%3Chttp%3A%2F%2Freference.data.gov.uk%2Fid%2Fday%2F%3E+%0APREFIX+rdfh-inst%3A+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh-inst%23%3E+%0Aselect++from+%3Chttp%3A%2F%2Flocalhost%3A8890%2FDAV%2Fssb_01_qb_ds%3E++from+%3Chttp%3A%2F%2Flocalhost%3A8890%2FDAV%2Fssb_01_qb_dsd%3E+from+%3Chttp%3A%2F%2Flocalhost%3A8890%2FDAV%2Fssb_01_qb_levels%3E+where+%7B++%3Fobs+qb%3AdataSet+%3Fds.+%3Fds+qb%3Astructure+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh-inst%23dsd%3E.%3Fobs+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh%23lo_custkey%3E+%3Frdfhlocustkey+FILTER%28%3Frdfhlocustkey+%3D+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh-inst%23customer_178%3E+%29.%3Fobs+%3CMeasures%3E+%3FMeasures.+%3Fobs+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh%23lo_custkey%3E+%3Frdfhlocustkey.+OPTIONAL+%7B+%3Fobs+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh%23lo_revenue%3E+%3Frdfhlorevenue.+%7D%7D+group+by++%3FMeasures++%3Frdfhlocustkey+order+by++%3FMeasures++%3Frdfhlocustkey+ resulted HTTP in status code 400
+	at org.olap4j.driver.ld.OpenVirtuosoEngine.sparqlOpenVirtuoso(OpenVirtuosoEngine.java:487)
+	at org.olap4j.driver.ld.OpenVirtuosoEngine.sparql(OpenVirtuosoEngine.java:359)
+	at org.olap4j.driver.ld.OpenVirtuosoEngine.getOlapResult(OpenVirtuosoEngine.java:2232)
+	at org.olap4j.driver.ld.LdOlap4jCellSet.cacheDataFromOlapQuery(LdOlap4jCellSet.java:342)
+	at org.olap4j.driver.ld.LdOlap4jCellSet.populateFromMdx(LdOlap4jCellSet.java:139)
+	at org.olap4j.driver.ld.LdOlap4jStatement.executeOlapQuery(LdOlap4jStatement.java:446)
+	at org.olap4j.SSBQueryTest.executeStatement(SSBQueryTest.java:184)
+	at org.olap4j.SSBQueryTest.testGenericQuery(SSBQueryTest.java:85)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:616)
+	at junit.framework.TestCase.runTest(TestCase.java:154)
+	at junit.framework.TestCase.runBare(TestCase.java:127)
+	at junit.framework.TestResult$1.protect(TestResult.java:106)
+	at junit.framework.TestResult.runProtected(TestResult.java:124)
+	at junit.framework.TestResult.run(TestResult.java:109)
+	at junit.framework.TestCase.run(TestCase.java:118)
+	at junit.framework.TestSuite.runTest(TestSuite.java:208)
+	at junit.framework.TestSuite.run(TestSuite.java:203)
+	at org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestReference.run(JUnit3TestReference.java:130)
+	at org.eclipse.jdt.internal.junit.runner.TestExecution.run(TestExecution.java:38)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:467)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:683)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:390)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main(RemoteTestRunner.java:197)
+
+------------------------------------
+Query:
+Virtuoso 37000 Error SP030: SPARQL compiler, line 25: syntax error at 'from' before '<http://localhost:8890/DAV/ssb_01_qb_ds>'
+
+SPARQL query:
+define sql:big-data-const 0 PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX edgar: <http://edgarwrap.ontologycentral.com/vocab/> 
+PREFIX gesis-dbpedia-stats2: <http://lod.gesis.org/dbpedia-stats/> 
+PREFIX smartdbwrap: <http://smartdbwrap.appspot.com/> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX refgovukyear: <http://reference.data.gov.uk/id/year/> 
+PREFIX refgovukmonth: <http://reference.data.gov.uk/id/month/> 
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX dropedia: <http://agkwebserver2.agk.uni-karlsruhe.de/~dropedia/index.php/Special:URIResolver/> 
+PREFIX eus: <http://ontologycentral.com/2009/01/eurostat/ns#> 
+PREFIX smartlocation: <http://smartdbwrap.appspot.com/id/location/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX smartanalysisobject: <http://smartdbwrap.appspot.com/id/analysisobject/> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfh: <http://lod2.eu/schemas/rdfh#> 
+PREFIX dropedialocal: <http://localhost/Dropedia/index.php/Special:URIResolver/> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX gesis-dbpedia-stats: <http://lod.gesis.org/dbpedia-stats/ns#> 
+PREFIX refgovukday: <http://reference.data.gov.uk/id/day/> 
+PREFIX rdfh-inst: <http://lod2.eu/schemas/rdfh-inst#> 
+select  from <http://localhost:8890/DAV/ssb_01_qb_ds>  from <http://localhost:8890/DAV/ssb_01_qb_dsd> from <http://localhost:8890/DAV/ssb_01_qb_levels> where {  ?obs qb:dataSet ?ds. ?ds qb:structure <http://lod2.eu/schemas/rdfh-inst#dsd>.?obs <http://lod2.eu/schemas/rdfh#lo_custkey> ?rdfhlocustkey FILTER(?rdfhlocustkey = <http://lod2.eu/schemas/rdfh-inst#customer_178> ).?obs <Measures> ?Measures. ?obs <http://lod2.eu/schemas/rdfh#lo_custkey> ?rdfhlocustkey. OPTIONAL { ?obs <http://lod2.eu/schemas/rdfh#lo_revenue> ?rdfhlorevenue. }} group by  ?Measures  ?rdfhlocustkey order by  ?Measures  ?rdfhlocustkey 
+
 ==2013-02-13 - From MDX to populated cellset==
 1) MDX: 
 SELECT 
@@ -57,6 +117,7 @@ restrictions.
 * Possible Solution: We just add the brackets as "MDX"-specific. 
 ** However, we should only transform SPARQL outputs if they are needed in MDX.
 * Next problem: From segment identifier objects, the [] are already removed.
+* 
 * Any possibility to know the cube when we are looking for an identifier?
 
 ===Problem: How about tree operators===
