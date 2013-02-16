@@ -21,11 +21,11 @@ package org.olap4j.driver.ld;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import org.olap4j.Position;
 import org.olap4j.driver.ld.LdOlap4jConnection.Restrictions;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
-import org.olap4j.metadata.Member;
 import org.semanticweb.yars.nx.Node;
 
 /**
@@ -158,7 +158,7 @@ public interface LinkedDataEngine {
 	 * @return
 	 */
 	public List<Node[]> getOlapResult(Cube cube, List<Level> slicesrollups,
-			List<List<Member>> dices, 
+			List<Position> dices, 
 			List<Measure> projections);
 
 }

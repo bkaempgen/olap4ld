@@ -93,8 +93,8 @@ public class SSBQueryTest extends TestCase {
 	 * Query 1.1
 	 */
 	public void testSSB_Q_1_1() {
-		String result = executeStatement("WITH MEMBER [Measures].[Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_extendedprice] * [Measures].[Measures].[Measures].[rdfh:lo_discount]' "
-				+ "SELECT {[Measures].[Revenue]} ON COLUMNS, "
+		String result = executeStatement("WITH MEMBER [Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_extendedprice] * [Measures].[Measures].[Measures].[rdfh:lo_discount]' "
+				+ "SELECT {[Revenue]} ON COLUMNS, "
 				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel].[rdfh:lo_orderdateYear1993]} ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "
 				+ "WHERE CrossJoin(Filter(Members([rdfh:lo_quantity]), "

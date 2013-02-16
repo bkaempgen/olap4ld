@@ -67,7 +67,7 @@ import org.xml.sax.SAXParseException;
  * @version $Id: XmlaOlap4jUtil.java 315 2010-05-29 00:56:11Z jhyde $
  * @since Dec 2, 2007
  */
-abstract class LdOlap4jUtil {
+public abstract class LdOlap4jUtil {
 	// Logging?
 	static Logger _log = Logger.getLogger("XmlaOlap4jUtil");
 
@@ -609,7 +609,7 @@ abstract class LdOlap4jUtil {
 	 *            The pure uri string to be encoded for MDX
 	 * @return encoded string
 	 */
-	private static String encodeUriWithPrefix(String uri) {
+	public static String encodeUriWithPrefix(String uri) {
 
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
@@ -646,8 +646,7 @@ abstract class LdOlap4jUtil {
 				/*
 				 * I also encode the following:
 				 * 
-				 * % = XXX
-				 * . = YYY
+				 * % = XXX . = YYY
 				 */
 				prefix = prefix.replace("%", "XXX");
 				prefix = prefix.replace(".", "YYY");
@@ -670,7 +669,7 @@ abstract class LdOlap4jUtil {
 	 * @param uri
 	 * @return
 	 */
-	private static String decodeUriWithPrefix(String prefixeduri) {
+	public static String decodeUriWithPrefix(String prefixeduri) {
 
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
@@ -694,8 +693,7 @@ abstract class LdOlap4jUtil {
 				/*
 				 * I first decode the following:
 				 * 
-				 * % = XXX
-				 * . = YYY
+				 * % = XXX . = YYY
 				 */
 				prefix = prefix.replace("XXX", "%");
 				prefix = prefix.replace("YYY", ".");
@@ -756,15 +754,15 @@ abstract class LdOlap4jUtil {
 					.severe("Here, we do not know what to do with a result node from Linked Data Engine.");
 			myValue = null;
 		}
-		
+
 		// We wrap any node value with brackets.
-		return "["+myValue+"]";
+		return "[" + myValue + "]";
 	}
 
 	public static String convertMDXtoURI(String mdx) {
 		// First, we remove the squared brackets
 		mdx = mdx.substring(1, mdx.length() - 1);
-		
+
 		// check whether prefix notation
 		if (mdx.contains("httpXXX3AXXX2FXXX2F")) {
 			return decodeUriWithPrefix(mdx);
@@ -987,6 +985,20 @@ abstract class LdOlap4jUtil {
 		}
 
 		return output;
+	}
+
+	/**
+	 * Removes []
+	 * @param name
+	 * @return
+	 */
+	public static String removeSquareBrackets(String name) {
+		if (!name.startsWith("[") || !name.endsWith("]")) {
+			throw new UnsupportedOperationException(
+					"Name not surrounded by square brackets!");
+		} else {
+			return name.substring(1, name.length()-1);
+		}
 	}
 
 }

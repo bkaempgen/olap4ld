@@ -46,6 +46,7 @@ import org.olap4j.impl.Olap4jUtil;
 import static org.olap4j.driver.ld.LdOlap4jUtil.*;
 
 import org.olap4j.metadata.*;
+import org.olap4j.metadata.Member.Type;
 import org.semanticweb.yars.nx.Node;
 
 import org.w3c.dom.*;
@@ -115,35 +116,38 @@ abstract class LdOlap4jCellSet implements CellSet {
 	 * MDX evaluates the axis and slicer dimensions first, building the
 	 * structure of the result cube before retrieving the information from the
 	 * cube to be queried and then issuing the query.
-	 * @param filterAxis2 
-	 * @param axisList2 
-	 * @param metadata2 
+	 * 
+	 * @param filterAxis2
+	 * @param axisList2
+	 * @param metadata2
 	 * 
 	 * 
 	 * @param selectNode
 	 * @throws OlapException
 	 */
-	void populateFromMdx(LdOlap4jCellSetMetaData metadata, List<LdOlap4jCellSetAxis> axisList, LdOlap4jCellSetAxis filterCellSetAxis)
-			throws OlapException {
+	void populateFromMdx(LdOlap4jCellSetMetaData metadata,
+			List<LdOlap4jCellSetAxis> axisList,
+			LdOlap4jCellSetAxis filterCellSetAxis) throws OlapException {
 
 		this.metaData = metadata;
 		this.axisList = axisList;
-		this.immutableAxisList = Olap4jUtil
-					.cast(Collections.unmodifiableList(axisList));
+		this.immutableAxisList = Olap4jUtil.cast(Collections
+				.unmodifiableList(axisList));
 		this.filterAxis = filterCellSetAxis;
 		/*
 		 * Now, create OLAP query and populate data
 		 */
 		olapquery = createOlapQueryFromMetadata();
-		
+
 		cacheDataFromOlapQuery();
-		
+
 	}
 
 	/**
 	 * Method now uses the information of metaData, axisList and filterAxis to
 	 * execute an OLAP query on the Linked Data Engine and caches the results.
-	 * @return 
+	 * 
+	 * @return
 	 */
 	private LdOlapQuery createOlapQueryFromMetadata() {
 
@@ -176,135 +180,6 @@ abstract class LdOlap4jCellSet implements CellSet {
 		 */
 		LdOlap4jCube cube = metaData.cube;
 
-		// Prepare selectionpredicates, a list of list of members of dimensions
-		// (including measure dimension, since we filter it out later).
-		ArrayList<List<Member>> dices = new ArrayList<List<Member>>();
-
-		List<HashMap<Integer, Member>> selectionhashmaps = new ArrayList<HashMap<Integer, Member>>();
-
-		// No dimension is to be mentioned in several axes, therefore, we can do
-		// the following
-		int numberOfDimensions = 0;
-
-		for (CellSetAxisMetaData axisMetaData : metaData.getAxesMetaData()) {
-			numberOfDimensions += axisMetaData.getHierarchies().size();
-		}
-		LdOlap4jCellSetAxisMetaData filterAxisMetaData = (LdOlap4jCellSetAxisMetaData) metaData
-				.getFilterAxisMetaData();
-
-		numberOfDimensions += filterAxisMetaData.getHierarchies().size();
-
-		// Create list for each dimension to be restricted
-		for (int i = 0; i < numberOfDimensions; i++) {
-			dices.add(new ArrayList<Member>());
-			selectionhashmaps.add(new HashMap<Integer, Member>());
-		}
-
-		LdOlap4jCellSetAxis filterCellSetAxis = filterAxis;
-		List<Hierarchy> filterHierarchies = filterCellSetAxis.getAxisMetaData()
-				.getHierarchies();
-
-		// Go through all positions of filter
-		for (Position list : filterCellSetAxis.positions) {
-			// For each position, we get a new member for each restriction set
-			List<Member> members = list.getMembers();
-			for (int i = 0; i < filterHierarchies.size(); i++) {
-				// Check first whether measure
-				Member member = members.get(i);
-
-				// Check whether member already contained.
-				if (!selectionhashmaps.get(i).containsKey(
-						member.getUniqueName().hashCode())) {
-					selectionhashmaps.get(i).put(
-							members.get(i).getUniqueName().hashCode(),
-							members.get(i));
-					dices.get(i).add(members.get(i));
-				}
-			}
-		}
-
-		// For each axis, add members to the appropriate member list of the
-		// dimension.
-		// TODO: Possibly, here we have room for improvements since a new graph
-		// pattern will be created for filtering although this dimension will
-		// have been selected already anyway.
-		int axisIndex = 0;
-		for (LdOlap4jCellSetAxis axis : axisList) {
-			List<Position> positions = axis.positions;
-			for (Position position : positions) {
-				List<Member> members = position.getMembers();
-				for (int i = 0; i < axis.getAxisMetaData().getHierarchies()
-						.size(); i++) {
-
-					if (!selectionhashmaps.get(
-							i + axisIndex + filterHierarchies.size())
-							.containsKey(
-									members.get(i).getUniqueName().hashCode())) {
-						selectionhashmaps.get(
-								i + axisIndex + filterHierarchies.size()).put(
-								members.get(i).getUniqueName().hashCode(),
-								members.get(i));
-						dices.get(i + axisIndex + filterHierarchies.size())
-								.add(members.get(i));
-					}
-				}
-			}
-			axisIndex += axis.getAxisMetaData().getHierarchies().size();
-		}
-
-		// Prepare measurelist, a set of measures
-		ArrayList<Measure> projections = new ArrayList<Measure>();
-
-		HashMap<Integer, Measure> measurehashmap = new HashMap<Integer, Measure>();
-
-		for (LdOlap4jCellSetAxis axis : axisList) {
-			List<Position> positions = axis.positions;
-			for (Position position : positions) {
-				List<Member> members = position.getMembers();
-				for (int i = 0; i < members.size(); i++) {
-					// Check whether measure already contained.
-					if ((members.get(i).getMemberType() == Member.Type.MEASURE || members
-							.get(i).getMemberType() == Member.Type.FORMULA)
-							&& !measurehashmap.containsKey(members.get(i)
-									.getUniqueName().hashCode())) {
-						measurehashmap.put(members.get(i).getUniqueName()
-								.hashCode(), (Measure) members.get(i));
-						projections.add((Measure) members.get(i));
-					}
-				}
-			}
-		}
-
-		// Go through all positions
-		for (Position list : filterCellSetAxis.positions) {
-			// For each position, we get a new member for each restriction set
-			List<Member> members = list.getMembers();
-			for (int i = 0; i < members.size(); i++) {
-				// Check whether measure already contained.
-				if ((members.get(i).getMemberType() == Member.Type.MEASURE || members
-						.get(i).getMemberType() == Member.Type.FORMULA)
-						&& !measurehashmap.containsKey(members.get(i)
-								.getUniqueName().hashCode())) {
-					measurehashmap.put(members.get(i).getUniqueName()
-							.hashCode(), (Measure) members.get(i));
-					projections.add((Measure) members.get(i));
-				}
-			}
-		}
-
-		// If no measure, then find default
-		if (projections.isEmpty()) {
-			// Default is simply the first we find.
-			LdOlap4jUtil._log
-					.info("Get default (first available) measure in cube.");
-			if (!cube.getMeasures().isEmpty()) {
-				projections.add(cube.getMeasures().get(0));
-			} else {
-				throw new UnsupportedOperationException(
-						"There should always be at least one measure in the cube.");
-			}
-		}
-
 		// When going through the axes: Prepare groupbylist, a set of levels
 		// Prepare list of levels (excluding Measures!)
 		// Go through tuple get dimensions, if not measure
@@ -322,24 +197,160 @@ abstract class LdOlap4jCellSet implements CellSet {
 			List<Member> members = position.getMembers();
 
 			for (Member member : members) {
-				slicesrollups.add(member.getLevel());
+
+				if (member.getMemberType() != Member.Type.MEASURE) {
+					slicesrollups.add(member.getLevel());
+				}
 			}
 		}
 
-		return new LdOlapQuery(cube, slicesrollups, dices,
-				projections);
+		// Prepare selectionpredicates, a list of list of members of dimensions
+		// (including measure dimension, since we filter it out later).
+		List<Position> dices = filterAxis.positions;
+		// ArrayList<List<Member>> dices = new ArrayList<List<Member>>();
+
+		// List<HashMap<Integer, Member>> selectionhashmaps = new
+		// ArrayList<HashMap<Integer, Member>>();
+		//
+		// // No dimension is to be mentioned in several axes, therefore, we can
+		// do
+		// // the following
+		// int numberOfDimensions = 0;
+		//
+		// for (CellSetAxisMetaData axisMetaData : metaData.getAxesMetaData()) {
+		// numberOfDimensions += axisMetaData.getHierarchies().size();
+		// }
+		// LdOlap4jCellSetAxisMetaData filterAxisMetaData =
+		// (LdOlap4jCellSetAxisMetaData) metaData
+		// .getFilterAxisMetaData();
+		//
+		// numberOfDimensions += filterAxisMetaData.getHierarchies().size();
+		//
+		// // Create list for each dimension to be restricted
+		// for (int i = 0; i < numberOfDimensions; i++) {
+		// dices.add(new ArrayList<Member>());
+		// selectionhashmaps.add(new HashMap<Integer, Member>());
+		// }
+		//
+		// LdOlap4jCellSetAxis filterCellSetAxis = filterAxis;
+		// List<Hierarchy> filterHierarchies =
+		// filterCellSetAxis.getAxisMetaData()
+		// .getHierarchies();
+		//
+		// // Go through all positions of filter
+		// for (Position list : filterCellSetAxis.positions) {
+		// // For each position, we get a new member for each restriction set
+		// List<Member> members = list.getMembers();
+		// for (int i = 0; i < filterHierarchies.size(); i++) {
+		// // Check first whether measure
+		// Member member = members.get(i);
+		//
+		// // Check whether member already contained.
+		// if (!selectionhashmaps.get(i).containsKey(
+		// member.getUniqueName().hashCode())) {
+		// selectionhashmaps.get(i).put(
+		// members.get(i).getUniqueName().hashCode(),
+		// members.get(i));
+		// dices.get(i).add(members.get(i));
+		// }
+		// }
+		// }
+		//
+		// // For each axis, add members to the appropriate member list of the
+		// // dimension.
+		// // TODO: Possibly, here we have room for improvements since a new
+		// graph
+		// // pattern will be created for filtering although this dimension will
+		// // have been selected already anyway.
+		// int axisIndex = 0;
+		// for (LdOlap4jCellSetAxis axis : axisList) {
+		// List<Position> positions = axis.positions;
+		// for (Position position : positions) {
+		// List<Member> members = position.getMembers();
+		// for (int i = 0; i < axis.getAxisMetaData().getHierarchies()
+		// .size(); i++) {
+		//
+		// if (!selectionhashmaps.get(
+		// i + axisIndex + filterHierarchies.size())
+		// .containsKey(
+		// members.get(i).getUniqueName().hashCode())) {
+		// selectionhashmaps.get(
+		// i + axisIndex + filterHierarchies.size()).put(
+		// members.get(i).getUniqueName().hashCode(),
+		// members.get(i));
+		// dices.get(i + axisIndex + filterHierarchies.size())
+		// .add(members.get(i));
+		// }
+		// }
+		// }
+		// axisIndex += axis.getAxisMetaData().getHierarchies().size();
+		// }
+
+		// Prepare measurelist, a ordered set of members
+		ArrayList<Measure> projections = new ArrayList<Measure>();
+
+		// First, we use set to collect the measures
+		HashSet<Member> usedMeasureSet = new HashSet<Member>();
+
+		for (LdOlap4jCellSetAxis axis : axisList) {
+			List<Position> positions = axis.positions;
+			for (Position position : positions) {
+				List<Member> members = position.getMembers();
+				for (int i = 0; i < members.size(); i++) {
+					// Check whether measure already contained.
+					if ((members.get(i).getMemberType() == Member.Type.MEASURE || members
+							.get(i).getMemberType() == Member.Type.FORMULA)) {
+						usedMeasureSet.add(members.get(i));
+					}
+				}
+			}
+		}
+		// Go through all positions
+		for (Position list : filterAxis.positions) {
+			// For each position, we get a new member for each restriction set
+			List<Member> members = list.getMembers();
+			for (int i = 0; i < members.size(); i++) {
+				// Check whether measure already contained.
+				if ((members.get(i).getMemberType() == Member.Type.MEASURE || members
+						.get(i).getMemberType() == Member.Type.FORMULA)) {
+					usedMeasureSet.add(members.get(i));
+				}
+			}
+		}
+
+		// If no measure, then find default
+		if (usedMeasureSet.isEmpty()) {
+			// Default is simply the first we find.
+			LdOlap4jUtil._log
+					.info("Get default (first available) measure in cube.");
+			if (!cube.getMeasures().isEmpty()) {
+				usedMeasureSet.add(cube.getMeasures().get(0));
+			} else {
+				throw new UnsupportedOperationException(
+						"There should always be at least one measure in the cube.");
+			}
+		}
+		
+		// Now, fill projections
+		for (Member member : usedMeasureSet) {
+			projections.add((Measure) member);
+		}
+
+		return new LdOlapQuery(cube, slicesrollups, dices, projections);
 	}
 
-	private void cacheDataFromOlapQuery() {	
+	private void cacheDataFromOlapQuery() {
 		/*
 		 * If groupbylist or measurelist is empty, we do not need to proceed.
 		 */
-		if (olapquery.slicesrollups.isEmpty() || olapquery.projections.isEmpty()) {
+		if (olapquery.slicesrollups.isEmpty()
+				|| olapquery.projections.isEmpty()) {
 			return;
 		}
 
 		List<Node[]> olapQueryResult = this.olap4jStatement.olap4jConnection.myLinkedData
-				.getOlapResult(olapquery.cube, olapquery.slicesrollups, olapquery.dices, olapquery.projections);
+				.getOlapResult(olapquery.cube, olapquery.slicesrollups,
+						olapquery.dices, olapquery.projections);
 
 		// Now, insert into hash map
 
@@ -371,9 +382,9 @@ abstract class LdOlap4jCellSet implements CellSet {
 			 * list, but this dimension list does not correspond to the
 			 * positions.
 			 * 
-			 * We now create a hash map which consist of: 1) Numeric representation
-			 * of concatenation of all dimension members 2) An array with the
-			 * values for each measure, ordered.
+			 * We now create a hash map which consist of: 1) Numeric
+			 * representation of concatenation of all dimension members 2) An
+			 * array with the values for each measure, ordered.
 			 */
 
 			for (int i = 0; i < olapquery.slicesrollups.size(); i++) {
@@ -382,9 +393,10 @@ abstract class LdOlap4jCellSet implements CellSet {
 
 			String[] valueArray = new String[olapquery.projections.size()];
 
-			for (int e = olapquery.slicesrollups.size(); e < olapquery.slicesrollups.size()
-					+ olapquery.projections.size(); e++) {
-				valueArray[e - olapquery.slicesrollups.size()] = node[e].toString();
+			for (int e = olapquery.slicesrollups.size(); e < olapquery.slicesrollups
+					.size() + olapquery.projections.size(); e++) {
+				valueArray[e - olapquery.slicesrollups.size()] = node[e]
+						.toString();
 			}
 
 			newValueMap.put(concatNr.hashCode(), valueArray);
@@ -904,7 +916,8 @@ abstract class LdOlap4jCellSet implements CellSet {
 		 */
 		int index = 0;
 		for (int i = 0; i < olapquery.projections.size() && measure != null; i++) {
-			if (olapquery.projections.get(i).getName().equals(measure.getName())) {
+			if (olapquery.projections.get(i).getName()
+					.equals(measure.getName())) {
 				index = i;
 				break;
 			}

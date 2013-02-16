@@ -1,3 +1,34 @@
+==2013-02-16 - Problem: Too many cubes==
+* Get Cubes, maybe reasoning?
+
+<pre>
+PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX edgar: <http://edgarwrap.ontologycentral.com/vocab/> 
+PREFIX gesis-dbpedia-stats2: <http://lod.gesis.org/dbpedia-stats/> 
+PREFIX smartdbwrap: <http://smartdbwrap.appspot.com/> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX refgovukyear: <http://reference.data.gov.uk/id/year/> 
+PREFIX refgovukmonth: <http://reference.data.gov.uk/id/month/> 
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX dropedia: <http://agkwebserver2.agk.uni-karlsruhe.de/~dropedia/index.php/Special:URIResolver/> 
+PREFIX eus: <http://ontologycentral.com/2009/01/eurostat/ns#> 
+PREFIX smartlocation: <http://smartdbwrap.appspot.com/id/location/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX smartanalysisobject: <http://smartdbwrap.appspot.com/id/analysisobject/> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfh: <http://lod2.eu/schemas/rdfh#> 
+PREFIX dropedialocal: <http://localhost/Dropedia/index.php/Special:URIResolver/> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX gesis-dbpedia-stats: <http://lod.gesis.org/dbpedia-stats/ns#> 
+PREFIX refgovukday: <http://reference.data.gov.uk/id/day/> 
+PREFIX rdfh-inst: <http://lod2.eu/schemas/rdfh-inst#> 
+select "LdCatalog" as ?CATALOG_NAME "LdSchema" as ?SCHEMA_NAME ?CUBE_NAME "CUBE" as ?CUBE_TYPE ?CUBE_NAME as ?DESCRIPTION ?CUBE_NAME as ?CUBE_CAPTION  from <http://fios:2> where { ?ds qb:structure ?CUBE_NAME. ?CUBE_NAME a qb:DataStructureDefinition. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = "" )} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = "" )} }order by ?CUBE_NAME limit 10
+</pre>
+
 ==2013-02-14 - MDX-to-SPARQL debugging==
 java.lang.RuntimeException: lookup on http://public.b-kaempgen.de:8890/sparql?query=PREFIX+dc%3A+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E+%0APREFIX+sdmx-measure%3A+%3Chttp%3A%2F%2Fpurl.org%2Flinked-data%2Fsdmx%2F2009%2Fmeasure%23%3E+%0APREFIX+edgar%3A+%3Chttp%3A%2F%2Fedgarwrap.ontologycentral.com%2Fvocab%2F%3E+%0APREFIX+gesis-dbpedia-stats2%3A+%3Chttp%3A%2F%2Flod.gesis.org%2Fdbpedia-stats%2F%3E+%0APREFIX+smartdbwrap%3A+%3Chttp%3A%2F%2Fsmartdbwrap.appspot.com%2F%3E+%0APREFIX+qb%3A+%3Chttp%3A%2F%2Fpurl.org%2Flinked-data%2Fcube%23%3E+%0APREFIX+refgovukyear%3A+%3Chttp%3A%2F%2Freference.data.gov.uk%2Fid%2Fyear%2F%3E+%0APREFIX+refgovukmonth%3A+%3Chttp%3A%2F%2Freference.data.gov.uk%2Fid%2Fmonth%2F%3E+%0APREFIX+dcterms%3A+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%3E+%0APREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E+%0APREFIX+skosclass%3A+%3Chttp%3A%2F%2Fddialliance.org%2Fontologies%2Fskosclass%23%3E+%0APREFIX+dropedia%3A+%3Chttp%3A%2F%2Fagkwebserver2.agk.uni-karlsruhe.de%2F%7Edropedia%2Findex.php%2FSpecial%3AURIResolver%2F%3E+%0APREFIX+eus%3A+%3Chttp%3A%2F%2Fontologycentral.com%2F2009%2F01%2Feurostat%2Fns%23%3E+%0APREFIX+smartlocation%3A+%3Chttp%3A%2F%2Fsmartdbwrap.appspot.com%2Fid%2Flocation%2F%3E+%0APREFIX+dbpedia%3A+%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F%3E+%0APREFIX+owl%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E+%0APREFIX+smartanalysisobject%3A+%3Chttp%3A%2F%2Fsmartdbwrap.appspot.com%2Fid%2Fanalysisobject%2F%3E+%0APREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E+%0APREFIX+rdfh%3A+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh%23%3E+%0APREFIX+dropedialocal%3A+%3Chttp%3A%2F%2Flocalhost%2FDropedia%2Findex.php%2FSpecial%3AURIResolver%2F%3E+%0APREFIX+skos%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E+%0APREFIX+gesis-dbpedia-stats%3A+%3Chttp%3A%2F%2Flod.gesis.org%2Fdbpedia-stats%2Fns%23%3E+%0APREFIX+refgovukday%3A+%3Chttp%3A%2F%2Freference.data.gov.uk%2Fid%2Fday%2F%3E+%0APREFIX+rdfh-inst%3A+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh-inst%23%3E+%0Aselect++from+%3Chttp%3A%2F%2Flocalhost%3A8890%2FDAV%2Fssb_01_qb_ds%3E++from+%3Chttp%3A%2F%2Flocalhost%3A8890%2FDAV%2Fssb_01_qb_dsd%3E+from+%3Chttp%3A%2F%2Flocalhost%3A8890%2FDAV%2Fssb_01_qb_levels%3E+where+%7B++%3Fobs+qb%3AdataSet+%3Fds.+%3Fds+qb%3Astructure+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh-inst%23dsd%3E.%3Fobs+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh%23lo_custkey%3E+%3Frdfhlocustkey+FILTER%28%3Frdfhlocustkey+%3D+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh-inst%23customer_178%3E+%29.%3Fobs+%3CMeasures%3E+%3FMeasures.+%3Fobs+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh%23lo_custkey%3E+%3Frdfhlocustkey.+OPTIONAL+%7B+%3Fobs+%3Chttp%3A%2F%2Flod2.eu%2Fschemas%2Frdfh%23lo_revenue%3E+%3Frdfhlorevenue.+%7D%7D+group+by++%3FMeasures++%3Frdfhlocustkey+order+by++%3FMeasures++%3Frdfhlocustkey+ resulted HTTP in status code 400
 	at org.olap4j.driver.ld.OpenVirtuosoEngine.sparqlOpenVirtuoso(OpenVirtuosoEngine.java:487)
@@ -87,8 +118,96 @@ levels for column axis + levels for row axis => slicesrollups
 list of positions for filter => dices
 check list of positions for mentioned members => projections
 
+Pseudocode:
+
+Algorithm 2: OLAP Query Generation
+Input: metadata, axisList, filterCellSetAxis
+Output: LdOlapQuery (cube, slicesrollups, dices, projections)
+
+begin
+  // Cube is easy
+  cube = metadata.cube
+  // Slicesrollups is easy
+  slicesrollups = new List<Level>()
+  for cellsetaxis \in axisList {
+    position = cellsetaxis.positions(0)
+    members = position.getMembers()
+    for member \in members {
+      // Only if no measure, since we collect measures later
+      if (member.Type != Measure) {
+        slicesrollups.add(member.getLevel())
+      }
+    }
+  }
+  // Problem Dices: From MDX, filterCellSetAxis returns a list of positions that should be ORed. Thus,
+  // dices actually could be filled with positions.
+  dices = filterCellSetAxis.positions
+  // Problem Projections: We use a set, since we only want to have each Measure kept in there once.
+  projections = new Set<Member>()
+  for cellsetaxis \in axisList {
+    for position \in cellsetaxis.positions {
+      members = position.getMembers()
+      for member \in members {
+        if (member.Type == Measure) {
+          projections.add(member)
+        }
+      }
+    }
+  }
+  for position \in filterCellSetAxis.positions {
+    members = position.getMembers()
+    for member \in members {
+      if (member.Type == Measure) {
+        projections.add(member)
+      }
+    }
+  }
+  return new LdOlapQuery(cube, slicesrollups, dices, projections)
+
 5) SPARQL query
-* See pseudocode for ssb paper
+
+Algorithm 1: OLAP Query Processing
+Input: An OLAP Query (cube, SlicesRollups, Dices, Projections)
+Output: A SPARQL query string
+
+begin
+  whereClause = graph pattern for observation in dataset described by data structure definition of cube
+  for level \in SlicesRollups AND level != ALL do
+    selectClause = selectClause + select for level
+    levelHeight = level.getHeight()
+    dimension = level.getHierarchy().getDimension()
+    hashMap.put(dimension, levelHeight)
+    for 0 to levelHeight do
+      levelPath = levelPath + graph pattern for path via skos:narrower 
+    levelPath = levelPath + graph pattern for level member via skos:member
+    whereClause = whereClause + levelPath
+    groupByClause = groupByClause + group by level
+  // We assume that each position has the same metadata (i.e., Levels)
+  position = Dices.positions.get(0)
+  for member \in position {
+    dicesLevelHeight = member.getLevel().getHeight()
+    slicesRollupLevelHeight = hashMap.get(member.getLevel().getHierarchy().getDimension()
+    levelPath = ""
+    for 0 to slicesRollupLevelHeight - dicesLevelHeight {
+      levelPath = levelPath + graph pattern for path via skos:narrower
+    }
+  } 
+  for position \in Dices {
+    for member \in Members do
+      memberFilterAnd = memberFilterAnd + "AND" + filter for member
+    memberFilter = memberFilter + "OR" + memberFilterAnd 
+  }
+  whereClause = whereClause + levelPath + memberFilter
+  for measure \in Projections do
+    aggregationSelect = measure.getAggregationFunction()
+    selectClause = selectClause + aggregationSelect
+    optionalPattern = optional graph pattern with measure
+    whereClause = whereClause + optionalPattern
+  query = selectClause + whereClause + groupByClause
+  return query
+
+
+
 
 ==2013-02-07==
 * Added to Tomcat for executing Saiku: "set CATALINA_OPTS=-Xms512m -Xmx768m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8 

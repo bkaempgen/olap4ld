@@ -29,12 +29,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.olap4j.OlapException;
+import org.olap4j.Position;
 import org.olap4j.driver.ld.LdOlap4jConnection.Restrictions;
 import org.olap4j.mdx.CallNode;
 import org.olap4j.mdx.MemberNode;
 import org.olap4j.metadata.Cube;
-import org.olap4j.metadata.Dimension;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
 import org.olap4j.metadata.Member;
@@ -336,10 +335,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	 */
 	private List<Node[]> sparql(String query, Boolean caching) {
 
+		// XXX Chaching disabled by default for now.
 		caching = false;
 
 		Integer hash = null;
-		// Disble caching for now
 		if (caching) {
 			hash = query.hashCode();
 		}
@@ -730,14 +729,14 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		// TODO: For now, we only use the non-language-tag CAPTION and
 		// DESCRIPTION
 		String query = LdOlap4jUtil.getStandardPrefixes()
-				+ "select \""
+				+ "select distinct \""
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"CUBE\" as ?CUBE_TYPE ?DESCRIPTION ?CUBE_CAPTION "
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"CUBE\" as ?CUBE_TYPE ?CUBE_NAME as ?DESCRIPTION ?CUBE_NAME as ?CUBE_CAPTION "
 				+ askForFrom(true)
-				+ "where { ?CUBE_NAME a qb:DataStructureDefinition. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"\" )} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"\" )} "
-				+ additionalFilters + "}" + "order by ?CUBE_NAME ";
+				+ "where { ?ds qb:structure ?CUBE_NAME. ?CUBE_NAME a qb:DataStructureDefinition. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"\" )} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"\" )} "
+				+ additionalFilters + "}" + "order by ?CUBE_NAME limit 10";
 
 		List<Node[]> result = sparql(query, true);
 
@@ -1861,12 +1860,9 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	 *         multidimensional result.
 	 */
 	public List<Node[]> getOlapResult(Cube cube, List<Level> slicesrollups,
-			List<List<Member>> dices, List<Measure> projections) {
+			List<Position> dices, List<Measure> projections) {
 		// cube is olap4ld
 		LdOlap4jCube mycube = (LdOlap4jCube) cube;
-
-		// HashMaps for already contained levels and measures
-		HashMap<Integer, Boolean> containedMap = new HashMap<Integer, Boolean>();
 
 		String dsd = LdOlap4jUtil.convertMDXtoURI(mycube.getUniqueName());
 
@@ -1875,17 +1871,15 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		String whereClause = "";
 		String groupByClause = "group by ";
 		String orderByClause = "order by ";
-		
+
 		// Typically, a cube is a dataset (actually, it represents a cube, but,
 		// anyway)
 
-		// Now that we consider DSD in queries, we need to consider DSD
-		// locations
-		String query = LdOlap4jUtil.getStandardPrefixes() + "select "
-				+ selectClause + askForFrom(false) + askForFrom(true)
-				+ "where { ";
+		whereClause += " ?obs qb:dataSet ?ds." + " ?ds qb:structure <" + dsd
+				+ ">.";
 
-		query += " ?obs qb:dataSet ?ds." + " ?ds qb:structure <" + dsd + ">.";
+		// HashMaps for level height of dimension
+		HashMap<Integer, Integer> levelHeightMap = new HashMap<Integer, Integer>();
 
 		for (Level level : slicesrollups) {
 
@@ -1895,10 +1889,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			// .getUniqueName());
 			String dimensionProperty = LdOlap4jUtil.convertMDXtoURI(level
 					.getDimension().getUniqueName());
-			String dimensionPropertyVariable = makeParameter(level
-					.getDimension().getUniqueName());
-
-			String levelUniqueName = LdOlap4jUtil.convertMDXtoURI(level
+			// XXX Why exactly do I include the level?
+			String levelURI = LdOlap4jUtil.convertMDXtoURI(level
 					.getUniqueName());
 
 			// Now, depending on level depth we need to behave differently
@@ -1907,248 +1899,471 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			// For that, the maximum depth and the level depth are used.
 			// TODO: THis is quite a simple approach, does not consider possible
 			// access restrictions.
-			Integer levelHeight = (level.getHierarchy().getLevels()
-					.size() - 1 - level.getDepth());
+			Integer levelHeight = (level.getHierarchy().getLevels().size() - 1 - level
+					.getDepth());
 
-			if (levelHeight == 0) {
-				/*
-				 * For now, we simply query for all and later match it to the
-				 * pivot table. A more performant way would be to filter only
-				 * for those dimension members, that are mentioned by any
-				 * position. Should be easy possible to do that if we simply ask
-				 * each position for the i'th position member.
-				 */
-				whereClause += "?obs <" + dimensionProperty + "> ?"
-						+ dimensionPropertyVariable + ". ";
+			// Note as inserted.
+			levelHeightMap.put(dimensionProperty.hashCode(), levelHeight);
 
-			} else {
-				// Level path will start with ?obs and end with
-				// slicerConcept
-				String levelPath = "";
+			whereClause += addLevelPropertyPath(0, levelHeight,
+					dimensionProperty, levelURI);
 
-				for (int i = 0; i < levelHeight; i++) {
-					levelPath += " ?" + dimensionPropertyVariable + i + ". ?"
-							+ dimensionPropertyVariable + i + " skos:narrower ";
-				}
-
-				whereClause += "?obs <" + dimensionProperty + "> " + levelPath
-						+ "?" + dimensionPropertyVariable + ". ";
-				// Note as inserted.
-				containedMap.put(dimensionProperty.hashCode(), true);
-
-				// And this concept needs to be contained in the level.
-				whereClause += "?" + dimensionPropertyVariable
-						+ " skos:member <" + levelUniqueName + ">. ";
-				// Removed part of hasTopConcept, since we know the members
-				// already.
-
-			}
+			String dimensionPropertyVariable = makeParameter(dimensionProperty);
 			selectClause += " ?" + dimensionPropertyVariable + " ";
 			groupByClause += " ?" + dimensionPropertyVariable + " ";
 			orderByClause += " ?" + dimensionPropertyVariable + " ";
 		}
-		
+
 		// For each filter tuple
-		if (dices == null || dices.isEmpty()) {
-			// do not do anything
-			;
-		} else {
-			for (List<Member> slicerTuple : dices) {
+		if (dices != null && !dices.isEmpty()) {
+			// We assume that each position has the same metadata (i.e., Levels)
+			// so that we only need to add graph patterns for the first position
+			for (Member member : dices.get(0).getMembers()) {
+				if (member.getMemberType() != Member.Type.MEASURE) {
 
-				// First, what dimension?
-				// If Measures, then do not filter (since the
-				// selectionpredicates also contain measures, since that was
-				// easier to do beforehand)
-				try {
-					if (slicerTuple.get(0).getDimension().getDimensionType()
-							.equals(Dimension.Type.MEASURE)) {
-						continue;
-					}
-				} catch (OlapException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					String dimensionProperty = LdOlap4jUtil
+							.convertMDXtoURI(member.getLevel().getDimension()
+									.getUniqueName());
+					String levelURI = LdOlap4jUtil.convertMDXtoURI(member
+							.getLevel().getUniqueName());
 
-				// We assume that all contained members are of the same
-				// dimension and the same level
-				String slicerDimensionProperty = LdOlap4jUtil
-						.convertMDXtoURI(slicerTuple.get(0).getDimension()
-								.getUniqueName());
-				String slicerDimensionPropertyVariable = makeParameter(slicerTuple
-						.get(0).getDimension().getUniqueName());
+					// Dices Level Height
+					Integer diceslevelHeight = (member.getHierarchy()
+							.getLevels().size() - 1 - member.getLevel()
+							.getDepth());
+					Integer slicesRollupsLevelHeight = (levelHeightMap
+							.containsKey(dimensionProperty.hashCode())) ? levelHeightMap
+							.get(dimensionProperty.hashCode()) : 0;
 
-				/*
-				 * slicerLevelNumber would give me the difference between the
-				 * maximal depth of all levels and the level depth (presumably
-				 * the same for all tuples). This tells us the number of
-				 * property-value pairs from the most granular element.
-				 */
-				Integer slicerLevelNumber = (slicerTuple.get(0).getLevel()
-						.getHierarchy().getLevels().size() - 1 - slicerTuple
-						.get(0).getLevel().getDepth());
+					whereClause += addLevelPropertyPath(
+							slicesRollupsLevelHeight, diceslevelHeight,
+							dimensionProperty, levelURI);
 
-				/*
-				 * Here, instead of going through all the members and filter for
-				 * them one by one, we need to "compress" the filter expression
-				 * somehow.
-				 */
-				// Check whether the leveltype is integer and define smallest
-				// and biggest
-				boolean isInteger = true;
-				int smallestTuple = 0;
-				int biggestTuple = 0;
-				int smallestLevelMember = 0;
-				int biggestLevelMember = 0;
-				try {
-					// Initialize
-					smallestTuple = Integer.parseInt(slicerTuple.get(0)
-							.getUniqueName());
-					biggestTuple = smallestTuple;
-					// Search for the smallest and the tallest member of
-					// slicerTuple
-					for (Member member : slicerTuple) {
-
-						int x = Integer.parseInt(member.getUniqueName());
-						if (x < smallestTuple) {
-							smallestTuple = x;
-						}
-						if (x > biggestTuple) {
-							biggestTuple = x;
-						}
-					}
-					// Initialize
-					smallestLevelMember = smallestTuple;
-					biggestLevelMember = smallestTuple;
-					// Search for the smallest and the tallest member of all
-					// level
-					// members
-					try {
-						for (Member member : slicerTuple.get(0).getLevel()
-								.getMembers()) {
-							int x = Integer.parseInt(member.getUniqueName());
-							if (x < smallestLevelMember) {
-								smallestLevelMember = x;
-							}
-							if (x > biggestLevelMember) {
-								biggestLevelMember = x;
-							}
-						}
-					} catch (OlapException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-				} catch (NumberFormatException nFE) {
-					isInteger = false;
-				}
-
-				boolean isRestricted = false;
-				try {
-					for (Member levelMember : slicerTuple.get(0).getLevel()
-							.getMembers()) {
-						if (isInteger) {
-							// Then we do not need to do this
-							break;
-						}
-						boolean isContained = false;
-						for (Member slicerMember : slicerTuple) {
-							// if any member is not contained in the
-							// slicerTuple, it is restricted
-							if (levelMember.getUniqueName().equals(
-									slicerMember.getUniqueName())) {
-								isContained = true;
-								break;
-							}
-						}
-						if (!isContained) {
-							isRestricted = true;
-							break;
-						}
-					}
-				} catch (OlapException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				// Now, we create the string that shall be put between filter.
-				String filterstring = "";
-				if (isInteger) {
-
-					if (smallestTuple > smallestLevelMember) {
-						filterstring = "?" + slicerDimensionPropertyVariable
-								+ " >= " + smallestTuple + " AND ";
-					}
-					if (biggestTuple < biggestLevelMember) {
-						filterstring += "?" + slicerDimensionPropertyVariable
-								+ " <= " + biggestTuple;
-					}
-
-				} else if (isRestricted) {
-					String[] slicerTupleArray = new String[slicerTuple.size()];
-
-					for (int j = 0; j < slicerTupleArray.length; j++) {
-
-						Member member = slicerTuple.get(j);
-						String memberString = LdOlap4jUtil
-								.convertMDXtoURI(member.getUniqueName());
-
-						// Check whether member is uri or literal value
-						if (memberString.startsWith("http://")) {
-							memberString = "?"
-									+ slicerDimensionPropertyVariable + " = <"
-									+ memberString + "> ";
-						} else {
-							memberString = "?"
-									+ slicerDimensionPropertyVariable + " = \""
-									+ memberString + "\" ";
-						}
-						slicerTupleArray[j] = memberString;
-					}
-
-					filterstring = LdOlap4jUtil.implodeArray(slicerTupleArray,
-							" || ");
-				} else {
-					// Nothing to do, there is nothing to filter for.
-					break;
-				}
-
-				// Only if this kind of level has not been selected, yet, we
-				// need to do it.
-				if (containedMap
-						.containsKey(slicerDimensionProperty.hashCode())) {
-					query += " FILTER(" + filterstring + ").";
-
-				} else {
-
-					// Since we are on a specific level, we need to add
-					// intermediary
-					// property-values
-					if (slicerLevelNumber == 0) {
-						query += "?obs <" + slicerDimensionProperty + "> ?"
-								+ slicerDimensionPropertyVariable + " FILTER("
-								+ filterstring + ").";
-					} else {
-						// Level path will start with ?obs and end with
-						// slicerConcept
-						String levelPath = "";
-
-						for (int i = 0; i < slicerLevelNumber; i++) {
-							levelPath += " ?" + slicerDimensionPropertyVariable
-									+ i + ". ?"
-									+ slicerDimensionPropertyVariable + i
-									+ " skos:narrower ";
-						}
-
-						query += "?obs <" + slicerDimensionProperty + "> "
-								+ levelPath + "?"
-								+ slicerDimensionPropertyVariable + " FILTER("
-								+ filterstring + ").";
-					}
 				}
 			}
+
+			whereClause += "FILTER (";
+			List<String> orList = new ArrayList<String>();
+
+			for (Position position : dices) {
+
+				// Each position is an OR
+				List<String> andList = new ArrayList<String>();
+
+				for (Member member : position.getMembers()) {
+					// We need to know the variable to filter
+					String dimensionProperty = LdOlap4jUtil
+							.convertMDXtoURI(member.getLevel().getDimension()
+									.getUniqueName());
+					String dimensionPropertyVariable = makeParameter(member
+							.getLevel().getDimension().getUniqueName());
+
+					Integer diceslevelHeight = (member.getHierarchy()
+							.getLevels().size() - 1 - member.getLevel()
+							.getDepth());
+
+					andList.add(" " + dimensionPropertyVariable + diceslevelHeight + " = " + "<"
+							+ dimensionProperty + "> ");
+				}
+
+				orList.add(LdOlap4jUtil.implodeArray(
+						andList.toArray(new String[0]), " AND "));
+			}
+			whereClause += LdOlap4jUtil.implodeArray(
+					orList.toArray(new String[0]), " OR ");
+
 		}
 
-		// Now, for each measure, we create a measure value column
+		// This huge thing probably tries to combine filter expressions to
+		// efficient SPARQL expressions
+		// // First, what dimension?
+		// // If Measures, then do not filter (since the
+		// // selectionpredicates also contain measures, since that was
+		// // easier to do beforehand)
+		// try {
+		// if (position.get(0).getDimension().getDimensionType()
+		// .equals(Dimension.Type.MEASURE)) {
+		// continue;
+		// }
+		// } catch (OlapException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		//
+		// // We assume that all contained members are of the same
+		// // dimension and the same level
+		// String slicerDimensionProperty = LdOlap4jUtil
+		// .convertMDXtoURI(position.get(0).getDimension()
+		// .getUniqueName());
+		// String slicerDimensionPropertyVariable = makeParameter(position
+		// .get(0).getDimension().getUniqueName());
+		//
+		// /*
+		// * slicerLevelNumber would give me the difference between the
+		// * maximal depth of all levels and the level depth (presumably
+		// * the same for all tuples). This tells us the number of
+		// * property-value pairs from the most granular element.
+		// */
+		// Integer slicerLevelNumber = (position.get(0).getLevel()
+		// .getHierarchy().getLevels().size() - 1 - position
+		// .get(0).getLevel().getDepth());
+		//
+		// /*
+		// * Here, instead of going through all the members and filter for
+		// * them one by one, we need to "compress" the filter expression
+		// * somehow.
+		// */
+		// // Check whether the leveltype is integer and define smallest
+		// // and biggest
+		// boolean isInteger = true;
+		// int smallestTuple = 0;
+		// int biggestTuple = 0;
+		// int smallestLevelMember = 0;
+		// int biggestLevelMember = 0;
+		// try {
+		// // Initialize
+		// smallestTuple = Integer.parseInt(position.get(0)
+		// .getUniqueName());
+		// biggestTuple = smallestTuple;
+		// // Search for the smallest and the tallest member of
+		// // slicerTuple
+		// for (Member member : position) {
+		//
+		// int x = Integer.parseInt(member.getUniqueName());
+		// if (x < smallestTuple) {
+		// smallestTuple = x;
+		// }
+		// if (x > biggestTuple) {
+		// biggestTuple = x;
+		// }
+		// }
+		// // Initialize
+		// smallestLevelMember = smallestTuple;
+		// biggestLevelMember = smallestTuple;
+		// // Search for the smallest and the tallest member of all
+		// // level
+		// // members
+		// try {
+		// for (Member member : position.get(0).getLevel()
+		// .getMembers()) {
+		// int x = Integer.parseInt(member.getUniqueName());
+		// if (x < smallestLevelMember) {
+		// smallestLevelMember = x;
+		// }
+		// if (x > biggestLevelMember) {
+		// biggestLevelMember = x;
+		// }
+		// }
+		// } catch (OlapException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		//
+		// } catch (NumberFormatException nFE) {
+		// isInteger = false;
+		// }
+		//
+		// boolean isRestricted = false;
+		// try {
+		// for (Member levelMember : position.get(0).getLevel()
+		// .getMembers()) {
+		// if (isInteger) {
+		// // Then we do not need to do this
+		// break;
+		// }
+		// boolean isContained = false;
+		// for (Member slicerMember : position) {
+		// // if any member is not contained in the
+		// // slicerTuple, it is restricted
+		// if (levelMember.getUniqueName().equals(
+		// slicerMember.getUniqueName())) {
+		// isContained = true;
+		// break;
+		// }
+		// }
+		// if (!isContained) {
+		// isRestricted = true;
+		// break;
+		// }
+		// }
+		// } catch (OlapException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		//
+		// // Now, we create the string that shall be put between filter.
+		// String filterstring = "";
+		// if (isInteger) {
+		//
+		// if (smallestTuple > smallestLevelMember) {
+		// filterstring = "?" + slicerDimensionPropertyVariable
+		// + " >= " + smallestTuple + " AND ";
+		// }
+		// if (biggestTuple < biggestLevelMember) {
+		// filterstring += "?" + slicerDimensionPropertyVariable
+		// + " <= " + biggestTuple;
+		// }
+		//
+		// } else if (isRestricted) {
+		// String[] slicerTupleArray = new String[position.size()];
+		//
+		// for (int j = 0; j < slicerTupleArray.length; j++) {
+		//
+		// Member member = position.get(j);
+		// String memberString = LdOlap4jUtil
+		// .convertMDXtoURI(member.getUniqueName());
+		//
+		// // Check whether member is uri or literal value
+		// if (memberString.startsWith("http://")) {
+		// memberString = "?"
+		// + slicerDimensionPropertyVariable + " = <"
+		// + memberString + "> ";
+		// } else {
+		// memberString = "?"
+		// + slicerDimensionPropertyVariable + " = \""
+		// + memberString + "\" ";
+		// }
+		// slicerTupleArray[j] = memberString;
+		// }
+		//
+		// filterstring = LdOlap4jUtil.implodeArray(slicerTupleArray,
+		// " || ");
+		// } else {
+		// // Nothing to do, there is nothing to filter for.
+		// break;
+		// }
+		//
+		// // Only if this kind of level has not been selected, yet, we
+		// // need to do it.
+		// if (levelHeightMap.containsKey(slicerDimensionProperty
+		// .hashCode())) {
+		// query += " FILTER(" + filterstring + ").";
+		//
+		// } else {
+		//
+		// // Since we are on a specific level, we need to add
+		// // intermediary
+		// // property-values
+		// if (slicerLevelNumber == 0) {
+		// query += "?obs <" + slicerDimensionProperty + "> ?"
+		// + slicerDimensionPropertyVariable + " FILTER("
+		// + filterstring + ").";
+		// } else {
+		// // Level path will start with ?obs and end with
+		// // slicerConcept
+		// // // First, what dimension?
+		// // If Measures, then do not filter (since the
+		// // selectionpredicates also contain measures, since that was
+		// // easier to do beforehand)
+		// try {
+		// if (position.get(0).getDimension().getDimensionType()
+		// .equals(Dimension.Type.MEASURE)) {
+		// continue;
+		// }
+		// } catch (OlapException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		//
+		// // We assume that all contained members are of the same
+		// // dimension and the same level
+		// String slicerDimensionProperty = LdOlap4jUtil
+		// .convertMDXtoURI(position.get(0).getDimension()
+		// .getUniqueName());
+		// String slicerDimensionPropertyVariable = makeParameter(position
+		// .get(0).getDimension().getUniqueName());
+		//
+		// /*
+		// * slicerLevelNumber would give me the difference between the
+		// * maximal depth of all levels and the level depth (presumably
+		// * the same for all tuples). This tells us the number of
+		// * property-value pairs from the most granular element.
+		// */
+		// Integer slicerLevelNumber = (position.get(0).getLevel()
+		// .getHierarchy().getLevels().size() - 1 - position
+		// .get(0).getLevel().getDepth());
+		//
+		// /*
+		// * Here, instead of going through all the members and filter for
+		// * them one by one, we need to "compress" the filter expression
+		// * somehow.
+		// */
+		// // Check whether the leveltype is integer and define smallest
+		// // and biggest
+		// boolean isInteger = true;
+		// int smallestTuple = 0;
+		// int biggestTuple = 0;
+		// int smallestLevelMember = 0;
+		// int biggestLevelMember = 0;
+		// try {
+		// // Initialize
+		// smallestTuple = Integer.parseInt(position.get(0)
+		// .getUniqueName());
+		// biggestTuple = smallestTuple;
+		// // Search for the smallest and the tallest member of
+		// // slicerTuple
+		// for (Member member : position) {
+		//
+		// int x = Integer.parseInt(member.getUniqueName());
+		// if (x < smallestTuple) {
+		// smallestTuple = x;
+		// }
+		// if (x > biggestTuple) {
+		// biggestTuple = x;
+		// }
+		// }
+		// // Initialize
+		// smallestLevelMember = smallestTuple;
+		// biggestLevelMember = smallestTuple;
+		// // Search for the smallest and the tallest member of all
+		// // level
+		// // members
+		// try {
+		// for (Member member : position.get(0).getLevel()
+		// .getMembers()) {
+		// int x = Integer.parseInt(member.getUniqueName());
+		// if (x < smallestLevelMember) {
+		// smallestLevelMember = x;
+		// }
+		// if (x > biggestLevelMember) {
+		// biggestLevelMember = x;
+		// }
+		// }
+		// } catch (OlapException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		//
+		// } catch (NumberFormatException nFE) {
+		// isInteger = false;
+		// }
+		//
+		// boolean isRestricted = false;
+		// try {
+		// for (Member levelMember : position.get(0).getLevel()
+		// .getMembers()) {
+		// if (isInteger) {
+		// // Then we do not need to do this
+		// break;
+		// }
+		// boolean isContained = false;
+		// for (Member slicerMember : position) {
+		// // if any member is not contained in the
+		// // slicerTuple, it is restricted
+		// if (levelMember.getUniqueName().equals(
+		// slicerMember.getUniqueName())) {
+		// isContained = true;
+		// break;
+		// }
+		// }
+		// if (!isContained) {
+		// isRestricted = true;
+		// break;
+		// }
+		// }
+		// } catch (OlapException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		//
+		// // Now, we create the string that shall be put between filter.
+		// String filterstring = "";
+		// if (isInteger) {
+		//
+		// if (smallestTuple > smallestLevelMember) {
+		// filterstring = "?" + slicerDimensionPropertyVariable
+		// + " >= " + smallestTuple + " AND ";
+		// }
+		// if (biggestTuple < biggestLevelMember) {
+		// filterstring += "?" + slicerDimensionPropertyVariable
+		// + " <= " + biggestTuple;
+		// }
+		//
+		// } else if (isRestricted) {
+		// String[] slicerTupleArray = new String[position.size()];
+		//
+		// for (int j = 0; j < slicerTupleArray.length; j++) {
+		//
+		// Member member = position.get(j);
+		// String memberString = LdOlap4jUtil
+		// .convertMDXtoURI(member.getUniqueName());
+		//
+		// // Check whether member is uri or literal value
+		// if (memberString.startsWith("http://")) {
+		// memberString = "?"
+		// + slicerDimensionPropertyVariable + " = <"
+		// + memberString + "> ";
+		// } else {
+		// memberString = "?"
+		// + slicerDimensionPropertyVariable + " = \""
+		// + memberString + "\" ";
+		// }
+		// slicerTupleArray[j] = memberString;
+		// }
+		//
+		// filterstring = LdOlap4jUtil.implodeArray(slicerTupleArray,
+		// " || ");
+		// } else {
+		// // Nothing to do, there is nothing to filter for.
+		// break;
+		// }
+		//
+		// // Only if this kind of level has not been selected, yet, we
+		// // need to do it.
+		// if (levelHeightMap.containsKey(slicerDimensionProperty
+		// .hashCode())) {
+		// query += " FILTER(" + filterstring + ").";
+		//
+		// } else {
+		//
+		// // Since we are on a specific level, we need to add
+		// // intermediary
+		// // property-values
+		// if (slicerLevelNumber == 0) {
+		// query += "?obs <" + slicerDimensionProperty + "> ?"
+		// + slicerDimensionPropertyVariable + " FILTER("
+		// + filterstring + ").";
+		// } else {
+		// // Level path will start with ?obs and end with
+		// // slicerConcept
+		// String levelPath = "";
+		//
+		// for (int i = 0; i < slicerLevelNumber; i++) {
+		// levelPath += " ?" + slicerDimensionPropertyVariable
+		// + i + ". ?"
+		// + slicerDimensionPropertyVariable + i
+		// + " skos:narrower ";
+		// }
+		//
+		// query += "?obs <" + slicerDimensionProperty + "> "
+		// + levelPath + "?"
+		// + slicerDimensionPropertyVariable + " FILTER("
+		// + filterstring + ").";
+		// }
+		// }
+		// }
+		// } String levelPath = "";
+		//
+		// for (int i = 0; i < slicerLevelNumber; i++) {
+		// levelPath += " ?" + slicerDimensionPropertyVariable
+		// + i + ". ?"
+		// + slicerDimensionPropertyVariable + i
+		// + " skos:narrower ";
+		// }
+		//
+		// query += "?obs <" + slicerDimensionProperty + "> "
+		// + levelPath + "?"
+		// + slicerDimensionPropertyVariable + " FILTER("
+		// + filterstring + ").";
+		// }
+		// }
+		// }
+		// }
+
+		// Now, for each measure, we create a measure value column.
+		// Any measure should be contained only once, unless calculated measures
+		HashMap<Integer, Boolean> measureMap = new HashMap<Integer, Boolean>();
+
 		for (Measure measure : projections) {
 
 			// For formulas, this is different
@@ -2189,15 +2404,15 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 				// I have to select them only, if we haven't inserted any
 				// before.
-				if (!containedMap.containsKey(measureProperty1.hashCode())) {
+				if (!measureMap.containsKey(measureProperty1.hashCode())) {
 					whereClause += "?obs <" + measureProperty1 + "> ?"
 							+ measurePropertyVariable1 + ". ";
-					containedMap.put(measureProperty1.hashCode(), true);
+					measureMap.put(measureProperty1.hashCode(), true);
 				}
-				if (!containedMap.containsKey(measureProperty2.hashCode())) {
+				if (!measureMap.containsKey(measureProperty2.hashCode())) {
 					whereClause += "?obs <" + measureProperty2 + "> ?"
 							+ measurePropertyVariable2 + ". ";
-					containedMap.put(measureProperty2.hashCode(), true);
+					measureMap.put(measureProperty2.hashCode(), true);
 				}
 
 			} else {
@@ -2215,21 +2430,81 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 				// Optional clause is used for the case that several measures
 				// are selected.
-				if (!containedMap.containsKey(measureProperty.hashCode())) {
-					whereClause += "OPTIONAL { ?obs <" + measureProperty + "> ?"
-							+ measurePropertyVariable + ". }";
-					containedMap.put(measureProperty.hashCode(), true);
+				if (!measureMap.containsKey(measureProperty.hashCode())) {
+					whereClause += "OPTIONAL { ?obs <" + measureProperty
+							+ "> ?" + measurePropertyVariable + ". }";
+					measureMap.put(measureProperty.hashCode(), true);
 				}
 			}
 		}
 
-		query += whereClause;
-		
-		query += "} ";
-		// We still have to group by and order by the dimensions
-		query += groupByClause + orderByClause;
+		// Now that we consider DSD in queries, we need to consider DSD
+		// locations
+		String query = LdOlap4jUtil.getStandardPrefixes() + "select "
+				+ selectClause + askForFrom(false) + askForFrom(true)
+				+ "where { " + whereClause + "}" + groupByClause
+				+ orderByClause;
 
 		return sparql(query, true);
+	}
+
+	/**
+	 * This method returns graph patterns for a property path for levels.
+	 * 
+	 * @param levelStart
+	 *            startingPoint of level
+	 * @param levelHeight
+	 *            endPoint of level
+	 * @param dimensionProperty
+	 * @param levelURI
+	 * @return
+	 */
+	private String addLevelPropertyPath(Integer levelStart,
+			Integer levelHeight, String dimensionProperty, String levelURI) {
+
+		String whereClause = "";
+
+		String dimensionPropertyVariable = makeParameter(dimensionProperty);
+
+		if (levelHeight == 0) {
+			/*
+			 * For now, we simply query for all and later match it to the pivot
+			 * table. A more performant way would be to filter only for those
+			 * dimension members, that are mentioned by any position. Should be
+			 * easy possible to do that if we simply ask each position for the
+			 * i'th position member.
+			 */
+			whereClause += "?obs <" + dimensionProperty + "> ?"
+					+ dimensionPropertyVariable + ". ";
+
+			// If level height is 0, it could be that no level is existing which
+			// is why we leave that
+			// pattern out.
+
+		} else {
+
+			// Level path will start with ?obs and end with
+			// slicerConcept
+			String levelPath = "";
+
+			for (int i = levelStart; i < levelHeight; i++) {
+				levelPath += " ?" + dimensionPropertyVariable + i + ". ?"
+						+ dimensionPropertyVariable + i + " skos:narrower ";
+			}
+
+			whereClause += "?obs <" + dimensionProperty + "> " + levelPath
+					+ "?" + dimensionPropertyVariable + ". ";
+
+			// And this concept needs to be contained in the level.
+			whereClause += "?" + dimensionPropertyVariable + " skos:member <"
+					+ levelURI + ">. ";
+			// Removed part of hasTopConcept, since we know the members
+			// already.
+
+		}
+
+		return whereClause;
+
 	}
 
 	/**

@@ -20,6 +20,7 @@
 package org.olap4j;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -31,6 +32,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.olap4j.driver.ld.LdOlap4jUtil;
 import org.olap4j.impl.Olap4jUtil;
 import org.olap4j.mdx.SelectNode;
 import org.olap4j.mdx.parser.MdxParser;
@@ -136,11 +138,19 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	 */
 	public GenericCubeReturnMetadataTest() throws SQLException {
 
-		//SEC Example
-		this.cubeNamePattern = "httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd";
-		
-		//Yahoo Finance Example
-		//this.cubeNamePattern = "httpXXX3AXXX2FXXX2Fyahoofinancewrap.appspot.comXXX2FarchiveXXX2FMAXXX2F2006-06-01XXX23:dsd";
+		String dsduri = "http://public.b-kaempgen.de:8080/edg/archive/1013237/0001193125-11-005034#dsd";
+
+		// New Yhf example
+		this.cubeNamePattern = "[" + LdOlap4jUtil.encodeUriWithPrefix(dsduri)
+				+ "]";
+
+		// SEC Example
+		// this.cubeNamePattern =
+		// "httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd";
+
+		// Yahoo Finance Example
+		// this.cubeNamePattern =
+		// "httpXXX3AXXX2FXXX2Fyahoofinancewrap.appspot.comXXX2FarchiveXXX2FMAXXX2F2006-06-01XXX23:dsd";
 	}
 
 	protected void setUp() throws SQLException {
@@ -246,17 +256,17 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	}
 
 	public void testDatabaseMetaDataGetDatabaseProperties() throws SQLException {
-//		String s = checkResultSet(olapDatabaseMetaData.getDatabaseProperties(
-//				dataSourceName, propertyNamePattern),
-//				DATABASE_PROPERTIES_COLUMN_NAMES);
-//		System.out.println("getDatabaseProperties(): " + s);
+		// String s = checkResultSet(olapDatabaseMetaData.getDatabaseProperties(
+		// dataSourceName, propertyNamePattern),
+		// DATABASE_PROPERTIES_COLUMN_NAMES);
+		// System.out.println("getDatabaseProperties(): " + s);
 	}
 
 	public void testDatabaseMetaDataGetProperties() throws SQLException {
-//		String s = checkResultSet(olapDatabaseMetaData.getProperties(
-//				catalogName, null, null, null, null, null, null, null),
-//				PROPERTIES_COLUMN_NAMES);
-//		System.out.println("getProperties(): " + s);
+		// String s = checkResultSet(olapDatabaseMetaData.getProperties(
+		// catalogName, null, null, null, null, null, null, null),
+		// PROPERTIES_COLUMN_NAMES);
+		// System.out.println("getProperties(): " + s);
 	}
 
 	public void testDatabaseMetaDataGetMdxKeywords() throws SQLException {
@@ -267,101 +277,111 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 
 	/**
 	 * We ask for a specific cube and return its properties.
+	 * 
 	 * @throws SQLException
 	 */
 	public void testDatabaseMetaDataGetCubes() throws SQLException {
-		String s = checkResultSet(
-				olapDatabaseMetaData.getCubes(catalogName, null, cubeNamePattern),
-				CUBE_COLUMN_NAMES);
+		String s = checkResultSet(olapDatabaseMetaData.getCubes(catalogName,
+				null, cubeNamePattern), CUBE_COLUMN_NAMES);
 
 		System.out.println("getCubes(): " + s);
 	}
 
 	/**
 	 * We ask for all dimensions of the cube.
+	 * 
 	 * @throws SQLException
 	 */
 	public void testDatabaseMetaDataGetDimensions() throws SQLException {
 		String s = checkResultSet(olapDatabaseMetaData.getDimensions(
-				catalogName, null, cubeNamePattern, null), DIMENSIONS_COLUMN_NAMES);
-		
+				catalogName, null, cubeNamePattern, null),
+				DIMENSIONS_COLUMN_NAMES);
+
 		System.out.println("getDimensions(): " + s);
 	}
 
 	public void testDatabaseMetaDataGetFunctions() throws SQLException {
-//		String s = checkResultSet(olapDatabaseMetaData.getOlapFunctions(null),
-//				FUNCTIONS_COLUMN_NAMES);
-//		System.out.println("getFunctions(): " + s);
+		// String s =
+		// checkResultSet(olapDatabaseMetaData.getOlapFunctions(null),
+		// FUNCTIONS_COLUMN_NAMES);
+		// System.out.println("getFunctions(): " + s);
 	}
 
-	/** 
+	/**
 	 * For each of the dimensions, we return the hierarchy.
+	 * 
 	 * @throws SQLException
 	 */
 	public void testDatabaseMetaDataGetHierarchies() throws SQLException {
-		
+
 		String s = checkResultSet(olapDatabaseMetaData.getHierarchies(
-				catalogName, null, cubeNamePattern, null, null), HIERARCHIES_COLUMN_NAMES);
+				catalogName, null, cubeNamePattern, null, null),
+				HIERARCHIES_COLUMN_NAMES);
 		System.out.println("getHierarchies(): " + s);
 	}
 
 	public void testDatabaseMetaDataGetLevels() throws SQLException {
 		String s = checkResultSet(olapDatabaseMetaData.getLevels(catalogName,
 				null, cubeNamePattern, null, null, null), LEVELS_COLUMN_NAMES);
-		
+
 		System.out.println("getLevels(): " + s);
 	}
 
 	public void testDatabaseMetaDataGetLiterals2() throws SQLException {
-//		String s = checkResultSet(olapDatabaseMetaData.getLiterals(),
-//				LITERALS_COLUMN_NAMES);
-//		System.out.println("getLiterals2(): " + s);
+		// String s = checkResultSet(olapDatabaseMetaData.getLiterals(),
+		// LITERALS_COLUMN_NAMES);
+		// System.out.println("getLiterals2(): " + s);
 	}
 
 	public void testDatabaseMetaDataGetMeasures() throws SQLException {
 		String s = checkResultSet(olapDatabaseMetaData.getMeasures(catalogName,
 				null, cubeNamePattern, null, null), MEASURES_COLUMN_NAMES);
-		
+
 		System.out.println("getMeasures(): " + s);
 	}
-	
+
 	/**
 	 * For each measure, find the measure member.
+	 * 
 	 * @throws SQLException
 	 */
 	public void testDatabaseMetaDataGetMeasureMembers() throws SQLException {
-		
-		ResultSet measures = olapDatabaseMetaData.getMeasures(catalogName,null, cubeNamePattern, null, null);
-		
+
+		ResultSet measures = olapDatabaseMetaData.getMeasures(catalogName,
+				null, cubeNamePattern, null, null);
+
 		while (measures.next()) {
 			String measure = measures.getString(4);
-		
-			String s = checkResultSet(olapDatabaseMetaData.getMembers(catalogName,
-					null, cubeNamePattern, null, null, null, measure, Olap4jUtil.enumSetOf(Member.TreeOp.SELF)), MEMBERS_COLUMN_NAMES);
-			
-			System.out.println("getMembers("+measure+"): " + s);
-			
+
+			String s = checkResultSet(olapDatabaseMetaData.getMembers(
+					catalogName, null, cubeNamePattern, null, null, null,
+					measure, Olap4jUtil.enumSetOf(Member.TreeOp.SELF)),
+					MEMBERS_COLUMN_NAMES);
+
+			System.out.println("getMembers(" + measure + "): " + s);
+
 		}
 	}
 
 	/**
 	 * For each level, find the members
+	 * 
 	 * @throws SQLException
 	 */
 	public void testDatabaseMetaDataGetMembers() throws SQLException {
-		ResultSet levels = olapDatabaseMetaData.getLevels(catalogName,null, cubeNamePattern, null, null, null);
-		
+		ResultSet levels = olapDatabaseMetaData.getLevels(catalogName, null,
+				cubeNamePattern, null, null, null);
+
 		while (levels.next()) {
 			String level = levels.getString(6);
-			
-			String s = checkResultSet(olapDatabaseMetaData.getMembers(catalogName,
-					null, cubeNamePattern, null, null, level, null, null), MEMBERS_COLUMN_NAMES);
 
-			System.out.println("getMembers(Level:"+level+"): " + s);
+			String s = checkResultSet(olapDatabaseMetaData.getMembers(
+					catalogName, null, cubeNamePattern, null, null, level,
+					null, null), MEMBERS_COLUMN_NAMES);
+
+			System.out.println("getMembers(Level:" + level + "): " + s);
 		}
 	}
-	
-	
 
 	public void testDatabaseMetaDataGetSets() throws SQLException {
 		// String s = checkResultSet(

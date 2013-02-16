@@ -110,11 +110,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				// TODO: This is a hack. Instead, I want to use calculated
 				// measures with their expression.
 				// TODO: Accept should work also.
-				Member calculatedMeasure = (Member) this
-						.visit((WithMemberNode) with);
-
-				// We store the calculatedMember as a possible IdentifierNode
-				withMembers.add(calculatedMeasure);
+				with.accept(this);
 			}
 		}
 
@@ -204,7 +200,6 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	 * In our case, a calcMember node always returns one measure with a new name
 	 * and an expression of a call node with two member nodes.
 	 */
-	@SuppressWarnings("unchecked")
 	public Object visit(WithMemberNode calcMemberNode) {
 		List<IdentifierSegment> identifierList = calcMemberNode.getIdentifier()
 				.getSegmentList();
@@ -212,7 +207,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		String[] identifierArray = new String[identifierList.size()];
 
 		for (int i = 0; i < identifierList.size(); i++) {
-			identifierArray[i] = identifierList.get(i).getName();
+			identifierArray[i] = identifierList.get(i).toString();
 		}
 
 		String calculatedMemberName = LdOlap4jUtil.implodeArray(
@@ -247,7 +242,10 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 					calculatedMemberName, calculatedMemberName, "", null,
 					Aggregator.CALCULATED, callNode, Datatype.INTEGER, true,
 					member1.getLevel().getMembers().size() + withMembers.size());
-			return (Object) calculatedMeasure;
+			
+			withMembers.add(calculatedMeasure);
+			
+			return null;
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
 			throw new UnsupportedOperationException(
@@ -428,7 +426,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		String caster = (String) call.getArgList().get(1).accept(this);
 		String value = (String) call.getArgList().get(0).accept(this);
 		if (caster.equals("NUMERIC")) {
-			return (Object) (new Double(value));
+			// All names are surrounded by square brackets, need to remove them...
+			return (Object) (new Double(LdOlap4jUtil.removeSquareBrackets(value)));
 		}
 		throw new UnsupportedOperationException(
 				"So far Name only for NUMERIC casts supported!");
@@ -634,7 +633,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 			String[] identifierArray = new String[segmentList.size()];
 
 			for (int i = 0; i < segmentList.size(); i++) {
-				identifierArray[i] = "[" + segmentList.get(i).getName() + "]";
+				identifierArray[i] = segmentList.get(i).toString();
 			}
 
 			String calculatedMemberName = LdOlap4jUtil.implodeArray(
