@@ -81,10 +81,16 @@ public class FIOSQueryTest extends TestCase {
 		}
 	}
 	
-	public void testFIOS_1() {
+	public void testFIOS_With_Brackets() {
 		String result = executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2010ZZZ02ZZZ28]})} ON COLUMNS {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F1013237XXX23id]} FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd]");
 		
 		assertContains("6", result);
+	}
+	
+	public void testFIOS_2_Without_Brackets() {
+		String result = executeStatement("SELECT NON EMPTY {Hierarchize({[2009ZZZ08ZZZ31]})} ON COLUMNS, NON EMPTY {Hierarchize({sdmxZZZmeasureXXX3AobsValue})} ON ROWS FROM httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ005034XXX23dsd");
+		
+		assertContains("1", result);
 	}
 
 //	public void testFIOS_2() {

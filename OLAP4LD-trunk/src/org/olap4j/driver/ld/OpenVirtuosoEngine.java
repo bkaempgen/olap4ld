@@ -1669,7 +1669,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 					alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = <"
 							+ resource + ">) ";
 				} else {
-					alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = \""
+					alteredadditionalFilters += " FILTER (str(?MEMBER_UNIQUE_NAME) = \""
 							+ resource + "\") ";
 				}
 			}
