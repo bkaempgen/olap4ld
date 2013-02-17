@@ -1,3 +1,56 @@
+==2013-02-17 - Problem: .Member is interpreted as an Identifier segment==
+* uri.Member is interpreted as a full Identifier of several segments
+* Solutions: 
+** How about defining a visitor that goes through the parser tree and transforms 
+IdentifierNode(uri.Members) to CallNode(Members, Identifier(uri)).
+
+==2013-02-17 - Problem: If asking for members, we do not consider Literal values==
+* Of all multidimensional elements, members possibly can be described by Literal values.
+* Thus, when querying for those members, we have to consider that.
+* In theory this can happen in two cases:
+** A codeList is described that defines concepts with skos:notation (not overly discussed, yet)
+** No codeList is given, and the members are simply read from the observations (in the future, 
+this case might be abandoned, since for cubes, we should always have a complete code list. However, 
+in data cubes, often you have "degenerated" dimensions, thus we might consider keeping it)
+* Problem: How do we know whether it is a URI member or Literal member? For now, we try just
+guessing from the name. However, with prefixeduris this will not work.
+
+* TODO: SPARQL query still does not work:
+
+PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX edgar: <http://edgarwrap.ontologycentral.com/vocab/> 
+PREFIX gesis-dbpedia-stats2: <http://lod.gesis.org/dbpedia-stats/> 
+PREFIX smartdbwrap: <http://smartdbwrap.appspot.com/> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX refgovukyear: <http://reference.data.gov.uk/id/year/> 
+PREFIX refgovukmonth: <http://reference.data.gov.uk/id/month/> 
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX dropedia: <http://agkwebserver2.agk.uni-karlsruhe.de/~dropedia/index.php/Special:URIResolver/> 
+PREFIX eus: <http://ontologycentral.com/2009/01/eurostat/ns#> 
+PREFIX smartlocation: <http://smartdbwrap.appspot.com/id/location/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX smartanalysisobject: <http://smartdbwrap.appspot.com/id/analysisobject/> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfh: <http://lod2.eu/schemas/rdfh#> 
+PREFIX dropedialocal: <http://localhost/Dropedia/index.php/Special:URIResolver/> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX gesis-dbpedia-stats: <http://lod.gesis.org/dbpedia-stats/ns#> 
+PREFIX refgovukday: <http://reference.data.gov.uk/id/day/> 
+PREFIX rdfh-inst: <http://lod2.eu/schemas/rdfh-inst#> 
+Select distinct "LdCatalog" as ?CATALOG_NAME "LdSchema" as ?SCHEMA_NAME ?CUBE_NAME  ?DIMENSION_UNIQUE_NAME  ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME "0" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION "1" as ?MEMBER_TYPE "null" as ?PARENT_UNIQUE_NAME "null" as ?PARENT_LEVEL  from <http://fios:2>  from <http://fios:2>  where { ?CUBE_NAME qb:component ?compSpec. ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. ?obs ?DIMENSION_UNIQUE_NAME ?MEMBER_UNIQUE_NAME.  ?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION  FILTER (?CUBE_NAME = <http://public.b-kaempgen.de:8080/edg/archive/1013237/0001193125-11-005034#dsd>)  FILTER (?MEMBER_UNIQUE_NAME = "2009-08-31") } order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME
+
+
+==2013-02-16 - Still problem with squared brackets==
+* Solution: Now that we fully encode a name (even dots), we do not need
+squared brackets any more.
+* We now try whether we can fully avoid them for the names (since with
+LD, their unique identifier should be unique.
+* Therefore I also do not need removeSquaredBrackets any more.
+
 ==2013-02-16 - Problem: Too many cubes==
 * Get Cubes, maybe reasoning?
 

@@ -82,9 +82,9 @@ public class SSBQueryTest extends TestCase {
 	}
 	
 	public void testGenericQuery() {
-		String result = executeStatement("SELECT {[Measures].[Measures].[Measures].[rdfh:lo_revenue]} ON COLUMNS, " +
-				"{[rdfh:lo_custkey].[rdfh:lo_custkeyCodeList].[rdfh:lo_custkeyCustomerLevel].[rdfh-inst:customer_178]} ON ROWS " +
-				"FROM [rdfh-inst:dsd]");
+		String result = executeStatement("SELECT {Measures.Measures.Measures.rdfhXXX3Alo_revenue} ON COLUMNS, " +
+				"{rdfhXXX3Alo_custkey.rdfhXXX3Alo_custkeyCodeList.rdfhXXX3Alo_custkeyCustomerLevel.rdfhZZZinstXXX3Acustomer_178} ON ROWS " +
+				"FROM rdfhZZZinstXXX3Adsd");
 		
 		assertContains("1436037326", result);
 	}

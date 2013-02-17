@@ -138,11 +138,14 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	 */
 	public GenericCubeReturnMetadataTest() throws SQLException {
 
-		String dsduri = "http://public.b-kaempgen.de:8080/edg/archive/1013237/0001193125-11-005034#dsd";
-
+		// String dsduri =
+		// "http://public.b-kaempgen.de:8080/edg/archive/1013237/0001193125-11-005034#dsd";
+		String dsduri = "rdfh-inst:dsd";
 		// New Yhf example
-		this.cubeNamePattern = "[" + LdOlap4jUtil.encodeUriWithPrefix(dsduri)
-				+ "]";
+		this.cubeNamePattern = LdOlap4jUtil.encodeUriWithPrefix(dsduri);
+
+		// this.cubeNamePattern =
+		// "httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd";
 
 		// SEC Example
 		// this.cubeNamePattern =
@@ -358,7 +361,7 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 					measure, Olap4jUtil.enumSetOf(Member.TreeOp.SELF)),
 					MEMBERS_COLUMN_NAMES);
 
-			System.out.println("getMembers(" + measure + "): " + s);
+			System.out.println("getMeasureMembers(" + measure + "): " + s);
 
 		}
 	}
@@ -368,20 +371,20 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	 * 
 	 * @throws SQLException
 	 */
-	public void testDatabaseMetaDataGetMembers() throws SQLException {
-		ResultSet levels = olapDatabaseMetaData.getLevels(catalogName, null,
-				cubeNamePattern, null, null, null);
-
-		while (levels.next()) {
-			String level = levels.getString(6);
-
-			String s = checkResultSet(olapDatabaseMetaData.getMembers(
-					catalogName, null, cubeNamePattern, null, null, level,
-					null, null), MEMBERS_COLUMN_NAMES);
-
-			System.out.println("getMembers(Level:" + level + "): " + s);
-		}
-	}
+//	public void testDatabaseMetaDataGetMembers() throws SQLException {
+//		ResultSet levels = olapDatabaseMetaData.getLevels(catalogName, null,
+//				cubeNamePattern, null, null, null);
+//
+//		while (levels.next()) {
+//			String level = levels.getString(6);
+//
+//			String s = checkResultSet(olapDatabaseMetaData.getMembers(
+//					catalogName, null, cubeNamePattern, null, null, level,
+//					null, null), MEMBERS_COLUMN_NAMES);
+//
+//			System.out.println("getMembers(Level:" + level + "): " + s);
+//		}
+//	}
 
 	public void testDatabaseMetaDataGetSets() throws SQLException {
 		// String s = checkResultSet(

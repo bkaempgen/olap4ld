@@ -207,7 +207,9 @@ class LdOlap4jCube implements Cube, Named {
 			if (buf.length() > 0) {
 				buf.append('.');
 			}
-			buf.append(segment.toString());
+			// We are looking for names, not strings with square brackets
+			buf.append(segment.getName());
+			// buf.append(segment.toString());
 		}
 		final String uniqueName = buf.toString();
 		// MetadataReader is used to find the actual member

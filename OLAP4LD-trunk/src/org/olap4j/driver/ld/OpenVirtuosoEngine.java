@@ -849,14 +849,15 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	private boolean isMeasureQueriedFor(String dimensionUniqueName,
 			String hierarchyUniqueName, String levelUniqueName) {
 		// If one is set, it should not be Measures, not.
+		// Watch out: square brackets are not needed.
 		boolean notExplicitlyStated = dimensionUniqueName == null
 				&& hierarchyUniqueName == null && levelUniqueName == null;
 		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName
-				.equals("[Measures]"))
+				.equals("Measures"))
 				|| (hierarchyUniqueName != null && hierarchyUniqueName
-						.equals("[Measures]"))
+						.equals("Measures"))
 				|| (levelUniqueName != null && levelUniqueName
-						.equals("[Measures]"));
+						.equals("Measures"));
 
 		return notExplicitlyStated || explicitlyStated;
 
@@ -1251,12 +1252,13 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		}
 
 		// Normal Member
+		// Watch out: No square brackets
 		if ((restrictions.dimensionUniqueName == null || !restrictions.dimensionUniqueName
-				.equals("[Measures]"))
+				.equals("Measures"))
 				|| (restrictions.hierarchyUniqueName == null || !restrictions.hierarchyUniqueName
-						.equals("[Measures]"))
+						.equals("Measures"))
 				|| (restrictions.levelUniqueName == null || !restrictions.levelUniqueName
-						.equals("[Measures]"))) {
+						.equals("Measures"))) {
 
 			intermediaryresult = getLevelMembers(restrictions);
 
@@ -1660,10 +1662,16 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 						+ ">) ";
 			}
 			if (restrictions.memberUniqueName != null) {
-				alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = <"
-						+ LdOlap4jUtil
-								.convertMDXtoURI(restrictions.memberUniqueName)
-						+ ">) ";
+				// Check whether uri or Literal
+				String resource = LdOlap4jUtil
+						.convertMDXtoURI(restrictions.memberUniqueName);
+				if (resource.startsWith("http:")) {
+					alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = <"
+							+ resource + ">) ";
+				} else {
+					alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = \""
+							+ resource + "\") ";
+				}
 			}
 
 			// It is possible that dimensionWithoutHierarchies is null
@@ -1962,7 +1970,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 							.getLevels().size() - 1 - member.getLevel()
 							.getDepth());
 
-					andList.add(" " + dimensionPropertyVariable + diceslevelHeight + " = " + "<"
+					andList.add(" " + dimensionPropertyVariable
+							+ diceslevelHeight + " = " + "<"
 							+ dimensionProperty + "> ");
 				}
 

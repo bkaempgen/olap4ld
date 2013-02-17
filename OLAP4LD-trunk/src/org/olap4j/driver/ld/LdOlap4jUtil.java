@@ -634,30 +634,11 @@ public abstract class LdOlap4jUtil {
 
 		// If there is no prefix stored, we have to come up with one ourselves
 		// (which if possible should be always the same):
-		String prefix = standard_uri2prefix.get(baseuri.hashCode());
-		if (prefix == null) {
-			// BASE64Encoder myEncoder = new BASE64Encoder();
-			// String encodedURI = myEncoder.encode(baseuri.getBytes());
-			// encodedURI = encodedURI.replace("/(\r\n|\n|\r)/gm","");
-			// Base64 myEncoder = new Base64(0);
-			// String encodedURI = myEncoder.encodeToString(baseuri.getBytes());
-			try {
-				prefix = URLEncoder.encode(baseuri, "UTF-8");
-				/*
-				 * I also encode the following:
-				 * 
-				 * % = XXX . = YYY
-				 */
-				prefix = prefix.replace("%", "XXX");
-				prefix = prefix.replace(".", "YYY");
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return prefix + ":" + qname;
-		} else {
-			return prefix + ":" + qname;
-		}
+		String prefixeduri = (standard_uri2prefix.containsKey(baseuri
+				.hashCode())) ? standard_uri2prefix.get(baseuri.hashCode())
+				+ ":" + qname : baseuri + qname;
+
+		return encodeSpecialMdxCharactersInNames(prefixeduri);
 	}
 
 	/**
@@ -669,42 +650,31 @@ public abstract class LdOlap4jUtil {
 	 * @param uri
 	 * @return
 	 */
-	public static String decodeUriWithPrefix(String prefixeduri) {
+	public static String decodeUriWithPrefix(String encodedname) {
 
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
 		}
 
+		String decodedname = decodeSpecialMdxCharactersInNames(encodedname);
+
 		// In this case, the : is the sign
-		int lastIndexColon = prefixeduri.lastIndexOf(":");
-		String qname = prefixeduri.substring(lastIndexColon + 1);
-		// Without colon
-		String prefix = prefixeduri.substring(0, lastIndexColon);
+		int lastIndexColon = decodedname.lastIndexOf(":");
 
-		String prefixuri = standard_prefix2uri.get(prefix.hashCode());
+		if (lastIndexColon >= 0) {
+			String qname = decodedname.substring(lastIndexColon + 1);
+			// Without colon
+			String prefix = decodedname.substring(0, lastIndexColon);
 
-		// Possibly stored in specific prefixes.
-		if (prefixuri == null) {
-			// BASE64Decoder myDecoder = new BASE64Decoder();
-			// prefixuri = new String(myDecoder.decodeBuffer(prefix));
-			// Base64 myDecoder = new Base64(0);
-			// prefixuri = new String(myDecoder.decode(prefix.getBytes()));
-			try {
-				/*
-				 * I first decode the following:
-				 * 
-				 * % = XXX . = YYY
-				 */
-				prefix = prefix.replace("XXX", "%");
-				prefix = prefix.replace("YYY", ".");
-				prefixuri = new String(URLDecoder.decode(prefix, "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			String prefixuri = standard_prefix2uri.get(prefix.hashCode());
+
+			if (prefixuri != null) {
+				return prefixuri + qname;
 			}
 		}
+		
+		return decodedname;
 
-		return prefixuri + qname;
 	}
 
 	/**
@@ -732,46 +702,20 @@ public abstract class LdOlap4jUtil {
 		// If value is uri, then convert into MDX friendly format
 		if (node.toString().equals("null")) {
 			myValue = null;
-		} else if (node instanceof Literal) {
-			// For literals, we do not need prefixes, therefore simple string
-			// notation.
-			String value = node.toString();
-			/*
-			 * TODO: Problem: SPARQL does not return URI when it should,
-			 * therefore we take everything as a resource what starts with
-			 * http://
-			 */
-			if (value.contains("http://")) {
-				value = LdOlap4jUtil.encodeUriWithPrefix(node.toString());
-			}
-			myValue = value;
-
-		} else if (node instanceof Resource) {
-			// For uris, we want to have prefixed notation.
-			myValue = LdOlap4jUtil.encodeUriWithPrefix(node.toString());
 		} else {
-			LdOlap4jUtil._log
-					.severe("Here, we do not know what to do with a result node from Linked Data Engine.");
-			myValue = null;
+			// No matter of uri or Literal, we need to encode it
+			myValue = encodeUriWithPrefix(node.toString());
 		}
 
-		// We wrap any node value with brackets.
-		return "[" + myValue + "]";
+		// XXX We do not wrap any node value with brackets.
+		return myValue;
 	}
 
 	public static String convertMDXtoURI(String mdx) {
-		// First, we remove the squared brackets
-		mdx = mdx.substring(1, mdx.length() - 1);
+		// First, we remove the square brackets
+		// mdx = mdx.substring(1, mdx.length() - 1);
 
-		// check whether prefix notation
-		if (mdx.contains("httpXXX3AXXX2FXXX2F")) {
-			return decodeUriWithPrefix(mdx);
-		} else if (mdx.lastIndexOf(":") != -1) {
-			return decodeUriWithPrefix(mdx);
-		} else {
-			// no conversion needed
-			return mdx;
-		}
+		return decodeUriWithPrefix(mdx);
 	}
 
 	/**
@@ -989,6 +933,7 @@ public abstract class LdOlap4jUtil {
 
 	/**
 	 * Removes []
+	 * 
 	 * @param name
 	 * @return
 	 */
@@ -997,8 +942,45 @@ public abstract class LdOlap4jUtil {
 			throw new UnsupportedOperationException(
 					"Name not surrounded by square brackets!");
 		} else {
-			return name.substring(1, name.length()-1);
+			return name.substring(1, name.length() - 1);
 		}
+	}
+
+	/**
+	 * We need to make sure that names of multidimensional elements do not carry
+	 * any MDX special characters.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public static String encodeSpecialMdxCharactersInNames(String name) {
+		try {
+			name = URLEncoder.encode(name, "UTF-8");
+			name = name.replace("%", "XXX");
+			name = name.replace(".", "YYY");
+			name = name.replace("-", "ZZZ");
+			return name;
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	public static String decodeSpecialMdxCharactersInNames(String name) {
+		try {
+			name = name.replace("XXX", "%");
+			name = name.replace("YYY", ".");
+			name = name.replace("ZZZ", "-");
+			name = URLDecoder.decode(name, "UTF-8");
+			return name;
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 }
