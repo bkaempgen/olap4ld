@@ -15,6 +15,7 @@ import javax.swing.text.Segment;
 import org.olap4j.OlapException;
 import org.olap4j.Position;
 import org.olap4j.driver.ld.LdOlap4jConnection.Context;
+import org.olap4j.impl.Olap4jUtil;
 import org.olap4j.mdx.AxisNode;
 import org.olap4j.mdx.CallNode;
 import org.olap4j.mdx.CubeNode;
@@ -115,7 +116,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		}
 
 		// I know, that getFrom gives me a cubeNode, therefore, I know the cube
-		cube = (Cube) selectNode.getFrom().accept(this);
+		this.cube = (Cube) selectNode.getFrom().accept(this);
 
 		// Filter (create MetaData for the filter axis)
 		AxisNode filter = selectNode.getFilterAxis();
@@ -207,7 +208,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		String[] identifierArray = new String[identifierList.size()];
 
 		for (int i = 0; i < identifierList.size(); i++) {
-			identifierArray[i] = identifierList.get(i).getName();
+			identifierArray[i] = identifierList.get(i).toString();
 		}
 
 		String calculatedMemberName = LdOlap4jUtil.implodeArray(
@@ -425,6 +426,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		// The second parameter gives us the cast
 		String caster = (String) call.getArgList().get(1).accept(this);
 		String value = (String) call.getArgList().get(0).accept(this);
+		// We have to translate MDX first to real value since for the square brackets
+		value = LdOlap4jUtil.convertMDXtoURI(value);
 		if (caster.equals("NUMERIC")) {
 			return (Object) (new Double(value));
 		}
@@ -435,15 +438,11 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	@SuppressWarnings("unchecked")
 	private Object callCrossJoin(CallNode call) {
 		// Will be two lists
-		MdxMethodVisitor<Object> newvisitor = new MdxMethodVisitor<Object>(
-				this.olap4jStatement);
 		List<Object> list = (List<Object>) call.getArgList().get(0)
-				.accept(newvisitor);
+				.accept(this);
 		List<List<Object>> result = new ArrayList<List<Object>>();
-		MdxMethodVisitor<Object> newvisitor1 = new MdxMethodVisitor<Object>(
-				this.olap4jStatement);
 		List<Object> list2 = (List<Object>) call.getArgList().get(1)
-				.accept(newvisitor1);
+				.accept(this);
 		// Would return one list of lists
 		for (Object object : list) {
 			for (Object object1 : list2) {
@@ -498,13 +497,10 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	@SuppressWarnings("unchecked")
 	private Object callChildren(CallNode call) {
 
-		MdxMethodVisitor<Object> newvisitor = new MdxMethodVisitor<Object>(
-				this.olap4jStatement);
-
 		/*
 		 * Children can only be for a member
 		 */
-		Object object = call.getArgList().get(0).accept(newvisitor);
+		Object object = call.getArgList().get(0).accept(this);
 
 		try {
 			if (object instanceof Member) {
@@ -526,13 +522,10 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	@SuppressWarnings("unchecked")
 	private Object callMembers(CallNode call) {
 
-		MdxMethodVisitor<Object> newvisitor = new MdxMethodVisitor<Object>(
-				this.olap4jStatement);
-
 		/*
 		 * Members can be for a dimension, hierarchy, level
 		 */
-		Object object = call.getArgList().get(0).accept(newvisitor);
+		Object object = call.getArgList().get(0).accept(this);
 
 		List<Member> allMembers = new ArrayList<Member>();
 		try {
@@ -580,11 +573,9 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 
 	@SuppressWarnings("unchecked")
 	private Object callHierarchize(CallNode call) {
-		// Can only be a list
-		MdxMethodVisitor<Object> newvisitor = new MdxMethodVisitor<Object>(
-				this.olap4jStatement);
+
 		List<Object> list = (List<Object>) call.getArgList().get(0)
-				.accept(newvisitor);
+				.accept(this);
 		for (Object object : list) {
 			if (object instanceof List) {
 				// First order for the first, then the second...
@@ -632,7 +623,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 			String[] identifierArray = new String[segmentList.size()];
 
 			for (int i = 0; i < segmentList.size(); i++) {
-				identifierArray[i] = segmentList.get(i).getName();
+				identifierArray[i] = segmentList.get(i).toString();
 			}
 
 			String calculatedMemberName = LdOlap4jUtil.implodeArray(
@@ -650,8 +641,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		 * TODO: .members is then seen as part of the name which is not ideal.
 		 */
 		int segmentIndex = 0;
-		// .name() removes the square brackets if contained
-		String segmentName = segmentList.get(segmentIndex).getName();
+		// .name() removes the square brackets if contained, therefore, we use toString()
+		String segmentName = segmentList.get(segmentIndex).toString();
 		segmentIndex++;
 		// Now, we check whether name is available
 		try {
@@ -666,8 +657,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				for (Cube cube1 : cubes) {
 
 					// If cube already given by the query, use it.
-					if (cube != null && first) {
-						cube1 = cube;
+					if (this.cube != null && first) {
+						cube1 = this.cube;
 						first = false;
 					} else if (cube != null && !first) {
 						throw new UnsupportedOperationException(
@@ -684,6 +675,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 					 */
 					if (dimension == null) {
 
+						// Go through everything
 						for (Dimension dimension1 : dimensions) {
 							NamedList<Hierarchy> hierarchies = dimension1
 									.getHierarchies();
@@ -720,7 +712,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 						return (Object) dimension;
 
 					} else if (dimension != null) {
-						segmentName = segmentList.get(segmentIndex).getName();
+						segmentName = segmentList.get(segmentIndex).toString();
 
 						Hierarchy hierarchy = dimension.getHierarchies().get(
 								segmentName);
@@ -733,7 +725,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 								&& segmentIndex >= segmentList.size()) {
 							return (Object) hierarchy;
 						} else {
-							segmentName = segmentList.get(segmentIndex).getName();
+							segmentName = segmentList.get(segmentIndex).toString();
 
 							Level level = hierarchy.getLevels()
 									.get(segmentName);
@@ -746,7 +738,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 									&& segmentIndex >= segmentList.size()) {
 								return (Object) level;
 							} else {
-								segmentName = segmentList.get(segmentIndex).getName();
+								segmentName = segmentList.get(segmentIndex).toString();
 
 								for (Member member : level.getMembers()) {
 									if (member.getName().equals(segmentName)) {
@@ -765,7 +757,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		}
 		String identifier = "";
 		for (int i = 0; i < segmentList.size(); i++) {
-			identifier += segmentList.get(i).getName();
+			identifier += segmentList.get(i).toString();
 		}
 		throw new UnsupportedOperationException(
 				"There should be an OLAP element for each identifier, also this one:"

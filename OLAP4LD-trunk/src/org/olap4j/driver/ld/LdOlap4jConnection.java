@@ -1447,9 +1447,8 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			}
 
 			// Here, we need a boolean
-			final boolean measureIsVisible = new Boolean(
-					LdOlap4jUtil.convertNodeToMDX(row[mapFields
-							.get("?MEASURE_IS_VISIBLE")])).booleanValue();
+			final boolean measureIsVisible = new Boolean(row[mapFields
+							.get("?MEASURE_IS_VISIBLE")].toString());
 
 			/*
 			 * Apparently, for each single measure in a cube, i need a member in

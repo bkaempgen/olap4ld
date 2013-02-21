@@ -1,3 +1,14 @@
+* TODO
+** How about useful captions?
+** How about querying over several cubes together?
+** How about the Member function?
+
+==2013-02-22==
+* We have again refactored the use of square brackets: For "Measures", we keep the name without 
+square brackets since Saiku is using those names specifically. For all others, the square brackets
+are a necessary part of the name (e.g., since MDX parser would not work for a member that starts 
+with a numeric character.
+
 ==2013-02-17 - Problem: .Member is interpreted as an Identifier segment==
 * uri.Member is interpreted as a full Identifier of several segments
 * Solutions: 
@@ -6,6 +17,12 @@ IdentifierNode(uri.Members) to CallNode(Members, Identifier(uri)).
 
 ==2013-02-18 - Problem: Literal values apparently require square brackets==
 * MDX Parser does not work with 2009ZZZ08ZZZ31, only with [2009ZZZ08ZZZ31].
+* Also, Saiku does not attach [] to the names when transformed to MDX.
+* Therefore, the unique name should actually say [Measures].
+* Again, we need to rethink the brackets approach:
+** Since the unique name is used for building MDX queries, and since MDX requires it, we add it.
+** When coming from MDX, we need to use toString(), since it keeps the square brackets.
+** Also, we need to add [] if comparing.
 
 ==2013-02-17 - Problem: If asking for members, we do not consider Literal values==
 * Of all multidimensional elements, members possibly can be described by Literal values.

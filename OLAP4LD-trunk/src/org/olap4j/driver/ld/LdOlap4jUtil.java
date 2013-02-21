@@ -609,7 +609,7 @@ public abstract class LdOlap4jUtil {
 	 *            The pure uri string to be encoded for MDX
 	 * @return encoded string
 	 */
-	public static String encodeUriWithPrefix(String uri) {
+	private static String encodeUriWithPrefix(String uri) {
 
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
@@ -644,13 +644,11 @@ public abstract class LdOlap4jUtil {
 	/**
 	 * Decode an MDX identifier of a URI.
 	 * 
-	 * Before using this method, we need to make sure that MDX has not wrapped
-	 * the URI with square brackets, e.g., [Measures].[http...].
 	 * 
 	 * @param uri
 	 * @return
 	 */
-	public static String decodeUriWithPrefix(String encodedname) {
+	private static String decodeUriWithPrefix(String encodedname) {
 
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
@@ -672,7 +670,7 @@ public abstract class LdOlap4jUtil {
 				return prefixuri + qname;
 			}
 		}
-		
+
 		return decodedname;
 
 	}
@@ -701,19 +699,24 @@ public abstract class LdOlap4jUtil {
 		final String myValue;
 		// If value is uri, then convert into MDX friendly format
 		if (node.toString().equals("null")) {
-			myValue = null;
+			return null;
+		} else if (node.toString().equals("Measures")) {
+			// Measures does not get encoded, can stay.
+			return node.toString();
 		} else {
 			// No matter of uri or Literal, we need to encode it
-			myValue = encodeUriWithPrefix(node.toString());
+			// We add square brackets
+			return "[" + encodeUriWithPrefix(node.toString()) + "]";
 		}
-
-		// XXX We do not wrap any node value with brackets.
-		return myValue;
 	}
 
 	public static String convertMDXtoURI(String mdx) {
+		if (mdx.equals("Measures")) {
+			// No conversion needed.
+			return mdx;
+		}
 		// First, we remove the square brackets
-		// mdx = mdx.substring(1, mdx.length() - 1);
+		mdx = removeSquareBrackets(mdx);
 
 		return decodeUriWithPrefix(mdx);
 	}
@@ -937,7 +940,7 @@ public abstract class LdOlap4jUtil {
 	 * @param name
 	 * @return
 	 */
-	public static String removeSquareBrackets(String name) {
+	private static String removeSquareBrackets(String name) {
 		if (!name.startsWith("[") || !name.endsWith("]")) {
 			throw new UnsupportedOperationException(
 					"Name not surrounded by square brackets!");
@@ -953,7 +956,7 @@ public abstract class LdOlap4jUtil {
 	 * @param name
 	 * @return
 	 */
-	public static String encodeSpecialMdxCharactersInNames(String name) {
+	private static String encodeSpecialMdxCharactersInNames(String name) {
 		try {
 			name = URLEncoder.encode(name, "UTF-8");
 			name = name.replace("%", "XXX");
@@ -968,7 +971,7 @@ public abstract class LdOlap4jUtil {
 		return null;
 	}
 
-	public static String decodeSpecialMdxCharactersInNames(String name) {
+	private static String decodeSpecialMdxCharactersInNames(String name) {
 		try {
 			name = name.replace("XXX", "%");
 			name = name.replace("YYY", ".");

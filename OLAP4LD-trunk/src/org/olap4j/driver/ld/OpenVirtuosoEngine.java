@@ -849,7 +849,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	private boolean isMeasureQueriedFor(String dimensionUniqueName,
 			String hierarchyUniqueName, String levelUniqueName) {
 		// If one is set, it should not be Measures, not.
-		// Watch out: square brackets are not needed.
+		// Watch out: square brackets are needed.
 		boolean notExplicitlyStated = dimensionUniqueName == null
 				&& hierarchyUniqueName == null && levelUniqueName == null;
 		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName
@@ -1665,7 +1665,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				// Check whether uri or Literal
 				String resource = LdOlap4jUtil
 						.convertMDXtoURI(restrictions.memberUniqueName);
-				if (resource.startsWith("http:")) {
+				if (isResourceAndNotLiteral(resource)) {
 					alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = <"
 							+ resource + ">) ";
 				} else {
@@ -1808,6 +1808,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 	}
 
+	private boolean isResourceAndNotLiteral(String resource) {
+		return resource.startsWith("http:");
+	}
+
 	private String createFilterForRestrictions(Restrictions restrictions) {
 		// We need to create a filter for the specific restriction
 		String cubeNamePatternFilter = (restrictions.cubeNamePattern != null) ? " FILTER (?CUBE_NAME = <"
@@ -1916,10 +1920,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			whereClause += addLevelPropertyPath(0, levelHeight,
 					dimensionProperty, levelURI);
 
-			String dimensionPropertyVariable = makeParameter(dimensionProperty);
-			selectClause += " ?" + dimensionPropertyVariable + " ";
-			groupByClause += " ?" + dimensionPropertyVariable + " ";
-			orderByClause += " ?" + dimensionPropertyVariable + " ";
+			String dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
+			selectClause += " ?" + dimensionPropertyVariable + levelHeight + " ";
+			groupByClause += " ?" + dimensionPropertyVariable + levelHeight + " ";
+			orderByClause += " ?" + dimensionPropertyVariable + levelHeight + " ";
 		}
 
 		// For each filter tuple
@@ -1960,19 +1964,31 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 				for (Member member : position.getMembers()) {
 					// We need to know the variable to filter
-					String dimensionProperty = LdOlap4jUtil
+					// First, we need to convert it to URI representation.
+					String dimensionPropertyVariable = makeUriToParameter(LdOlap4jUtil
 							.convertMDXtoURI(member.getLevel().getDimension()
-									.getUniqueName());
-					String dimensionPropertyVariable = makeParameter(member
-							.getLevel().getDimension().getUniqueName());
+									.getUniqueName()));
 
+					// We need to know the member to filter
+					String memberResource = LdOlap4jUtil.convertMDXtoURI(member
+							.getUniqueName());
+
+					// Need to know the level of the member
 					Integer diceslevelHeight = (member.getHierarchy()
 							.getLevels().size() - 1 - member.getLevel()
 							.getDepth());
 
-					andList.add(" " + dimensionPropertyVariable
-							+ diceslevelHeight + " = " + "<"
-							+ dimensionProperty + "> ");
+					if (isResourceAndNotLiteral(memberResource)) {
+						andList.add(" ?" + dimensionPropertyVariable
+								+ diceslevelHeight + " = " + "<"
+								+ memberResource + "> ");
+					} else {
+						// For some reason, we need to convert the variable using str.
+						andList.add(" str(?" + dimensionPropertyVariable
+								+ diceslevelHeight + ") = " + "\""
+								+ memberResource + "\" ");
+					}
+
 				}
 
 				orList.add(LdOlap4jUtil.implodeArray(
@@ -1980,6 +1996,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			}
 			whereClause += LdOlap4jUtil.implodeArray(
 					orList.toArray(new String[0]), " OR ");
+			whereClause += ") ";
 
 		}
 
@@ -2397,13 +2414,13 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 						" " + measure.getAggregator().name(), "");
 				// We do not encode the aggregation function in the measure, any
 				// more.
-				String measurePropertyVariable1 = makeParameter(measure1
+				String measurePropertyVariable1 = makeUriToParameter(measure1
 						.getUniqueName());
 
 				String measureProperty2 = LdOlap4jUtil.convertMDXtoURI(
 						measure2.getUniqueName()).replace(
 						" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable2 = makeParameter(measure2
+				String measurePropertyVariable2 = makeUriToParameter(measure2
 						.getUniqueName());
 
 				// We take the aggregator from the measure
@@ -2430,7 +2447,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				String measureProperty = LdOlap4jUtil.convertMDXtoURI(
 						measure.getUniqueName()).replace(
 						" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable = makeParameter(measure
+				String measurePropertyVariable = makeUriToParameter(measure
 						.getUniqueName());
 
 				// We take the aggregator from the measure
@@ -2473,7 +2490,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 		String whereClause = "";
 
-		String dimensionPropertyVariable = makeParameter(dimensionProperty);
+		String dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
 
 		if (levelHeight == 0) {
 			/*
@@ -2484,7 +2501,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			 * i'th position member.
 			 */
 			whereClause += "?obs <" + dimensionProperty + "> ?"
-					+ dimensionPropertyVariable + ". ";
+					+ dimensionPropertyVariable + levelHeight + ". ";
 
 			// If level height is 0, it could be that no level is existing which
 			// is why we leave that
@@ -2518,15 +2535,16 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 	/**
 	 * SPARQL does not allow all characters as parameter names, e.g.,
-	 * ?sdmx-measure:obsValue
+	 * ?sdmx-measure:obsValue. Therefore, we transform the URI representation
+	 * into a parameter.
 	 * 
-	 * @param uniqueName
+	 * @param uriRepresentation
 	 * @return
 	 */
-	private String makeParameter(String uniqueName) {
+	private String makeUriToParameter(String uriRepresentation) {
 		// We simply remove all special characters
-		uniqueName = uniqueName.replaceAll("[^a-zA-Z0-9]+", "");
-		return uniqueName;
+		uriRepresentation = uriRepresentation.replaceAll("[^a-zA-Z0-9]+", "");
+		return uriRepresentation;
 	}
 
 }
