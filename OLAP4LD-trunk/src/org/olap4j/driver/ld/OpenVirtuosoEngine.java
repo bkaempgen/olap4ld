@@ -726,6 +726,9 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		// }
 		// }
 
+		// Add filter for certain cube
+		additionalFilters += "FILTER (?CUBE_NAME = <http://public.b-kaempgen.de:8080/fios#dsd>)";
+		
 		// TODO: For now, we only use the non-language-tag CAPTION and
 		// DESCRIPTION
 		String query = LdOlap4jUtil.getStandardPrefixes()

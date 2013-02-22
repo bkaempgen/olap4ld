@@ -40,6 +40,9 @@ import org.olap4j.mdx.parser.MdxParserFactory;
 import org.olap4j.mdx.parser.MdxValidator;
 import org.olap4j.metadata.Member;
 import org.olap4j.test.TestContext;
+import org.semanticweb.yars.nx.Literal;
+import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.NodeComparator;
 
 /**
  * Unit test for olap4j metadata methods.
@@ -140,9 +143,9 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 
 		// String dsduri =
 		// "http://public.b-kaempgen.de:8080/edg/archive/1013237/0001193125-11-005034#dsd";
-		String dsduri = "rdfh-inst:dsd";
+		Node node = new Literal("http://public.b-kaempgen.de:8080/fios#dsd");
 		// New Yhf example
-		this.cubeNamePattern = LdOlap4jUtil.encodeUriWithPrefix(dsduri);
+		this.cubeNamePattern = LdOlap4jUtil.convertNodeToMDX(node);
 
 		// this.cubeNamePattern =
 		// "httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd";
@@ -371,20 +374,20 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	 * 
 	 * @throws SQLException
 	 */
-//	public void testDatabaseMetaDataGetMembers() throws SQLException {
-//		ResultSet levels = olapDatabaseMetaData.getLevels(catalogName, null,
-//				cubeNamePattern, null, null, null);
-//
-//		while (levels.next()) {
-//			String level = levels.getString(6);
-//
-//			String s = checkResultSet(olapDatabaseMetaData.getMembers(
-//					catalogName, null, cubeNamePattern, null, null, level,
-//					null, null), MEMBERS_COLUMN_NAMES);
-//
-//			System.out.println("getMembers(Level:" + level + "): " + s);
-//		}
-//	}
+	public void testDatabaseMetaDataGetMembers() throws SQLException {
+		ResultSet levels = olapDatabaseMetaData.getLevels(catalogName, null,
+				cubeNamePattern, null, null, null);
+
+		while (levels.next()) {
+			String level = levels.getString(6);
+
+			String s = checkResultSet(olapDatabaseMetaData.getMembers(
+					catalogName, null, cubeNamePattern, null, null, level,
+					null, null), MEMBERS_COLUMN_NAMES);
+
+			System.out.println("getMembers(Level:" + level + "): " + s);
+		}
+	}
 
 	public void testDatabaseMetaDataGetSets() throws SQLException {
 		// String s = checkResultSet(

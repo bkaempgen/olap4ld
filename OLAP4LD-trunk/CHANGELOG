@@ -1,7 +1,15 @@
 * TODO
-** How about useful captions?
 ** How about querying over several cubes together?
+** How about useful captions?
 ** How about the Member function?
+
+==How about querying over several cubes together?==
+* Cube created
+* Test query created
+* Next steps
+** Have to query over both datasets together
+** Enable reasoning
+** Try in Saiku
 
 ==2013-02-22==
 * We have again refactored the use of square brackets: For "Measures", we keep the name without 
