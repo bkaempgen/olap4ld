@@ -80,51 +80,62 @@ public class FIOSQueryTest extends TestCase {
 			connection = null;
 		}
 	}
-	
-//	public void testFIOS_Full_Member() {
-//		String result = executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2009ZZZ08ZZZ31]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F1013237XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd]");
-//		
-//		assertContains("1", result);
-//	}
-//	
-//	public void testFIOS_Only_Member() {
-//		String result = executeStatement("SELECT {Hierarchize({[2009ZZZ08ZZZ31]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F1013237XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd]");
-//		
-//		assertContains("1", result);
-//	}
-	
-//	public void testFIOS_With_Where() {
-//		String result = executeStatement("SELECT NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F1013237XXX23id]})} ON COLUMNS, NON EMPTY {Hierarchize({[sdmxZZZmeasureXXX3AobsValue]})} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd] WHERE {Hierarchize({[2009ZZZ08ZZZ31]})}");
-//		
-//		assertContains("1", result);
-//	}
-	
-	public void testFIOS_DrillAcross() {
-	String result = executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2009ZZZ06ZZZ30]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F37996XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23dsd]");
-	
-	assertContains("58", result);
-}
 
-//	public void testFIOS_2() {
-//		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23:issuer].[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23:issuer].[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23:issuer].[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FcikXXX2F1141391XXX23:id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2008-09-30]} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd]");
-//		
-//		 assertContains("1", result);
-//	}
-//	
-//	public void testFIOS_3() {
-//		
-//		String result = executeStatement("SELECT NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FcikXXX2F1141391XXX23:id]})} ON COLUMNS, NON EMPTY {Hierarchize({[sdmx-measure:obsValue]})} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd]");
-//		
-//		 assertContains("1", result);
-//
-//	}
-	
+	// public void testFIOS_Full_Member() {
+	// String result =
+	// executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2009ZZZ08ZZZ31]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F1013237XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd]");
+	//
+	// assertContains("1", result);
+	// }
+	//
+	// public void testFIOS_Only_Member() {
+	// String result =
+	// executeStatement("SELECT {Hierarchize({[2009ZZZ08ZZZ31]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F1013237XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd]");
+	//
+	// assertContains("1", result);
+	// }
+
+	// public void testFIOS_With_Where() {
+	// String result =
+	// executeStatement("SELECT NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F1013237XXX23id]})} ON COLUMNS, NON EMPTY {Hierarchize({[sdmxZZZmeasureXXX3AobsValue]})} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd] WHERE {Hierarchize({[2009ZZZ08ZZZ31]})}");
+	//
+	// assertContains("1", result);
+	// }
+
+	public void testFIOS_DrillAcrossYahoo() {
+		String result = executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2013ZZZ02ZZZ19]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F37996XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23dsd]");
+
+		assertContains("19", result);
+	}
+
+	public void testFIOS_DrillAcrossSEC() {
+		String result = executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2009ZZZ06ZZZ30]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F37996XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23dsd]");
+
+		assertContains("58", result);
+	}
+
+	// public void testFIOS_2() {
+	// String result =
+	// executeStatement("SELECT {[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23:issuer].[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23:issuer].[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23:issuer].[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FcikXXX2F1141391XXX23:id]} ON COLUMNS, {[dcterms:date].[dcterms:date].[dcterms:date].[2008-09-30]} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd]");
+	//
+	// assertContains("1", result);
+	// }
+	//
+	// public void testFIOS_3() {
+	//
+	// String result =
+	// executeStatement("SELECT NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FcikXXX2F1141391XXX23:id]})} ON COLUMNS, NON EMPTY {Hierarchize({[sdmx-measure:obsValue]})} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd]");
+	//
+	// assertContains("1", result);
+	//
+	// }
+
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
 			fail("expected to find '" + seek + "' in '" + s + "'");
 		}
 	}
-	
+
 	private String executeStatement(String mdxString) {
 		// Execute the statement.
 		String resultString = "";
@@ -142,7 +153,6 @@ public class FIOSQueryTest extends TestCase {
 
 			System.out.println("Output:");
 			System.out.println(resultString);
-			
 
 		} catch (OlapException e) {
 			System.out.println("Execution failed: " + e);

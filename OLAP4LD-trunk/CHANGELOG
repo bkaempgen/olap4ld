@@ -1,7 +1,24 @@
-* TODO
-** How about querying over several cubes together?
-** How about useful captions?
-** How about the Member function?
+==Open issues==
+
+* Reasoning does not work
+
+* Queries are very slow. Possible solutions:
+** We could define code lists (hierarchies etc.)
+** We could enable caching
+** We could only gradually populate the multidimensional data
+
+* CAPTIONS
+** We only use english captions
+** We use skos:notation for members
+** We use rdfs:label for everything else
+
+* How about querying over several cubes together?
+** We have to define the measures clearly. For SEC / Yahoo what is the appropriate aggregation function?
+
+* How about predefining codelists?
+
+* How about the Member function?
+
 
 ==How about querying over several cubes together?==
 * Cube created
@@ -10,6 +27,7 @@
 ** Have to query over both datasets together
 ** Enable reasoning
 ** Try in Saiku
+
 
 ==2013-02-22==
 * We have again refactored the use of square brackets: For "Measures", we keep the name without 
