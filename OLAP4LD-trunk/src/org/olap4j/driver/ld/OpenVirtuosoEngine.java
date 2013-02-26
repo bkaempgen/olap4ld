@@ -334,8 +334,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	 * @return
 	 */
 	private List<Node[]> sparql(String query, Boolean caching) {
-
-		// XXX Chaching disabled by default for now.
+		
+		// XXX: Caching off
 		caching = false;
 
 		Integer hash = null;
@@ -727,7 +727,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		// }
 
 		// Add filter for certain cube
-		additionalFilters += "FILTER (?CUBE_NAME = <http://public.b-kaempgen.de:8080/fios#dsd>)";
+		//additionalFilters += "FILTER (?CUBE_NAME = <http://public.b-kaempgen.de:8080/fios#secdsd> OR ?CUBE_NAME = <http://public.b-kaempgen.de:8080/fios#yahoodsd>)";
 		
 		// TODO: For now, we only use the non-language-tag CAPTION and
 		// DESCRIPTION
@@ -736,10 +736,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"CUBE\" as ?CUBE_TYPE ?DESCRIPTION ?CUBE_CAPTION "
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"CUBE\" as ?CUBE_TYPE min(?DESCRIPTION) as ?DESCRIPTION min(?CUBE_CAPTION) as ?CUBE_CAPTION "
 				+ askForFrom(true)
-				+ "where { ?ds qb:structure ?CUBE_NAME. ?CUBE_NAME a qb:DataStructureDefinition. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"\" )} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"\" )} "
-				+ additionalFilters + "}" + "order by ?CUBE_NAME limit 10";
+				+ "where { ?ds qb:structure ?CUBE_NAME. ?CUBE_NAME a qb:DataStructureDefinition. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"en\" )} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" )} "
+				+ additionalFilters + "}" + "group by ?CUBE_NAME order by ?CUBE_NAME";
 
 		List<Node[]> result = sparql(query, true);
 
@@ -777,12 +777,12 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME as ?DIMENSION_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_CAPTION ?DESCRIPTION \"0\" as ?DIMENSION_TYPE \"0\" as ?DIMENSION_ORDINAL "
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME as ?DIMENSION_NAME ?DIMENSION_UNIQUE_NAME min(?DIMENSION_CAPTION) as ?DIMENSION_CAPTION min(?DESCRIPTION) as ?DESCRIPTION \"0\" as ?DIMENSION_TYPE \"0\" as ?DIMENSION_ORDINAL "
 				+ askForFrom(true)
 				+ " where { ?CUBE_NAME qb:component ?compSpec "
 				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. OPTIONAL {?DIMENSION_UNIQUE_NAME rdfs:label ?DIMENSION_CAPTION FILTER ( lang(?DIMENSION_CAPTION) = \"en\" )} OPTIONAL {?DIMENSION_UNIQUE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" )} "
 				+ additionalFilters + "} "
-				+ "order by ?CUBE_NAME ?DIMENSION_NAME ";
+				+ "group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME order by ?CUBE_NAME ?DIMENSION_NAME ";
 
 		List<Node[]> result = sparql(query, true);
 
@@ -900,7 +900,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEASURE_NAME ?MEASURE_CAPTION \"5\" as ?DATA_TYPE \"true\" as ?MEASURE_IS_VISIBLE ?MEASURE_AGGREGATOR ?EXPRESSION"
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEASURE_NAME min(?MEASURE_CAPTION) as ?MEASURE_CAPTION \"5\" as ?DATA_TYPE \"true\" as ?MEASURE_IS_VISIBLE min(?MEASURE_AGGREGATOR) as ?MEASURE_AGGREGATOR min(?EXPRESSION) as ?EXPRESSION "
 				+ askForFrom(true)
 				// Hint: For now, MEASURE_CAPTION is simply the
 				// MEASURE_DIMENSION.
@@ -910,7 +910,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION "
 				+ ". ?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = \"en\" )} OPTIONAL {?COMPONENT_SPECIFICATION qb:aggregator ?MEASURE_AGGREGATOR } OPTIONAL {?COMPONENT_SPECIFICATION qb:expression ?EXPRESSION } "
 				+ additionalFilters + "} "
-				+ "order by ?CUBE_NAME ?MEASURE_UNIQUE_NAME ";
+				+ "group by ?CUBE_NAME ?MEASURE_UNIQUE_NAME order by ?CUBE_NAME ?MEASURE_UNIQUE_NAME ";
 		List<Node[]> result = sparql(query, true);
 
 		// List<Node[]> result = applyRestrictions(measureUris, restrictions);
@@ -936,12 +936,12 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_NAME ?HIERARCHY_CAPTION ?HIERARCHY_UNIQUE_NAME as ?DESCRIPTION "
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_NAME min(?HIERARCHY_CAPTION) as ?HIERARCHY_CAPTION min(?DESCRIPTION) as ?DESCRIPTION "
 				+ askForFrom(true)
 				+ " where { ?CUBE_NAME qb:component ?compSpec "
-				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:label ?HIERARCHY_CAPTION FILTER ( lang(?HIERARCHY_CAPTION) = \"\" ) } OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:comment ?DESCRIPTION } "
+				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:label ?HIERARCHY_CAPTION FILTER ( lang(?HIERARCHY_CAPTION) = \"en\" ) } OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" ) } "
 				+ additionalFilters + "} "
-				+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_NAME ";
+				+ "group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ";
 		List<Node[]> result = sparql(query, true);
 
 		// TODO: No sorting done, yet
@@ -1056,7 +1056,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. FILTER NOT EXISTS { ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. }"
 				+ additionalFilters
 				+ " }"
-				+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_NUMBER ";
+				+ " order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_NUMBER ";
 		List<Node[]> result = sparql(query, true);
 
 		// List<Node[]> result = applyRestrictions(levelResults, restrictions);
@@ -1069,13 +1069,13 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_UNIQUE_NAME as ?LEVEL_CAPTION ?LEVEL_UNIQUE_NAME as ?LEVEL_NAME \"N/A\" as ?DESCRIPTION ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME min(?LEVEL_CAPTION) as ?LEVEL_CAPTION ?LEVEL_UNIQUE_NAME as ?LEVEL_NAME min(?DESCRIPTION) as ?DESCRIPTION ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
 				+ askForFrom(true)
 				+ " where { ?CUBE_NAME qb:component ?compSpec "
-				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
+				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. OPTIONAL {?LEVEL_UNIQUE_NAME rdfs:label ?LEVEL_CAPTION FILTER ( lang(?LEVEL_CAPTION) = \"en\" ) } OPTIONAL {?LEVEL_UNIQUE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" ) }"
 				+ additionalFilters
 				+ "}"
-				+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_NUMBER ";
+				+ "group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_NUMBER ";
 		List<Node[]> result0 = sparql(query, true);
 
 		// List<Node[]> result0 = applyRestrictions(memberUris0, restrictions);
@@ -1362,10 +1362,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 				+ TABLE_CAT
 				+ "\" as ?CATALOG_NAME \""
 				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEASURE_UNIQUE_NAME as ?MEMBER_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_CAPTION \"3\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"0\" as ?PARENT_LEVEL "
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEASURE_UNIQUE_NAME as ?MEMBER_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_CAPTION \"3\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"0\" as ?PARENT_LEVEL "
 				+ askForFrom(true)
 				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION. "
-				+ "?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. "
+				+ "?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" ) } "
 				+ additionalFilters + "} " + "order by ?MEASURE_UNIQUE_NAME";
 
 		List<Node[]> memberUris2 = sparql(query, true);
@@ -1417,7 +1417,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 						+ askForFrom(true)
 						+ " where { ?CUBE_NAME qb:component ?compSpec. "
 						+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?MEMBER_UNIQUE_NAME skos:member ?LEVEL_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
-						+ "?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skos:member ?PARENT_LEVEL_UNIQUE_NAME. ?PARENT_LEVEL_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL. OPTIONAL {?MEMBER_UNIQUE_NAME rdfs:label ?MEMBER_UNIQUE_NAME FILTER ( lang(?MEMBER_UNIQUE_NAME) = \"\" ) }"
+						+ "?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skos:member ?PARENT_LEVEL_UNIQUE_NAME. ?PARENT_LEVEL_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL. OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" ) } "
 						+ additionalFilters
 						+ "} "
 						+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
@@ -1452,46 +1452,22 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			// TreeOp = Self or null
 			LdOlap4jUtil._log.info("TreeOp:SELF");
 
-			// Also, get all members of hierarchies with levels without
-			// notation
 			query = LdOlap4jUtil.getStandardPrefixes()
 					+ "Select \""
 					+ TABLE_CAT
 					+ "\" as ?CATALOG_NAME \""
 					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE ?PARENT_UNIQUE_NAME ?PARENT_LEVEL "
+					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE ?PARENT_UNIQUE_NAME ?PARENT_LEVEL "
 					+ askForFrom(true)
 					+ " where { ?CUBE_NAME qb:component ?compSpec. "
 					+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?MEMBER_UNIQUE_NAME skos:member ?LEVEL_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
-					+ "OPTIONAL {?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL.}"
-					+ " FILTER NOT EXISTS {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION } "
-					+ additionalFilters
-					+ "} "
-					+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-			List<Node[]> memberUris1 = sparql(query, true);
-
-			// Finally, get all members of hierarchies with levels with
-			// notations
-			// (members will be literals)
-			// (Literals)
-			query = LdOlap4jUtil.getStandardPrefixes()
-					+ "Select \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE as ?PARENT_UNIQUE_NAME ?PARENT_LEVEL "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec. "
-					+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?MEMBER_CONCEPT skos:member ?LEVEL_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
 					+ "OPTIONAL { ?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL. }"
-					+ " ?MEMBER_CONCEPT skos:notation ?MEMBER_UNIQUE_NAME "
+					+ " OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" ) } "
 					+ additionalFilters
 					+ "} "
 					+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
 
 			List<Node[]> memberUris2 = sparql(query, true);
-
-			addToResult(memberUris1, memberUris2);
 
 			return memberUris2;
 		}
@@ -1578,11 +1554,11 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 					+ TABLE_CAT
 					+ "\" as ?CATALOG_NAME \""
 					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
+					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
 					+ askForFrom(true)
 					+ " where { ?CUBE_NAME qb:component ?compSpec. "
 					+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?HIERARCHY_UNIQUE_NAME skos:hasTopConcept ?MEMBER_UNIQUE_NAME. "
-					+ " ?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION. "
+					+ " OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" ) } "
 					+ specificFilters
 					+ " } "
 					+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
@@ -1690,7 +1666,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 						+ "\" as ?SCHEMA_NAME ?CUBE_NAME "
 						+ " ?DIMENSION_UNIQUE_NAME "
 						+ " ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME "
-						+ "?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
+						+ "?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
 						// Since we query for instances
 						+ askForFrom(true)
 						+ askForFrom(false)
@@ -1698,43 +1674,12 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 						+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. "
 						+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. "
 						+ "?obs ?DIMENSION_UNIQUE_NAME ?MEMBER_UNIQUE_NAME. "
-						+ " ?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION "
+						+ " OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" ) } "
 						+ alteredadditionalFilters
 						+ "} "
 						+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
 
 				memberUris1 = sparql(query, true);
-
-				/*
-				 * ... and Literal values / values that do not serve a
-				 * skos:notation.
-				 * 
-				 * Need to include instance graph.
-				 */
-				query = LdOlap4jUtil.getStandardPrefixes()
-						+ "Select distinct \""
-						+ TABLE_CAT
-						+ "\" as ?CATALOG_NAME \""
-						+ TABLE_SCHEM
-						+ "\" as ?SCHEMA_NAME ?CUBE_NAME "
-						+ "?DIMENSION_UNIQUE_NAME "
-						+ "?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME "
-						+ "?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
-						// Since we query for instances
-						+ askForFrom(true)
-						+ askForFrom(false)
-						+ " where { ?CUBE_NAME qb:component ?compSpec. "
-						+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. "
-						+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. "
-						+ "?obs ?DIMENSION_UNIQUE_NAME ?MEMBER_UNIQUE_NAME."
-						+ " FILTER NOT EXISTS {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION } "
-						+ alteredadditionalFilters
-						+ "} "
-						+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-
-				List<Node[]> memberUris2 = sparql(query, true);
-
-				addToResult(memberUris2, memberUris1);
 
 			} else {
 
@@ -1749,7 +1694,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 						+ dimensionWithoutHierarchies
 						+ "\" as ?HIERARCHY_UNIQUE_NAME \""
 						+ dimensionWithoutHierarchies
-						+ "\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
+						+ "\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
 						// Since we query for instances
 						+ askForFrom(true)
 						+ askForFrom(false)
@@ -1760,49 +1705,13 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 						+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. ?obs <"
 						+ dimensionWithoutHierarchies
 						+ "> ?MEMBER_UNIQUE_NAME. "
-						+ " ?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION "
+						+ " OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" ) } "
 						+ alteredadditionalFilters
 						+ "} "
 						+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
 
 				memberUris1 = sparql(query, true);
-
-				/*
-				 * ... and Literal values / values that do not serve a
-				 * skos:notation.
-				 * 
-				 * Need to include instance graph.
-				 */
-				query = LdOlap4jUtil.getStandardPrefixes()
-						+ "Select distinct \""
-						+ TABLE_CAT
-						+ "\" as ?CATALOG_NAME \""
-						+ TABLE_SCHEM
-						+ "\" as ?SCHEMA_NAME ?CUBE_NAME \""
-						+ dimensionWithoutHierarchies
-						+ "\" as ?DIMENSION_UNIQUE_NAME \""
-						+ dimensionWithoutHierarchies
-						+ "\" as ?HIERARCHY_UNIQUE_NAME \""
-						+ dimensionWithoutHierarchies
-						+ "\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME ?MEMBER_UNIQUE_NAME as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
-						// Since we query for instances
-						+ askForFrom(true)
-						+ askForFrom(false)
-						+ " where { ?CUBE_NAME qb:component ?compSpec. "
-						+ "?compSpec qb:dimension <"
-						+ dimensionWithoutHierarchies
-						+ ">. "
-						+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. ?obs <"
-						+ dimensionWithoutHierarchies
-						+ "> ?MEMBER_UNIQUE_NAME."
-						+ " FILTER NOT EXISTS {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION } "
-						+ alteredadditionalFilters
-						+ "} "
-						+ "order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-
-				List<Node[]> memberUris2 = sparql(query, true);
-
-				addToResult(memberUris2, memberUris1);
+				
 			}
 
 			return memberUris1;
@@ -2454,8 +2363,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 						.getUniqueName());
 
 				// We take the aggregator from the measure
-				selectClause += " " + measure.getAggregator().name() + "(?"
-						+ measurePropertyVariable + ")";
+				// Since we use OPTIONAL, there might be empty columns, which is why we need
+				// to convert them to decimal.
+				selectClause += " " + measure.getAggregator().name() + "(xsd:decimal(?"
+						+ measurePropertyVariable + "))";
 
 				// Optional clause is used for the case that several measures
 				// are selected.
@@ -2522,10 +2433,10 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			}
 
 			whereClause += "?obs <" + dimensionProperty + "> " + levelPath
-					+ "?" + dimensionPropertyVariable + ". ";
+					+ "?" + dimensionPropertyVariable + levelHeight + ". ";
 
 			// And this concept needs to be contained in the level.
-			whereClause += "?" + dimensionPropertyVariable + " skos:member <"
+			whereClause += "?" + dimensionPropertyVariable + levelHeight + " skos:member <"
 					+ levelURI + ">. ";
 			// Removed part of hasTopConcept, since we know the members
 			// already.

@@ -1,11 +1,46 @@
+* Warum haben die Dimensionen alle zwei Englische rdfs:label? 
+
+==Problem: Saiku calls <Measures>==
+PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX edgar: <http://edgarwrap.ontologycentral.com/vocab/> 
+PREFIX gesis-dbpedia-stats2: <http://lod.gesis.org/dbpedia-stats/> 
+PREFIX smartdbwrap: <http://smartdbwrap.appspot.com/> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX refgovukyear: <http://reference.data.gov.uk/id/year/> 
+PREFIX refgovukmonth: <http://reference.data.gov.uk/id/month/> 
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX dropedia: <http://agkwebserver2.agk.uni-karlsruhe.de/~dropedia/index.php/Special:URIResolver/> 
+PREFIX eus: <http://ontologycentral.com/2009/01/eurostat/ns#> 
+PREFIX smartlocation: <http://smartdbwrap.appspot.com/id/location/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX smartanalysisobject: <http://smartdbwrap.appspot.com/id/analysisobject/> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfh: <http://lod2.eu/schemas/rdfh#> 
+PREFIX dropedialocal: <http://localhost/Dropedia/index.php/Special:URIResolver/> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX gesis-dbpedia-stats: <http://lod.gesis.org/dbpedia-stats/ns#> 
+PREFIX refgovukday: <http://reference.data.gov.uk/id/day/> 
+PREFIX rdfh-inst: <http://lod2.eu/schemas/rdfh-inst#> 
+select "LdCatalog" as ?CATALOG_NAME "LdSchema" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?LEVEL_CAPTION ?DIMENSION_UNIQUE_NAME as ?LEVEL_NAME "N/A" as ?DESCRIPTION "1" as ?LEVEL_NUMBER "0" as ?LEVEL_CARDINALITY "0x0000" as ?LEVEL_TYPE  from <http://fios:saiku>  where { ?CUBE_NAME qb:component ?compSpec . ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. }   FILTER (?CUBE_NAME = <http://public.b-kaempgen.de:8080/archive/MA/2007-06-06#dsd>)  FILTER (?DIMENSION_UNIQUE_NAME = <Measures>) } order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?LEVEL_NUMBER 
+
+
 ==Open issues==
 
 * Reasoning does not work
+** If we enable reasoning, the queries take much too long
+** Also, we do not know what URIs are given to the members.
+** Possible solution: We need to further normalise the data to use one specific uri per resource.
 
 * Queries are very slow. Possible solutions:
 ** We could define code lists (hierarchies etc.)
 ** We could enable caching
 ** We could only gradually populate the multidimensional data
+
+** How about predefining codelists?
 
 * CAPTIONS
 ** We only use english captions
@@ -14,10 +49,25 @@
 
 * How about querying over several cubes together?
 ** We have to define the measures clearly. For SEC / Yahoo what is the appropriate aggregation function?
-
-* How about predefining codelists?
+** Solution: AVG seems a good candidate for now. 
+** Another solution: We separate the measures.
 
 * How about the Member function?
+
+* How about the time information?
+** One part of the problem: In the current implementation, we cater for the special situation where
+the observations use Literal values but we still would like to define code lists. In those cases,
+we so far allowed to use skos:Concept and to give them skos:notations that could be used in the
+observations. In FIOS 2.0, this would be the case for dates and for segment. However, we already use
+skos:notation as a (unique) caption for a member. Therefore, we change this assumption and take
+Literal observations automatically as "degenerated dimensions".
+** Also, I am not sure whether we want to model dates as Literal dates. How about modelling "temporal 
+coverage" with an own uri, maybe giving it ical:dtstart, ical:dtend as descriptive properties, but 
+most importantly giving it skos:notation with "Period from dtstart to dtend" or "Instant at dtstart"?
+Also, one could then more or less automatically link to the date reference ontology for hierarchies,
+e.g., within year 2011 or before 2012. Also, we could give it names such as "Q3, Q4" etc.
+** 
+
 
 
 ==How about querying over several cubes together?==

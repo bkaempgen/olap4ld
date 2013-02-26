@@ -19,7 +19,6 @@ import org.olap4j.mdx.parser.MdxParserFactory;
 import org.olap4j.mdx.parser.MdxValidator;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Hierarchy;
-import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
 import org.olap4j.metadata.Member;
 import org.olap4j.metadata.Property;
@@ -315,6 +314,11 @@ class LdOlap4jStatement implements OlapStatement {
 	public CellSet executeOlapQuery(SelectNode selectNode) throws OlapException {
 		final String mdx = toString(selectNode);
 		LdOlap4jUtil._log.info("Execute MDX: " + mdx);
+		
+		// I pre-process the select node
+		// I need to replace Identifier.Members with Members(Identifier)
+		PreprocessMdxVisitor<Object> preprocessMdxVisitor = new PreprocessMdxVisitor<Object>();
+		selectNode.accept(preprocessMdxVisitor);
 
 		// Close the previous open CellSet, if there is one.
 		synchronized (this) {
@@ -369,8 +373,8 @@ class LdOlap4jStatement implements OlapStatement {
 		List<Position> columnPositions = visitor.getColumnPositions();
 		List<Hierarchy> columnHierarchies = new ArrayList<Hierarchy>();
 		columnHierarchies = this.createHierarchyList(columnPositions);
-		List<Level> columnLevels = new ArrayList<Level>();
-		columnLevels = this.createLevelList(columnPositions);
+//		List<Level> columnLevels = new ArrayList<Level>();
+//		columnLevels = this.createLevelList(columnPositions);
 
 		// Add axisMetaData to list of axes metadata
 		final LdOlap4jCellSetAxisMetaData columnAxisMetaData = new LdOlap4jCellSetAxisMetaData(
@@ -389,8 +393,8 @@ class LdOlap4jStatement implements OlapStatement {
 		List<Position> rowPositions = visitor.getRowPositions();
 		List<Hierarchy> rowHierarchies = new ArrayList<Hierarchy>();
 		rowHierarchies = this.createHierarchyList(rowPositions);
-		List<Level> rowLevels = new ArrayList<Level>();
-		rowLevels = this.createLevelList(rowPositions);
+		// List<Level> rowLevels = new ArrayList<Level>();
+		// rowLevels = this.createLevelList(rowPositions);
 
 		// Add axisMetaData to list of axes metadata
 		final LdOlap4jCellSetAxisMetaData rowAxisMetaData = new LdOlap4jCellSetAxisMetaData(
@@ -408,8 +412,8 @@ class LdOlap4jStatement implements OlapStatement {
 		// Create filter hierarchies
 		List<Hierarchy> filterHierarchies = new ArrayList<Hierarchy>();
 		filterHierarchies = this.createHierarchyList(filterPositions);
-		List<Level> filterLevels = new ArrayList<Level>();
-		filterLevels = this.createLevelList(filterPositions);
+		// List<Level> filterLevels = new ArrayList<Level>();
+		// filterLevels = this.createLevelList(filterPositions);
 		// I need to create a filter axis metadata
 		LdOlap4jCellSetAxisMetaData filterAxisMetaData = new LdOlap4jCellSetAxisMetaData(
 				this.olap4jConnection, filterAxis,
@@ -518,47 +522,6 @@ class LdOlap4jStatement implements OlapStatement {
 		}
 
 		return hierarchyList;
-	}
-
-	/**
-	 * TODO: From the parsed list of lists of members, it should be possible to
-	 * create a level list. Note, we do also include the measures level, here
-	 * this is done for hierarchies also.
-	 * 
-	 * @param list
-	 * @return
-	 */
-	private List<Level> createLevelList(List<Position> axisPositions) {
-		/*
-		 * The list of hierarchies used in an axis, the dimensionality in terms
-		 * of hierarchies
-		 */
-		List<Level> levelList = new ArrayList<Level>();
-
-		// We have a list of tuples (lists)
-
-		// List of "positions"
-		if (!axisPositions.isEmpty()) {
-
-			Position position = axisPositions.get(0);
-
-			List<Member> list1 = position.getMembers();
-			for (Object object2 : list1) {
-				// Now, should be member
-				if (object2 instanceof Member) {
-					if (object2 instanceof Measure) {
-						// Measures are used, also.
-						levelList.add(((Member) object2).getLevel());
-					} else {
-						levelList.add(((Member) object2).getLevel());
-					}
-				} else {
-					throw new UnsupportedOperationException(
-							"Inside the list we should only have members.");
-				}
-			}
-		}
-		return levelList;
 	}
 
 	public void addListener(CellSetListener.Granularity granularity,

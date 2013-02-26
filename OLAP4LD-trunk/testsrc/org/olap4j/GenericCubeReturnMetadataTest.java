@@ -143,7 +143,7 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 
 		// String dsduri =
 		// "http://public.b-kaempgen.de:8080/edg/archive/1013237/0001193125-11-005034#dsd";
-		Node node = new Literal("http://public.b-kaempgen.de:8080/fios#dsd");
+		Node node = new Literal("http://public.b-kaempgen.de:8080/fios#secyhofdsd");
 		// New Yhf example
 		this.cubeNamePattern = LdOlap4jUtil.convertNodeToMDX(node);
 

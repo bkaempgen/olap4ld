@@ -73,6 +73,8 @@ import org.olap4j.metadata.Schema;
 import org.semanticweb.yars.nx.Node;
 import org.w3c.dom.Element;
 
+import com.sun.corba.se.spi.ior.MakeImmutable;
+
 /**
  * Implementation of {@link org.olap4j.OlapConnection} for XML/A providers.
  * 
@@ -920,50 +922,59 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			Context context, MetadataRequest metadataRequest,
 			Object[] restrictions) {
 
-			LdOlap4jUtil._log.info("********************************************");
-			LdOlap4jUtil._log.info("** SENDING REQUEST :");
-			String restrictionString = "";
-			for (int i = 0; i < restrictions.length; i = i + 2) {
-				if ("CATALOG_NAME".equals((String) restrictions[i])) {
-					restrictionString += "catalog_name = "+(String) restrictions[i + 1];
-					// we do not consider catalogs for now.
-					continue;
-				}
-				if ("SCHEMA_NAME".equals((String) restrictions[i])) {
-					restrictionString += "schema_name = "+(String) restrictions[i + 1];
-					// we do not consider schema for now
-					continue;
-				}
-				if ("CUBE_NAME".equals((String) restrictions[i])) {
-					restrictionString += "cube_name = "+(String) restrictions[i + 1];
-					continue;
-				}
-				if ("DIMENSION_UNIQUE_NAME".equals((String) restrictions[i])) {
-					restrictionString += "dimension_unique_name = "+(String) restrictions[i + 1];
-					continue;
-				}
-				if ("HIERARCHY_UNIQUE_NAME".equals((String) restrictions[i])) {
-					restrictionString += "hierarchy_unique_name = "+(String) restrictions[i + 1];
-					continue;
-				}
-				if ("LEVEL_UNIQUE_NAME".equals((String) restrictions[i])) {
-					restrictionString += "level_unique_name = "+(String) restrictions[i + 1];
-					continue;
-				}
-				if ("MEMBER_UNIQUE_NAME".equals((String) restrictions[i])) {
-					restrictionString += "member_unique_name = "+(String) restrictions[i + 1];
-					continue;
-				}
-				if ("TREE_OP".equals((String) restrictions[i])) {
-					restrictionString += "tree_op = "+new Integer((String) restrictions[i + 1]);
-					// treeOps erstellen wie in OpenVirtuoso
-					continue;
-				}
-				
+		LdOlap4jUtil._log.info("********************************************");
+		LdOlap4jUtil._log.info("** SENDING REQUEST :");
+		String restrictionString = "";
+		for (int i = 0; i < restrictions.length; i = i + 2) {
+			if ("CATALOG_NAME".equals((String) restrictions[i])) {
+				restrictionString += "catalog_name = "
+						+ (String) restrictions[i + 1];
+				// we do not consider catalogs for now.
+				continue;
+			}
+			if ("SCHEMA_NAME".equals((String) restrictions[i])) {
+				restrictionString += "schema_name = "
+						+ (String) restrictions[i + 1];
+				// we do not consider schema for now
+				continue;
+			}
+			if ("CUBE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "cube_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("DIMENSION_UNIQUE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "dimension_unique_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("HIERARCHY_UNIQUE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "hierarchy_unique_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("LEVEL_UNIQUE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "level_unique_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("MEMBER_UNIQUE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "member_unique_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("TREE_OP".equals((String) restrictions[i])) {
+				restrictionString += "tree_op = "
+						+ new Integer((String) restrictions[i + 1]);
+				// treeOps erstellen wie in OpenVirtuoso
+				continue;
 			}
 
-			LdOlap4jUtil._log.info("executeMetadataRequestOnLd("+metadataRequest.name()+") with "+restrictionString+";");
-			LdOlap4jUtil._log.info("********************************************");
+		}
+
+		LdOlap4jUtil._log.info("executeMetadataRequestOnLd("
+				+ metadataRequest.name() + ") with " + restrictionString + ";");
+		LdOlap4jUtil._log.info("********************************************");
 
 		/*
 		 * Specification of those metadata requests, see MetaDataRequest,
@@ -978,7 +989,7 @@ abstract class LdOlap4jConnection implements OlapConnection {
 		 * XmlaOlap4jUtil.prettyPrint(fault) + "\n" + "Request was:\n" +
 		 * request);
 		 */
-			
+
 		// Restrictions are wrapped in own object
 		Restrictions myRestrictionsObject = new Restrictions(restrictions);
 
@@ -1080,16 +1091,13 @@ abstract class LdOlap4jConnection implements OlapConnection {
 				Map<String, Integer> mapFields, Context context,
 				List<LdOlap4jDatabase> list) throws OlapException {
 			// I want to ask first for the field names
-			String dsName = row[mapFields
-					.get("?DATA_SOURCE_NAME")].toString();
-			String dsDesc = row[mapFields
-					.get("?DATA_SOURCE_DESCRIPTION")].toString();
-			String url = row[mapFields
-					.get("?URL")].toString();
-			String dsInfo = row[mapFields
-					.get("?DATA_SOURCE_INFO")].toString();
-			String providerName = row[mapFields
-					.get("?PROVIDER_NAME")].toString();
+			String dsName = row[mapFields.get("?DATA_SOURCE_NAME")].toString();
+			String dsDesc = row[mapFields.get("?DATA_SOURCE_DESCRIPTION")]
+					.toString();
+			String url = row[mapFields.get("?URL")].toString();
+			String dsInfo = row[mapFields.get("?DATA_SOURCE_INFO")].toString();
+			String providerName = row[mapFields.get("?PROVIDER_NAME")]
+					.toString();
 
 			// Simply empty
 			List<ProviderType> pTypesList = new ArrayList<ProviderType>();
@@ -1137,11 +1145,11 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			String cubeName = LdOlap4jUtil.convertNodeToMDX(row[mapFields
 					.get("?CUBE_NAME")]);
 
-			String caption = LdOlap4jUtil.makeCaption(LdOlap4jUtil
-					.convertNodeToMDX(row[mapFields.get("?CUBE_CAPTION")]));
+			String caption = LdOlap4jUtil.makeCaption(
+					row[mapFields.get("?CUBE_CAPTION")].toString(),
+					row[mapFields.get("?CUBE_NAME")].toString());
 
-			String description = LdOlap4jUtil.convertNodeToMDX(row[mapFields
-					.get("?DESCRIPTION")]);
+			String description = row[mapFields.get("?DESCRIPTION")].toString();
 
 			list.add(new LdOlap4jCube(context.olap4jSchema, cubeName, caption,
 					description));
@@ -1167,17 +1175,16 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			String dimensionUniqueName = LdOlap4jUtil
 					.convertNodeToMDX(row[mapFields
 							.get("?DIMENSION_UNIQUE_NAME")]);
-			String dimensionCaption = LdOlap4jUtil
-					.makeCaption(LdOlap4jUtil.convertNodeToMDX(row[mapFields
-							.get("?DIMENSION_CAPTION")]));
+			String dimensionCaption = LdOlap4jUtil.makeCaption(
+					row[mapFields.get("?DIMENSION_CAPTION")].toString(),
+					row[mapFields.get("?DIMENSION_UNIQUE_NAME")].toString());
 
-			String description = LdOlap4jUtil.convertNodeToMDX(row[mapFields
-					.get("?DESCRIPTION")]);
+			String description = row[mapFields.get("?DESCRIPTION")].toString();
 			// From this result only integer values should be returned (can we
 			// actually do this with SPARQL?
 			// TODO: SO far, only unkown(0) is returned, here.
-			final int dimensionType = new Integer(row[mapFields
-							.get("?DIMENSION_TYPE")].toString());
+			final int dimensionType = new Integer(
+					row[mapFields.get("?DIMENSION_TYPE")].toString());
 			final Dimension.Type type = Dimension.Type.getDictionary()
 					.forOrdinal(dimensionType);
 			// the max of hierarchies
@@ -1186,8 +1193,8 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			// TODO: For default hierarchy it is similar...
 			final String defaultHierarchyUniqueName = null;
 			// simply 0 is returned here
-			final Integer dimensionOrdinal = new Integer(row[mapFields
-							.get("?DIMENSION_ORDINAL")].toString());
+			final Integer dimensionOrdinal = new Integer(
+					row[mapFields.get("?DIMENSION_ORDINAL")].toString());
 			LdOlap4jDimension dimension = new LdOlap4jDimension(
 					context.olap4jCube, dimensionUniqueName, dimensionName,
 					dimensionCaption, description, type,
@@ -1256,9 +1263,11 @@ abstract class LdOlap4jConnection implements OlapConnection {
 					.convertNodeToMDX(row[mapFields.get("?HIERARCHY_NAME")]) == null ? hierarchyUniqueName
 					: LdOlap4jUtil.convertNodeToMDX(row[mapFields
 							.get("?HIERARCHY_NAME")]);
-			final String hierarchyCaption = LdOlap4jUtil
-					.makeCaption(LdOlap4jUtil.convertNodeToMDX(row[mapFields
-							.get("?HIERARCHY_CAPTION")]));
+
+			String hierarchyCaption = LdOlap4jUtil.makeCaption(
+					row[mapFields.get("?HIERARCHY_CAPTION")].toString(),
+					row[mapFields.get("?HIERARCHY_UNIQUE_NAME")].toString());
+
 			final String description = LdOlap4jUtil
 					.convertNodeToMDX(row[mapFields.get("?DESCRIPTION")]);
 			// TODO: For us, the all member is always null
@@ -1320,10 +1329,13 @@ abstract class LdOlap4jConnection implements OlapConnection {
 					.convertNodeToMDX(row[mapFields.get("?LEVEL_NAME")]) == null ? levelUniqueName
 					: LdOlap4jUtil.convertNodeToMDX(row[mapFields
 							.get("?LEVEL_NAME")]);
-			final String levelCaption = LdOlap4jUtil.makeCaption(LdOlap4jUtil
-					.convertNodeToMDX(row[mapFields.get("?LEVEL_CAPTION")]));
-			final String description = LdOlap4jUtil
-					.convertNodeToMDX(row[mapFields.get("?DESCRIPTION")]);
+
+			String levelCaption = LdOlap4jUtil.makeCaption(
+					row[mapFields.get("?LEVEL_CAPTION")].toString(),
+					row[mapFields.get("?LEVEL_UNIQUE_NAME")].toString());
+
+			final String description = row[mapFields.get("?DESCRIPTION")]
+					.toString();
 			// The distance of the level from the root of the hierarchy. Root
 			// level is zero (0).
 			// Default is root level.
@@ -1331,25 +1343,23 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			if (LdOlap4jUtil.convertNodeToMDX(row[mapFields
 					.get("?LEVEL_NUMBER")]) != null) {
 				// Since we use depth, we need to reduce the size with 1.
-				levelNumber = new Integer(row[mapFields
-								.get("?LEVEL_NUMBER")].toString()) - 1;
+				levelNumber = new Integer(
+						row[mapFields.get("?LEVEL_NUMBER")].toString()) - 1;
 				if (levelNumber < 0) {
 					throw new UnsupportedOperationException(
 							"The levelNumber cannot be negative!");
 				}
 			}
 			// Is Hexadecimal therefore little more complicated
-			String level_type = row[mapFields
-					.get("?LEVEL_TYPE")].toString();
+			String level_type = row[mapFields.get("?LEVEL_TYPE")].toString();
 			final Integer levelTypeCode = Integer.parseInt(
 					level_type.substring(2, level_type.length()), 16);
-			
+
 			final Level.Type levelType = Level.Type.getDictionary().forOrdinal(
 					levelTypeCode);
 			boolean calculated = (levelTypeCode & MDLEVEL_TYPE_CALCULATED) != 0;
 			final int levelCardinality = new Integer(
-					row[mapFields
-							.get("?LEVEL_CARDINALITY")].toString());
+					row[mapFields.get("?LEVEL_CARDINALITY")].toString());
 			LdOlap4jLevel level = new LdOlap4jLevel(context.getHierarchy(row,
 					mapFields), levelUniqueName, levelName, levelCaption,
 					description, levelNumber, levelType, calculated,
@@ -1385,7 +1395,7 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			 * <MEASURE_IS_VISIBLE>true</MEASURE_IS_VISIBLE> <DESCRIPTION>Sales
 			 * Cube - Profit Member</DESCRIPTION> </row>
 			 */
-			
+
 			// Here, we need to have a certain number
 			/*
 			 * Here, we get a string with the aggregation function, which we
@@ -1407,7 +1417,8 @@ abstract class LdOlap4jConnection implements OlapConnection {
 				measureAggregator = Measure.Aggregator.MAX;
 			} else if (rowAggregator.toString().toLowerCase().equals("count")) {
 				measureAggregator = Measure.Aggregator.COUNT;
-			} else if (rowAggregator.toString().toLowerCase().equals("calculated")) {
+			} else if (rowAggregator.toString().toLowerCase()
+					.equals("calculated")) {
 				measureAggregator = Measure.Aggregator.CALCULATED;
 				// In this case, we should also have an expression.
 				// expression =
@@ -1415,21 +1426,22 @@ abstract class LdOlap4jConnection implements OlapConnection {
 				LdOlap4jUtil._log
 						.info("Calculated members from the DSD are not supported, yet.");
 			}
-			
+
 			// Names
 			final String measureName = LdOlap4jUtil
 					.convertNodeToMDX(row[mapFields.get("?MEASURE_NAME")]);
 			final String measureUniqueName = LdOlap4jUtil
 					.convertNodeToMDX(row[mapFields.get("?MEASURE_UNIQUE_NAME")]);
 			// Measure caption will contain the measure property
-			final String measureCaption = LdOlap4jUtil.makeCaption(LdOlap4jUtil
-					.convertNodeToMDX(row[mapFields.get("?MEASURE_CAPTION")]));
+			final String measureCaption = LdOlap4jUtil.makeCaption(
+					row[mapFields.get("?MEASURE_CAPTION")].toString(),
+					row[mapFields.get("?MEASURE_UNIQUE_NAME")].toString());
 
 			/*
 			 * Node.toString is not enough. Integer/Boolean also
 			 */
-			final String description = LdOlap4jUtil
-					.convertNodeToMDX(row[mapFields.get("?MEASURE_CAPTION")]);
+			final String description = row[mapFields.get("?MEASURE_CAPTION")]
+					.toString();
 
 			// Here, for a certain name, we get a datatype
 			// TODO: How to read DataType from RDF?
@@ -1439,16 +1451,17 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			if (ordinalDatatype == null) {
 
 				// If it is encoded as number, fine also.
-				datatype = Datatype.getDictionary().forOrdinal(
-						new Integer(row[mapFields
-								.get("?DATA_TYPE")].toString()));
+				datatype = Datatype.getDictionary()
+						.forOrdinal(
+								new Integer(row[mapFields.get("?DATA_TYPE")]
+										.toString()));
 			} else {
 				datatype = ordinalDatatype;
 			}
 
 			// Here, we need a boolean
-			final boolean measureIsVisible = new Boolean(row[mapFields
-							.get("?MEASURE_IS_VISIBLE")].toString());
+			final boolean measureIsVisible = new Boolean(
+					row[mapFields.get("?MEASURE_IS_VISIBLE")].toString());
 
 			/*
 			 * Apparently, for each single measure in a cube, i need a member in
@@ -1570,8 +1583,7 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			 */
 			if (false) {
 				int levelNumber = new Integer(
-						row[mapFields
-								.get("?LEVEL_NUMBER")].toString());
+						row[mapFields.get("?LEVEL_NUMBER")].toString());
 			}
 			// TODO: FOr now, we only have member ordinal = 0
 			int memberOrdinal = 0;
@@ -1588,11 +1600,11 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			// We see, an Integer is used, which means we need to return the
 			// type in terms of the number
 			Member.Type memberType = MEMBER_TYPE_VALUES[new Integer(
-					row[mapFields
-							.get("?MEMBER_TYPE")].toString())];
+					row[mapFields.get("?MEMBER_TYPE")].toString())];
 
-			String memberCaption = LdOlap4jUtil.makeCaption(LdOlap4jUtil
-					.convertNodeToMDX(row[mapFields.get("?MEMBER_CAPTION")]));
+			String memberCaption = LdOlap4jUtil.makeCaption(
+					row[mapFields.get("?MEMBER_CAPTION")].toString(),
+					row[mapFields.get("?MEMBER_UNIQUE_NAME")].toString());
 			// TODO: For now, we only have cardinality 0
 			int childrenCardinality = 0;
 
@@ -1851,7 +1863,7 @@ abstract class LdOlap4jConnection implements OlapConnection {
 			// do nothing - assume XMLA returned list in correct order
 		}
 	}
-	
+
 	static class Restrictions {
 		// Restrictions
 		public String catalog = null;
@@ -1863,7 +1875,7 @@ abstract class LdOlap4jConnection implements OlapConnection {
 		public String memberUniqueName = null;
 		public Integer tree = null;
 		public Set<Member.TreeOp> treeOps = null;
-		
+
 		private Restrictions(Object[] restrictions) {
 
 			for (int i = 0; i < restrictions.length; i = i + 2) {

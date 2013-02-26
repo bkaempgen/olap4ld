@@ -782,18 +782,17 @@ public abstract class LdOlap4jUtil {
 	}
 
 	/**
-	 * TODO: At the moment, I do not have a good way of dealing with captions.
-	 * Therefore this method that converts a should-be-caption into a proper
-	 * caption.
+	 * This method, either a proper caption or a uri can be given.
 	 * 
 	 * @param caption
 	 * @return
 	 */
-	public static String makeCaption(String caption) {
-		// A caption should never be null
-		if (caption == null) {
-			return "";
+	public static String makeCaption(String caption, String alternative) {
+
+		if (caption == null || caption.equals("") || caption.equals("null")) {
+			caption = alternative;
 		}
+
 		if (caption.contains("http://")) {
 
 			String value = "";
