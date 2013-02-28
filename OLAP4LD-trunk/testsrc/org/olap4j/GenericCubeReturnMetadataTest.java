@@ -380,7 +380,7 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 
 		while (levels.next()) {
 			String level = levels.getString(6);
-
+			
 			String s = checkResultSet(olapDatabaseMetaData.getMembers(
 					catalogName, null, cubeNamePattern, null, null, level,
 					null, null), MEMBERS_COLUMN_NAMES);

@@ -102,28 +102,65 @@ public class FIOSQueryTest extends TestCase {
 	// assertContains("1", result);
 	// }
 
-//	public void testFIOS_DrillAcrossYahoo() {
-//		String result = executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2013ZZZ02ZZZ19]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F37996XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23dsd]");
-//
-//		assertContains("19", result);
-//	}
-//
-//	public void testFIOS_DrillAcrossSEC() {
-//		String result = executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2009ZZZ06ZZZ30]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F37996XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23dsd]");
-//
-//		assertContains("58", result);
-//	}
-	
-//	public void testFIOS_SicLevelSEC() {
-//		String result = executeStatement("SELECT NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FsicXXX2F3711XXX23id]})} ON COLUMNS, NON EMPTY {Hierarchize({[sdmxZZZmeasureXXX3AobsValue]})} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23dsd]");
-//
-//		assertContains("8899095016.43744934535308", result);
-//	}
-	
-	public void testFIOS_Members() {
-		String result = executeStatement("SELECT NON EMPTY {Hierarchize({[sdmxZZZmeasureXXX3AobsValue]})} ON COLUMNS, NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23issuerCodeListCompanyLevel].Members})} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FarchiveXXX2FHPQXXX2F2007ZZZ06ZZZ27XXX23dsd]");
+	// public void testFIOS_DrillAcrossYahoo() {
+	// String result =
+	// executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2013ZZZ02ZZZ19]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F37996XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23dsd]");
+	//
+	// assertContains("19", result);
+	// }
+	//
+	// public void testFIOS_DrillAcrossSEC() {
+	// String result =
+	// executeStatement("SELECT {Hierarchize({[dctermsXXX3Adate].[dctermsXXX3Adate].[dctermsXXX3Adate].[2009ZZZ06ZZZ30]})} ON COLUMNS, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FvocabXXX2FedgarXXX23issuer].[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FcikXXX2F37996XXX23id]} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23dsd]");
+	//
+	// assertContains("58", result);
+	// }
 
-		assertContains("8899095016.43744934535308", result);
+	// public void testFIOS_SicLevelSEC() {
+	// String result =
+	// executeStatement("SELECT NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FsicXXX2F3711XXX23id]})} ON COLUMNS, NON EMPTY {Hierarchize({[sdmxZZZmeasureXXX3AobsValue]})} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23dsd]");
+	//
+	// assertContains("8899095016.43744934535308", result);
+	// }
+
+	// public void testFIOS_Members() {
+	// String result =
+	// executeStatement("SELECT NON EMPTY {Hierarchize({[sdmxZZZmeasureXXX3AobsValue]})} ON COLUMNS, NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23issuerCodeListCompanyLevel].Members})} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FarchiveXXX2FHPQXXX2F2007ZZZ06ZZZ27XXX23dsd]");
+	//
+	// assertContains("8899095016.43744934535308", result);
+	// }
+
+	/**
+	 * "Frage für NVIDIA den Durchschnitt jedes Subjects ab."
+	 */
+	// public void testFIOS_Query_Subjects_of_Dell() {
+	// String result =
+	// executeStatement("SELECT NON EMPTY {Hierarchize({[sdmxZZZmeasureXXX3AobsValue]})} ON COLUMNS, NON EMPTY {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FvocabXXX23subject].Members} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23secyhofdsd] WHERE {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FcikXXX2F1045810XXX23id]})}");
+	//
+	// assertContains("| Open                                                                                                                                                                |           27.58 |",
+	// result);
+	// assertContains("| Gross profit                                                                                                                                                        |      4.761715E8 |",
+	// result);
+	// }
+
+	/**
+	 */
+//	public void testFIOS_Query_Open_AssetsCurrent_Over_time() {
+//		String result = executeStatement("SELECT NON EMPTY {Hierarchize({[dctermsXXX3Adate].Members})} ON COLUMNS, NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FvocabXXX2FstockXXX23Open], [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FvocabXXX2FusZZZgaapZZZ2011ZZZ01ZZZ31XXX23AssetsCurrent]})} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23secyhofdsd] WHERE {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FcikXXX2F1045810XXX23id]})}");
+//
+//		assertContains(
+//				"| Assets current  |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |  3.22695E9 |            |            |            |            |            |            |            |            |            |            |            |            |            |            | 3.500071E9 |            | 3.905358E9 |            |            |            | 4.032116E9 |            |            |            | 4.213851E9 |            |            |            | 4.424827E9 |            |            |            |            |            |",
+//				result);
+//	}
+
+	/**
+	 */
+	public void testFIOS_Query_Open_DELL_HewlettPackard_Over_time() {
+		String result = executeStatement("SELECT NON EMPTY {Hierarchize({[dctermsXXX3Adate].Members})} ON COLUMNS, NON EMPTY {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FcikXXX2F47217XXX23id],[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FcikXXX2F1045810XXX23id]})} ON ROWS FROM [httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FfiosXXX23secyhofdsd] WHERE {Hierarchize({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FvocabXXX2FstockXXX23Open]})}");
+
+		assertContains(
+				"| Assets current  |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |            |  3.22695E9 |            |            |            |            |            |            |            |            |            |            |            |            |            |            | 3.500071E9 |            | 3.905358E9 |            |            |            | 4.032116E9 |            |            |            | 4.213851E9 |            |            |            | 4.424827E9 |            |            |            |            |            |",
+				result);
 	}
 
 	// public void testFIOS_2() {

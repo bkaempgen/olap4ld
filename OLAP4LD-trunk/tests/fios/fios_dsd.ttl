@@ -1,0 +1,103 @@
+@prefix geonames:  <http://www.geonames.org/ontology#> .
+@prefix meta:    <http://example.org/metadata#> .
+@prefix dcterms:  <http://purl.org/dc/terms/> .
+@prefix ed:      <http://public.b-kaempgen.de:8080/edg/vocab/edgar#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cik:     <http://dbpedia.org/property/secCik> .
+@prefix prvTypes:  <http://purl.org/net/provenance/types#> .
+@prefix dbpedia:  <http://dbpedia.org/resource/> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cal:     <http://www.w3.org/2002/12/cal/ical#> .
+@prefix prv:     <http://purl.org/net/provenance/ns#> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/> .
+@prefix ir:      <http://www.ontologydesignpatterns.org/cp/owl/informationrealization.owl#> .
+@prefix ldSpider:  <http://code.google.com/p/ldspider/ns#> .
+@prefix sdmx-measure:  <http://purl.org/linked-data/sdmx/2009/measure#> .
+@prefix geo:     <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix yago:    <http://localhost:8080/class/yago/> .
+@prefix void:    <http://rdfs.org/ns/void#> .
+@prefix yhof:    <http://public.b-kaempgen.de:8080/yhof/vocab/yahoo#> .
+@prefix qb:      <http://purl.org/linked-data/cube#> .
+@prefix units:   <http://dbpedia.org/units/> .
+@prefix vcard:   <http://www.w3.org/2006/vcard/ns#> .
+@prefix http:    <http://www.w3.org/2006/http#> .
+@prefix p:       <http://localhost:8080/property/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix sdmx:    <http://purl.org/linked-data/sdmx#> .
+@prefix doap:    <http://usefulinc.com/ns/doap#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix  fios: 	 <http://public.b-kaempgen.de:8080/fios#> .
+@prefix skosclass: <http://ddialliance.org/ontologies/skosclass#> .
+
+# First the dsd for SEC with its components
+fios:secdsd
+	a qb:DataStructureDefinition;
+	rdfs:label "FIOS 2.0 Data Cube for SEC"@en;
+	qb:component fios:secdsdcomponentobsValue;
+	qb:component fios:secdsdcomponentissuer;
+	qb:component fios:secdsdcomponentdate; 
+	qb:component fios:secdsdcomponentsegment;
+	qb:component fios:secdsdcomponentsubject.
+
+# Measures and aggregation functions
+fios:secdsdcomponentobsValue qb:measure sdmx-measure:obsValue.
+fios:secdsdcomponentobsValue qb:aggregator "AVG".
+
+# Dimensions and code lists
+fios:secdsdcomponentissuer qb:dimension ed:issuer.
+
+ed:issuer qb:codeList fios:issuerCodeList.
+fios:issuerCodeListSicLevel skos:inScheme fios:issuerCodeList.
+fios:issuerCodeListSicLevel rdfs:label "SIC Level"@en.
+fios:issuerCodeListSicLevel skosclass:depth "1".
+fios:issuerCodeListCompanyLevel skos:inScheme fios:issuerCodeList.
+fios:issuerCodeListCompanyLevel rdfs:label "Company Level"@en.
+fios:issuerCodeListCompanyLevel skosclass:depth "2".
+
+fios:secdsdcomponentdate qb:dimension dcterms:date.
+fios:secdsdcomponentsegment qb:dimension ed:segment.
+fios:secdsdcomponentsubject qb:dimension ed:subject.
+
+# Second the dsd for Yahoo! with its components
+fios:yahoodsd
+	a qb:DataStructureDefinition;
+	rdfs:label "FIOS 2.0 Data Cube for Yahoo"@en;
+	qb:component fios:yahoodsdcomponentobsValue;
+	qb:component fios:yahoodsdcomponentissuer;
+	qb:component fios:yahoodsdcomponentdate; 
+	qb:component fios:yahoodsdcomponentsegment;
+	qb:component fios:yahoodsdcomponentsubject.
+
+# Measures and aggregation functions
+fios:yahoodsdcomponentobsValue qb:measure sdmx-measure:obsValue.
+fios:yahoodsdcomponentobsValue qb:aggregator "AVG".
+
+# Dimensions and code lists
+fios:yahoodsdcomponentissuer qb:dimension yhof:issuer.
+fios:yahoodsdcomponentdate qb:dimension dcterms:date.
+fios:yahoodsdcomponentsegment qb:dimension yhof:segment.
+fios:yahoodsdcomponentsubject qb:dimension yhof:subject.
+
+# Now the sameAs relationships (in both directions).
+ed:issuer owl:sameAs yhof:issuer.
+yhof:issuer owl:sameAs ed:issuer.
+
+ed:segment owl:sameAs yhof:segment.
+yhof:segment owl:sameAs ed:segment.
+
+ed:subject owl:sameAs yhof:subject.
+yhof:subject owl:sameAs ed:subject.
+
+# Now the datasets
+<http://public.b-kaempgen.de:8080/yhof/archive/F/2013-02-19#ds> qb:structure fios:secdsd.
+<http://public.b-kaempgen.de:8080/edg/archive/37996/0001140361-09-017928#ds> qb:structure fios:secdsd.
+
+<http://public.b-kaempgen.de:8080/yhof/archive/F/2013-02-19#ds> qb:structure fios:yahoodsd.
+<http://public.b-kaempgen.de:8080/edg/archive/37996/0001140361-09-017928#ds> qb:structure fios:yahoodsd.
+
+# Now the issuer
+<http://edgarwrap.ontologycentral.com/cik/37996#id> owl:sameAs <http://yahoofinancewrap.appspot.com/ticker/F#id>.
+<http://yahoofinancewrap.appspot.com/ticker/F#id> owl:sameAs <http://edgarwrap.ontologycentral.com/cik/37996#id>.
+
