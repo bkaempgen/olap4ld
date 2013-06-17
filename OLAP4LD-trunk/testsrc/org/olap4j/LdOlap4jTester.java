@@ -19,8 +19,8 @@
 */
 package org.olap4j;
 
-import org.olap4j.driver.ld.LdOlap4jDriver;
-import org.olap4j.driver.ld.proxy.XmlaOlap4jProxy;
+import org.olap4j.driver.olap4ld.Olap4ldDriver;
+import org.olap4j.driver.olap4ld.proxy.XmlaOlap4jProxy;
 import org.olap4j.test.TestContext;
 
 import java.lang.reflect.Constructor;
@@ -47,7 +47,7 @@ import java.util.*;
 public class LdOlap4jTester implements TestContext.Tester {
     private final TestContext testContext;
     final XmlaOlap4jProxy proxy;
-    static final String cookie = LdOlap4jDriver.nextCookie();
+    static final String cookie = Olap4ldDriver.nextCookie();
     private Connection connection;
 
     /**
@@ -93,7 +93,7 @@ public class LdOlap4jTester implements TestContext.Tester {
         this.proxy =
             (XmlaOlap4jProxy) constructor.newInstance(
                 catalogNameUrls, urlString);
-        LdOlap4jDriver.PROXY_MAP.put(cookie, proxy);
+        Olap4ldDriver.PROXY_MAP.put(cookie, proxy);
     }
 
     public TestContext getTestContext() {
@@ -112,7 +112,7 @@ public class LdOlap4jTester implements TestContext.Tester {
         }
         Properties info = new Properties();
         info.setProperty(
-            LdOlap4jDriver.Property.CATALOG.name(), "FoodMart");
+            Olap4ldDriver.Property.CATALOG.name(), "FoodMart");
         connection =
             DriverManager.getConnection(
                 getURL(),
@@ -135,7 +135,7 @@ public class LdOlap4jTester implements TestContext.Tester {
             throw new RuntimeException("oops", e);
         }
         props.setProperty(
-            LdOlap4jDriver.Property.CATALOG.name(), "FoodMart");
+            Olap4ldDriver.Property.CATALOG.name(), "FoodMart");
         if (USER != null) {
             props.put("user", USER);
         }

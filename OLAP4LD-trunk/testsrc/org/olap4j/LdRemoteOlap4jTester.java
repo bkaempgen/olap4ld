@@ -37,7 +37,7 @@ public class LdRemoteOlap4jTester implements Tester {
 
     public static final String DRIVER_URL_PREFIX = "jdbc:xmla:";
     public static final String DRIVER_CLASS_NAME =
-        "org.olap4j.driver.ld.LdOlap4jDriver";
+        "org.olap4j.driver.olap4ld.Olap4ldDriver";
 
     private String url = null;
     private String user = null;

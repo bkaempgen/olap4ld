@@ -32,7 +32,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.olap4j.driver.ld.LdOlap4jUtil;
+import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.impl.Olap4jUtil;
 import org.olap4j.mdx.SelectNode;
 import org.olap4j.mdx.parser.MdxParser;
@@ -143,9 +143,9 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 
 		// String dsduri =
 		// "http://public.b-kaempgen.de:8080/edg/archive/1013237/0001193125-11-005034#dsd";
-		Node node = new Literal("http://public.b-kaempgen.de:8080/fios#secyhofdsd");
+		Node node = new Literal("http://lod2.eu/schemas/rdfh-inst#dsd");
 		// New Yhf example
-		this.cubeNamePattern = LdOlap4jUtil.convertNodeToMDX(node);
+		this.cubeNamePattern = Olap4ldLinkedDataUtil.convertNodeToMDX(node);
 
 		// this.cubeNamePattern =
 		// "httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd";

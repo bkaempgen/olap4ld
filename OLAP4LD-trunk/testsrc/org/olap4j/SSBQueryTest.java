@@ -81,27 +81,30 @@ public class SSBQueryTest extends TestCase {
 		}
 	}
 	
+	/**
+	 * Generic Query
+	 */
 	public void testGenericQuery() {
-		String result = executeStatement("SELECT {Measures.Measures.Measures.rdfhXXX3Alo_revenue} ON COLUMNS, " +
-				"{rdfhXXX3Alo_custkey.rdfhXXX3Alo_custkeyCodeList.rdfhXXX3Alo_custkeyCustomerLevel.rdfhZZZinstXXX3Acustomer_178} ON ROWS " +
-				"FROM rdfhZZZinstXXX3Adsd");
+		String result = executeStatement("SELECT {Measures.Measures.Measures.[rdfhXXX3Alo_revenue]} ON COLUMNS, " +
+				"{[rdfhXXX3Alo_custkey].[rdfhXXX3Alo_custkeyCodeList].[rdfhXXX3Alo_custkeyCustomerLevel].[rdfhZZZinstXXX3Acustomer_178]} ON ROWS " +
+				"FROM [rdfhZZZinstXXX3Adsd]");
 		
-		assertContains("1436037326", result);
+		assertContains("1.436037326E9", result);
 	}
 
 	/**
 	 * Query 1.1
 	 */
 	public void testSSB_Q_1_1() {
-		String result = executeStatement("WITH MEMBER [Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_extendedprice] * [Measures].[Measures].[Measures].[rdfh:lo_discount]' "
+		String result = executeStatement("WITH MEMBER [Revenue] as 'Measures.Measures.Measures.[rdfhXXX3Alo_extendedprice] * Measures.Measures.Measures.[rdfhXXX3Alo_discount]' "
 				+ "SELECT {[Revenue]} ON COLUMNS, "
-				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel].[rdfh:lo_orderdateYear1993]} ON ROWS "
-				+ "FROM [rdfh-inst:dsd] "
-				+ "WHERE CrossJoin(Filter(Members([rdfh:lo_quantity]), "
-				+ "Cast(Name(CurrentMember([rdfh:lo_quantity])) as NUMERIC) < 25), "
-				+ "Filter(Members([rdfh:lo_discount]), "
-				+ "Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) >= 1 "
-				+ "and Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) <= 3))");
+				+ "{[rdfhXXX3Alo_orderdate].[rdfhXXX3Alo_orderdateCodeList].[rdfhXXX3Alo_orderdateYearLevel].[rdfhXXX3Alo_orderdateYear1993]} ON ROWS "
+				+ "FROM [rdfhZZZinstXXX3Adsd] "
+				+ "WHERE CrossJoin(Filter(Members([rdfhXXX3Alo_quantity]), "
+				+ "Cast(Name(CurrentMember([rdfhXXX3Alo_quantity])) as NUMERIC) < 25), "
+				+ "Filter(Members([rdfhXXX3Alo_discount]), "
+				+ "Cast(Name(CurrentMember([rdfhXXX3Alo_discount])) as NUMERIC) >= 1 "
+				+ "and Cast(Name(CurrentMember([rdfhXXX3Alo_discount])) as NUMERIC) <= 3))");
 		
 		assertContains("4182760987", result);
 	}
@@ -110,8 +113,8 @@ public class SSBQueryTest extends TestCase {
 	 * Query 1.2
 	 */
 	public void testSSB_Q_1_2() {
-		String result = executeStatement("WITH MEMBER [Measures].[Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_extendedprice] * [Measures].[Measures].[Measures].[rdfh:lo_discount]' "
-				+ "SELECT {[Measures].[Revenue]} ON COLUMNS, "
+		String result = executeStatement("WITH MEMBER Measures.[Revenue] as 'Measures.Measures.Measures.[rdfh:lo_extendedprice] * Measures.Measures.Measures.[rdfh:lo_discount]' "
+				+ "SELECT {Measures.[Revenue]} ON COLUMNS, "
 				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearMonthNumLevel].[rdfh:lo_orderdateYearMonthNum199401]} ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "
 				+ "WHERE CrossJoin(Filter(Members([rdfh:lo_quantity]), "
@@ -127,8 +130,8 @@ public class SSBQueryTest extends TestCase {
 	 * Query 1.3
 	 */
 	public void testSSB_Q_1_3() {
-		String result = executeStatement("WITH MEMBER [Measures].[Revenue] as '[Measures].[Measures].[Measures].[rdfh:lo_extendedprice] * [Measures].[Measures].[Measures].[rdfh:lo_discount]' "
-				+ "SELECT {[Measures].[Revenue]} ON COLUMNS, "
+		String result = executeStatement("WITH MEMBER Measures.[Revenue] as 'Measures.Measures.Measures.[rdfh:lo_extendedprice] * Measures.Measures.Measures.[rdfh:lo_discount]' "
+				+ "SELECT {Measures.[Revenue]} ON COLUMNS, "
 				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateWeeknuminyearCodeList].[rdfh:lo_orderdateWeeknuminyearLevel].[rdfh:lo_orderdateWeeknuminyear19946]} ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "
 				+ "WHERE CrossJoin(Filter(Members([rdfh:lo_quantity]), "
@@ -146,7 +149,7 @@ public class SSBQueryTest extends TestCase {
 	 * XXX: Does not fit, yet, since Children is not implemented, yet.
 	 */
 	public void notestSSB_Q_2_1() {
-		executeStatement("SELECT {[Measures].[Measures].[Measures].[rdfh:lo_revenue]} ON COLUMNS, "
+		executeStatement("SELECT {Measures.Measures.Measures.[rdfh:lo_revenue]} ON COLUMNS, "
 				+ "CrossJoin(Members([rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel]), "
 				+ "{[rdfh:lo_partkey].[rdfh:lo_partkeyCodeList].[rdfh:lo_partkeyCategoryLevel].[rdfh:lo_partkeyCategoryMFGR-12]}) ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "
@@ -158,7 +161,7 @@ public class SSBQueryTest extends TestCase {
 	 * Query 2.2
 	 */
 	public void notestSSB_Q_2_2() {
-		executeStatement("SELECT {[Measures].[Measures].[Measures].[rdfh:lo_revenue]} ON COLUMNS, "
+		executeStatement("SELECT {Measures.Measures.Measures.[rdfh:lo_revenue]} ON COLUMNS, "
 				+ "CrossJoin(Members([rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel]), "
 				+ "{[rdfh:lo_partkey].[rdfh:lo_partkeyCodeList].[rdfh:lo_partkeyCategoryLevel].[rdfh:lo_partkeyCategoryMFGR-12]}) ON ROWS "
 				+ "FROM [rdfh-inst:dsd] "
