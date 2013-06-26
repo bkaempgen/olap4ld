@@ -8,33 +8,54 @@
  */
 package org.olap4j.driver.olap4ld;
 
-import org.olap4j.*;
-import org.olap4j.driver.olap4ld.Olap4ldCellSet;
-import org.olap4j.driver.olap4ld.Olap4ldConnection;
-import org.olap4j.driver.olap4ld.Olap4ldStatement;
-import org.olap4j.driver.olap4ld.helper.LdHelper;
-import org.olap4j.driver.olap4ld.helper.PreprocessMdxVisitor;
-import org.olap4j.mdx.*;
-import org.olap4j.mdx.parser.MdxParser;
-import org.olap4j.mdx.parser.MdxParserFactory;
-import org.olap4j.mdx.parser.MdxValidator;
-import org.olap4j.metadata.Cube;
-import org.olap4j.metadata.Hierarchy;
-import org.olap4j.metadata.Measure;
-import org.olap4j.metadata.Member;
-import org.olap4j.metadata.Property;
-
-import java.sql.*;
-import java.io.*;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.olap4j.AllocationPolicy;
+import org.olap4j.Cell;
+import org.olap4j.CellSet;
+import org.olap4j.CellSetAxis;
+import org.olap4j.CellSetListener;
+import org.olap4j.CellSetMetaData;
+import org.olap4j.OlapConnection;
+import org.olap4j.OlapException;
+import org.olap4j.OlapStatement;
+import org.olap4j.Position;
+import org.olap4j.driver.olap4ld.helper.LdHelper;
+import org.olap4j.mdx.AxisNode;
+import org.olap4j.mdx.ParseTreeNode;
+import org.olap4j.mdx.ParseTreeWriter;
+import org.olap4j.mdx.SelectNode;
+import org.olap4j.mdx.parser.MdxParser;
+import org.olap4j.mdx.parser.MdxParserFactory;
+import org.olap4j.mdx.parser.MdxValidator;
+import org.olap4j.metadata.Property;
 
 /**
  * Implementation of {@link org.olap4j.OlapStatement} for XML/A providers.
@@ -302,25 +323,17 @@ class Olap4ldStatement implements OlapStatement {
 	}
 
 	/**
-	 * ExecuteOlapQuery and populate.
 	 * 
-	 * Runs SPARQL query on Linked Data. Goes through result from SPARQL query
-	 * and populates CellSet axes and cells.
-	 * 
+	 * 1) Creates and fills cellSetMetadata 2) Creates and fills cellSet
 	 * 
 	 * @param selectNode
 	 * @return
 	 * @throws OlapException
 	 */
 	public CellSet executeOlapQuery(SelectNode selectNode) throws OlapException {
-		
+
 		final String mdx = toString(selectNode);
 		Olap4ldUtil._log.info("Execute MDX: " + mdx);
-		
-		// I pre-process the select node
-		// I need to replace Identifier.Members with Members(Identifier)
-		PreprocessMdxVisitor<Object> preprocessMdxVisitor = new PreprocessMdxVisitor<Object>();
-		selectNode.accept(preprocessMdxVisitor);
 
 		// Close the previous open CellSet, if there is one.
 		synchronized (this) {
@@ -340,117 +353,9 @@ class Olap4ldStatement implements OlapStatement {
 			// olap4jConnection.serverInfos, mdx);
 			openCellSet = olap4jConnection.factory.newCellSet(this);
 		}
-		// Release the monitor before calling populate, so that cancel can
-		// grab the monitor if it needs to.
-		// openCellSet.populate();
-		// We use the selectNode in order to create the CellSetMetaData
-
-		/*
-		 * MDX evaluates the axis and slicer dimensions first, building the
-		 * structure of the result cube before retrieving the information from
-		 * the cube to be queried.
-		 */
-
-		/*
-		 * 1) MDX + 2) MdxMethodVisitor
-		 */
-		// Create visitor that we will use throughout.
-		MdxMethodVisitor<Object> visitor = new MdxMethodVisitor<Object>(this);
-		selectNode.accept(visitor);
-
-		/*
-		 * 3) CellSetMetaData
-		 */
-		Cube cube = visitor.getCube();
-
-		// Axes Metadata (create MetaData for one specific axis)
-		List<Olap4ldCellSetAxisMetaData> axisMetaDataList = new ArrayList<Olap4ldCellSetAxisMetaData>();
-		// Axes
-		List<Olap4ldCellSetAxis> axisList = new ArrayList<Olap4ldCellSetAxis>();
-		// Properties are not computed, yet.
-		List<Olap4ldCellSetMemberProperty> propertyList = new ArrayList<Olap4ldCellSetMemberProperty>();
-		List<Olap4ldCellSetMemberProperty> properties = propertyList;
-
-		Axis columnAxis = Axis.COLUMNS;
-		List<Position> columnPositions = visitor.getColumnPositions();
-		List<Hierarchy> columnHierarchies = new ArrayList<Hierarchy>();
-		columnHierarchies = this.createHierarchyList(columnPositions);
-//		List<Level> columnLevels = new ArrayList<Level>();
-//		columnLevels = this.createLevelList(columnPositions);
-
-		// Add axisMetaData to list of axes metadata
-		final Olap4ldCellSetAxisMetaData columnAxisMetaData = new Olap4ldCellSetAxisMetaData(
-				this.olap4jConnection, columnAxis, columnHierarchies,
-				properties);
-
-		axisMetaDataList.add(columnAxisMetaData);
-
-		// Add cellSetAxis to list of axes
-		final Olap4ldCellSetAxis columnCellSetAxis = new Olap4ldCellSetAxis(
-				openCellSet, columnAxis,
-				Collections.unmodifiableList(columnPositions));
-		axisList.add(columnCellSetAxis);
-
-		Axis rowAxis = Axis.ROWS;
-		List<Position> rowPositions = visitor.getRowPositions();
-		List<Hierarchy> rowHierarchies = new ArrayList<Hierarchy>();
-		rowHierarchies = this.createHierarchyList(rowPositions);
-		// List<Level> rowLevels = new ArrayList<Level>();
-		// rowLevels = this.createLevelList(rowPositions);
-
-		// Add axisMetaData to list of axes metadata
-		final Olap4ldCellSetAxisMetaData rowAxisMetaData = new Olap4ldCellSetAxisMetaData(
-				this.olap4jConnection, rowAxis, rowHierarchies, properties);
-		axisMetaDataList.add(rowAxisMetaData);
-
-		// Add cellSetAxis to list of axes
-		final Olap4ldCellSetAxis rowCellSetAxis = new Olap4ldCellSetAxis(
-				openCellSet, rowAxis,
-				Collections.unmodifiableList(rowPositions));
-		axisList.add(rowCellSetAxis);
-
-		Axis filterAxis = Axis.FILTER;
-		List<Position> filterPositions = visitor.getFilterPositions();
-		// Create filter hierarchies
-		List<Hierarchy> filterHierarchies = new ArrayList<Hierarchy>();
-		filterHierarchies = this.createHierarchyList(filterPositions);
-		// List<Level> filterLevels = new ArrayList<Level>();
-		// filterLevels = this.createLevelList(filterPositions);
-		// I need to create a filter axis metadata
-		Olap4ldCellSetAxisMetaData filterAxisMetaData = new Olap4ldCellSetAxisMetaData(
-				this.olap4jConnection, filterAxis,
-				Collections.<Hierarchy> unmodifiableList(filterHierarchies),
-				Collections.<Olap4ldCellSetMemberProperty> emptyList());
-		// I need to create a filter axis
-		Olap4ldCellSetAxis filterCellSetAxis = new Olap4ldCellSetAxis(
-				openCellSet, filterAxis,
-				Collections.unmodifiableList(filterPositions));
-
-		List<Olap4ldCellProperty> cellProperties = new ArrayList<Olap4ldCellProperty>();
-		// I do not support cell properties, yet.
-		if (!selectNode.getCellPropertyList().isEmpty()) {
-			// pw.println();
-			// pw.print("CELL PROPERTIES ");
-			// k = 0;
-			// for (IdentifierNode cellProperty : cellPropertyList) {
-			// if (k++ > 0) {
-			// pw.print(", ");
-			// }
-			// cellProperty.unparse(writer);
-			// }
-		}
-
-		Olap4ldCellSetMetaData metadata = new Olap4ldCellSetMetaData(this,
-				(Olap4ldCube) cube, filterAxisMetaData, axisMetaDataList,
-				cellProperties);
-
-		// Transform into list of levels
-
-		/*
-		 * 4) OLAP query
-		 */
-		openCellSet.populateFromMdx(metadata, axisList, filterCellSetAxis);
-
+		
+		openCellSet.populate(selectNode);
+		
 		// Implement NonEmpty
 		/*
 		 * The NonEmptyResult is more advanced since in theory it would be
@@ -483,48 +388,7 @@ class Olap4ldStatement implements OlapStatement {
 		return nonEmptyCellSet;
 	}
 
-	/**
-	 * TODO: From the parsed list of lists of members, it should be possible to
-	 * create the hierarchy list. Note, we do also include the measures
-	 * hierarchy, here, since the hierarchies give an impression of the look of
-	 * the pivot table.
-	 * 
-	 * @param list
-	 * @return
-	 */
-	private List<Hierarchy> createHierarchyList(List<Position> axisPositions) {
-		/*
-		 * The list of hierarchies used in an axis, the dimensionality in terms
-		 * of hierarchies
-		 */
-		List<Hierarchy> hierarchyList = new ArrayList<Hierarchy>();
 
-		// We have a list of tuples (lists)
-
-		// List of "positions"
-		if (!axisPositions.isEmpty()) {
-
-			Position position = axisPositions.get(0);
-
-			List<Member> list1 = position.getMembers();
-			for (Object object2 : list1) {
-				// Now, should be member
-				if (object2 instanceof Member) {
-					if (object2 instanceof Measure) {
-						// Measures are used, also.
-						hierarchyList.add(((Member) object2).getHierarchy());
-					} else {
-						hierarchyList.add(((Member) object2).getHierarchy());
-					}
-				} else {
-					throw new UnsupportedOperationException(
-							"Inside the list we should only have members.");
-				}
-			}
-		}
-
-		return hierarchyList;
-	}
 
 	public void addListener(CellSetListener.Granularity granularity,
 			CellSetListener listener) throws OlapException {

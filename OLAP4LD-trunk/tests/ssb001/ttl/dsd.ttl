@@ -1,0 +1,190 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfh: <http://lod2.eu/schemas/rdfh#> .
+@prefix rdfh-inst: <http://lod2.eu/schemas/rdfh-inst#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skosclass: <http://ddialliance.org/ontologies/skosclass#> .
+
+rdfh-inst:dsd
+	rdfs:label "Star Schema Benchmark DSD";
+	a qb:DataStructureDefinition ;
+	qb:component rdfh:lo_Comp ;
+	qb:component rdfh:lo_CompMeas1 ;
+	qb:component rdfh:lo_CompMeas2 ;
+	qb:component rdfh:lo_CompMeas3 ;
+	qb:component rdfh:lo_CompMeas4 ;
+	qb:component rdfh:lo_CompMeas5 ;
+	qb:component rdfh:lo_CompMeas6 ;
+	qb:component rdfh:lo_CompMeas7 .
+	
+rdfh-inst:ds
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS";
+	qb:structure rdfh-inst:dsd.	
+	
+rdfh-inst:ds-query1-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 1";
+	qb:structure rdfh-inst:dsd.	
+	
+rdfh-inst:ds-query2-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 2";
+	qb:structure rdfh-inst:dsd.
+
+rdfh-inst:ds-query3-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 3";
+	qb:structure rdfh-inst:dsd.
+
+rdfh-inst:ds-query4-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 4";
+	qb:structure rdfh-inst:dsd.
+	
+rdfh-inst:ds-query7-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 7";
+	qb:structure rdfh-inst:dsd.
+	
+rdfh-inst:ds-query8-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 8";
+	qb:structure rdfh-inst:dsd.
+	
+rdfh-inst:ds-query10-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 10";
+	qb:structure rdfh-inst:dsd.
+	
+rdfh-inst:ds-query11-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 11";
+	qb:structure rdfh-inst:dsd.
+
+rdfh-inst:ds-query12-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 12";
+	qb:structure rdfh-inst:dsd.
+
+rdfh-inst:ds-query13-aggview
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS - AggView Query 13";
+	qb:structure rdfh-inst:dsd.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_orderdate.
+rdfh:lo_orderdate qb:codeList rdfh:lo_orderdateCodeList.
+rdfh:lo_orderdateAllLevel skos:inScheme rdfh:lo_orderdateCodeList.
+rdfh:lo_orderdateAllLevel skosclass:depth "0".
+rdfh:lo_orderdateYearLevel skos:inScheme rdfh:lo_orderdateCodeList.
+rdfh:lo_orderdateYearLevel skosclass:depth "1".
+rdfh:lo_orderdateYearMonthLevel skos:inScheme rdfh:lo_orderdateCodeList.
+rdfh:lo_orderdateYearMonthLevel skosclass:depth "2".
+rdfh:lo_orderdateYearMonthNumLevel skos:inScheme rdfh:lo_orderdateCodeList.
+rdfh:lo_orderdateYearMonthNumLevel skosclass:depth "3".
+rdfh:lo_orderdateDateLevel skos:inScheme rdfh:lo_orderdateCodeList.
+rdfh:lo_orderdateDateLevel skosclass:depth "4".
+
+rdfh:lo_orderdate qb:codeList rdfh:lo_orderdateWeeknuminyearCodeList.
+rdfh:lo_orderdateWeeknuminyearAllLevel skos:inScheme rdfh:lo_orderdateWeeknuminyearCodeList.
+rdfh:lo_orderdateWeeknuminyearAllLevel skosclass:depth "0".
+rdfh:lo_orderdateWeeknuminyearLevel skos:inScheme rdfh:lo_orderdateWeeknuminyearCodeList.
+rdfh:lo_orderdateWeeknuminyearLevel skosclass:depth "1".
+rdfh:lo_orderdateWeeknuminyearDateLevel skos:inScheme rdfh:lo_orderdateWeeknuminyearCodeList.
+rdfh:lo_orderdateWeeknuminyearDateLevel skosclass:depth "2".
+
+rdfh:lo_Comp qb:dimension rdfh:lo_custkey.
+rdfh:lo_custkey qb:codeList rdfh:lo_custkeyCodeList.
+rdfh:lo_custkeyAllLevel skos:inScheme rdfh:lo_custkeyCodeList.
+rdfh:lo_custkeyAllLevel skosclass:depth "0".
+rdfh:lo_custkeyRegionLevel skos:inScheme rdfh:lo_custkeyCodeList.
+rdfh:lo_custkeyRegionLevel skosclass:depth "1".
+rdfh:lo_custkeyNationLevel skos:inScheme rdfh:lo_custkeyCodeList.
+rdfh:lo_custkeyNationLevel skosclass:depth "2".
+rdfh:lo_custkeyCityLevel skos:inScheme rdfh:lo_custkeyCodeList.
+rdfh:lo_custkeyCityLevel skosclass:depth "3".
+rdfh:lo_custkeyCustomerLevel skos:inScheme rdfh:lo_custkeyCodeList.
+rdfh:lo_custkeyCustomerLevel skosclass:depth "4".
+
+rdfh:lo_Comp qb:dimension rdfh:lo_partkey.
+rdfh:lo_partkey qb:codeList rdfh:lo_partkeyCodeList.
+rdfh:lo_partkeyAllLevel skos:inScheme rdfh:lo_partkeyCodeList.
+rdfh:lo_partkeyAllLevel skosclass:depth "0".
+rdfh:lo_partkeyMfgrLevel skos:inScheme rdfh:lo_partkeyCodeList.
+rdfh:lo_partkeyMfgrLevel skosclass:depth "1".
+rdfh:lo_partkeyCategoryLevel skos:inScheme rdfh:lo_partkeyCodeList.
+rdfh:lo_partkeyCategoryLevel skosclass:depth "2".
+rdfh:lo_partkeyBrand1Level skos:inScheme rdfh:lo_partkeyCodeList.
+rdfh:lo_partkeyBrand1Level skosclass:depth "3".
+rdfh:lo_partkeyPartLevel skos:inScheme rdfh:lo_partkeyCodeList.
+rdfh:lo_partkeyPartLevel skosclass:depth "4".
+
+rdfh:lo_Comp qb:dimension rdfh:lo_suppkey.
+rdfh:lo_suppkey qb:codeList rdfh:lo_suppkeyCodeList.
+rdfh:lo_suppkeyAllLevel skos:inScheme rdfh:lo_suppkeyCodeList.
+rdfh:lo_suppkeyAllLevel skosclass:depth "0".
+rdfh:lo_suppkeyRegionLevel skos:inScheme rdfh:lo_suppkeyCodeList.
+rdfh:lo_suppkeyRegionLevel skosclass:depth "1".
+rdfh:lo_suppkeyNationLevel skos:inScheme rdfh:lo_suppkeyCodeList.
+rdfh:lo_suppkeyNationLevel skosclass:depth "2".
+rdfh:lo_suppkeyCityLevel skos:inScheme rdfh:lo_suppkeyCodeList.
+rdfh:lo_suppkeyCityLevel skosclass:depth "3".
+rdfh:lo_suppkeySupplierLevel skos:inScheme rdfh:lo_suppkeyCodeList.
+rdfh:lo_suppkeySupplierLevel skosclass:depth "4".
+
+rdfh:lo_Comp qb:dimension rdfh:lo_quantity.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_discount.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_orderkey.
+rdfh:lo_orderkey qb:codeList rdfh:lo_orderkeyCodeList.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_linenumber.
+rdfh:lo_linenumber qb:codeList rdfh:lo_linenumberCodeList.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_orderpriority.
+rdfh:lo_orderpriority qb:codeList rdfh:lo_orderpriorityCodeList.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_shippriority.
+rdfh:lo_shippriority qb:codeList rdfh:lo_shippriorityCodeList.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_ordtotalprice.
+rdfh:lo_ordtotalprice qb:codeList rdfh:lo_ordtotalpriceCodeList.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_supplycost.
+rdfh:lo_supplycost qb:codeList rdfh:lo_supplycostCodeList.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_tax.
+rdfh:lo_tax qb:codeList rdfh:lo_taxCodeList.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_commitdate.
+rdfh:lo_commitdate qb:codeList rdfh:lo_commitdateCodeList.
+
+rdfh:lo_Comp qb:dimension rdfh:lo_shipmode.
+rdfh:lo_shipmode qb:codeList rdfh:lo_shipmodeCodeList.
+
+rdfh:lo_CompMeas2 qb:measure rdfh:lo_quantity.
+rdfh:lo_CompMeas2 qb:aggregator "SUM".
+
+rdfh:lo_CompMeas1 qb:measure rdfh:lo_discount.
+rdfh:lo_CompMeas1 qb:aggregator "AVG".
+
+rdfh:lo_CompMeas3 qb:measure rdfh:lo_extendedprice.
+rdfh:lo_CompMeas3 qb:aggregator "SUM".
+
+rdfh:lo_CompMeas4 qb:measure rdfh:lo_revenue.
+rdfh:lo_CompMeas4 qb:aggregator "SUM".
+
+rdfh:lo_CompMeas5 qb:measure rdfh:sum_revenue.
+rdfh:lo_CompMeas5 qb:aggregator "CALCULATED".
+rdfh:lo_CompMeas5 qb:expression "sum(?rdfh:lo_extendedprice * ?rdfh:lo_discount)".
+rdfh:lo_CompMeas5 qb:componentAttachment qb:DataStructureDefinition.
+
+rdfh:lo_CompMeas6 qb:measure rdfh:sum_profit.
+rdfh:lo_CompMeas6 qb:aggregator "CALCULATED".
+rdfh:lo_CompMeas6 qb:expression "sum(?lo_revenue - ?lo_supplycost)".
+rdfh:lo_CompMeas6 qb:componentAttachment qb:DataStructureDefinition.
+
+rdfh:lo_CompMeas7 qb:measure rdfh:lo_supplycost.
+rdfh:lo_CompMeas7 qb:aggregator "SUM".

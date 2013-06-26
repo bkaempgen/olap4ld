@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.swing.text.Segment;
 
+import org.olap4j.Axis;
 import org.olap4j.OlapException;
 import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.Olap4ldConnection.Context;
@@ -188,8 +189,51 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		if (axisList.size() > 2) {
 			throw new UnsupportedOperationException("Only columns and rows are supported in MDX query!");
 		}
-
+		
 		return null;
+	}
+	
+	/**
+	 * TODO: From the parsed list of lists of members, it should be possible to
+	 * create the hierarchy list. Note, we do also include the measures
+	 * hierarchy, here, since the hierarchies give an impression of the look of
+	 * the pivot table.
+	 * 
+	 * @param list
+	 * @return
+	 */
+	public List<Hierarchy> createHierarchyList(List<Position> axisPositions) {
+		/*
+		 * The list of hierarchies used in an axis, the dimensionality in terms
+		 * of hierarchies
+		 */
+		List<Hierarchy> hierarchyList = new ArrayList<Hierarchy>();
+
+		// We have a list of tuples (lists)
+
+		// List of "positions"
+		if (!axisPositions.isEmpty()) {
+
+			Position position = axisPositions.get(0);
+
+			List<Member> list1 = position.getMembers();
+			for (Member object2 : list1) {
+				// Now, should be member
+				if (object2 instanceof Member) {
+					if (object2 instanceof Measure) {
+						// Measures are used, also.
+						hierarchyList.add(((Member) object2).getHierarchy());
+					} else {
+						hierarchyList.add(((Member) object2).getHierarchy());
+					}
+				} else {
+					throw new UnsupportedOperationException(
+							"Inside the list we should only have members.");
+				}
+			}
+		}
+
+		return hierarchyList;
 	}
 
 	@Override
@@ -779,22 +823,6 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 						+ identifier);
 	}
 
-	public Cube getCube() {
-		return cube;
-	}
-
-	public List<Position> getColumnPositions() {
-		return columnPositions;
-	}
-
-	public List<Position> getRowPositions() {
-		return rowPositions;
-	}
-
-	public List<Position> getFilterPositions() {
-		return filterPositions;
-	}
-
 	@Override
 	public Object visit(ParameterNode parameterNode) {
 		// TODO Auto-generated method stub
@@ -896,5 +924,21 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 			positions.add(aPosition);
 		}
 		return positions;
+	}
+
+	public List<Position> getColumnPositions() {
+		return this.columnPositions;
+	}
+
+	public List<Position> getRowPositions() {
+		return this.rowPositions;
+	}
+
+	public List<Position> getFilterPositions() {
+		return this.filterPositions;
+	}
+
+	public Cube getCube() {
+		return this.cube;
 	}
 }

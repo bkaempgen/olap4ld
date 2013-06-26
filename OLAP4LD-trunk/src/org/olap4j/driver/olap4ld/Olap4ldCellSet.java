@@ -18,49 +18,76 @@
  */
 package org.olap4j.driver.olap4ld;
 
-import org.olap4j.*;
-import org.olap4j.mdx.AxisNode;
-import org.olap4j.mdx.CubeNode;
-import org.olap4j.mdx.ParseTreeNode;
-import org.olap4j.mdx.SelectNode;
-import org.olap4j.mdx.WithMemberNode;
-import org.olap4j.driver.olap4ld.Factory;
-import org.olap4j.driver.olap4ld.Olap4ldCell;
-import org.olap4j.driver.olap4ld.Olap4ldCellProperty;
-import org.olap4j.driver.olap4ld.Olap4ldCellSet;
-import org.olap4j.driver.olap4ld.Olap4ldCellSetAxis;
-import org.olap4j.driver.olap4ld.Olap4ldCellSetAxisMetaData;
-import org.olap4j.driver.olap4ld.Olap4ldCellSetMemberProperty;
-import org.olap4j.driver.olap4ld.Olap4ldCellSetMetaData;
-import org.olap4j.driver.olap4ld.Olap4ldConnection;
-import org.olap4j.driver.olap4ld.Olap4ldPosition;
-import org.olap4j.driver.olap4ld.Olap4ldStatement;
-import org.olap4j.driver.olap4ld.MetadataReader;
-import org.olap4j.driver.olap4ld.Olap4ldMemberBase;
-import org.olap4j.driver.olap4ld.Olap4ldPositionMember;
-import org.olap4j.driver.olap4ld.Olap4ldPreparedStatement;
-import org.olap4j.driver.olap4ld.helper.LdHelper;
-import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.impl.Olap4jUtil;
+import static org.olap4j.driver.olap4ld.Olap4ldUtil.MDDATASET_NS;
+import static org.olap4j.driver.olap4ld.Olap4ldUtil.SOAP_NS;
+import static org.olap4j.driver.olap4ld.Olap4ldUtil.XMLA_NS;
+import static org.olap4j.driver.olap4ld.Olap4ldUtil.childElements;
+import static org.olap4j.driver.olap4ld.Olap4ldUtil.findChild;
+import static org.olap4j.driver.olap4ld.Olap4ldUtil.findChildren;
+import static org.olap4j.driver.olap4ld.Olap4ldUtil.integerElement;
+import static org.olap4j.driver.olap4ld.Olap4ldUtil.parse;
+import static org.olap4j.driver.olap4ld.Olap4ldUtil.stringElement;
 
-import static org.olap4j.driver.olap4ld.Olap4ldUtil.*;
-
-import org.olap4j.metadata.*;
-import org.olap4j.metadata.Member.Type;
-import org.olap4j.metadata.Property.StandardCellProperty;
-import org.semanticweb.yars.nx.Node;
-
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.Ref;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.olap4j.Axis;
+import org.olap4j.Cell;
+import org.olap4j.CellSet;
+import org.olap4j.CellSetAxis;
+import org.olap4j.CellSetMetaData;
+import org.olap4j.OlapException;
+import org.olap4j.OlapStatement;
+import org.olap4j.Position;
+import org.olap4j.driver.olap4ld.helper.LdHelper;
+import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
+import org.olap4j.driver.olap4ld.helper.PreprocessMdxVisitor;
+import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
+import org.olap4j.driver.olap4ld.linkeddata.DiceOp;
+import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
+import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
+import org.olap4j.driver.olap4ld.linkeddata.ProjectionOp;
+import org.olap4j.driver.olap4ld.linkeddata.RollupOp;
+import org.olap4j.driver.olap4ld.linkeddata.SliceOp;
+import org.olap4j.impl.Olap4jUtil;
+import org.olap4j.mdx.ParseTreeNode;
+import org.olap4j.mdx.SelectNode;
+import org.olap4j.metadata.Catalog;
+import org.olap4j.metadata.Cube;
+import org.olap4j.metadata.Dimension;
+import org.olap4j.metadata.Hierarchy;
+import org.olap4j.metadata.Level;
+import org.olap4j.metadata.Measure;
+import org.olap4j.metadata.Member;
+import org.olap4j.metadata.NamedList;
+import org.olap4j.metadata.Property;
+import org.olap4j.metadata.Schema;
+import org.semanticweb.yars.nx.Node;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * Implementation of {@link org.olap4j.CellSet} for XML/A providers.
@@ -75,9 +102,21 @@ import java.util.regex.Pattern;
  * @since May 24, 2007
  */
 abstract class Olap4ldCellSet implements CellSet {
+	// Meta Meta Data
 	final Olap4ldStatement olap4jStatement;
 	protected boolean closed;
+	private static final List<String> standardProperties = Arrays.asList(
+			"UName", "Caption", "LName", "LNum", "DisplayInfo");
+	// Metadata
 	private Olap4ldCellSetMetaData metaData;
+	private List<Olap4ldCellSetAxis> axisList;
+	private List<CellSetAxis> immutableAxisList;
+	private Olap4ldCellSetAxis filterAxis;
+
+	// Query
+	private Olap4ldQuery olapquery;
+
+	// Data
 	private final Map<Integer, Cell> cellMap = new HashMap<Integer, Cell>();
 	/**
 	 * The value map that the OLAP query populates and from which the cells are
@@ -86,13 +125,6 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * of the uniquely identifying list of members.
 	 */
 	private final Map<Integer, String[]> newValueMap = new HashMap<Integer, String[]>();
-	private List<Olap4ldCellSetAxis> axisList;
-	private List<CellSetAxis> immutableAxisList;
-	private Olap4ldCellSetAxis filterAxis;
-	private Olap4ldQuery olapquery;
-
-	private static final List<String> standardProperties = Arrays.asList(
-			"UName", "Caption", "LName", "LNum", "DisplayInfo");
 
 	/**
 	 * Creates an XmlaOlap4jCellSet.
@@ -115,35 +147,250 @@ abstract class Olap4ldCellSet implements CellSet {
 		return olap4jStatement.olap4jConnection.helper;
 	}
 
-	/**
-	 * MDX evaluates the axis and slicer dimensions first, building the
-	 * structure of the result cube before retrieving the information from the
-	 * cube to be queried and then issuing the query.
-	 * 
-	 * @param filterAxis2
-	 * @param axisList2
-	 * @param metadata2
-	 * 
-	 * 
-	 * @param selectNode
-	 * @throws OlapException
-	 */
-	void populateFromMdx(Olap4ldCellSetMetaData metadata,
-			List<Olap4ldCellSetAxis> axisList,
-			Olap4ldCellSetAxis filterCellSetAxis) throws OlapException {
+	public void populate(SelectNode selectNode) {
+
+		// I pre-process the select node
+		// I need to replace Identifier.Members with Members(Identifier)
+		PreprocessMdxVisitor<Object> preprocessMdxVisitor = new PreprocessMdxVisitor<Object>();
+		selectNode.accept(preprocessMdxVisitor);
+
+		// Visitor to create: metaData, axisList, filterAxis
+
+		MdxMethodVisitor<Object> visitor = new MdxMethodVisitor<Object>(
+				olap4jStatement);
+		selectNode.accept(visitor);
+
+		// Cube
+		Cube cube = visitor.getCube();
+
+		// Axes Metadata (create MetaData for one specific axis)
+		List<Olap4ldCellSetAxisMetaData> axisMetaDataList = new ArrayList<Olap4ldCellSetAxisMetaData>();
+		// Axes
+		List<Olap4ldCellSetAxis> axisList = new ArrayList<Olap4ldCellSetAxis>();
+		// Properties are not computed, yet.
+		List<Olap4ldCellSetMemberProperty> propertyList = new ArrayList<Olap4ldCellSetMemberProperty>();
+		List<Olap4ldCellSetMemberProperty> properties = propertyList;
+
+		Axis columnAxis = Axis.COLUMNS;
+		List<Position> columnPositions = visitor.getColumnPositions();
+		List<Hierarchy> columnHierarchies = new ArrayList<Hierarchy>();
+		columnHierarchies = visitor.createHierarchyList(columnPositions);
+		// List<Level> columnLevels = new ArrayList<Level>();
+		// columnLevels = this.createLevelList(columnPositions);
+
+		// Add axisMetaData to list of axes metadata
+		final Olap4ldCellSetAxisMetaData columnAxisMetaData = new Olap4ldCellSetAxisMetaData(
+				this.olap4jStatement.olap4jConnection, columnAxis,
+				columnHierarchies, properties);
+
+		axisMetaDataList.add(columnAxisMetaData);
+
+		// Add cellSetAxis to list of axes
+		final Olap4ldCellSetAxis columnCellSetAxis = new Olap4ldCellSetAxis(
+				this, columnAxis, Collections.unmodifiableList(columnPositions));
+		axisList.add(columnCellSetAxis);
+
+		Axis rowAxis = Axis.ROWS;
+		List<Position> rowPositions = visitor.getRowPositions();
+		List<Hierarchy> rowHierarchies = new ArrayList<Hierarchy>();
+		rowHierarchies = visitor.createHierarchyList(rowPositions);
+		// List<Level> rowLevels = new ArrayList<Level>();
+		// rowLevels = this.createLevelList(rowPositions);
+
+		// Add axisMetaData to list of axes metadata
+		final Olap4ldCellSetAxisMetaData rowAxisMetaData = new Olap4ldCellSetAxisMetaData(
+				this.olap4jStatement.olap4jConnection, rowAxis, rowHierarchies,
+				properties);
+		axisMetaDataList.add(rowAxisMetaData);
+
+		// Add cellSetAxis to list of axes
+		final Olap4ldCellSetAxis rowCellSetAxis = new Olap4ldCellSetAxis(this,
+				rowAxis, Collections.unmodifiableList(rowPositions));
+		axisList.add(rowCellSetAxis);
+
+		Axis filterAxis = Axis.FILTER;
+		List<Position> filterPositions = visitor.getFilterPositions();
+		// Create filter hierarchies
+		List<Hierarchy> filterHierarchies = new ArrayList<Hierarchy>();
+		filterHierarchies = visitor.createHierarchyList(filterPositions);
+		// List<Level> filterLevels = new ArrayList<Level>();
+		// filterLevels = this.createLevelList(filterPositions);
+		// I need to create a filter axis metadata
+		Olap4ldCellSetAxisMetaData filterAxisMetaData = new Olap4ldCellSetAxisMetaData(
+				this.olap4jStatement.olap4jConnection, filterAxis,
+				Collections.<Hierarchy> unmodifiableList(filterHierarchies),
+				Collections.<Olap4ldCellSetMemberProperty> emptyList());
+		// I need to create a filter axis
+		Olap4ldCellSetAxis filterCellSetAxis = new Olap4ldCellSetAxis(this,
+				filterAxis, Collections.unmodifiableList(filterPositions));
+
+		List<Olap4ldCellProperty> cellProperties = new ArrayList<Olap4ldCellProperty>();
+		// I do not support cell properties, yet.
+		if (!selectNode.getCellPropertyList().isEmpty()) {
+			// pw.println();
+			// pw.print("CELL PROPERTIES ");
+			// k = 0;
+			// for (IdentifierNode cellProperty : cellPropertyList) {
+			// if (k++ > 0) {
+			// pw.print(", ");
+			// }
+			// cellProperty.unparse(writer);
+			// }
+		}
+
+		Olap4ldCellSetMetaData metadata = new Olap4ldCellSetMetaData(
+				olap4jStatement, (Olap4ldCube) cube, filterAxisMetaData,
+				axisMetaDataList, cellProperties);
 
 		this.metaData = metadata;
 		this.axisList = axisList;
 		this.immutableAxisList = Olap4jUtil.cast(Collections
 				.unmodifiableList(axisList));
 		this.filterAxis = filterCellSetAxis;
+
+		// Visitor to create: Logical OLAP Operator Query Tree
+
+		// Before, create OLAP subcube query
+		// olapquery = createOlapQueryFromMetadata();
+
 		/*
-		 * Now, create OLAP query and populate data
+		 * Now, create Logical OLAP Operator Query Tree
 		 */
-		olapquery = createOlapQueryFromMetadata();
 
-		cacheDataFromOlapQuery();
+		LogicalOlapQueryPlan queryplan = createLogicalOlapQueryPlan();
 
+		// Before, execute OLAP subcube query
+		// /*
+		// * If groupbylist or measurelist is empty, we do not need to proceed.
+		// */
+		// if (olapquery.slicesrollups.isEmpty()
+		// || olapquery.projections.isEmpty()) {
+		// return;
+		// }
+		//
+		// List<Node[]> olapQueryResult =
+		// this.olap4jStatement.olap4jConnection.myLinkedData
+		// .getOlapResult(olapquery.cube, olapquery.slicesrollups,
+		// olapquery.dices, olapquery.projections);
+		// cacheDataFromOlapQuery(olapQueryResult);
+
+		/*
+		 * Now, execute Logical OLAP Operator Query Tree in LinkedDataEngine
+		 */
+		List<Node[]> olapQueryResult = olap4jStatement.olap4jConnection.myLinkedData
+				.getOlapResult(queryplan);
+		
+		cacheDataFromOlapQuery(olapQueryResult);
+	}
+
+	private LogicalOlapQueryPlan createLogicalOlapQueryPlan() {
+
+		// BaseCube operator
+		LogicalOlapOp basecube = new BaseCubeOp(metaData.cube);
+		
+		// Projection operator
+		// Prepare measurelist, a ordered set of members
+		ArrayList<Measure> projections = new ArrayList<Measure>();
+
+		// First, we use set to collect the measures
+		HashSet<Member> usedMeasureSet = new HashSet<Member>();
+
+		for (Olap4ldCellSetAxis axis : axisList) {
+			List<Position> positions = axis.positions;
+			for (Position position : positions) {
+				List<Member> members = position.getMembers();
+				for (int i = 0; i < members.size(); i++) {
+					// Check whether measure already contained.
+					if ((members.get(i).getMemberType() == Member.Type.MEASURE || members
+							.get(i).getMemberType() == Member.Type.FORMULA)) {
+						usedMeasureSet.add(members.get(i));
+					}
+				}
+			}
+		}
+		// Go through all positions
+		for (Position list : filterAxis.positions) {
+			// For each position, we get a new member for each restriction set
+			List<Member> members = list.getMembers();
+			for (int i = 0; i < members.size(); i++) {
+				// Check whether measure already contained.
+				if ((members.get(i).getMemberType() == Member.Type.MEASURE || members
+						.get(i).getMemberType() == Member.Type.FORMULA)) {
+					usedMeasureSet.add(members.get(i));
+				}
+			}
+		}
+
+		// If no measure, then find default
+		if (usedMeasureSet.isEmpty()) {
+			// Default is simply the first we find.
+			Olap4ldUtil._log
+					.info("Get default (first available) measure in cube.");
+			if (!metaData.cube.getMeasures().isEmpty()) {
+				usedMeasureSet.add(metaData.cube.getMeasures().get(0));
+			} else {
+				throw new UnsupportedOperationException(
+						"There should always be at least one measure in the cube.");
+			}
+		}
+
+		// Now, fill projections
+		for (Member member : usedMeasureSet) {
+			projections.add((Measure) member);
+		}
+		
+		LogicalOlapOp projection = new ProjectionOp(basecube, projections);
+		
+		// Dice operator
+		LogicalOlapOp dice = new DiceOp(projection, filterAxis.positions);
+		
+		// Slice operator
+		
+		// When going through the axes: Prepare groupbylist, a set of levels
+		// Prepare list of levels (excluding Measures!)
+		// Go through tuple get dimensions, if not measure
+		ArrayList<Level> rollups = new ArrayList<Level>();
+
+		for (Olap4ldCellSetAxis cellSetAxis : axisList) {
+
+			List<Position> positions = cellSetAxis.positions;
+			/*
+			 * For now, we assume that for each hierarchy, we query for members
+			 * of one specific level, only.
+			 */
+			Position position = positions.get(0);
+
+			List<Member> members = position.getMembers();
+
+			for (Member member : members) {
+
+				if (member.getMemberType() != Member.Type.MEASURE) {
+					rollups.add(member.getLevel());
+				}
+			}
+		}
+		
+		// Find out which Dimensions to slice
+		List<Dimension> slicedDimensions = new ArrayList<Dimension>();
+		NamedList<Dimension> dimensions = metaData.cube.getDimensions();
+		for (Dimension dimension : dimensions) {
+			boolean contained = false;
+			for (Level slicesrollup : rollups) {
+				if (slicesrollup.getDimension().getUniqueName().equals(slicesrollup.getUniqueName())) {
+					contained = true;
+				}
+			}
+			if (!contained) {
+				slicedDimensions.add(dimension);
+			}
+		}
+		LogicalOlapOp slice = new SliceOp(dice, slicedDimensions);
+		
+		// Rollup operator
+		LogicalOlapOp rollup = new RollupOp(slice, rollups);
+		
+		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(rollup);
+		return myplan;
 	}
 
 	/**
@@ -152,6 +399,8 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("unused")
+	@Deprecated
 	private Olap4ldQuery createOlapQueryFromMetadata() {
 
 		/*
@@ -342,18 +591,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		return new Olap4ldQuery(cube, slicesrollups, dices, projections);
 	}
 
-	private void cacheDataFromOlapQuery() {
-		/*
-		 * If groupbylist or measurelist is empty, we do not need to proceed.
-		 */
-		if (olapquery.slicesrollups.isEmpty()
-				|| olapquery.projections.isEmpty()) {
-			return;
-		}
-
-		List<Node[]> olapQueryResult = this.olap4jStatement.olap4jConnection.myLinkedData
-				.getOlapResult(olapquery.cube, olapquery.slicesrollups,
-						olapquery.dices, olapquery.projections);
+	private void cacheDataFromOlapQuery(List<Node[]> olapQueryResult) {
 
 		// Now, insert into hash map
 
@@ -1029,8 +1267,7 @@ abstract class Olap4ldCellSet implements CellSet {
 					null);
 
 			return new Olap4ldCell(this, coordinatesToOrdinal(coordinates),
-					hashedCells[index], hashedCells[index],
-					propertyValues);
+					hashedCells[index], hashedCells[index], propertyValues);
 		} else {
 			return new Olap4ldCell(this, coordinatesToOrdinal(coordinates), "",
 					"", Collections.<Property, Object> emptyMap());

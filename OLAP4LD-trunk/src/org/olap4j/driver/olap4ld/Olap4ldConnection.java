@@ -42,6 +42,7 @@ import org.olap4j.Scenario;
 import org.olap4j.driver.olap4ld.helper.LdHelper;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.helper.Restrictions;
+import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataEngine;
 import org.olap4j.driver.olap4ld.linkeddata.OpenVirtuosoEngine;
 import org.olap4j.driver.olap4ld.linkeddata.SesameEngine;
@@ -295,6 +296,10 @@ abstract class Olap4ldConnection implements OlapConnection {
 		}
 		if (databaseName.equals("SESAME")) {
 			myLinkedData = new SesameEngine(serverUrlObject,
+					datastructuredefinitions, datasets, databaseName);
+		}
+		if (databaseName.equals("EMBEDDEDSESAME")) {
+			myLinkedData = new EmbeddedSesameEngine(serverUrlObject,
 					datastructuredefinitions, datasets, databaseName);
 		}
 

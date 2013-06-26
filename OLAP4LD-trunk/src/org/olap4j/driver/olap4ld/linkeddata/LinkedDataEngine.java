@@ -37,18 +37,10 @@ import org.semanticweb.yars.nx.Node;
  */
 public interface LinkedDataEngine {
 
-	/**
-	 * 
-	 * @return
-	 */
 	public List<Node[]> getDatabases(Restrictions restrictions);
 
 	public List<Node[]> getCatalogs(Restrictions restrictions);
 
-	/**
-	 * 
-	 * @return
-	 */
 	public List<Node[]> getSchemas(Restrictions restrictions);
 
 	/**
@@ -104,7 +96,7 @@ public interface LinkedDataEngine {
 	/**
 	 * 
 	 * Return hierarchies
-	 * 
+	 *  
 	 * @param context
 	 * @param metadataRequest
 	 * @param restrictions
@@ -154,11 +146,20 @@ public interface LinkedDataEngine {
 	 * input of a subcube query tuple: set of levels for each inquired dimension
 	 * set of queried meassures set of set of members for each fixed dimension
 	 * cube
-	 *  
+	 * 
 	 * @return
 	 */
 	public List<Node[]> getOlapResult(Cube cube, List<Level> slicesrollups,
-			List<Position> dices, 
-			List<Measure> projections);
+			List<Position> dices, List<Measure> projections);
 
+	/**
+	 * In the extended olap4ld implementation, an OLAP query is issued from the input of
+	 * a logical OLAP operator query plan: a tree of logical OLAP operators that are then
+	 * translated into a physical OLAP operator query plan depending on the implementation.
+	 * 
+	 * 
+	 * @param queryplan
+	 * @return a relational representation of resulting observations in the resulting data cube
+	 */
+	public List<Node[]> getOlapResult(LogicalOlapQueryPlan queryplan);
 }
