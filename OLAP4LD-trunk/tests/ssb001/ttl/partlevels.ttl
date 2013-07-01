@@ -1,6 +1,6 @@
 @prefix skos:	<http://www.w3.org/2004/02/skos/core#> .
-@prefix ns1:	<http://lod2.eu/schemas/rdfh-inst#> .
-@prefix ns2:	<http://lod2.eu/schemas/rdfh#> .
+@prefix ns1:	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/custlevels.ttl#> .
+@prefix ns2:	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb01/ttl/custlevels.ttl#> .
 ns1:part_155190	skos:member	ns2:lo_partkeyPartLevel ;
 	skos:narrower	ns2:lo_partkeyBrand1MFGR-4325 .
 ns1:part_67310	skos:member	ns2:lo_partkeyPartLevel ;

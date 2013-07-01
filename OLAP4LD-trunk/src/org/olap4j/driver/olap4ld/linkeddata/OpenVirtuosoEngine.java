@@ -757,6 +757,57 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	}
 
 	/**
+	 * Every measure also needs to be listed as member. When I create the dsd, I
+	 * add obsValue as a dimension, but also as a measure. However, members of
+	 * the measure dimension would typically all be named differently from the
+	 * measure (e.g., obsValue5), therefore, we do not find a match. The problem
+	 * is, that getMembers() has to return the measures. So, either, in the dsd,
+	 * we need to add a dimension with the measure as a member, or, the query
+	 * for the members should return for measures the measure property as
+	 * member.
+	 * 
+	 * 
+	 * Here, all the measure properties are returned.
+	 * 
+	 * @param context
+	 * @param metadataRequest
+	 * @param restrictions
+	 * @return
+	 */
+	public List<Node[]> getMeasures(Restrictions restrictions) {
+	
+		String additionalFilters = createFilterForRestrictions(restrictions);
+	
+		// ///////////QUERY//////////////////////////
+		/*
+		 * TODO: How to consider equal measures?
+		 */
+	
+		// Boolean values need to be returned as "true" or "false".
+		// Get all measures
+		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
+				+ "select \""
+				+ TABLE_CAT
+				+ "\" as ?CATALOG_NAME \""
+				+ TABLE_SCHEM
+				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEASURE_NAME min(?MEASURE_CAPTION) as ?MEASURE_CAPTION \"5\" as ?DATA_TYPE \"true\" as ?MEASURE_IS_VISIBLE min(?MEASURE_AGGREGATOR) as ?MEASURE_AGGREGATOR min(?EXPRESSION) as ?EXPRESSION "
+				+ askForFrom(true)
+				// Hint: For now, MEASURE_CAPTION is simply the
+				// MEASURE_DIMENSION.
+				// Important: Only measures are queried
+				// XXX: EXPRESSION also needs to be attached to
+				// ?COMPONENT_SPECIFICATION
+				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION "
+				+ ". ?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = \"en\" )} OPTIONAL {?COMPONENT_SPECIFICATION qb:aggregator ?MEASURE_AGGREGATOR } OPTIONAL {?COMPONENT_SPECIFICATION qb:expression ?EXPRESSION } "
+				+ additionalFilters + "} "
+				+ "group by ?CUBE_NAME ?MEASURE_UNIQUE_NAME order by ?CUBE_NAME ?MEASURE_UNIQUE_NAME ";
+		List<Node[]> result = sparql(query, true);
+	
+		// List<Node[]> result = applyRestrictions(measureUris, restrictions);
+		return result;
+	}
+
+	/**
 	 * Get possible dimensions (component properties) for each cube from the
 	 * triple store.
 	 * 
@@ -866,57 +917,6 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 		return notExplicitlyStated || explicitlyStated;
 
-	}
-
-	/**
-	 * Every measure also needs to be listed as member. When I create the dsd, I
-	 * add obsValue as a dimension, but also as a measure. However, members of
-	 * the measure dimension would typically all be named differently from the
-	 * measure (e.g., obsValue5), therefore, we do not find a match. The problem
-	 * is, that getMembers() has to return the measures. So, either, in the dsd,
-	 * we need to add a dimension with the measure as a member, or, the query
-	 * for the members should return for measures the measure property as
-	 * member.
-	 * 
-	 * 
-	 * Here, all the measure properties are returned.
-	 * 
-	 * @param context
-	 * @param metadataRequest
-	 * @param restrictions
-	 * @return
-	 */
-	public List<Node[]> getMeasures(Restrictions restrictions) {
-
-		String additionalFilters = createFilterForRestrictions(restrictions);
-
-		// ///////////QUERY//////////////////////////
-		/*
-		 * TODO: How to consider equal measures?
-		 */
-
-		// Boolean values need to be returned as "true" or "false".
-		// Get all measures
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEASURE_NAME min(?MEASURE_CAPTION) as ?MEASURE_CAPTION \"5\" as ?DATA_TYPE \"true\" as ?MEASURE_IS_VISIBLE min(?MEASURE_AGGREGATOR) as ?MEASURE_AGGREGATOR min(?EXPRESSION) as ?EXPRESSION "
-				+ askForFrom(true)
-				// Hint: For now, MEASURE_CAPTION is simply the
-				// MEASURE_DIMENSION.
-				// Important: Only measures are queried
-				// XXX: EXPRESSION also needs to be attached to
-				// ?COMPONENT_SPECIFICATION
-				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION "
-				+ ". ?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = \"en\" )} OPTIONAL {?COMPONENT_SPECIFICATION qb:aggregator ?MEASURE_AGGREGATOR } OPTIONAL {?COMPONENT_SPECIFICATION qb:expression ?EXPRESSION } "
-				+ additionalFilters + "} "
-				+ "group by ?CUBE_NAME ?MEASURE_UNIQUE_NAME order by ?CUBE_NAME ?MEASURE_UNIQUE_NAME ";
-		List<Node[]> result = sparql(query, true);
-
-		// List<Node[]> result = applyRestrictions(measureUris, restrictions);
-		return result;
 	}
 
 	/**
@@ -1659,6 +1659,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			// It is possible that dimensionWithoutHierarchies is null
 			List<Node[]> memberUris1 = null;
 			String query = null;
+			
+			// XXX: Necessary distinction? I think not...
 			if (dimensionWithoutHierarchies == null) {
 
 				query = Olap4ldLinkedDataUtil.getStandardPrefixes()

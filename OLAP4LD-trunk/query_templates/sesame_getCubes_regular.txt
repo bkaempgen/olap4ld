@@ -1,0 +1,22 @@
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+SELECT DISTINCT 
+?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE (min(?DESCRIPTION) as ?DESCRIPTION) (min(?CUBE_CAPTION) as ?CUBE_CAPTION) 
+{{{STANDARDFROM}}}
+WHERE {
+?CUBE_NAME a qb:DataSet.
+OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = "en")}
+OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = "en" )}
+BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME).
+BIND('{{{TABLE_SCHEM}}}' as ?SCHEMA_NAME).
+BIND('CUBE' as ?CUBE_TYPE).
+{{{ADDITIONALFILTERS}}}
+} GROUP BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ORDER BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE
+

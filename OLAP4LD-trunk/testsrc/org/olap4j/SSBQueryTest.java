@@ -84,6 +84,18 @@ public class SSBQueryTest extends TestCase {
 	/**
 	 * Generic Query
 	 */
+	public void testSSB001() {
+		String result = executeStatement("SELECT {Measures.Measures.Measures.[rdfhXXX3Alo_revenue]} ON COLUMNS, " +
+				"{[rdfhXXX3Alo_custkey].[rdfhXXX3Alo_custkeyCodeList].[rdfhXXX3Alo_custkeyCustomerLevel].[rdfhZZZinstXXX3Acustomer_277]} ON ROWS " +
+				"FROM [http://olap4ldYYYgooglecodeYYYcom/git/OLAP4LD-trunk/tests/ssb001/ttl/lineorder_qbYYYttl#ds]");
+		
+		assertContains("1.436037326E9", result);
+	}
+	
+	
+	/**
+	 * Generic Query
+	 */
 	public void testGenericQuery() {
 		String result = executeStatement("SELECT {Measures.Measures.Measures.[rdfhXXX3Alo_revenue]} ON COLUMNS, " +
 				"{[rdfhXXX3Alo_custkey].[rdfhXXX3Alo_custkeyCodeList].[rdfhXXX3Alo_custkeyCustomerLevel].[rdfhZZZinstXXX3Acustomer_178]} ON ROWS " +
