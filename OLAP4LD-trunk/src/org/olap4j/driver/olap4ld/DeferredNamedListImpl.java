@@ -10,6 +10,7 @@ package org.olap4j.driver.olap4ld;
 
 import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.Olap4ldConnection;
+import org.olap4j.driver.olap4ld.Olap4ldConnection.MetadataRequest;
 import org.olap4j.impl.Named;
 import org.olap4j.impl.NamedListImpl;
 import org.olap4j.metadata.NamedList;
@@ -76,7 +77,7 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 
 		switch (state) {
 		case POPULATING:
-			//return new NamedListImpl<T>();
+			// return new NamedListImpl<T>();
 			throw new RuntimeException("recursive population");
 		case NEW:
 			try {
@@ -115,6 +116,23 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 	}
 
 	public T get(String name) {
+		// If "new" and name != null, then we need to populate selectively
+		if (name != null && this.state == State.NEW) {
+			try {
+				// Create own restriction for cube
+				if (metadataRequest == MetadataRequest.MDSCHEMA_CUBES) {
+					Object[] restrictions = new Object[] { "CUBE_NAME", name };
+					context.olap4jConnection.olap4jDatabaseMetaData
+							.populateList(list, context, metadataRequest,
+									handler, restrictions);
+					return list.get(name);
+				}
+				// TODO add other possible Requests.
+			} catch (OlapException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		return getList().get(name);
 	}
 
@@ -123,8 +141,8 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 	}
 
 	protected void populateList(NamedList<T> list) throws OlapException {
-		context.olap4jConnection.olap4jDatabaseMetaData.populateList(list, context, metadataRequest,
-				handler, restrictions);
+		context.olap4jConnection.olap4jDatabaseMetaData.populateList(list,
+				context, metadataRequest, handler, restrictions);
 	}
 
 	private enum State {

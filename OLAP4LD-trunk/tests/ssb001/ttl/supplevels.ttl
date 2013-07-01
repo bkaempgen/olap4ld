@@ -1,6 +1,6 @@
 @prefix skos:	<http://www.w3.org/2004/02/skos/core#> .
-@prefix ns1:	<http://lod2.eu/schemas/rdfh-inst#> .
-@prefix ns2:	<http://lod2.eu/schemas/rdfh#> .
+@prefix ns1:	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/custlevels.ttl#> .
+@prefix ns2:	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb01/ttl/custlevels.ttl#> .
 ns1:supplier_828	skos:member	ns2:lo_suppkeySupplierLevel ;
 	skos:narrower	ns2:lo_suppkeyCityVIETNAM--3 .
 ns1:supplier_163	skos:member	ns2:lo_suppkeySupplierLevel ;

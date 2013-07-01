@@ -169,11 +169,83 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 				patternValueList.add((String) value);
 			}
 		}
+		
+		String[] restrictions = patternValueList.toArray(new String[patternValueList
+		    								.size()]);
+		
+		Olap4ldUtil._log.info("********************************************");
+		Olap4ldUtil._log.info("** SENDING REQUEST :");
+		String restrictionString = "";
+		for (int i = 0; i < restrictions.length; i = i + 2) {
+			if ("CATALOG_NAME".equals((String) restrictions[i])) {
+				restrictionString += "catalog_name = "
+						+ (String) restrictions[i + 1];
+				// we do not consider catalogs for now.
+				continue;
+			}
+			if ("SCHEMA_NAME".equals((String) restrictions[i])) {
+				restrictionString += "schema_name = "
+						+ (String) restrictions[i + 1];
+				// we do not consider schema for now
+				continue;
+			}
+			if ("CUBE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "cube_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("DIMENSION_UNIQUE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "dimension_unique_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("HIERARCHY_UNIQUE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "hierarchy_unique_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("LEVEL_UNIQUE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "level_unique_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("MEMBER_UNIQUE_NAME".equals((String) restrictions[i])) {
+				restrictionString += "member_unique_name = "
+						+ (String) restrictions[i + 1];
+				continue;
+			}
+			if ("TREE_OP".equals((String) restrictions[i])) {
+				restrictionString += "tree_op = "
+						+ new Integer((String) restrictions[i + 1]);
+				// treeOps erstellen wie in OpenVirtuoso
+				continue;
+			}
+
+		}
+
+		Olap4ldUtil._log.info("executeMetadataRequestOnLd("
+				+ metadataRequest.name() + ") with " + restrictionString + ";");
+		Olap4ldUtil._log.info("********************************************");
+
+		/*
+		 * Specification of those metadata requests, see MetaDataRequest,
+		 * further below
+		 */
+
+		/*
+		 * TODO: We should throw proper OLAP execptions coming from the engine,
+		 * e.g. (see above):
+		 * 
+		 * throw getHelper().createException( "XMLA provider gave exception: " +
+		 * XmlaOlap4jUtil.prettyPrint(fault) + "\n" + "Request was:\n" +
+		 * request);
+		 */
+
+		// Restrictions are wrapped in own object
+		Restrictions myRestrictionsObject = new Restrictions(restrictions);
 
 		// Request was created before, here, it is generated and then executed.
-		List<Node[]> root = executeMetadataRequestOnLd(context, metadataRequest,
-						patternValueList.toArray(new String[patternValueList
-								.size()]));
+		List<Node[]> root = executeMetadataRequestOnLd(context, metadataRequest, myRestrictionsObject);
 
 		// String request = olap4jConnection.generateRequest(context,
 		// metadataRequest,
@@ -1409,11 +1481,13 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		// restrictions);
 		// Element root = executeMetadataRequest(request);
 
+		Restrictions myRestrictionsObject = new Restrictions(restrictions);
+		
 		// Here, we now query Linked Data
 		// Here, the context helps, since deferred lists are filled with
 		// contexts.
 		List<org.semanticweb.yars.nx.Node[]> root = executeMetadataRequestOnLd(
-				context, metadataRequest, restrictions);
+				context, metadataRequest, myRestrictionsObject);
 
 		// Go through Nodes and change handlers to do so, as well.
 		boolean isFirst = true;
@@ -1469,78 +1543,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	 */
 	protected List<org.semanticweb.yars.nx.Node[]> executeMetadataRequestOnLd(
 			Context context, MetadataRequest metadataRequest,
-			Object[] restrictions) {
-
-		Olap4ldUtil._log.info("********************************************");
-		Olap4ldUtil._log.info("** SENDING REQUEST :");
-		String restrictionString = "";
-		for (int i = 0; i < restrictions.length; i = i + 2) {
-			if ("CATALOG_NAME".equals((String) restrictions[i])) {
-				restrictionString += "catalog_name = "
-						+ (String) restrictions[i + 1];
-				// we do not consider catalogs for now.
-				continue;
-			}
-			if ("SCHEMA_NAME".equals((String) restrictions[i])) {
-				restrictionString += "schema_name = "
-						+ (String) restrictions[i + 1];
-				// we do not consider schema for now
-				continue;
-			}
-			if ("CUBE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "cube_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("DIMENSION_UNIQUE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "dimension_unique_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("HIERARCHY_UNIQUE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "hierarchy_unique_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("LEVEL_UNIQUE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "level_unique_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("MEMBER_UNIQUE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "member_unique_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("TREE_OP".equals((String) restrictions[i])) {
-				restrictionString += "tree_op = "
-						+ new Integer((String) restrictions[i + 1]);
-				// treeOps erstellen wie in OpenVirtuoso
-				continue;
-			}
-
-		}
-
-		Olap4ldUtil._log.info("executeMetadataRequestOnLd("
-				+ metadataRequest.name() + ") with " + restrictionString + ";");
-		Olap4ldUtil._log.info("********************************************");
-
-		/*
-		 * Specification of those metadata requests, see MetaDataRequest,
-		 * further below
-		 */
-
-		/*
-		 * TODO: We should throw proper OLAP execptions coming from the engine,
-		 * e.g. (see above):
-		 * 
-		 * throw getHelper().createException( "XMLA provider gave exception: " +
-		 * XmlaOlap4jUtil.prettyPrint(fault) + "\n" + "Request was:\n" +
-		 * request);
-		 */
-
-		// Restrictions are wrapped in own object
-		Restrictions myRestrictionsObject = new Restrictions(restrictions);
+			Restrictions myRestrictionsObject) {
 
 		// Create result
 		switch (metadataRequest) {

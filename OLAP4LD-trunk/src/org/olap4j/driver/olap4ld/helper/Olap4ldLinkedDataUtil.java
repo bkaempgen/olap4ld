@@ -18,15 +18,13 @@ import java.util.Map;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
-import org.semanticweb.yars.nx.Node;
 
 public class Olap4ldLinkedDataUtil {
-	
+
 	/*
 	 * RDF prefixes
 	 */
@@ -43,35 +41,10 @@ public class Olap4ldLinkedDataUtil {
 	 * @return encoded string
 	 */
 	static String encodeUriWithPrefix(String uri) {
-	
-		if (standard_prefix2uri == null && standard_uri2prefix == null) {
-			readInStandardPrefixes();
-		}
-	
-		/*
-		 * First, I have to retrieve the base uri. If there is a hash, I just
-		 * remove it. If there is no hash, I remove everything from the last /
-		 * on.
-		 */
-		String qname = "";
-		String baseuri = "";
-		int lastIndexHash = uri.lastIndexOf("#");
-		if (lastIndexHash != -1) {
-			qname = uri.substring(lastIndexHash + 1);
-			baseuri = uri.substring(0, lastIndexHash + 1);
-		} else {
-			int lastIndexSlash = uri.lastIndexOf("/");
-			qname = uri.substring(lastIndexSlash + 1);
-			baseuri = uri.substring(0, lastIndexSlash + 1);
-		}
-	
-		// If there is no prefix stored, we have to come up with one ourselves
+
+		// Since we do not manage prefixes, we have to come up with one ourselves
 		// (which if possible should be always the same):
-		String prefixeduri = (standard_uri2prefix.containsKey(baseuri
-				.hashCode())) ? standard_uri2prefix.get(baseuri.hashCode())
-				+ ":" + qname : baseuri + qname;
-	
-		return encodeSpecialMdxCharactersInNames(prefixeduri);
+		return encodeSpecialMdxCharactersInNames(uri);
 	}
 
 	/**
@@ -82,30 +55,30 @@ public class Olap4ldLinkedDataUtil {
 	 * @return
 	 */
 	static String decodeUriWithPrefix(String encodedname) {
-	
+
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
 		}
-	
+
 		String decodedname = decodeSpecialMdxCharactersInNames(encodedname);
-	
+
 		// In this case, the : is the sign
 		int lastIndexColon = decodedname.lastIndexOf(":");
-	
+
 		if (lastIndexColon >= 0) {
 			String qname = decodedname.substring(lastIndexColon + 1);
 			// Without colon
 			String prefix = decodedname.substring(0, lastIndexColon);
-	
+
 			String prefixuri = standard_prefix2uri.get(prefix.hashCode());
-	
+
 			if (prefixuri != null) {
 				return prefixuri + qname;
 			}
 		}
-	
+
 		return decodedname;
-	
+
 	}
 
 	/**
@@ -129,7 +102,6 @@ public class Olap4ldLinkedDataUtil {
 	 * @return
 	 */
 	public static String convertNodeToMDX(org.semanticweb.yars.nx.Node node) {
-		final String myValue;
 		// If value is uri, then convert into MDX friendly format
 		if (node.toString().equals("null")) {
 			return null;
@@ -150,8 +122,32 @@ public class Olap4ldLinkedDataUtil {
 		}
 		// First, we remove the square brackets
 		mdx = removeSquareBrackets(mdx);
-	
+
 		return decodeUriWithPrefix(mdx);
+	}
+
+	public static String readInQueryTemplate(String name) {
+		try {
+			StreamSource stream = new StreamSource(
+					Olap4ldLinkedDataUtil.class
+							.getResourceAsStream("/"+name));
+			InputStream inputStream = stream.getInputStream();
+
+			InputStreamReader reader = new InputStreamReader(inputStream);
+			BufferedReader in = new BufferedReader(reader);
+
+			String querytemplate = "";
+			String readString;
+			while ((readString = in.readLine()) != null) {
+				querytemplate += readString;
+			}
+			in.close();
+			return querytemplate;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/**
@@ -170,7 +166,7 @@ public class Olap4ldLinkedDataUtil {
 			InputStream inputStream = stream.getInputStream();
 			InputStreamReader reader = new InputStreamReader(inputStream);
 			BufferedReader in = new BufferedReader(reader);
-	
+
 			String readString;
 			while ((readString = in.readLine()) != null) {
 				String[] prefixuricombination = readString.split(trennzeichen);
@@ -197,20 +193,23 @@ public class Olap4ldLinkedDataUtil {
 	 * and which do encoding/decoding, but which are not explicitly defined in a
 	 * SPARQL query.
 	 * 
+	 * Deprecated, since we do not dynamically build SPARQL queries but use templates.
+	 * 
 	 * @return
 	 */
+	@Deprecated
 	public static String getStandardPrefixes() {
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
 		}
-	
+
 		String standardprefixes = "";
 		Collection<String> uris = standard_prefix2uri.values();
 		for (String uri : uris) {
 			String prefix = standard_uri2prefix.get(uri.hashCode());
 			standardprefixes += "PREFIX " + prefix + ": <" + uri + "> \n";
 		}
-	
+
 		return standardprefixes;
 	}
 
@@ -221,17 +220,17 @@ public class Olap4ldLinkedDataUtil {
 	 * @return
 	 */
 	public static String makeCaption(String caption, String alternative) {
-	
+
 		if (caption == null || caption.equals("") || caption.equals("null")) {
 			caption = alternative;
 		}
-	
+
 		if (caption.contains("http://")) {
-	
+
 			String value = "";
 			// If there is a # I take everything from there
 			int hashindex = caption.indexOf('#');
-	
+
 			if (hashindex != -1) {
 				value = caption.substring(hashindex);
 			} else {
@@ -242,12 +241,12 @@ public class Olap4ldLinkedDataUtil {
 					value = caption;
 				}
 			}
-	
+
 			// resolve CamelCase
 			HumaniseCamelCase myCamel = new HumaniseCamelCase();
 			value = myCamel.humanise(value);
 			return value;
-	
+
 		} else {
 			return caption;
 		}
@@ -270,7 +269,7 @@ public class Olap4ldLinkedDataUtil {
 		 */
 		if (is != null) {
 			Writer writer = new StringWriter();
-	
+
 			char[] buffer = new char[1024];
 			try {
 				Reader reader = new BufferedReader(new InputStreamReader(is,
@@ -288,6 +287,7 @@ public class Olap4ldLinkedDataUtil {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@Deprecated
 	private static String getSkosPropertyOfDimension(String dimensionProperty) {
 		// It can only be either literal or resource: notion, or
@@ -347,22 +347,22 @@ public class Olap4ldLinkedDataUtil {
 	 * @return String containing all array elements seperated by glue string
 	 */
 	public static String implodeArray(String[] inputArray, String glueString) {
-	
+
 		/** Output variable */
 		String output = "";
-	
+
 		if (inputArray.length > 0) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(inputArray[0]);
-	
+
 			for (int i = 1; i < inputArray.length; i++) {
 				sb.append(glueString);
 				sb.append(inputArray[i]);
 			}
-	
+
 			output = sb.toString();
 		}
-	
+
 		return output;
 	}
 
@@ -399,7 +399,7 @@ public class Olap4ldLinkedDataUtil {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+
 		return null;
 	}
 
@@ -414,7 +414,7 @@ public class Olap4ldLinkedDataUtil {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+
 		return null;
 	}
 
@@ -440,40 +440,40 @@ public class Olap4ldLinkedDataUtil {
 	}
 
 	public static InputStream transformSparqlXmlToNx(InputStream xml) {
-	
+
 		javax.xml.transform.TransformerFactory tf = javax.xml.transform.TransformerFactory
 				.newInstance("net.sf.saxon.TransformerFactoryImpl", Thread
 						.currentThread().getContextClassLoader());
-	
+
 		Transformer t;
-	
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	
+
 		try {
 			// String base = System.getProperty("RESOURCE_BASE", "");
 			// String userDir = System.getProperty("user.home");
 			// TODO: This is not very generic.
-	
+
 			// Instead of:
 			// File xslFile = new File(
 			// "C:/Users/b-kaempgen/Documents/Workspaces/Eclipse_SLD/OLAP4LD/resources/xml2nx.xsl");
 			// t = tf.newTransformer(new StreamSource(xslFile.getPath()));
-	
+
 			t = tf.newTransformer(new StreamSource(Olap4ldLinkedDataUtil.class
 					.getResourceAsStream("/xml2nx.xsl")));
-	
+
 			StreamSource ssource = new StreamSource(xml);
 			StreamResult sresult = new StreamResult(baos);
-	
+
 			Olap4ldUtil._log.info("...applying xslt to transform xml to nx...");
 			// System.out.println("herwe");
-	
+
 			t.transform(ssource, sresult);
-	
+
 			// We need to make INputStream out of OutputStream
 			ByteArrayInputStream nx = new ByteArrayInputStream(
 					baos.toByteArray());
-	
+
 			return nx;
 		} catch (TransformerException e) {
 			e.printStackTrace();

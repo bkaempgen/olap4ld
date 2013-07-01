@@ -18,35 +18,21 @@
  */
 package org.olap4j.driver.olap4ld.linkeddata;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.memory.MemoryStore;
 
 import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
@@ -55,14 +41,27 @@ import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResultHandlerException;
+import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.repository.sail.SailRepositoryConnection;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParseException;
+import org.openrdf.sail.memory.MemoryStore;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Variable;
 import org.semanticweb.yars.nx.parser.NxParser;
 
 /**
- * Implements methods of XmlaOlap4jDatabaseMetadata, returning the specified
- * columns as nodes from a sparql endpoint.
+ * The EmbeddedSesameEngine manages an embedded Sesame repository (triple store) while
+ * executing metadata or olap queries. 
  * 
  * @author b-kaempgen
  * 
@@ -88,23 +87,47 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	// Helper attributes
 
+	/**
+	 * Map of locations that have been loaded into the embedded triple store.
+	 */
 	private HashMap<Integer, Boolean> locationsMap = new HashMap<Integer, Boolean>();
 
+	/** 
+	 * The Sesame repository (triple store).
+	 */
 	private SailRepository repo;
-
-	// Not used
-	private ArrayList<String> datastructuredefinitions;
-	private ArrayList<String> datasets;
 
 	public EmbeddedSesameEngine(URL serverUrlObject,
 			ArrayList<String> datastructuredefinitions,
 			ArrayList<String> datasets, String databasename) {
+		
+		//We actually do not need that.
 		URL = serverUrlObject.toString();
-		this.datastructuredefinitions = datastructuredefinitions;
-		this.datasets = datasets;
+		
+		//Those given URIs we load and add to the location map
+		for (String string : datastructuredefinitions) {
+			try {
+				String location = askForLocation(string);
+				if (!isStored(location)) {
+					loadInStore(location);
+				}
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		for (String string : datasets) {
+			try {
+				String location = askForLocation(string);
+				if (!isStored(location)) {
+					loadInStore(location);
+				}
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
-		// TODO: I could add another version with a specific rule set for open
-		// virtuoso
 		if (databasename.equals("EMBEDDEDSESAME")) {
 			DATASOURCENAME = databasename;
 			DATASOURCEVERSION = "1.0";
@@ -147,6 +170,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * @throws IOException
 	 */
 	private String askForLocation(String uri) throws MalformedURLException {
+		
+		Olap4ldUtil._log.info("Ask for location: " + uri + "...");
+		
 		URL url;
 		url = new URL(uri);
 
@@ -169,13 +195,16 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					uri = uri.substring(0, index + 1) + header;
 				}
 			}
+			// We should remove # uris
+			if (uri.contains("#")) {
+				int index = uri.lastIndexOf("#");
+				uri = uri.substring(0, index);
+			}
 		} catch (IOException e) {
 			throw new MalformedURLException(e.getMessage());
 		}
-		if (uri.endsWith(".ttl")) {
-			throw new MalformedURLException(
-					"We cannot handle non-rdf files, yet");
-		}
+		
+		Olap4ldUtil._log.info("... result: " + uri);
 		return uri;
 	}
 
@@ -202,17 +231,21 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		try {
 			RepositoryConnection con = repo.getConnection();
 			
-			PipedOutputStream out = new PipedOutputStream();
+			ByteArrayOutputStream boas =   new ByteArrayOutputStream();
+			
 			SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
-					out);
-			PipedInputStream in = new PipedInputStream(out);
+					boas);
 
 			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
 					query);
 			tupleQuery.evaluate(sparqlWriter);
-
+			
+			ByteArrayInputStream bais = new ByteArrayInputStream(boas.toByteArray());
+			
+			//String xmlwriterstreamString = Olap4ldLinkedDataUtil.convertStreamToString(bais);
+			//System.out.println(xmlwriterstreamString);
 			// Transform sparql xml to nx
-			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(in);
+			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(bais);
 			String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
 			Olap4ldUtil._log.info("NX output: " + test2);
 			nx.reset();
@@ -327,23 +360,21 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	}
 
 	/**
+	 *  
+	 * 
 	 * 
 	 * Get Cubes from the triple store.
 	 * 
 	 * Here, the restrictions are strict restrictions without patterns.
 	 * 
-	 * ==Task: Show proper captions== Problem: Where to take captions from?
-	 * rdfs:label Problem: There might be several rdfs:label -> only English
-	 * When creating such dsds, we could give the dsd an english label Also, we
-	 * need an english label for dimension, hierarchy, level, members Cell
-	 * Values will be numeric and not require language
+	 * 
 	 * 
 	 * @return Node[]{}
 	 */
 	public List<Node[]> getCubes(Restrictions restrictions) {
 
 		// If specific data cube asked for, get URI
-		if (!restrictions.cubeNamePattern.equals(null)) {
+		if (restrictions.cubeNamePattern != null) {
 			String uri = Olap4ldLinkedDataUtil
 					.convertMDXtoURI(restrictions.cubeNamePattern);
 			try {
@@ -361,21 +392,14 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		}
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
+		
+		String querytemplate = Olap4ldLinkedDataUtil.readInQueryTemplate("sesame_getCubes_regular.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}", askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{ADDITIONALFILTERS}}}", additionalFilters);
 
-		// TODO: For now, we only use the non-language-tag CAPTION and
-		// DESCRIPTION
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select distinct \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"CUBE\" as ?CUBE_TYPE min(?DESCRIPTION) as ?DESCRIPTION min(?CUBE_CAPTION) as ?CUBE_CAPTION "
-				+ askForFrom(true)
-				+ "where { ?ds qb:structure ?CUBE_NAME. ?CUBE_NAME a qb:DataStructureDefinition. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"en\" )} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" )} "
-				+ additionalFilters + "}"
-				+ "group by ?CUBE_NAME order by ?CUBE_NAME";
-
-		List<Node[]> result = sparql(query, true);
+		List<Node[]> result = sparql(querytemplate, true);
 
 		/*
 		 * Check on restrictions that the interface makes:
@@ -388,14 +412,25 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	}
 
+	/**
+	 * Loads location into store and mark it as stored.
+	 * @param location
+	 */
 	private void loadInStore(String location) {
-		locationsMap.put(location.hashCode(), true);
-
-		RepositoryConnection con;
 		try {
-			con = repo.getConnection();
+			Olap4ldUtil._log.info("Load in store: " + location);
+			
+			SailRepositoryConnection con = repo.getConnection();
 			URL url = new URL(location);
-			con.add(url, url.toString(), RDFFormat.RDFXML);
+			
+			if (location.endsWith(".rdf") || location.endsWith(".xml")) {
+				con.add(url, url.toString(), RDFFormat.RDFXML);
+			} else if (location.endsWith(".ttl")) {
+				con.add(url, url.toString(), RDFFormat.TURTLE);
+			} else {
+				throw new UnsupportedOperationException("How is the RDF encoded of location: "+location+"?");
+			}
+			locationsMap.put(location.hashCode(), true);
 		} catch (RepositoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -412,6 +447,11 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	}
 
+	/**
+	 * 
+	 * @param location
+	 * @return boolean value say whether location already loaded
+	 */
 	private boolean isStored(String location) {
 		return this.locationsMap.containsValue(location.hashCode());
 	}

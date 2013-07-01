@@ -1,6 +1,16 @@
+==2013-07-02==
+* Read in first location.
+* Problem: A data cube is an instance of qb:DataSet. What do we
+typically store with the qb:DataSet? For sure the outgoing link to dsd,
+the outgoing link to all of its slices that in turn link to the
+observations. Sometimes, we may have the observations already in the ds
+location.
+
+==2013-07-01 (before)==
+
 * Warum haben die Dimensionen alle zwei Englische rdfs:label? 
 
-==Problem: Saiku calls <Measures>==
+===Problem: Saiku calls <Measures>===
 PREFIX dc: <http://purl.org/dc/elements/1.1/> 
 PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
 PREFIX edgar: <http://edgarwrap.ontologycentral.com/vocab/> 
@@ -28,7 +38,7 @@ PREFIX rdfh-inst: <http://lod2.eu/schemas/rdfh-inst#>
 select "LdCatalog" as ?CATALOG_NAME "LdSchema" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?LEVEL_CAPTION ?DIMENSION_UNIQUE_NAME as ?LEVEL_NAME "N/A" as ?DESCRIPTION "1" as ?LEVEL_NUMBER "0" as ?LEVEL_CARDINALITY "0x0000" as ?LEVEL_TYPE  from <http://fios:saiku>  where { ?CUBE_NAME qb:component ?compSpec . ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. }   FILTER (?CUBE_NAME = <http://public.b-kaempgen.de:8080/archive/MA/2007-06-06#dsd>)  FILTER (?DIMENSION_UNIQUE_NAME = <Measures>) } order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?LEVEL_NUMBER 
 
 
-==Open issues==
+===Open issues===
 
 * Reasoning does not work
 ** If we enable reasoning, the queries take much too long
@@ -66,11 +76,9 @@ coverage" with an own uri, maybe giving it ical:dtstart, ical:dtend as descripti
 most importantly giving it skos:notation with "Period from dtstart to dtend" or "Instant at dtstart"?
 Also, one could then more or less automatically link to the date reference ontology for hierarchies,
 e.g., within year 2011 or before 2012. Also, we could give it names such as "Q3, Q4" etc.
-** 
+** ...
 
-
-
-==How about querying over several cubes together?==
+===How about querying over several cubes together?===
 * Cube created
 * Test query created
 * Next steps
