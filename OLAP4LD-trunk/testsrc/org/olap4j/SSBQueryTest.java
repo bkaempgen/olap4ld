@@ -84,108 +84,129 @@ public class SSBQueryTest extends TestCase {
 	/**
 	 * Generic Query
 	 */
-	public void testSSB001() {
-		String result = executeStatement("SELECT {Measures.Measures.Measures.[rdfhXXX3Alo_revenue]} ON COLUMNS, " +
-				"{[rdfhXXX3Alo_custkey].[rdfhXXX3Alo_custkeyCodeList].[rdfhXXX3Alo_custkeyCustomerLevel].[rdfhZZZinstXXX3Acustomer_277]} ON ROWS " +
-				"FROM [http://olap4ldYYYgooglecodeYYYcom/git/OLAP4LD-trunk/tests/ssb001/ttl/lineorder_qbYYYttl#ds]");
-		
-		assertContains("1.436037326E9", result);
-	}
-	
-	
-	/**
-	 * Generic Query
-	 */
-	public void testGenericQuery() {
-		String result = executeStatement("SELECT {Measures.Measures.Measures.[rdfhXXX3Alo_revenue]} ON COLUMNS, " +
-				"{[rdfhXXX3Alo_custkey].[rdfhXXX3Alo_custkeyCodeList].[rdfhXXX3Alo_custkeyCustomerLevel].[rdfhZZZinstXXX3Acustomer_178]} ON ROWS " +
-				"FROM [rdfhZZZinstXXX3Adsd]");
-		
+	public void testSsbExample() {
+		String result = executeStatement("SELECT {[Measures].[Measures].[Measures].[http://purlYYYorg/linked-data/sdmx/2009/measure#obsValue]} ON COLUMNS,	"
+				+ "{[http://lodYYYgesisYYYorg/lodpilot/ALLBUS/vocabYYYrdf#geo].[http://lodYYYgesisYYYorg/lodpilot/ALLBUS/geoYYYrdf#list].[http://lodYYYgesisYYYorg/lodpilot/ALLBUS/geoYYYrdf#list].[http://lodYYYgesisYYYorg/lodpilot/ALLBUS/geoYYYrdf#00]} ON ROWS "
+				+ "FROM [http://lodYYYgesisYYYorg/lodpilot/ALLBUS/ZA4570v590YYYrdf#ds]");
+
 		assertContains("1.436037326E9", result);
 	}
 
-	/**
-	 * Query 1.1
-	 */
-	public void testSSB_Q_1_1() {
-		String result = executeStatement("WITH MEMBER [Revenue] as 'Measures.Measures.Measures.[rdfhXXX3Alo_extendedprice] * Measures.Measures.Measures.[rdfhXXX3Alo_discount]' "
-				+ "SELECT {[Revenue]} ON COLUMNS, "
-				+ "{[rdfhXXX3Alo_orderdate].[rdfhXXX3Alo_orderdateCodeList].[rdfhXXX3Alo_orderdateYearLevel].[rdfhXXX3Alo_orderdateYear1993]} ON ROWS "
-				+ "FROM [rdfhZZZinstXXX3Adsd] "
-				+ "WHERE CrossJoin(Filter(Members([rdfhXXX3Alo_quantity]), "
-				+ "Cast(Name(CurrentMember([rdfhXXX3Alo_quantity])) as NUMERIC) < 25), "
-				+ "Filter(Members([rdfhXXX3Alo_discount]), "
-				+ "Cast(Name(CurrentMember([rdfhXXX3Alo_discount])) as NUMERIC) >= 1 "
-				+ "and Cast(Name(CurrentMember([rdfhXXX3Alo_discount])) as NUMERIC) <= 3))");
-		
-		assertContains("4182760987", result);
-	}
-
-	/**
-	 * Query 1.2
-	 */
-	public void testSSB_Q_1_2() {
-		String result = executeStatement("WITH MEMBER Measures.[Revenue] as 'Measures.Measures.Measures.[rdfh:lo_extendedprice] * Measures.Measures.Measures.[rdfh:lo_discount]' "
-				+ "SELECT {Measures.[Revenue]} ON COLUMNS, "
-				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearMonthNumLevel].[rdfh:lo_orderdateYearMonthNum199401]} ON ROWS "
-				+ "FROM [rdfh-inst:dsd] "
-				+ "WHERE CrossJoin(Filter(Members([rdfh:lo_quantity]), "
-				+ "Cast(Name(CurrentMember([rdfh:lo_quantity])) as NUMERIC) >= 26 and Cast(Name(CurrentMember([rdfh:lo_quantity])) as NUMERIC) <= 35), "
-				+ "Filter(Members([rdfh:lo_discount]), "
-				+ "Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) >= 4 "
-				+ "and Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) <= 6)) ");
-		
-		assertContains("1036391395", result);
-	}
-
-	/**
-	 * Query 1.3
-	 */
-	public void testSSB_Q_1_3() {
-		String result = executeStatement("WITH MEMBER Measures.[Revenue] as 'Measures.Measures.Measures.[rdfh:lo_extendedprice] * Measures.Measures.Measures.[rdfh:lo_discount]' "
-				+ "SELECT {Measures.[Revenue]} ON COLUMNS, "
-				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateWeeknuminyearCodeList].[rdfh:lo_orderdateWeeknuminyearLevel].[rdfh:lo_orderdateWeeknuminyear19946]} ON ROWS "
-				+ "FROM [rdfh-inst:dsd] "
-				+ "WHERE CrossJoin(Filter(Members([rdfh:lo_quantity]), "
-				+ "Cast(Name(CurrentMember([rdfh:lo_quantity])) as NUMERIC) >= 26 and Cast(Name(CurrentMember([rdfh:lo_quantity])) as NUMERIC) <= 35), "
-				+ "Filter(Members([rdfh:lo_discount]), "
-				+ "Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) >= 5 "
-				+ "and Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) <= 7))");
-		
-		assertContains("303927274", result);
-	}
-
-	/**
-	 * Query 2.1
-	 * 
-	 * XXX: Does not fit, yet, since Children is not implemented, yet.
-	 */
-	public void notestSSB_Q_2_1() {
-		executeStatement("SELECT {Measures.Measures.Measures.[rdfh:lo_revenue]} ON COLUMNS, "
-				+ "CrossJoin(Members([rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel]), "
-				+ "{[rdfh:lo_partkey].[rdfh:lo_partkeyCodeList].[rdfh:lo_partkeyCategoryLevel].[rdfh:lo_partkeyCategoryMFGR-12]}) ON ROWS "
-				+ "FROM [rdfh-inst:dsd] "
-				+ "WHERE {[rdfh:lo_suppkey].[rdfh:lo_suppkeyCodeList].[rdfh:lo_suppkeyRegionLevel].[rdfh:lo_suppkeyRegionAMERICA]}");
-
-	}
-
-	/**
-	 * Query 2.2
-	 */
-	public void notestSSB_Q_2_2() {
-		executeStatement("SELECT {Measures.Measures.Measures.[rdfh:lo_revenue]} ON COLUMNS, "
-				+ "CrossJoin(Members([rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel]), "
-				+ "{[rdfh:lo_partkey].[rdfh:lo_partkeyCodeList].[rdfh:lo_partkeyCategoryLevel].[rdfh:lo_partkeyCategoryMFGR-12]}) ON ROWS "
-				+ "FROM [rdfh-inst:dsd] "
-				+ "WHERE {[rdfh:lo_suppkey].[rdfh:lo_suppkeyCodeList].[rdfh:lo_suppkeyRegionLevel].[rdfh:lo_suppkeyRegionAMERICA]}");
-	}
+//	/**
+//	 * Generic Query
+//	 */
+//	public void testGESIS() {
+//		String result = executeStatement("SELECT {[Measures].[Measures].[Measures].[http://purlYYYorg/linked-data/sdmx/2009/measure#obsValue]} ON COLUMNS,	"
+//				+ "{[http://lodYYYgesisYYYorg/lodpilot/ALLBUS/vocabYYYrdf#geo].[http://lodYYYgesisYYYorg/lodpilot/ALLBUS/geoYYYrdf#list].[http://lodYYYgesisYYYorg/lodpilot/ALLBUS/geoYYYrdf#list].[http://lodYYYgesisYYYorg/lodpilot/ALLBUS/geoYYYrdf#00]} ON ROWS "
+//				+ "FROM [http://lodYYYgesisYYYorg/lodpilot/ALLBUS/ZA4570v590YYYrdf#ds]");
+//
+//		assertContains("1.436037326E9", result);
+//	}
+// 
+//	/**
+//	 * Generic Query
+//	 */
+//	public void testSSB001() {
+//		String result = executeStatement("SELECT {Measures.Measures.Measures.[rdfhXXX3Alo_revenue]} ON COLUMNS, "
+//				+ "{[rdfhXXX3Alo_custkey].[rdfhXXX3Alo_custkeyCodeList].[rdfhXXX3Alo_custkeyCustomerLevel].[rdfhZZZinstXXX3Acustomer_277]} ON ROWS "
+//				+ "FROM [http://olap4ldYYYgooglecodeYYYcom/git/OLAP4LD-trunk/tests/ssb001/ttl/lineorder_qbYYYttl#ds]");
+//
+//		assertContains("1.436037326E9", result);
+//	}
+//
+//	/**
+//	 * Generic Query
+//	 */
+//	public void testGenericQuery() {
+//		String result = executeStatement("SELECT {Measures.Measures.Measures.[rdfhXXX3Alo_revenue]} ON COLUMNS, "
+//				+ "{[rdfhXXX3Alo_custkey].[rdfhXXX3Alo_custkeyCodeList].[rdfhXXX3Alo_custkeyCustomerLevel].[rdfhZZZinstXXX3Acustomer_178]} ON ROWS "
+//				+ "FROM [rdfhZZZinstXXX3Adsd]");
+//
+//		assertContains("1.436037326E9", result);
+//	}
+//
+//	/**
+//	 * Query 1.1
+//	 */
+//	public void testSSB_Q_1_1() {
+//		String result = executeStatement("WITH MEMBER [Revenue] as 'Measures.Measures.Measures.[rdfhXXX3Alo_extendedprice] * Measures.Measures.Measures.[rdfhXXX3Alo_discount]' "
+//				+ "SELECT {[Revenue]} ON COLUMNS, "
+//				+ "{[rdfhXXX3Alo_orderdate].[rdfhXXX3Alo_orderdateCodeList].[rdfhXXX3Alo_orderdateYearLevel].[rdfhXXX3Alo_orderdateYear1993]} ON ROWS "
+//				+ "FROM [rdfhZZZinstXXX3Adsd] "
+//				+ "WHERE CrossJoin(Filter(Members([rdfhXXX3Alo_quantity]), "
+//				+ "Cast(Name(CurrentMember([rdfhXXX3Alo_quantity])) as NUMERIC) < 25), "
+//				+ "Filter(Members([rdfhXXX3Alo_discount]), "
+//				+ "Cast(Name(CurrentMember([rdfhXXX3Alo_discount])) as NUMERIC) >= 1 "
+//				+ "and Cast(Name(CurrentMember([rdfhXXX3Alo_discount])) as NUMERIC) <= 3))");
+//
+//		assertContains("4182760987", result);
+//	}
+//
+//	/**
+//	 * Query 1.2
+//	 */
+//	public void testSSB_Q_1_2() {
+//		String result = executeStatement("WITH MEMBER Measures.[Revenue] as 'Measures.Measures.Measures.[rdfh:lo_extendedprice] * Measures.Measures.Measures.[rdfh:lo_discount]' "
+//				+ "SELECT {Measures.[Revenue]} ON COLUMNS, "
+//				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearMonthNumLevel].[rdfh:lo_orderdateYearMonthNum199401]} ON ROWS "
+//				+ "FROM [rdfh-inst:dsd] "
+//				+ "WHERE CrossJoin(Filter(Members([rdfh:lo_quantity]), "
+//				+ "Cast(Name(CurrentMember([rdfh:lo_quantity])) as NUMERIC) >= 26 and Cast(Name(CurrentMember([rdfh:lo_quantity])) as NUMERIC) <= 35), "
+//				+ "Filter(Members([rdfh:lo_discount]), "
+//				+ "Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) >= 4 "
+//				+ "and Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) <= 6)) ");
+//
+//		assertContains("1036391395", result);
+//	}
+//
+//	/**
+//	 * Query 1.3
+//	 */
+//	public void testSSB_Q_1_3() {
+//		String result = executeStatement("WITH MEMBER Measures.[Revenue] as 'Measures.Measures.Measures.[rdfh:lo_extendedprice] * Measures.Measures.Measures.[rdfh:lo_discount]' "
+//				+ "SELECT {Measures.[Revenue]} ON COLUMNS, "
+//				+ "{[rdfh:lo_orderdate].[rdfh:lo_orderdateWeeknuminyearCodeList].[rdfh:lo_orderdateWeeknuminyearLevel].[rdfh:lo_orderdateWeeknuminyear19946]} ON ROWS "
+//				+ "FROM [rdfh-inst:dsd] "
+//				+ "WHERE CrossJoin(Filter(Members([rdfh:lo_quantity]), "
+//				+ "Cast(Name(CurrentMember([rdfh:lo_quantity])) as NUMERIC) >= 26 and Cast(Name(CurrentMember([rdfh:lo_quantity])) as NUMERIC) <= 35), "
+//				+ "Filter(Members([rdfh:lo_discount]), "
+//				+ "Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) >= 5 "
+//				+ "and Cast(Name(CurrentMember([rdfh:lo_discount])) as NUMERIC) <= 7))");
+//
+//		assertContains("303927274", result);
+//	}
+//
+//	/**
+//	 * Query 2.1
+//	 * 
+//	 * XXX: Does not fit, yet, since Children is not implemented, yet.
+//	 */
+//	public void notestSSB_Q_2_1() {
+//		executeStatement("SELECT {Measures.Measures.Measures.[rdfh:lo_revenue]} ON COLUMNS, "
+//				+ "CrossJoin(Members([rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel]), "
+//				+ "{[rdfh:lo_partkey].[rdfh:lo_partkeyCodeList].[rdfh:lo_partkeyCategoryLevel].[rdfh:lo_partkeyCategoryMFGR-12]}) ON ROWS "
+//				+ "FROM [rdfh-inst:dsd] "
+//				+ "WHERE {[rdfh:lo_suppkey].[rdfh:lo_suppkeyCodeList].[rdfh:lo_suppkeyRegionLevel].[rdfh:lo_suppkeyRegionAMERICA]}");
+//
+//	}
+//
+//	/**
+//	 * Query 2.2
+//	 */
+//	public void notestSSB_Q_2_2() {
+//		executeStatement("SELECT {Measures.Measures.Measures.[rdfh:lo_revenue]} ON COLUMNS, "
+//				+ "CrossJoin(Members([rdfh:lo_orderdate].[rdfh:lo_orderdateCodeList].[rdfh:lo_orderdateYearLevel]), "
+//				+ "{[rdfh:lo_partkey].[rdfh:lo_partkeyCodeList].[rdfh:lo_partkeyCategoryLevel].[rdfh:lo_partkeyCategoryMFGR-12]}) ON ROWS "
+//				+ "FROM [rdfh-inst:dsd] "
+//				+ "WHERE {[rdfh:lo_suppkey].[rdfh:lo_suppkeyCodeList].[rdfh:lo_suppkeyRegionLevel].[rdfh:lo_suppkeyRegionAMERICA]}");
+//	}
 
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
 			fail("expected to find '" + seek + "' in '" + s + "'");
 		}
 	}
-	
+
 	private String executeStatement(String mdxString) {
 		// Execute the statement.
 		String resultString = "";
@@ -203,7 +224,6 @@ public class SSBQueryTest extends TestCase {
 
 			System.out.println("Output:");
 			System.out.println(resultString);
-			
 
 		} catch (OlapException e) {
 			System.out.println("Execution failed: " + e);

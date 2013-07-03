@@ -385,6 +385,10 @@ public class Olap4ldLinkedDataUtil {
 	 * We need to make sure that names of multidimensional elements do not carry
 	 * any MDX special characters.
 	 * 
+	 * Note: You can use a bash command for translating a URI into an MDX applicable form:
+	 * 
+	 * echo "http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list" | sed 's/\./YYY/g' | sed 's/-/ZZZ/g' | sed 's/%/XXX/g'
+	 * 
 	 * @param name
 	 * @return
 	 */

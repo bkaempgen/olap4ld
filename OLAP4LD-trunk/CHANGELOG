@@ -1,3 +1,8 @@
+==2013-07-03==
+* xml2nx adapted to Sesame SPARQL/XML output with linebreaks
+* added manually created representative SSB example
+* added Sesame SPARQL templates
+
 ==2013-07-02==
 * Read in first location.
 * Problem: A data cube is an instance of qb:DataSet. What do we
@@ -5,6 +10,22 @@ typically store with the qb:DataSet? For sure the outgoing link to dsd,
 the outgoing link to all of its slices that in turn link to the
 observations. Sometimes, we may have the observations already in the ds
 location.
+* Ideally, we get the following from...
+** DS: Links from observations / Links to slices that in turn link to observations, rdfs:label, 
+rdfs:comment, qb:structure.
+** DSD: All information about the DSD, including code lists.
+
+* For now, we assume (and adapt the SSB dataset accordingly):
+** DS: Links from observations, rdfs:label, qb:structure
+** DSD: All measure properties, dimension properties, code lists...
+
+* Note in spec: Every qb:Observation has exactly one associated qb:DataSet. 
+* Note in spec: Every qb:DataSet has exactly one associated qb:DataStructureDefinition. 
+* Note in spec: "Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range."
+* Note in spec: "Every dimension with range skos:Concept must have a qb:codeList." <= This means, 
+we do not necessarily need a code list in many cases. But, if we have a code list, then:
+* "If a dimension property has a qb:codeList, then the value of the dimension property on every 
+qb:Observation must be in the code list."
 
 ==2013-07-01 (before)==
 

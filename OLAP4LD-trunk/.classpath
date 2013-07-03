@@ -25,8 +25,16 @@
 	<classpathentry kind="lib" path="lib_sesame/sesame-http-client-2.7.2.jar"/>
 	<classpathentry kind="lib" path="lib_sesame/sesame-http-protocol-2.7.2.jar"/>
 	<classpathentry kind="lib" path="lib_sesame/sesame-http-server-spring-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-model-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-query-2.7.2.jar"/>
+	<classpathentry kind="lib" path="lib_sesame/sesame-model-2.7.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://openrdf.callimachus.net/sesame/2.7/apidocs/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib_sesame/sesame-query-2.7.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://openrdf.callimachus.net/sesame/2.7/apidocs/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib_sesame/sesame-queryalgebra-evaluation-2.7.2.jar"/>
 	<classpathentry kind="lib" path="lib_sesame/sesame-queryalgebra-model-2.7.2.jar"/>
 	<classpathentry kind="lib" path="lib_sesame/sesame-queryparser-api-2.7.2.jar"/>
@@ -36,7 +44,11 @@
 	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-api-2.7.2.jar"/>
 	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-binary-2.7.2.jar"/>
 	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-sparqljson-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-sparqlxml-2.7.2.jar"/>
+	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-sparqlxml-2.7.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://openrdf.callimachus.net/sesame/2.7/apidocs/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-text-2.7.2.jar"/>
 	<classpathentry kind="lib" path="lib_sesame/sesame-repository-api-2.7.2.jar">
 		<attributes>

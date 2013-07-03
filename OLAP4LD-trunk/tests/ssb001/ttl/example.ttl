@@ -1,0 +1,212 @@
+# Example SSB dataset for olap4ld testing
+# Author: Benedikt Kämpgen
+
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:     <http://www.w3.org/2004/02/skos/core#> .
+@prefix void:     <http://rdfs.org/ns/void#> .
+@prefix dct:      <http://purl.org/dc/terms/> .
+@prefix foaf:     <http://xmlns.com/foaf/0.1/> .
+@prefix org:      <http://www.w3.org/ns/org#> .
+@prefix admingeo: <http://data.ordnancesurvey.co.uk/ontology/admingeo/> .
+@prefix interval: <http://reference.data.gov.uk/def/intervals/> .
+
+@prefix qb:       <http://purl.org/linked-data/cube#> .
+
+@prefix sdmx-concept:    <http://purl.org/linked-data/sdmx/2009/concept#> .
+@prefix sdmx-dimension:  <http://purl.org/linked-data/sdmx/2009/dimension#> .
+@prefix sdmx-attribute:  <http://purl.org/linked-data/sdmx/2009/attribute#> .
+@prefix sdmx-measure:    <http://purl.org/linked-data/sdmx/2009/measure#> .
+@prefix sdmx-metadata:   <http://purl.org/linked-data/sdmx/2009/metadata#> .
+@prefix sdmx-code:       <http://purl.org/linked-data/sdmx/2009/code#> .
+@prefix sdmx-subject:    <http://purl.org/linked-data/sdmx/2009/subject#> .
+
+@prefix eg:       	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#> .
+
+# -- Data Set --------------------------------------------
+
+eg:ds
+	a qb:DataSet ;
+	rdfs:label "Star Schema Benchmark DS";
+	qb:structure eg:dsd.	
+
+# -- Data structure definition ----------------------------
+
+eg:dsd
+	rdfs:label "Star Schema Benchmark DSD";
+	a qb:DataStructureDefinition ;
+	qb:component 
+		[ qb:dimension eg:lo_orderdate ],
+		[ qb:dimension eg:lo_custkey ],
+		[ qb:dimension eg:lo_partkey ],
+		[ qb:dimension eg:lo_suppkey ];
+	qb:component 
+		[ qb:measure eg:lo_quantity ],
+		[ qb:measure eg:lo_discount ],
+		[ qb:measure eg:lo_extendedprice ],
+		[ qb:measure eg:lo_revenue ],
+		[ qb:measure eg:lo_supplycost ];
+	.
+
+# -- Dimensions and measures  -----------------------------
+
+eg:lo_orderdate a rdf:Property, qb:DimensionProperty;
+    rdfs:label "orderdate"@en;
+    rdfs:range skos:Concept;
+    qb:codeList eg:lo_orderdateCodeList;
+    .
+
+eg:lo_custkey a rdf:Property, qb:DimensionProperty;
+    rdfs:label "custkey"@en;
+    rdfs:range skos:Concept;
+    qb:codeList eg:lo_custkeyCodeList;
+    .
+
+eg:lo_partkey a rdf:Property, qb:DimensionProperty;
+    rdfs:label "partkey"@en;
+    rdfs:range skos:Concept;
+    qb:codeList eg:lo_partkeyCodeList;
+    .
+
+eg:lo_suppkey a rdf:Property, qb:DimensionProperty;
+    rdfs:label "suppkey"@en;
+    rdfs:range skos:Concept;
+    qb:codeList eg:lo_suppkeyCodeList;
+    .
+
+eg:lo_quantity  a rdf:Property, qb:MeasureProperty;
+    rdfs:label "quantity"@en;
+    rdfs:subPropertyOf sdmx-measure:obsValue;
+    rdfs:range xsd:decimal ;
+    qb:aggregator "SUM" ;
+    .
+
+eg:lo_discount  a rdf:Property, qb:MeasureProperty;
+    rdfs:label "discount"@en;
+    rdfs:subPropertyOf sdmx-measure:obsValue;
+    rdfs:range xsd:decimal ;
+    qb:aggregator "AVG" ;
+    .
+
+eg:lo_extendedprice  a rdf:Property, qb:MeasureProperty ;
+    rdfs:label "extendedprice"@en ;
+    rdfs:subPropertyOf sdmx-measure:obsValue ;
+    rdfs:range xsd:decimal ;
+    qb:aggregator "SUM" ;
+    .
+
+eg:lo_revenue  a rdf:Property, qb:MeasureProperty;
+    rdfs:label "revenue"@en;
+    rdfs:subPropertyOf sdmx-measure:obsValue;
+    rdfs:range xsd:decimal ;
+    qb:aggregator "SUM" ;
+    .
+
+eg:lo_supplycost  a rdf:Property, qb:MeasureProperty;
+    rdfs:label "quantity"@en;
+    rdfs:subPropertyOf sdmx-measure:obsValue;
+    rdfs:range xsd:decimal ;
+    qb:aggregator "SUM" ;
+    .
+
+# -- Code lists -------------------------------------------
+
+eg:lo_orderdateCodeList a skos:ConceptScheme, sdmx:CodeList;
+    skos:hasTopConcept eg:date_19940101;
+    skos:hasTopConcept eg:date_19940601;
+    .
+
+eg:lo_custkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
+    skos:hasTopConcept ns1:customer_1;
+    skos:hasTopConcept ns1:customer_2;
+    .
+
+eg:lo_partkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
+    skos:hasTopConcept ns1:part_1;
+    skos:hasTopConcept ns1:part_2;
+    .
+
+eg:lo_suppkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
+    skos:hasTopConcept ns1:supplier_1;
+    skos:hasTopConcept ns1:supplier_2;
+    .
+
+# -- Observations -----------------------------------------
+
+eg:lineorder_1_1
+    a eg:lineorder ; 
+    a qb:Observation ; 
+    qb:dataSet eg:ds ;
+    eg:lo_orderdate eg:date_19940101 ;
+    eg:lo_custkey eg:customer_1 ;
+    eg:lo_partkey eg:part_1 ;
+    eg:lo_suppkey eg:supplier_1 ;
+    eg:lo_quantity 17 ;
+    eg:lo_discount 4e0 ;
+    eg:lo_extendedprice 2471035e0 ;
+    eg:lo_supplycost 87213 ;
+    eg:lo_revenue 2372193 ;
+    .
+
+eg:lineorder_1_2
+    a eg:lineorder ; 
+    a qb:Observation ; 
+    qb:dataSet eg:ds ;
+    eg:lo_orderdate eg:date_19940101 ;
+    eg:lo_custkey eg:customer_1 ;
+    eg:lo_partkey eg:part_1 ;
+    eg:lo_suppkey eg:supplier_1 ;
+    eg:lo_quantity 17 ;
+    eg:lo_discount 4e0 ;
+    eg:lo_extendedprice 2471035e0 ;
+    eg:lo_supplycost 87213 ;
+    eg:lo_revenue 2372193 ;
+    .
+
+eg:lineorder_1_3
+    a eg:lineorder ; 
+    a qb:Observation ; 
+    qb:dataSet eg:ds ;
+    eg:lo_orderdate eg:date_19940101 ;
+    eg:lo_custkey eg:customer_1 ;
+    eg:lo_partkey eg:part_1 ;
+    eg:lo_suppkey eg:supplier_1 ;
+    eg:lo_quantity 17 ;
+    eg:lo_discount 4e0 ;
+    eg:lo_extendedprice 2471035e0 ;
+    eg:lo_supplycost 87213 ;
+    eg:lo_revenue 2372193 ;
+    .
+
+eg:lineorder_1_4
+    a eg:lineorder ; 
+    a qb:Observation ; 
+    qb:dataSet eg:ds ;
+    eg:lo_orderdate eg:date_19940101 ;
+    eg:lo_custkey eg:customer_1 ;
+    eg:lo_partkey eg:part_1 ;
+    eg:lo_suppkey eg:supplier_1 ;
+    eg:lo_quantity 17 ;
+    eg:lo_discount 4e0 ;
+    eg:lo_extendedprice 2471035e0 ;
+    eg:lo_supplycost 87213 ;
+    eg:lo_revenue 2372193 ;
+    .
+
+eg:lineorder_1_5
+    a eg:lineorder ; 
+    a qb:Observation ; 
+    qb:dataSet eg:ds ;
+    eg:lo_orderdate eg:date_19940101 ;
+    eg:lo_custkey eg:customer_1 ;
+    eg:lo_partkey eg:part_1 ;
+    eg:lo_suppkey eg:supplier_1 ;
+    eg:lo_quantity 17 ;
+    eg:lo_discount 4e0 ;
+    eg:lo_extendedprice 2471035e0 ;
+    eg:lo_supplycost 87213 ;
+    eg:lo_revenue 2372193 ;
+    .
+
