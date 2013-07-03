@@ -45,6 +45,7 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.TupleQueryResultHandlerException;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.repository.RepositoryConnection;
@@ -60,8 +61,8 @@ import org.semanticweb.yars.nx.Variable;
 import org.semanticweb.yars.nx.parser.NxParser;
 
 /**
- * The EmbeddedSesameEngine manages an embedded Sesame repository (triple store) while
- * executing metadata or olap queries. 
+ * The EmbeddedSesameEngine manages an embedded Sesame repository (triple store)
+ * while executing metadata or olap queries.
  * 
  * @author b-kaempgen
  * 
@@ -92,7 +93,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	private HashMap<Integer, Boolean> locationsMap = new HashMap<Integer, Boolean>();
 
-	/** 
+	/**
 	 * The Sesame repository (triple store).
 	 */
 	private SailRepository repo;
@@ -100,11 +101,11 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	public EmbeddedSesameEngine(URL serverUrlObject,
 			ArrayList<String> datastructuredefinitions,
 			ArrayList<String> datasets, String databasename) {
-		
-		//We actually do not need that.
+
+		// We actually do not need that.
 		URL = serverUrlObject.toString();
-		
-		//Those given URIs we load and add to the location map
+
+		// Those given URIs we load and add to the location map
 		for (String string : datastructuredefinitions) {
 			try {
 				String location = askForLocation(string);
@@ -170,9 +171,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * @throws IOException
 	 */
 	private String askForLocation(String uri) throws MalformedURLException {
-		
+
 		Olap4ldUtil._log.info("Ask for location: " + uri + "...");
-		
+
 		URL url;
 		url = new URL(uri);
 
@@ -203,7 +204,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		} catch (IOException e) {
 			throw new MalformedURLException(e.getMessage());
 		}
-		
+
 		Olap4ldUtil._log.info("... result: " + uri);
 		return uri;
 	}
@@ -219,7 +220,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * cube.
 	 * 
 	 * @param query
-	 * @param caching (not used)
+	 * @param caching
+	 *            (not used)
 	 * @return
 	 */
 	private List<Node[]> sparql(String query, boolean caching) {
@@ -230,9 +232,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		try {
 			RepositoryConnection con = repo.getConnection();
-			
-			ByteArrayOutputStream boas =   new ByteArrayOutputStream();
-			//FileOutputStream fos = new FileOutputStream("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/resources/result.srx");
+
+			ByteArrayOutputStream boas = new ByteArrayOutputStream();
+			// FileOutputStream fos = new
+			// FileOutputStream("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/resources/result.srx");
 
 			SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
 					boas);
@@ -240,11 +243,13 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
 					query);
 			tupleQuery.evaluate(sparqlWriter);
-			
-			ByteArrayInputStream bais = new ByteArrayInputStream(boas.toByteArray());
-			
-			//String xmlwriterstreamString = Olap4ldLinkedDataUtil.convertStreamToString(bais);
-			//System.out.println(xmlwriterstreamString);
+
+			ByteArrayInputStream bais = new ByteArrayInputStream(
+					boas.toByteArray());
+
+			// String xmlwriterstreamString =
+			// Olap4ldLinkedDataUtil.convertStreamToString(bais);
+			// System.out.println(xmlwriterstreamString);
 			// Transform sparql xml to nx
 			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(bais);
 			String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
@@ -266,7 +271,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				;
 			}
 
+			
 			con.close();
+			boas.close();
 			// do something interesting with the values here...
 			// con.close();
 		} catch (RepositoryException e) {
@@ -361,7 +368,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	}
 
 	/**
-	 *  
+	 * 
 	 * 
 	 * 
 	 * Get Cubes from the triple store.
@@ -385,14 +392,19 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				if (!isStored(location)) {
 					loadInStore(location);
 				}
-				
-				// Ask for DSD URI and load 
-				String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"+uri+"> qb:structure ?dsd}";
+
+				// Ask for DSD URI and load
+				//
+				String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
+						+ uri + "> qb:structure ?dsd}";
 				List<Node[]> dsd = sparql(query, true);
-				// There should be dsd
+				// There should be a dsd
+				// Note in spec:
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
 				uri = dsd.get(1)[0].toString();
 				if (uri == null) {
-					throw new UnsupportedOperationException("A cube should serve a data structure definition!");
+					throw new UnsupportedOperationException(
+							"A cube should serve a data structure definition!");
 				} else {
 					location = askForLocation(uri);
 
@@ -409,12 +421,15 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		}
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
-		
-		String querytemplate = Olap4ldLinkedDataUtil.readInQueryTemplate("sesame_getCubes_regular.txt");
-		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}", askForFrom(true));
+
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getCubes_regular.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
 		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
 		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
-		querytemplate = querytemplate.replace("{{{ADDITIONALFILTERS}}}", additionalFilters);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
 
 		List<Node[]> result = sparql(querytemplate, true);
 
@@ -431,30 +446,33 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	/**
 	 * Loads location into store and mark it as stored.
+	 * 
 	 * @param location
 	 */
 	private void loadInStore(String location) {
 		try {
 			Olap4ldUtil._log.info("Load in store: " + location);
-			
+
 			SailRepositoryConnection con = repo.getConnection();
 			URL url = new URL(location);
-			
+
 			if (location.endsWith(".rdf") || location.endsWith(".xml")) {
 				con.add(url, url.toString(), RDFFormat.RDFXML);
 			} else if (location.endsWith(".ttl")) {
 				con.add(url, url.toString(), RDFFormat.TURTLE);
 			} else {
-				throw new UnsupportedOperationException("How is the RDF encoded of location: "+location+"?");
+				throw new UnsupportedOperationException(
+						"How is the RDF encoded of location: " + location + "?");
 			}
 			locationsMap.put(location.hashCode(), true);
 			con.close();
-			
+
 			// Log content
 			String query = "select * where {?s ?p ?o} limit 100";
-			query = "PREFIX dcterms: <http://purl.org/dc/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION WHERE {?CUBE_NAME a qb:DataSet. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"en\")} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" )} BIND('LdCatalog' as ?CATALOG_NAME).BIND('LdSchema' as ?SCHEMA_NAME).BIND('CUBE' as ?CUBE_TYPE). FILTER (?CUBE_NAME = <http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds>) } GROUP BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION ORDER BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION";
+			// query =
+			// "PREFIX dcterms: <http://purl.org/dc/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION WHERE {?CUBE_NAME a qb:DataSet. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"en\")} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" )} BIND('LdCatalog' as ?CATALOG_NAME).BIND('LdSchema' as ?SCHEMA_NAME).BIND('CUBE' as ?CUBE_TYPE). FILTER (?CUBE_NAME = <http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds>) } GROUP BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION ORDER BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION";
 			sparql(query, false);
-		
+
 		} catch (RepositoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -477,7 +495,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * @return boolean value say whether location already loaded
 	 */
 	private boolean isStored(String location) {
-		return this.locationsMap.containsValue(location.hashCode());
+		return this.locationsMap.containsKey(location.hashCode());
 	}
 
 	/**
@@ -497,11 +515,14 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
 		// Get all dimensions
-		String querytemplate = Olap4ldLinkedDataUtil.readInQueryTemplate("sesame_getDimensions_regular.txt");
-		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}", askForFrom(true));
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getDimensions_regular.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
 		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
 		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
-		querytemplate = querytemplate.replace("{{{ADDITIONALFILTERS}}}", additionalFilters);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
 
 		List<Node[]> result = sparql(querytemplate, true);
 
@@ -526,11 +547,15 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// In this case, we do ask for a measure dimension.
-			querytemplate = Olap4ldLinkedDataUtil.readInQueryTemplate("sesame_getDimensions_measure_dimension.txt");
-			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}", askForFrom(true));
+			querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getDimensions_measure_dimension.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
 			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
-			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
-			querytemplate = querytemplate.replace("{{{ADDITIONALFILTERS}}}", additionalFilters);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					specificFilters);
 
 			List<Node[]> result2 = sparql(querytemplate, true);
 
@@ -606,24 +631,16 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		// Boolean values need to be returned as "true" or "false".
 		// Get all measures
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEASURE_NAME min(?MEASURE_CAPTION) as ?MEASURE_CAPTION \"5\" as ?DATA_TYPE \"true\" as ?MEASURE_IS_VISIBLE min(?MEASURE_AGGREGATOR) as ?MEASURE_AGGREGATOR min(?EXPRESSION) as ?EXPRESSION "
-				+ askForFrom(true)
-				// Hint: For now, MEASURE_CAPTION is simply the
-				// MEASURE_DIMENSION.
-				// Important: Only measures are queried
-				// XXX: EXPRESSION also needs to be attached to
-				// ?COMPONENT_SPECIFICATION
-				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION "
-				+ ". ?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = \"en\" )} OPTIONAL {?COMPONENT_SPECIFICATION qb:aggregator ?MEASURE_AGGREGATOR } OPTIONAL {?COMPONENT_SPECIFICATION qb:expression ?EXPRESSION } "
-				+ additionalFilters
-				+ "} "
-				+ "group by ?CUBE_NAME ?MEASURE_UNIQUE_NAME order by ?CUBE_NAME ?MEASURE_UNIQUE_NAME ";
-		List<Node[]> result = sparql(query, true);
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getMeasures.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
+		
+		List<Node[]> result = sparql(querytemplate, true);
 
 		// List<Node[]> result = applyRestrictions(measureUris, restrictions);
 		return result;
@@ -640,18 +657,36 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getHierarchies(Restrictions restrictions) {
 
-		String additionalFilters = createFilterForRestrictions(restrictions);
+		List<Node[]> result = new ArrayList<Node[]>();
 
-		// Get all hierarchies with codeLists
-		String querytemplate = Olap4ldLinkedDataUtil.readInQueryTemplate("sesame_getHierarchies_regular.txt");
-		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}", askForFrom(true));
-		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
-		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
-		querytemplate = querytemplate.replace("{{{ADDITIONALFILTERS}}}", additionalFilters);
-		
-		List<Node[]> result = sparql(querytemplate, true);
+		if (!isMeasureQueriedFor(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
 
-		// TODO: No sorting done, yet
+			String additionalFilters = createFilterForRestrictions(restrictions);
+
+			// Get all hierarchies with codeLists
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getHierarchies_regular.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
+
+			List<Node[]> myresult = sparql(querytemplate, true);
+
+			boolean first = true;
+			for (Node[] nodes : myresult) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				result.add(nodes);
+			}
+
+		}
 
 		// List<Node[]> result = applyRestrictions(hierarchyResults,
 		// restrictions);
@@ -672,20 +707,24 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// In this case, we do ask for a measure hierarchy.
-			querytemplate = Olap4ldLinkedDataUtil.readInQueryTemplate("sesame_getHierarchies_measure_dimension.txt");
-			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}", askForFrom(true));
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getHierarchies_measure_dimension.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
 			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
-			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
-			querytemplate = querytemplate.replace("{{{SPECIFICFILTERS}}}", additionalFilters);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					specificFilters);
 
-			List<Node[]> result2 = sparql(querytemplate, true);
+			List<Node[]> myresult = sparql(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
 
 			// Add all of result2 to result
 			boolean first = true;
-			for (Node[] nodes : result2) {
+			for (Node[] nodes : myresult) {
 				if (first) {
 					first = false;
 					continue;
@@ -696,28 +735,44 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		// Get dimension hierarchies without codeList, but only if hierarchy is
 		// not set and different from dimension unique name
-		if (restrictions.hierarchyUniqueName != null
+		/*
+		 * * Note in spec:
+		 * "Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range."
+		 * Note in spec:
+		 * "Every dimension with range skos:Concept must have a qb:codeList." <=
+		 * This means, we do not necessarily need a code list in many cases.
+		 * But, if we have a code list, then: "If a dimension property has a
+		 * qb:codeList, then the value of the dimension property on every
+		 * qb:Observation must be in the code list."
+		 */
+		if (isMeasureQueriedFor(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName) || (restrictions.hierarchyUniqueName != null
 				&& !restrictions.hierarchyUniqueName
-						.equals(restrictions.dimensionUniqueName)) {
+						.equals(restrictions.dimensionUniqueName))) {
+			;
 			// we do not need to do this
 		} else {
 
-			// In this case, we do ask for a measure hierarchy.
-			querytemplate = Olap4ldLinkedDataUtil.readInQueryTemplate("sesame_getHierarchies_without_codelist.txt");
-			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}", askForFrom(true));
+			String additionalFilters = createFilterForRestrictions(restrictions);
+
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getHierarchies_without_codelist.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
 			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
-			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
-			querytemplate = querytemplate.replace("{{{ADDITIONALFILTERS}}}", additionalFilters);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
 
-
-			List<Node[]> result3 = sparql(querytemplate, true);
+			List<Node[]> myresult = sparql(querytemplate, true);
 
 			// List<Node[]> result3 = applyRestrictions(memberUris3,
 			// restrictions);
 
 			// Add all of result2 to result
 			boolean first = true;
-			for (Node[] nodes : result3) {
+			for (Node[] nodes : myresult) {
 				if (first) {
 					first = false;
 					continue;
@@ -740,42 +795,30 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
-		// Get all levels of code lists without levels
+		// TODO: Add regularly modeled levels (without using xkos)
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getLevels_regular.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
+
+		List<Node[]> result = sparql(querytemplate, true);
+
+		// Get all levels of code lists using xkos
 		// TODO: LEVEL_CARDINALITY is not solved, yet.
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?LEVEL_CAPTION ?HIERARCHY_UNIQUE_NAME as ?LEVEL_NAME \"N/A\" as ?DESCRIPTION \"1\" as ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?compSpec "
-				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. FILTER NOT EXISTS { ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. }"
-				+ additionalFilters
-				+ " }"
-				+ " order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_NUMBER ";
-		List<Node[]> result = sparql(query, true);
+		querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getLevels_xkos.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
 
-		// List<Node[]> result = applyRestrictions(levelResults, restrictions);
-
-		// TODO: No sorting done, yet
-
-		// TODO: Add properly modeled level
-		query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME min(?LEVEL_CAPTION) as ?LEVEL_CAPTION ?LEVEL_UNIQUE_NAME as ?LEVEL_NAME min(?DESCRIPTION) as ?DESCRIPTION ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?compSpec "
-				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. OPTIONAL {?LEVEL_UNIQUE_NAME rdfs:label ?LEVEL_CAPTION FILTER ( lang(?LEVEL_CAPTION) = \"en\" ) } OPTIONAL {?LEVEL_UNIQUE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" ) }"
-				+ additionalFilters
-				+ "}"
-				+ "group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_NUMBER ";
-		List<Node[]> result0 = sparql(query, true);
-
-		// List<Node[]> result0 = applyRestrictions(memberUris0, restrictions);
+		List<Node[]> result0 = sparql(querytemplate, true);
 
 		// Add all of result2 to result
 		boolean first = true;
@@ -806,18 +849,17 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// In this case, we do ask for a measure dimension.
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "select distinct \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?LEVEL_UNIQUE_NAME \"Measures\" as ?LEVEL_CAPTION \"Measures\" as ?LEVEL_NAME \"Measures\" as ?DESCRIPTION \"1\" as ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec "
-					+ ". ?compSpec qb:measure ?MEASURE_PROPERTY. "
-					+ specificFilters + "} " + "order by ?MEASURE_PROPERTY";
+			querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getLevels_measure_dimension.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					specificFilters);
 
-			List<Node[]> result2 = sparql(query, true);
+			List<Node[]> result2 = sparql(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
@@ -856,21 +898,18 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						+ ">) ";
 			}
 
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "select \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?LEVEL_CAPTION ?DIMENSION_UNIQUE_NAME as ?LEVEL_NAME \"N/A\" as ?DESCRIPTION \"1\" as ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec "
-					+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. }  "
-					+ specificFilters
-					+ "} "
-					+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?LEVEL_NUMBER ";
+			querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getLevels_without_codelist.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					specificFilters);
 
 			// Second, ask for the measures (which are also members)
-			List<Node[]> result3 = sparql(query, true);
+			List<Node[]> result3 = sparql(querytemplate, true);
 
 			// List<Node[]> result3 = applyRestrictions(memberUris3,
 			// restrictions);

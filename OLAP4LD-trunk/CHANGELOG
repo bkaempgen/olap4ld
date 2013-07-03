@@ -19,6 +19,7 @@ rdfs:comment, qb:structure.
 ** DS: Links from observations, rdfs:label, qb:structure
 ** DSD: All measure properties, dimension properties, code lists...
 
+* Note in spec: If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list. 
 * Note in spec: Every qb:Observation has exactly one associated qb:DataSet. 
 * Note in spec: Every qb:DataSet has exactly one associated qb:DataStructureDefinition. 
 * Note in spec: "Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range."

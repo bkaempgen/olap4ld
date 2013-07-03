@@ -85,9 +85,9 @@ public class SSBQueryTest extends TestCase {
 	 * Generic Query
 	 */
 	public void testSsbExample() {
-		String result = executeStatement("SELECT {[Measures].[Measures].[Measures].[http://olap4ldYYYgooglecodeYYYcom/git/OLAP4LDZZZtrunk/tests/ssb001/ttl/exampleYYYttl#revenue]} ON COLUMNS,	"
-				+ "{[http://olap4ldYYYgooglecodeYYYcom/git/OLAP4LDZZZtrunk/tests/ssb001/ttl/exampleYYYttl#lo_custkey].[http://olap4ldYYYgooglecodeYYYcom/git/OLAP4LDZZZtrunk/tests/ssb001/ttl/exampleYYYttl#lo_custkeyCodeList].[http://olap4ldYYYgooglecodeYYYcom/git/OLAP4LDZZZtrunk/tests/ssb001/ttl/exampleYYYttl#lo_custkeyCodeList].[http://olap4ldYYYgooglecodeYYYcom/git/OLAP4LDZZZtrunk/tests/ssb001/ttl/exampleYYYttl#customer_1]} ON ROWS "
-				+ "FROM [http://olap4ldYYYgooglecodeYYYcom/git/OLAP4LDZZZtrunk/tests/ssb001/ttl/exampleYYYttl#ds]");
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23revenue]} ON COLUMNS,	"
+				+ "{[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23customer_1]} ON ROWS "
+				+ "FROM [httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds]");
 		assertContains("1.436037326E9", result);
 	}
 
