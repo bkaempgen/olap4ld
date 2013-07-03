@@ -14,7 +14,7 @@ WHERE {
 ?CUBE_NAME qb:structure ?dsd. 
 ?dsd qb:component ?compSpec. 
 ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. 
-FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. }
+?DIMENSION_UNIQUE_NAME rdfs:range ?range FILTER (?range <> skos:Concept).
 BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 
 BIND('{{{TABLE_SCHEM}}}' as ?SCHEMA_NAME). 
 BIND('Measures' as ?DIMENSION_UNIQUE_NAME). 
