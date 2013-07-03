@@ -15,6 +15,7 @@
 
 @prefix qb:       <http://purl.org/linked-data/cube#> .
 
+@prefix sdmx:    	 <http://purl.org/linked-data/sdmx#> .
 @prefix sdmx-concept:    <http://purl.org/linked-data/sdmx/2009/concept#> .
 @prefix sdmx-dimension:  <http://purl.org/linked-data/sdmx/2009/dimension#> .
 @prefix sdmx-attribute:  <http://purl.org/linked-data/sdmx/2009/attribute#> .
