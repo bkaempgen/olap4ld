@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @prefix rdfs: 		<http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: 		<http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfh-inst:	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/lineorder_qb.ttl#> .
@@ -5,6 +6,15 @@
 @prefix qb: 		<http://purl.org/linked-data/cube#> .
 @prefix skos: 		<http://www.w3.org/2004/02/skos/core#> .
 @prefix skosclass: 	<http://ddialliance.org/ontologies/skosclass#> .
+=======
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfh-inst:	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/custlevels.ttl#> .
+@prefix rdfh:	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb01/ttl/custlevels.ttl#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skosclass: <http://ddialliance.org/ontologies/skosclass#> .
+>>>>>>> 25efce14f8b163a9f306c45ce4870e0fb22f8dd8
 
 rdfh-inst:dsd
 	rdfs:label "Star Schema Benchmark DSD";
