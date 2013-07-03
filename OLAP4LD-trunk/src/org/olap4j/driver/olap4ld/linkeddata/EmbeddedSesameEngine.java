@@ -702,19 +702,15 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// we do not need to do this
 		} else {
 
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "select \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_CAPTION ?DIMENSION_UNIQUE_NAME as ?DESCRIPTION "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec "
-					+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. } "
-					+ additionalFilters
-					+ "} order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ";
+			// In this case, we do ask for a measure hierarchy.
+			querytemplate = Olap4ldLinkedDataUtil.readInQueryTemplate("sesame_getHierarchies_without_codelist.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}", askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{ADDITIONALFILTERS}}}", additionalFilters);
 
-			List<Node[]> result3 = sparql(query, true);
+
+			List<Node[]> result3 = sparql(querytemplate, true);
 
 			// List<Node[]> result3 = applyRestrictions(memberUris3,
 			// restrictions);

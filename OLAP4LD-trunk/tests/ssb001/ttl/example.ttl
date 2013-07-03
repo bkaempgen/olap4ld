@@ -53,38 +53,38 @@ eg:dsd
 # -- Dimensions and measures  -----------------------------
 
 eg:lo_orderdate a rdf:Property, qb:DimensionProperty;
-    rdfs:label "orderdate"@en;
-    rdfs:range skos:Concept;
-    qb:codeList eg:lo_orderdateCodeList;
+    rdfs:label "orderdate"@en ;
+    rdfs:range skos:Concept ;
+    qb:codeList eg:lo_orderdateCodeList ;
     .
 
 eg:lo_custkey a rdf:Property, qb:DimensionProperty;
-    rdfs:label "custkey"@en;
-    rdfs:range skos:Concept;
-    qb:codeList eg:lo_custkeyCodeList;
+    rdfs:label "custkey"@en ;
+    rdfs:range skos:Concept ;
+    qb:codeList eg:lo_custkeyCodeList ;
     .
 
 eg:lo_partkey a rdf:Property, qb:DimensionProperty;
-    rdfs:label "partkey"@en;
-    rdfs:range skos:Concept;
-    qb:codeList eg:lo_partkeyCodeList;
+    rdfs:label "partkey"@en ;
+    rdfs:range skos:Concept ;
+    qb:codeList eg:lo_partkeyCodeList ;
     .
 
 eg:lo_suppkey a rdf:Property, qb:DimensionProperty;
-    rdfs:label "suppkey"@en;
-    rdfs:range skos:Concept;
-    qb:codeList eg:lo_suppkeyCodeList;
+    rdfs:label "suppkey"@en ;
+    rdfs:range skos:Concept ;
+    qb:codeList eg:lo_suppkeyCodeList ;
     .
 
 eg:lo_quantity  a rdf:Property, qb:MeasureProperty;
-    rdfs:label "quantity"@en;
+    rdfs:label "quantity"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
     qb:aggregator "SUM" ;
     .
 
 eg:lo_discount  a rdf:Property, qb:MeasureProperty;
-    rdfs:label "discount"@en;
+    rdfs:label "discount"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
     qb:aggregator "AVG" ;
@@ -98,14 +98,14 @@ eg:lo_extendedprice  a rdf:Property, qb:MeasureProperty ;
     .
 
 eg:lo_revenue  a rdf:Property, qb:MeasureProperty;
-    rdfs:label "revenue"@en;
+    rdfs:label "revenue"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
     qb:aggregator "SUM" ;
     .
 
 eg:lo_supplycost  a rdf:Property, qb:MeasureProperty;
-    rdfs:label "quantity"@en;
+    rdfs:label "quantity"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
     qb:aggregator "SUM" ;
