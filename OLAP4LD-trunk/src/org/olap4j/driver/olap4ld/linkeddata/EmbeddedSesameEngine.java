@@ -232,11 +232,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			RepositoryConnection con = repo.getConnection();
 			
 			ByteArrayOutputStream boas =   new ByteArrayOutputStream();
-<<<<<<< HEAD
 			//FileOutputStream fos = new FileOutputStream("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/resources/result.srx");
-=======
-			
->>>>>>> 25efce14f8b163a9f306c45ce4870e0fb22f8dd8
+
 			SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
 					boas);
 
@@ -377,11 +374,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getCubes(Restrictions restrictions) {
 
-<<<<<<< HEAD
 		// If specific data cube asked for, get DS URI
-=======
-		// If specific data cube asked for, get URI
->>>>>>> 25efce14f8b163a9f306c45ce4870e0fb22f8dd8
 		if (restrictions.cubeNamePattern != null) {
 			String uri = Olap4ldLinkedDataUtil
 					.convertMDXtoURI(restrictions.cubeNamePattern);
@@ -455,16 +448,13 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				throw new UnsupportedOperationException("How is the RDF encoded of location: "+location+"?");
 			}
 			locationsMap.put(location.hashCode(), true);
-<<<<<<< HEAD
 			con.close();
 			
 			// Log content
 			String query = "select * where {?s ?p ?o} limit 100";
 			query = "PREFIX dcterms: <http://purl.org/dc/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION WHERE {?CUBE_NAME a qb:DataSet. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"en\")} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" )} BIND('LdCatalog' as ?CATALOG_NAME).BIND('LdSchema' as ?SCHEMA_NAME).BIND('CUBE' as ?CUBE_TYPE). FILTER (?CUBE_NAME = <http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds>) } GROUP BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION ORDER BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION";
 			sparql(query, false);
-			
-=======
->>>>>>> 25efce14f8b163a9f306c45ce4870e0fb22f8dd8
+		
 		} catch (RepositoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

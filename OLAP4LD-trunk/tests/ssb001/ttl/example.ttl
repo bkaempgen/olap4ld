@@ -119,18 +119,18 @@ eg:lo_orderdateCodeList a skos:ConceptScheme, sdmx:CodeList;
     .
 
 eg:lo_custkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
-    skos:hasTopConcept ns1:customer_1;
-    skos:hasTopConcept ns1:customer_2;
+    skos:hasTopConcept eg:customer_1;
+    skos:hasTopConcept eg:customer_2;
     .
 
 eg:lo_partkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
-    skos:hasTopConcept ns1:part_1;
-    skos:hasTopConcept ns1:part_2;
+    skos:hasTopConcept eg:part_1;
+    skos:hasTopConcept eg:part_2;
     .
 
 eg:lo_suppkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
-    skos:hasTopConcept ns1:supplier_1;
-    skos:hasTopConcept ns1:supplier_2;
+    skos:hasTopConcept eg:supplier_1;
+    skos:hasTopConcept eg:supplier_2;
     .
 
 # -- Observations -----------------------------------------
@@ -185,7 +185,7 @@ eg:lineorder_1_4
     a qb:Observation ; 
     qb:dataSet eg:ds ;
     eg:lo_orderdate eg:date_19940101 ;
-    eg:lo_custkey eg:customer_1 ;
+    eg:lo_custkey eg:customer_2 ;
     eg:lo_partkey eg:part_1 ;
     eg:lo_suppkey eg:supplier_1 ;
     eg:lo_quantity 17 ;
@@ -200,7 +200,7 @@ eg:lineorder_1_5
     a qb:Observation ; 
     qb:dataSet eg:ds ;
     eg:lo_orderdate eg:date_19940101 ;
-    eg:lo_custkey eg:customer_1 ;
+    eg:lo_custkey eg:customer_2 ;
     eg:lo_partkey eg:part_1 ;
     eg:lo_suppkey eg:supplier_1 ;
     eg:lo_quantity 17 ;
