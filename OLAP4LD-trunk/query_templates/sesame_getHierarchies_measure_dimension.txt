@@ -19,6 +19,6 @@ BIND('Measures' as ?HIERARCHY_UNIQUE_NAME).
 BIND('Measures' as ?HIERARCHY_NAME). 
 BIND('Measures' as ?HIERARCHY_CAPTION). 
 BIND('Measures' as ?DESCRIPTION). 
-{{{SPECIFICFILTERS}}} 
+{{{FILTERS}}} 
 } ORDER BY ?CUBE_NAME 
 

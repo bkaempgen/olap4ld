@@ -24,19 +24,19 @@
 @prefix sdmx-code:       <http://purl.org/linked-data/sdmx/2009/code#> .
 @prefix sdmx-subject:    <http://purl.org/linked-data/sdmx/2009/subject#> .
 
-@prefix eg:       	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#> .
+@prefix eg:       	<http://localhost/fios_xmla4js/example.ttl#> .
 
 # -- Data Set --------------------------------------------
 
 eg:ds
 	a qb:DataSet ;
-	rdfs:label "Star Schema Benchmark DS";
+	rdfs:label "Example Star Schema Benchmark DS"@en ;
 	qb:structure eg:dsd.	
 
 # -- Data structure definition ----------------------------
 
 eg:dsd
-	rdfs:label "Star Schema Benchmark DSD";
+	rdfs:label "Example Star Schema Benchmark DSD"@en ;
 	a qb:DataStructureDefinition ;
 	qb:component 
 		[ qb:dimension eg:lo_orderdate ],
