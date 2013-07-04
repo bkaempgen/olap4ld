@@ -1,0 +1,30 @@
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX xkos: <http://purl.org/linked-data/xkos#> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+SELECT 
+?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_CAPTION ?LEVEL_NAME ?DESCRIPTION ?LEVEL_NUMBER ?LEVEL_CARDINALITY ?LEVEL_TYPE 
+{{{STANDARDFROM}}}
+WHERE {
+?CUBE_NAME qb:structure ?dsd. 
+?dsd qb:component ?compSpec. 
+?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. 
+?DIMENSION_UNIQUE_NAME rdfs:range ?range FILTER (?range != skos:Concept).
+BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 
+BIND('{{{TABLE_SCHEM}}}' as ?SCHEMA_NAME). 
+BIND(?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME). 
+BIND(?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME). 
+BIND(?DIMENSION_UNIQUE_NAME as ?LEVEL_CAPTION). 
+BIND(?DIMENSION_UNIQUE_NAME as ?LEVEL_NAME). 
+BIND(?DIMENSION_UNIQUE_NAME as ?DESCRIPTION). 
+BIND('1' as ?LEVEL_NUMBER). 
+BIND('0' as ?LEVEL_CARDINALITY). 
+BIND('0x0000' as ?LEVEL_TYPE). 
+{{{FILTERS}}}
+} ORDER BY ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_NUMBER 
+ 

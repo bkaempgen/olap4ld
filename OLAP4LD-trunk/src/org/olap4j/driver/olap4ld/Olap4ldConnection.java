@@ -185,6 +185,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 	 */
 	LinkedDataEngine myLinkedData;
 
+	private String url;
+
 	/**
 	 * Creates an Olap4j connection an XML/A provider.
 	 * 
@@ -223,6 +225,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 			throw new AssertionError("does not start with '"
 					+ CONNECT_STRING_PREFIX + "'");
 		}
+		this.url = url;
 
 		this.factory = factory;
 		this.driver = driver;
@@ -469,7 +472,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 	}
 
 	public void rollback() throws SQLException {
-		throw new UnsupportedOperationException();
+		//throw new UnsupportedOperationException();
+		;
 	}
 
 	public void close() throws SQLException {
@@ -777,7 +781,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 	 * @return URL
 	 */
 	String getURL() {
-		throw Olap4jUtil.needToImplement(this);
+		return url;
+		//throw Olap4jUtil.needToImplement(this);
 	}
 
 	public void setLocale(Locale locale) {

@@ -366,7 +366,8 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	}
 
 	public String getUserName() throws SQLException {
-		throw new UnsupportedOperationException();
+		return "";
+		//throw new UnsupportedOperationException();
 	}
 
 	public boolean isReadOnly() throws SQLException {
