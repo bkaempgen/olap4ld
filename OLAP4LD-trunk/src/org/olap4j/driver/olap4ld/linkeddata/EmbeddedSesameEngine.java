@@ -78,9 +78,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	private static final String DATASOURCEINFO = "Data following the Linked Data principles.";
 
-	private static final String TABLE_CAT = "LdCatalog";
+	private static final String TABLE_CAT = "LdCatalogSchema";
 
-	private static final String TABLE_SCHEM = "LdSchema";
+	private static final String TABLE_SCHEM = "LdCatalogSchema";
 
 	public String DATASOURCENAME;
 

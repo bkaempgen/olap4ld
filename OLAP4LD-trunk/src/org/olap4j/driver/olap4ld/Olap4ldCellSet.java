@@ -124,6 +124,7 @@ abstract class Olap4ldCellSet implements CellSet {
 	 */
 	private final Map<Integer, String[]> newValueMap = new HashMap<Integer, String[]>();
 	private LogicalOlapQueryPlan queryplan;
+	// The list of measures queried here as part of metadata
 	private ArrayList<Measure> measureList;
 
 	/**
@@ -631,12 +632,12 @@ abstract class Olap4ldCellSet implements CellSet {
 			 */
 			
 			int slicesRollupsSize = 0;
-			int projectionsSize = 0;
 			for ( CellSetAxisMetaData metadata : metaData.getAxesMetaData()) {
 				List<Hierarchy> hierarchies = metadata.getHierarchies();
 				for (Hierarchy hierarchy : hierarchies) {
 					if (hierarchy.getName().equals("Measures")) {
-						projectionsSize++;
+						// Projection size does not help here
+						;
 					} else {
 						slicesRollupsSize++;
 					}
@@ -648,9 +649,9 @@ abstract class Olap4ldCellSet implements CellSet {
 				concatNr += node[i].toString();
 			}
 			
-			String[] valueArray = new String[projectionsSize];
+			String[] valueArray = new String[measureList.size()];
 
-			for (int e = slicesRollupsSize; e < slicesRollupsSize + projectionsSize; e++) {
+			for (int e = slicesRollupsSize; e < slicesRollupsSize + measureList.size(); e++) {
 
 				String nodevalue = node[e].toString();
 				// For readability reasons, if numeric value, we round to to two
