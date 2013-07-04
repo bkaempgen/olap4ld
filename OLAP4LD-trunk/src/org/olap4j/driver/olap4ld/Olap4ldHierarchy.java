@@ -77,7 +77,7 @@ class Olap4ldHierarchy
                 this, null),
             new Olap4ldConnection.LevelHandler(olap4jDimension.olap4jCube),
             hierarchyRestrictions);
-        int pop = levels.size();
+        //int pop = levels.size();
     }
 
     public Dimension getDimension() {

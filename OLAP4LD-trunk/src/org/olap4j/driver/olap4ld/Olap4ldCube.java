@@ -330,12 +330,12 @@ class Olap4ldCube implements Cube, Named {
 			// we have a list of measures for a cube, and we have a list of
 			// measures for the measure dimension. Thus, we look here in the
 			// cube measure list.
-			if (!measures.isEmpty()) {
-				Olap4ldMeasure measure = measures.get(memberUniqueName);
-				if (measure != null) {
-					return measure;
-				}
-			}
+//			if (!measures.isEmpty()) {
+//				Olap4ldMeasure measure = measures.get(memberUniqueName);
+//				if (measure != null) {
+//					return measure;
+//				}
+//			}
 
 			// Next, look in cache.
 			final SoftReference<Olap4ldMember> memberRef = memberMap
@@ -367,13 +367,13 @@ class Olap4ldCube implements Cube, Named {
 				// TODO: I will always recognize a not populated measure list,
 				// by it
 				// being empty.
-				if (!measures.isEmpty()) {
-					Olap4ldMeasure measure = measures.get(memberUniqueName);
-					if (measure != null) {
-						memberMap.put(memberUniqueName, measure);
-						continue;
-					}
-				}
+//				if (!measures.isEmpty()) {
+//					Olap4ldMeasure measure = measures.get(memberUniqueName);
+//					if (measure != null) {
+//						memberMap.put(memberUniqueName, measure);
+//						continue;
+//					}
+//				}
 
 				// Next, look in cache.
 				final SoftReference<Olap4ldMember> memberRef = this.memberMap

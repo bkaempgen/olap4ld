@@ -75,7 +75,7 @@ class Olap4ldDimension
             dimensionRestrictions);
 
         //Populate immediately?
-        hierarchies.size();
+        //hierarchies.size();
     }
 
     public NamedList<Hierarchy> getHierarchies() {

@@ -85,8 +85,8 @@ public class SSBQueryTest extends TestCase {
 	 * Generic Query
 	 */
 	public void testSsbExample() {
-		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23revenue]} ON COLUMNS,	"
-				+ "{[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23customer_1]} ON ROWS "
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23customer_1]} ON COLUMNS,	"
+				+ "{[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_revenue]} ON ROWS "
 				+ "FROM [httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds]");
 		assertContains("1.436037326E9", result);
 	}

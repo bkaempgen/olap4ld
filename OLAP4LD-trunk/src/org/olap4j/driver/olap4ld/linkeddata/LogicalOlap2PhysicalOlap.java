@@ -17,6 +17,7 @@ import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
 import org.olap4j.metadata.Member;
+import org.openrdf.repository.sail.SailRepository;
 
 /**
  * Converts from relational algebra plans to physical access plans.
@@ -26,60 +27,67 @@ import org.olap4j.metadata.Member;
 public class LogicalOlap2PhysicalOlap implements Visitor {
 	// the new root node
 	ExecIterator _root;
- 
+
 	// We collect necessary parts of the SPARQL query.
-	String selectClause = "";
-	String whereClause = "";
-	String groupByClause = "group by ";
-	String orderByClause = "order by ";
+	String selectClause = " ";
+	String whereClause = " ";
+	String groupByClause = " group by ";
+	String orderByClause = " order by ";
 
 	// Helper attributes
 	private HashMap<Integer, Integer> levelHeightMap;
 
+	// For the moment, we know the repo (we could wrap it also)
+	private SailRepository repo;
+
 	/**
 	 * Constructor.
+	 * @param repo 
 	 * 
 	 * @param ds
 	 */
-	public LogicalOlap2PhysicalOlap() {	
-		;
+	public LogicalOlap2PhysicalOlap(SailRepository repo) {
+		this.repo = repo;
 	}
-	
+
 	/**
 	 * A visitor object.
 	 * 
-	 * takes an node in the logical OLAP operator algebra tree and
-	 * converts it to a node in the physical access tree.
+	 * takes an node in the logical OLAP operator algebra tree and converts it
+	 * to a node in the physical access tree.
 	 * 
 	 * @param o
 	 */
 	public void visit(Object o) throws QueryException {
 		if (o instanceof RollupOp) {
-			// For rollup, 
+			// For rollup,
 			RollupOp so = (RollupOp) o;
-			
+
 			List<Level> rollups = so.getRollups();
-			
+
 			// HashMaps for level height of dimension
 			this.levelHeightMap = new HashMap<Integer, Integer>();
 
 			for (Level level : rollups) {
 
-				// At the moment, we do not support hierarchy/roll-up, but simply
+				// At the moment, we do not support hierarchy/roll-up, but
+				// simply
 				// query for all dimension members
 				// String hierarchyURI = LdOlap4jUtil.decodeUriForMdx(hierarchy
 				// .getUniqueName());
-				String dimensionProperty = Olap4ldLinkedDataUtil.convertMDXtoURI(level
-						.getDimension().getUniqueName());
+				String dimensionProperty = Olap4ldLinkedDataUtil
+						.convertMDXtoURI(level.getDimension().getUniqueName());
 				// XXX Why exactly do I include the level?
 				String levelURI = Olap4ldLinkedDataUtil.convertMDXtoURI(level
 						.getUniqueName());
 
 				// Now, depending on level depth we need to behave differently
-				// Slicer level is the number of property-value pairs from the most
+				// Slicer level is the number of property-value pairs from the
+				// most
 				// granular value
 				// For that, the maximum depth and the level depth are used.
-				// TODO: THis is quite a simple approach, does not consider possible
+				// TODO: THis is quite a simple approach, does not consider
+				// possible
 				// access restrictions.
 				Integer levelHeight = (level.getHierarchy().getLevels().size() - 1 - level
 						.getDepth());
@@ -91,33 +99,34 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 						dimensionProperty, levelURI);
 
 				String dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
-				selectClause += " ?" + dimensionPropertyVariable + levelHeight + " ";
-				groupByClause += " ?" + dimensionPropertyVariable + levelHeight + " ";
-				orderByClause += " ?" + dimensionPropertyVariable + levelHeight + " ";
+				selectClause += " ?" + dimensionPropertyVariable + levelHeight
+						+ " ";
+				groupByClause += " ?" + dimensionPropertyVariable + levelHeight
+						+ " ";
+				orderByClause += " ?" + dimensionPropertyVariable + levelHeight
+						+ " ";
 			}
-			
-		} else if (o instanceof SliceOp) {
-			BaseCubeOp so = (BaseCubeOp) o;
-			
-			// Cube gives us the URI of the dataset that we want to resolve
-			Cube mycube = (Cube) so.getCube();
-			String ds = Olap4ldLinkedDataUtil.convertMDXtoURI(mycube.getUniqueName());
 
-			// Add physical operator that retrieves data from URI and stores it in triple store
-			ExecIterator bi = null;
-			_root = bi;
-			
+		} else if (o instanceof SliceOp) {
+			SliceOp so = (SliceOp) o;
+
+			// we do not need to do anything with SliceOp
+			;
+
 		} else if (o instanceof DiceOp) {
 			DiceOp dop = (DiceOp) o;
-			
+
 			List<Position> dices = dop.getPositions();
-			
+
 			// For each filter tuple
 			if (dices != null && !dices.isEmpty()) {
-				// We assume that each position has the same metadata (i.e., Levels)
-				// so that we only need to add graph patterns for the first position
+				// We assume that each position has the same metadata (i.e.,
+				// Levels)
+				// so that we only need to add graph patterns for the first
+				// position
 				for (Member member : dices.get(0).getMembers()) {
-					// We should be testing whether diceslevelHeight higher than slicesRollupsLevelHeight
+					// We should be testing whether diceslevelHeight higher than
+					// slicesRollupsLevelHeight
 					// Dices Level Height
 					Integer diceslevelHeight = (member.getHierarchy()
 							.getLevels().size() - 1 - member.getLevel()
@@ -128,10 +137,12 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 					Integer slicesRollupsLevelHeight = (levelHeightMap
 							.containsKey(dimensionProperty.hashCode())) ? levelHeightMap
 							.get(dimensionProperty.hashCode()) : 0;
-					if (member.getMemberType() != Member.Type.MEASURE && diceslevelHeight > slicesRollupsLevelHeight) {
+					if (member.getMemberType() != Member.Type.MEASURE
+							&& diceslevelHeight > slicesRollupsLevelHeight) {
 
-						String levelURI = Olap4ldLinkedDataUtil.convertMDXtoURI(member
-								.getLevel().getUniqueName());
+						String levelURI = Olap4ldLinkedDataUtil
+								.convertMDXtoURI(member.getLevel()
+										.getUniqueName());
 
 						whereClause += addLevelPropertyPath(
 								slicesRollupsLevelHeight, diceslevelHeight,
@@ -140,7 +151,7 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 					}
 				}
 
-				whereClause += "FILTER (";
+				whereClause += " FILTER (";
 				List<String> orList = new ArrayList<String>();
 
 				for (Position position : dices) {
@@ -152,12 +163,12 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 						// We need to know the variable to filter
 						// First, we need to convert it to URI representation.
 						String dimensionPropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil
-								.convertMDXtoURI(member.getLevel().getDimension()
-										.getUniqueName()));
+								.convertMDXtoURI(member.getLevel()
+										.getDimension().getUniqueName()));
 
 						// We need to know the member to filter
-						String memberResource = Olap4ldLinkedDataUtil.convertMDXtoURI(member
-								.getUniqueName());
+						String memberResource = Olap4ldLinkedDataUtil
+								.convertMDXtoURI(member.getUniqueName());
 
 						// Need to know the level of the member
 						Integer diceslevelHeight = (member.getHierarchy()
@@ -169,19 +180,21 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 									+ diceslevelHeight + " = " + "<"
 									+ memberResource + "> ");
 						} else {
-							// For some reason, we need to convert the variable using str.
+							// For some reason, we need to convert the variable
+							// using str.
 							andList.add(" str(?" + dimensionPropertyVariable
 									+ diceslevelHeight + ") = " + "\""
 									+ memberResource + "\" ");
 						}
 
 					}
-
+					// For sesame, instead of AND is &&
 					orList.add(Olap4ldLinkedDataUtil.implodeArray(
-							andList.toArray(new String[0]), " AND "));
+							andList.toArray(new String[0]), " && "));
 				}
+				// For sesame, instead of OR is ||
 				whereClause += Olap4ldLinkedDataUtil.implodeArray(
-						orList.toArray(new String[0]), " OR ");
+						orList.toArray(new String[0]), " || ");
 				whereClause += ") ";
 
 			}
@@ -572,24 +585,21 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 			// }
 			// }
 
-			
-			// Add physical operator that retrieves data from URI and stores it in triple store
-			ExecIterator bi = null;
-			_root = bi;
-			
 		} else if (o instanceof ProjectionOp) {
 			ProjectionOp po = (ProjectionOp) o;
-			
+
 			ArrayList<Measure> projections = po.getProjectedMeasures();
 
 			// Now, for each measure, we create a measure value column.
-			// Any measure should be contained only once, unless calculated measures
+			// Any measure should be contained only once, unless calculated
+			// measures
 			HashMap<Integer, Boolean> measureMap = new HashMap<Integer, Boolean>();
 
 			for (Measure measure : projections) {
 
 				// For formulas, this is different
-				if (measure.getAggregator().equals(Measure.Aggregator.CALCULATED)) {
+				if (measure.getAggregator().equals(
+						Measure.Aggregator.CALCULATED)) {
 
 					/*
 					 * For now, hard coded. Here, I also partly evaluate a query
@@ -605,34 +615,36 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 
 					// Measure
 					// Measure property has aggregator attached to it " avg".
-					String measureProperty1 = Olap4ldLinkedDataUtil.convertMDXtoURI(
-							measure1.getUniqueName()).replace(
-							" " + measure.getAggregator().name(), "");
-					// We do not encode the aggregation function in the measure, any
+					String measureProperty1 = Olap4ldLinkedDataUtil
+							.convertMDXtoURI(measure1.getUniqueName()).replace(
+									" " + measure.getAggregator().name(), "");
+					// We do not encode the aggregation function in the measure,
+					// any
 					// more.
 					String measurePropertyVariable1 = makeUriToParameter(measure1
 							.getUniqueName());
 
-					String measureProperty2 = Olap4ldLinkedDataUtil.convertMDXtoURI(
-							measure2.getUniqueName()).replace(
-							" " + measure.getAggregator().name(), "");
+					String measureProperty2 = Olap4ldLinkedDataUtil
+							.convertMDXtoURI(measure2.getUniqueName()).replace(
+									" " + measure.getAggregator().name(), "");
 					String measurePropertyVariable2 = makeUriToParameter(measure2
 							.getUniqueName());
 
 					// We take the aggregator from the measure
-					selectClause += " " + measure1.getAggregator().name() + "(?"
-							+ measurePropertyVariable1 + " " + operatorName + " "
-							+ "?" + measurePropertyVariable2 + ")";
+					selectClause += " " + measure1.getAggregator().name()
+							+ "(?" + measurePropertyVariable1 + " "
+							+ operatorName + " " + "?"
+							+ measurePropertyVariable2 + ")";
 
 					// I have to select them only, if we haven't inserted any
 					// before.
 					if (!measureMap.containsKey(measureProperty1.hashCode())) {
-						whereClause += "?obs <" + measureProperty1 + "> ?"
+						whereClause += " ?obs <" + measureProperty1 + "> ?"
 								+ measurePropertyVariable1 + ". ";
 						measureMap.put(measureProperty1.hashCode(), true);
 					}
 					if (!measureMap.containsKey(measureProperty2.hashCode())) {
-						whereClause += "?obs <" + measureProperty2 + "> ?"
+						whereClause += " ?obs <" + measureProperty2 + "> ?"
 								+ measurePropertyVariable2 + ". ";
 						measureMap.put(measureProperty2.hashCode(), true);
 					}
@@ -640,54 +652,53 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 				} else {
 
 					// Measure
-					String measureProperty = Olap4ldLinkedDataUtil.convertMDXtoURI(
-							measure.getUniqueName()).replace(
-							" " + measure.getAggregator().name(), "");
+					String measureProperty = Olap4ldLinkedDataUtil
+							.convertMDXtoURI(measure.getUniqueName()).replace(
+									" " + measure.getAggregator().name(), "");
 					String measurePropertyVariable = makeUriToParameter(measure
 							.getUniqueName());
 
 					// We take the aggregator from the measure
-					// Since we use OPTIONAL, there might be empty columns, which is why we need
+					// Since we use OPTIONAL, there might be empty columns,
+					// which is why we need
 					// to convert them to decimal.
-					selectClause += " " + measure.getAggregator().name() + "(xsd:decimal(?"
-							+ measurePropertyVariable + "))";
+					selectClause += " (" + measure.getAggregator().name()
+							+ "(?" + measurePropertyVariable + ") as ?"+measurePropertyVariable+")";
 
-					// Optional clause is used for the case that several measures
-					// are selected.
+					// According to spec, every measure needs to be set for every observation
 					if (!measureMap.containsKey(measureProperty.hashCode())) {
-						whereClause += "OPTIONAL { ?obs <" + measureProperty
-								+ "> ?" + measurePropertyVariable + ". }";
+						whereClause += "?obs <" + measureProperty
+								+ "> ?" + measurePropertyVariable + ".";
 						measureMap.put(measureProperty.hashCode(), true);
 					}
 				}
 			}
-			
-			// Add physical operator that retrieves data from URI and stores it in triple store
-			ExecIterator bi = null;
-			_root = bi;
-			
+
 		} else if (o instanceof BaseCubeOp) {
 			BaseCubeOp so = (BaseCubeOp) o;
-			
+
 			// Cube gives us the URI of the dataset that we want to resolve
 			Cube mycube = (Cube) so.getCube();
-			String ds = Olap4ldLinkedDataUtil.convertMDXtoURI(mycube.getUniqueName());
+			String ds = Olap4ldLinkedDataUtil.convertMDXtoURI(mycube
+					.getUniqueName());
 
-			// Add physical operator that retrieves data from URI and stores it in triple store
-			ExecIterator bi = null;
-			_root = bi;
-			
-		} 
+			// TODO One possibility is it to directly create the tree
+			// Add physical operator that retrieves data from URI and stores it
+			// in triple store
+			// ExecIterator bi = null;
+			// _root = bi;
+
+		}
 	}
-	
+
 	/**
-	 * After iteration, create new root. I want to have simple SPARQL query + load RDF to store. 
+	 * After iteration, create new root. I want to have simple SPARQL query +
+	 * load RDF to store.
 	 */
 	public Object getNewRoot() {
-		
+
 		// Initialise triple store with dataset URI
-		
-		
+
 		// Query triple store with SPARQL query
 		// Now that we consider DSD in queries, we need to consider DSD
 		// locations
@@ -695,12 +706,13 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 				+ selectClause + askForFrom(false) + askForFrom(true)
 				+ "where { " + whereClause + "}" + groupByClause
 				+ orderByClause;
-		
-		
+
+		// Currently, we should have retrieved the data, already, therefore, we only have one node.
+		_root = new SparqlSesameExecIterator(repo, query);
 		
 		return _root;
 	}
-	
+
 	/**
 	 * This method returns graph patterns for a property path for levels.
 	 * 
@@ -749,8 +761,8 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 					+ "?" + dimensionPropertyVariable + levelHeight + ". ";
 
 			// And this concept needs to be contained in the level.
-			whereClause += "?" + dimensionPropertyVariable + levelHeight + " skos:member <"
-					+ levelURI + ">. ";
+			whereClause += "?" + dimensionPropertyVariable + levelHeight
+					+ " skos:member <" + levelURI + ">. ";
 			// Removed part of hasTopConcept, since we know the members
 			// already.
 
@@ -759,7 +771,7 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 		return whereClause;
 
 	}
-	
+
 	/**
 	 * SPARQL does not allow all characters as parameter names, e.g.,
 	 * ?sdmx-measure:obsValue. Therefore, we transform the URI representation
@@ -773,16 +785,17 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 		uriRepresentation = uriRepresentation.replaceAll("[^a-zA-Z0-9]+", "");
 		return uriRepresentation;
 	}
-	
+
 	/**
 	 * Given a string, check whether resource or literal.
+	 * 
 	 * @param resource
 	 * @return
 	 */
 	private boolean isResourceAndNotLiteral(String resource) {
 		return resource.startsWith("http:");
 	}
-	
+
 	/**
 	 * Returns from String in order to retrieve information about these URIs
 	 * 
@@ -794,7 +807,7 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 	 * @return fromResult
 	 */
 	private String askForFrom(boolean isDsdQuery) {
-			return " ";
+		return " ";
 	}
 
 	/**

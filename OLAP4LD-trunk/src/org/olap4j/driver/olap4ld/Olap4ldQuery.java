@@ -6,6 +6,7 @@ import org.olap4j.Position;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
 
+@Deprecated
 public class Olap4ldQuery {
 
 	public Olap4ldCube cube;

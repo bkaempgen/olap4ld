@@ -57,6 +57,7 @@ import org.olap4j.Axis;
 import org.olap4j.Cell;
 import org.olap4j.CellSet;
 import org.olap4j.CellSetAxis;
+import org.olap4j.CellSetAxisMetaData;
 import org.olap4j.CellSetMetaData;
 import org.olap4j.OlapException;
 import org.olap4j.OlapStatement;
@@ -113,9 +114,6 @@ abstract class Olap4ldCellSet implements CellSet {
 	private List<CellSetAxis> immutableAxisList;
 	private Olap4ldCellSetAxis filterAxis;
 
-	// Query
-	private Olap4ldQuery olapquery;
-
 	// Data
 	private final Map<Integer, Cell> cellMap = new HashMap<Integer, Cell>();
 	/**
@@ -125,6 +123,8 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * of the uniquely identifying list of members.
 	 */
 	private final Map<Integer, String[]> newValueMap = new HashMap<Integer, String[]>();
+	private LogicalOlapQueryPlan queryplan;
+	private ArrayList<Measure> measureList;
 
 	/**
 	 * Creates an XmlaOlap4jCellSet.
@@ -257,7 +257,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		 * Now, create Logical OLAP Operator Query Tree
 		 */
 
-		LogicalOlapQueryPlan queryplan = createLogicalOlapQueryPlan();
+		this.queryplan = createLogicalOlapQueryPlan();
 
 		// Before, execute OLAP subcube query
 		// /*
@@ -338,6 +338,8 @@ abstract class Olap4ldCellSet implements CellSet {
 		for (Member member : usedMeasureSet) {
 			projections.add((Measure) member);
 		}
+		// We store this list of measures for later looking up the number of a measure.
+		this.measureList = projections;
 		
 		LogicalOlapOp projection = new ProjectionOp(basecube, projections);
 		
@@ -627,15 +629,28 @@ abstract class Olap4ldCellSet implements CellSet {
 			 * representation of concatenation of all dimension members 2) An
 			 * array with the values for each measure, ordered.
 			 */
-
-			for (int i = 0; i < olapquery.slicesrollups.size(); i++) {
-				concatNr += node[i].toString();
+			
+			int slicesRollupsSize = 0;
+			int projectionsSize = 0;
+			for ( CellSetAxisMetaData metadata : metaData.getAxesMetaData()) {
+				List<Hierarchy> hierarchies = metadata.getHierarchies();
+				for (Hierarchy hierarchy : hierarchies) {
+					if (hierarchy.getName().equals("Measures")) {
+						projectionsSize++;
+					} else {
+						slicesRollupsSize++;
+					}
+				}
+				
 			}
 
-			String[] valueArray = new String[olapquery.projections.size()];
+			for (int i = 0; i < slicesRollupsSize; i++) {
+				concatNr += node[i].toString();
+			}
+			
+			String[] valueArray = new String[projectionsSize];
 
-			for (int e = olapquery.slicesrollups.size(); e < olapquery.slicesrollups
-					.size() + olapquery.projections.size(); e++) {
+			for (int e = slicesRollupsSize; e < slicesRollupsSize + projectionsSize; e++) {
 
 				String nodevalue = node[e].toString();
 				// For readability reasons, if numeric value, we round to to two
@@ -697,7 +712,7 @@ abstract class Olap4ldCellSet implements CellSet {
 					nodevalue = value.toString();
 				}
 
-				valueArray[e - olapquery.slicesrollups.size()] = nodevalue;
+				valueArray[e - slicesRollupsSize] = nodevalue;
 			}
 
 			newValueMap.put(concatNr.hashCode(), valueArray);
@@ -1216,8 +1231,8 @@ abstract class Olap4ldCellSet implements CellSet {
 		 * We need to know the number of the measure
 		 */
 		int index = 0;
-		for (int i = 0; i < olapquery.projections.size() && measure != null; i++) {
-			if (olapquery.projections.get(i).getName()
+		for (int i = 0; i < measureList.size() && measure != null; i++) {
+			if (measureList.get(i).getName()
 					.equals(measure.getName())) {
 				index = i;
 				break;

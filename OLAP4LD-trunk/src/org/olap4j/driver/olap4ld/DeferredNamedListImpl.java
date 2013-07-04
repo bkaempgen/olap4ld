@@ -133,7 +133,8 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 				e.printStackTrace();
 			}
 		}
-		return getList().get(name);
+		getList();
+		return list.get(name);
 	}
 
 	public int indexOfName(String name) {

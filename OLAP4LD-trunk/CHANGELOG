@@ -1,3 +1,15 @@
+==2013-07-4==
+* Problem came up that the following elements have the same name in our current model:
+** Dimension, Dimension without codelist Hierarchy, Dimension without codelist Level
+** Hierarchy, Regular hierarchy level
+** Since we do not need to refer to those sub-elements, directly, but rather will be asking for all 
+members of the dimension, we do not need to consider this.
+* Measure DataType is now interpreted from rdfs:range.
+* Watch out for the right name in MDX query.
+* Sesame SPARQL adaption:
+** Picky with empty spaces, added serveral
+** (COUNT(?variable) as ?variable)
+
 ==2013-07-03==
 * xml2nx adapted to Sesame SPARQL/XML output with linebreaks
 * added manually created representative SSB example

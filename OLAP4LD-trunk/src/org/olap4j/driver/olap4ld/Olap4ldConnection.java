@@ -1238,20 +1238,17 @@ abstract class Olap4ldConnection implements OlapConnection {
 			final String description = row[mapFields.get("?MEASURE_CAPTION")]
 					.toString();
 
-			// Here, for a certain name, we get a datatype
-			// TODO: How to read DataType from RDF?
-			Datatype ordinalDatatype = Datatype.getDictionary().forName(
-					Olap4ldLinkedDataUtil.convertNodeToMDX(row[mapFields
-							.get("?DATA_TYPE")]));
-			if (ordinalDatatype == null) {
-
-				// If it is encoded as number, fine also.
-				datatype = Datatype.getDictionary()
-						.forOrdinal(
-								new Integer(row[mapFields.get("?DATA_TYPE")]
-										.toString()));
-			} else {
-				datatype = ordinalDatatype;
+			// Here, for a certain name, we get a datatype (encoded as rdfs:range of xsd type)
+			Datatype ordinalDatatype = Datatype.INTEGER;
+			String rowdatatype = row[mapFields.get("?DATA_TYPE")].toString();
+			if (rowdatatype.toString().toLowerCase().equals("http://www.w3.org/2001/XMLSchema#integer")) {
+				ordinalDatatype = Datatype.INTEGER;
+			} else if (rowAggregator.toString().toLowerCase().equals("http://www.w3.org/2001/XMLSchema#decimal")) {
+				ordinalDatatype = Datatype.DOUBLE;
+			} else if (rowAggregator.toString().toLowerCase().equals("http://www.w3.org/2001/XMLSchema#boolean")) {
+				ordinalDatatype = Datatype.BOOLEAN;
+			} else if (rowAggregator.toString().toLowerCase().equals("http://www.w3.org/2001/XMLSchema#string")) {
+				ordinalDatatype = Datatype.STRING;
 			}
 
 			// Here, we need a boolean
@@ -1281,7 +1278,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 
 			list.add(new Olap4ldMeasure((Olap4ldLevel) member.getLevel(),
 					measureUniqueName, measureName, measureCaption,
-					description, null, measureAggregator, expression, datatype,
+					description, null, measureAggregator, expression, ordinalDatatype,
 					measureIsVisible, member.getOrdinal()));
 
 		}
