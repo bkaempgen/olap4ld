@@ -14,6 +14,7 @@
 @prefix interval: <http://reference.data.gov.uk/def/intervals/> .
 
 @prefix qb:       <http://purl.org/linked-data/cube#> .
+@prefix qb4o: 	  <http://purl.org/olap#> .
 
 @prefix sdmx:    	 <http://purl.org/linked-data/sdmx#> .
 @prefix sdmx-concept:    <http://purl.org/linked-data/sdmx/2009/concept#> .
@@ -44,11 +45,11 @@ eg:dsd
 		[ qb:dimension eg:lo_partkey ],
 		[ qb:dimension eg:lo_suppkey ];
 	qb:component 
-		[ qb:measure eg:lo_quantity ],
-		[ qb:measure eg:lo_discount ],
-		[ qb:measure eg:lo_extendedprice ],
-		[ qb:measure eg:lo_revenue ],
-		[ qb:measure eg:lo_supplycost ];
+		[ qb:measure eg:lo_quantity; qb4o:hasAggregateFunction qb4o:sum ],
+		[ qb:measure eg:lo_discount; qb4o:hasAggregateFunction qb4o:avg ],
+		[ qb:measure eg:lo_extendedprice; qb4o:hasAggregateFunction qb4o:sum ],
+		[ qb:measure eg:lo_revenue; qb4o:hasAggregateFunction qb4o:sum ],
+		[ qb:measure eg:lo_supplycost; qb4o:hasAggregateFunction qb4o:sum ];
 	.
 
 # -- Dimensions and measures  -----------------------------
@@ -81,35 +82,30 @@ eg:lo_quantity  a rdf:Property, qb:MeasureProperty;
     rdfs:label "quantity"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
-    qb:aggregator "SUM" ;
     .
 
 eg:lo_discount  a rdf:Property, qb:MeasureProperty;
     rdfs:label "discount"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
-    qb:aggregator "AVG" ;
     .
 
 eg:lo_extendedprice  a rdf:Property, qb:MeasureProperty ;
     rdfs:label "extendedprice"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue ;
     rdfs:range xsd:decimal ;
-    qb:aggregator "SUM" ;
     .
 
 eg:lo_revenue  a rdf:Property, qb:MeasureProperty;
     rdfs:label "revenue"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
-    qb:aggregator "SUM" ;
     .
 
 eg:lo_supplycost  a rdf:Property, qb:MeasureProperty;
-    rdfs:label "quantity"@en ;
+    rdfs:label "supplycost"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
-    qb:aggregator "SUM" ;
     .
 
 # -- Code lists -------------------------------------------
@@ -188,7 +184,7 @@ eg:lineorder_1_4
     eg:lo_orderdate eg:date_19940101 ;
     eg:lo_custkey eg:customer_2 ;
     eg:lo_partkey eg:part_1 ;
-    eg:lo_suppkey eg:supplier_1 ;
+    eg:lo_suppkey eg:supplier_2 ;
     eg:lo_quantity 17 ;
     eg:lo_discount 4e0 ;
     eg:lo_extendedprice 2471035e0 ;
@@ -203,7 +199,7 @@ eg:lineorder_1_5
     eg:lo_orderdate eg:date_19940101 ;
     eg:lo_custkey eg:customer_2 ;
     eg:lo_partkey eg:part_1 ;
-    eg:lo_suppkey eg:supplier_1 ;
+    eg:lo_suppkey eg:supplier_2 ;
     eg:lo_quantity 17 ;
     eg:lo_discount 4e0 ;
     eg:lo_extendedprice 2471035e0 ;

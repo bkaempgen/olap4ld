@@ -96,7 +96,9 @@ class Olap4ldHierarchy
 
     public Member getDefaultMember() throws OlapException {
         if (defaultMemberUniqueName == null) {
-            return null;
+            //return null;
+        	// Since every hierarchy needs a default member, we simply return the very first member
+        	return this.getLevels().get(0).getMembers().get(0);
         }
         return olap4jDimension.olap4jCube.getMetadataReader()
             .lookupMemberByUniqueName(

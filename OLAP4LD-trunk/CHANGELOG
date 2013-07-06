@@ -1,3 +1,13 @@
+==2013-07-05==
+* Problem: GetCubes() auf dem Schema gibt uns keinerlei Cubes, da das System nicht weiß, woher
+er sie nehmen soll. Daher setzen wir auf getMeasures(Cube), getDimensions(Cube) etc., müssen hier
+jedoch sicherstellen, dass zumindest der Datensatz aufgelöst worden ist.
+** Lösung: We check the restrictions and at least check whether dataset is resolved (in which case,
+the datastructuredefinition should have been resolved as well).
+* with setCatalog() in Connection, I reset the LinkedDataEngine from now on. <= does not work!
+** We reset at getSchemas() of Catalog. Also, we now load only if instance qb:DataSet.
+* We inserted checks from specification for when qb:DataSet is loaded.
+
 ==2013-07-4==
 * Problem came up that the following elements have the same name in our current model:
 ** Dimension, Dimension without codelist Hierarchy, Dimension without codelist Level
@@ -12,9 +22,6 @@ members of the dimension, we do not need to consider this.
 * xmla-server + xmla4js was quite picky about some non-implemented methods in olap4ld taken over 
 from olap4j/mondrian (e.g., Olap4ldDatabase.getUserName()). Fixed those with workarounds. 
 * We name Catalog and Schema the same due to compatibility reasons with xmla-server/xmla4js
-* Problem: GetCubes() auf dem Schema gibt uns keinerlei Cubes, da das System nicht weiß, woher
-er sie nehmen soll. Daher setzen wir auf getMeasures(Cube), getDimensions(Cube) etc., müssen hier
-jedoch sicherstellen, dass zumindest der Datensatz aufgelöst worden ist. 
 * We have added measureList to CellSet as added metadata.
 
 ==2013-07-03==

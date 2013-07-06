@@ -36,6 +36,11 @@ import org.semanticweb.yars.nx.Node;
  * 
  */
 public interface LinkedDataEngine {
+	
+	/**
+	 * Puts engine to its default init state.
+	 */
+	public void rollback();
 
 	public List<Node[]> getDatabases(Restrictions restrictions);
 

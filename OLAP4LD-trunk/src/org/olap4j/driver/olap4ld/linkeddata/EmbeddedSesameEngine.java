@@ -18,15 +18,10 @@
  */
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,11 +36,11 @@ import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
+import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.TupleQueryResultHandlerException;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.repository.RepositoryConnection;
@@ -323,8 +318,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// Log content
 			String query = "select * where {?s ?p ?o} limit 100";
-			// query =
-			// "PREFIX dcterms: <http://purl.org/dc/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION WHERE {?CUBE_NAME a qb:DataSet. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"en\")} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" )} BIND('LdCatalog' as ?CATALOG_NAME).BIND('LdSchema' as ?SCHEMA_NAME).BIND('CUBE' as ?CUBE_TYPE). FILTER (?CUBE_NAME = <http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds>) } GROUP BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION ORDER BY ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION ?DESCRIPTION";
+			//query = "PREFIX dcterms: <http://purl.org/dc/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX xkos: <http://purl.org/linked-data/xkos#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT * WHERE { ?CUBE_NAME qb:structure ?dsd. ?dsd qb:component ?compSpec. ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME rdfs:range ?range FILTER (?range != skos:Concept). ?obs qb:dataSet ?CUBE_NAME. ?obs ?DIMENSION_UNIQUE_NAME ?MEMBER_UNIQUE_NAME.   } ";
 			sparql(query, false);
 
 		} catch (RepositoryException e) {
@@ -460,44 +454,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getCubes(Restrictions restrictions) {
 
-		// If specific data cube asked for, get DS URI
-		if (restrictions.cubeNamePattern != null) {
-			String uri = Olap4ldLinkedDataUtil
-					.convertMDXtoURI(restrictions.cubeNamePattern);
-			try {
-				String location = askForLocation(uri);
-
-				// If not in store: load location and also load dsd
-				if (!isStored(location)) {
-					loadInStore(location);
-
-					// Ask for DSD URI and load
-					String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
-							+ uri + "> qb:structure ?dsd}";
-					List<Node[]> dsd = sparql(query, true);
-					// There should be a dsd
-					// Note in spec:
-					// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-					if (dsd.size() <= 1) {
-						throw new UnsupportedOperationException(
-								"A cube should serve a data structure definition!");
-					} else {
-						uri = dsd.get(1)[0].toString();
-
-						location = askForLocation(uri);
-
-						// If not in store: load location
-						if (!isStored(location)) {
-							loadInStore(location);
-						}
-					}
-				}
-
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		checkSufficientInformationGathered(restrictions);
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
@@ -524,6 +481,178 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	}
 
 	/**
+	 * Depending on the restrictions, we check whether sufficient Linked Data
+	 * has been gathered. If not, we gather more or throw exception.
+	 * 
+	 * @param restrictions
+	 */
+	private void checkSufficientInformationGathered(Restrictions restrictions) {
+		// For now, if only cube is asked for, we load ds and dsd and run checks
+		/*
+		 * && restrictions.dimensionUniqueName == null &&
+		 * restrictions.hierarchyUniqueName == null &&
+		 * restrictions.levelUniqueName == null && restrictions.memberUniqueName
+		 * == null
+		 */
+		if (restrictions.cubeNamePattern != null) {
+			String uri = Olap4ldLinkedDataUtil
+					.convertMDXtoURI(restrictions.cubeNamePattern);
+
+			try {
+				String location = askForLocation(uri);
+
+				// Here, we always load, since we want to update.
+
+				if (!isStored(location)) {
+					loadInStore(location);
+
+					// For everything else: Check whether really cube
+					RepositoryConnection con;
+					con = repo.getConnection();
+
+					String testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> ASK { ?CUBE_NAME a qb:DataSet. FILTER (?CUBE_NAME = <"
+							+ uri + ">)}";
+					BooleanQuery booleanQuery = con.prepareBooleanQuery(
+							QueryLanguage.SPARQL, testquery);
+					boolean isDataset = booleanQuery.evaluate();
+					con.close();
+
+					if (isDataset) {
+
+						// If loading ds, also load dsd. Ask for DSD URI and
+						// load
+						String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
+								+ uri + "> qb:structure ?dsd}";
+						List<Node[]> dsd = sparql(query, true);
+						// There should be a dsd
+						// Note in spec:
+						// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+						if (dsd.size() <= 1) {
+							throw new UnsupportedOperationException(
+									"A cube should serve a data structure definition!");
+						} else {
+							String dsduri = dsd.get(1)[0].toString();
+
+							location = askForLocation(dsduri);
+
+							// Since ds and dsd location can be the same,
+							// check
+							// whether loaded already
+							if (!isStored(location)) {
+								loadInStore(location);
+							}
+						}
+
+						// Now, we run checks.
+
+						con = repo.getConnection();
+
+						// IC-1. Unique DataSet. Every qb:Observation
+						// has exactly one associated qb:DataSet. <=
+						// takes too long since every observation tested
+
+						// IC-2. Unique DSD. Every qb:DataSet has
+						// exactly one associated
+						// qb:DataStructureDefinition. <= tested before
+
+						// IC-3. DSD includes measure
+						// XXX: Not fully like in spec
+						testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> ASK { ?dsd a qb:DataStructureDefinition . FILTER NOT EXISTS { ?dsd qb:component [qb:measure [a qb:MeasureProperty]] }}";
+						booleanQuery = con.prepareBooleanQuery(
+								QueryLanguage.SPARQL, testquery);
+						if (booleanQuery.evaluate() == true) {
+							throw new UnsupportedOperationException(
+									"Failed specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure. ");
+						}
+
+						// IC-4. Dimensions have range
+						testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ASK { ?dim a qb:DimensionProperty . FILTER NOT EXISTS { ?dim rdfs:range [] }}";
+						booleanQuery = con.prepareBooleanQuery(
+								QueryLanguage.SPARQL, testquery);
+						if (booleanQuery.evaluate() == true) {
+							throw new UnsupportedOperationException(
+									"Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.");
+						}
+
+						// IC-5. Concept dimensions have code lists
+						testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ASK { ?dim a qb:DimensionProperty ; rdfs:range skos:Concept . FILTER NOT EXISTS { ?dim qb:codeList [] }}";
+						booleanQuery = con.prepareBooleanQuery(
+								QueryLanguage.SPARQL, testquery);
+						if (booleanQuery.evaluate() == true) {
+							throw new UnsupportedOperationException(
+									"Failed specification check: IC-14. All measures present. Every dimension with range skos:Concept must have a qb:codeList. ");
+						}
+
+						// IC-6. Only attributes may be optional <= not
+						// important right now. We do not regard
+						// attributes.
+
+						// IC-7. Slice Keys must be declared <= not
+						// important right now. We do not regard slices.
+						// IC-8. Slice Keys consistent with DSD
+						// IC-9. Unique slice structure
+						// IC-10. Slice dimensions complete
+
+						// IC-11. All dimensions required <= takes too
+						// long
+						// IC-12. No duplicate observations <= takes too
+						// long
+
+						// IC-13. Required attributes <= We do not
+						// regard attributes
+
+						// IC-14. All measures present
+						testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ASK { ?obs qb:dataSet/qb:structure ?dsd . FILTER NOT EXISTS { ?dsd qb:component/qb:componentProperty qb:measureType } ?dsd qb:component/qb:componentProperty ?measure . ?measure a qb:MeasureProperty; FILTER NOT EXISTS { ?obs ?measure [] }}";
+						booleanQuery = con.prepareBooleanQuery(
+								QueryLanguage.SPARQL, testquery);
+						if (booleanQuery.evaluate() == true) {
+							throw new UnsupportedOperationException(
+									"Failed specification check: IC-14. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure. ");
+						}
+
+						// IC-15. Measure dimension consistent <= We do
+						// not support measureType, yet.
+						// IC-16. Single measure on measure dimension
+						// observation
+						
+						// Own check: Dataset should have at least one observation
+						testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ASK { ?obs qb:dataSet ?CUBE_NAME FILTER (?CUBE_NAME = <"+ uri + ">)}";
+						booleanQuery = con.prepareBooleanQuery(
+								QueryLanguage.SPARQL, testquery);
+						if (booleanQuery.evaluate() == false) {
+							throw new UnsupportedOperationException(
+									"Failed own check: Dataset should have at least one observation. ");
+						} 
+						
+						// XXX Possible other checks
+						// No dimensions
+						// No aggregation function
+						// Code list empty
+						// No member
+
+						// Important!
+						con.close();
+
+					}
+				}
+
+			} catch (RepositoryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (QueryEvaluationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MalformedQueryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
 	 * Get possible dimensions (component properties) for each cube from the
 	 * triple store.
 	 * 
@@ -536,6 +665,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * @throws MalformedURLException
 	 */
 	public List<Node[]> getDimensions(Restrictions restrictions) {
+
+		checkSufficientInformationGathered(restrictions);
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
@@ -621,6 +752,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getMeasures(Restrictions restrictions) {
 
+		checkSufficientInformationGathered(restrictions);
+
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
 		// ///////////QUERY//////////////////////////
@@ -655,6 +788,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * @return
 	 */
 	public List<Node[]> getHierarchies(Restrictions restrictions) {
+
+		checkSufficientInformationGathered(restrictions);
 
 		List<Node[]> result = new ArrayList<Node[]>();
 
@@ -802,6 +937,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getLevels(Restrictions restrictions) {
 
+		checkSufficientInformationGathered(restrictions);
+
 		List<Node[]> result = new ArrayList<Node[]>();
 
 		// Create header
@@ -810,12 +947,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				new Variable("?DIMENSION_UNIQUE_NAME"),
 				new Variable("?HIERARCHY_UNIQUE_NAME"),
 				new Variable("?LEVEL_UNIQUE_NAME"),
-				new Variable("?LEVEL_CAPTION"),
-				new Variable("?LEVEL_NAME"),
-				new Variable("?DESCRIPTION"),
-				new Variable("?LEVEL_NUMBER"),
-				new Variable("?LEVEL_CARDINALITY"),
-				new Variable("?LEVEL_TYPE") };
+				new Variable("?LEVEL_CAPTION"), new Variable("?LEVEL_NAME"),
+				new Variable("?DESCRIPTION"), new Variable("?LEVEL_NUMBER"),
+				new Variable("?LEVEL_CARDINALITY"), new Variable("?LEVEL_TYPE") };
 		result.add(header);
 
 		if (!isMeasureQueriedFor(restrictions.dimensionUniqueName,
@@ -919,8 +1053,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		// Add levels for dimensions without codelist, but only if hierarchy and
 		// dimension names are equal
 		if (isMeasureQueriedFor(restrictions.dimensionUniqueName,
-				restrictions.hierarchyUniqueName, restrictions.levelUniqueName) || (restrictions.hierarchyUniqueName != null
-				&& !restrictions.hierarchyUniqueName
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)
+				|| (restrictions.hierarchyUniqueName != null && !restrictions.hierarchyUniqueName
 						.equals(restrictions.dimensionUniqueName))) {
 			// we do not need to do this
 			;
@@ -1007,6 +1141,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * @throws MalformedURLException
 	 */
 	public List<Node[]> getMembers(Restrictions restrictions) {
+
+		checkSufficientInformationGathered(restrictions);
 
 		List<Node[]> result = new ArrayList<Node[]>();
 		List<Node[]> intermediaryresult = null;
@@ -1490,7 +1626,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	@Override
 	public List<Node[]> getOlapResult(LogicalOlapQueryPlan queryplan) {
 		// Log logical query plan
-		Olap4ldUtil._log.info("Logical query plan to string: "+queryplan.toString());
+		Olap4ldUtil._log.info("Logical query plan to string: "
+				+ queryplan.toString());
 
 		LogicalOlap2PhysicalOlap r2a = new LogicalOlap2PhysicalOlap(repo);
 
@@ -1525,6 +1662,28 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			List<Position> dices, List<Measure> projections) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * Empties store and locationMap.
+	 */
+	public void rollback() {
+
+		// Store
+		try {
+			// Rely on garbage collector
+			// this.repo.initialize();
+			// this.repo.shutDown();
+			this.repo = new SailRepository(new MemoryStore());
+			repo.initialize();
+
+			// do something interesting with the values here...
+			// con.close();
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		locationsMap.clear();
 	}
 
 }

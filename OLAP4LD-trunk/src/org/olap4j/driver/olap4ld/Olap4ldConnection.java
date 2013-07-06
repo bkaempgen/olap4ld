@@ -187,6 +187,10 @@ abstract class Olap4ldConnection implements OlapConnection {
 
 	private String url;
 
+	private ArrayList<String> datasets;
+
+	private ArrayList<String> datastructuredefinitions;
+
 	/**
 	 * Creates an Olap4j connection an XML/A provider.
 	 * 
@@ -268,7 +272,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 		String datasetString = map.get(Olap4ldDriver.Property.DATASETS.name());
 		// TODO: Tokenizer using Komma ",".
 		StringTokenizer urltokenizer = new StringTokenizer(datasetString, ",");
-		ArrayList<String> datasets = new ArrayList<String>();
+		this.datasets = new ArrayList<String>();
 		while (urltokenizer.hasMoreTokens()) {
 			datasets.add(urltokenizer.nextToken());
 		}
@@ -277,34 +281,12 @@ abstract class Olap4ldConnection implements OlapConnection {
 				.get(Olap4ldDriver.Property.DATASTRUCTUREDEFINITIONS.name());
 		// TODO: Tokenizer using Komma ",".
 		StringTokenizer urltokenizer1 = new StringTokenizer(dsdString, ",");
-		ArrayList<String> datastructuredefinitions = new ArrayList<String>();
+		this.datastructuredefinitions = new ArrayList<String>();
 		while (urltokenizer1.hasMoreTokens()) {
 			datastructuredefinitions.add(urltokenizer1.nextToken());
 		}
-		// This is the SPARQL engine
-		// Depending on the databaseName, we create a different Linked Data
-		// Engine
-
-		if (databaseName.equals("QCRUMB")) {
-			myLinkedData = new OpenVirtuosoEngine(serverUrlObject,
-					datastructuredefinitions, datasets, databaseName);
-		}
-		if (databaseName.equals("OPENVIRTUOSO")) {
-			myLinkedData = new OpenVirtuosoEngine(serverUrlObject,
-					datastructuredefinitions, datasets, databaseName);
-		}
-		if (databaseName.equals("OPENVIRTUOSORULESET")) {
-			myLinkedData = new OpenVirtuosoEngine(serverUrlObject,
-					datastructuredefinitions, datasets, databaseName);
-		}
-		if (databaseName.equals("SESAME")) {
-			myLinkedData = new SesameEngine(serverUrlObject,
-					datastructuredefinitions, datasets, databaseName);
-		}
-		if (databaseName.equals("EMBEDDEDSESAME")) {
-			myLinkedData = new EmbeddedSesameEngine(serverUrlObject,
-					datastructuredefinitions, datasets, databaseName);
-		}
+		
+		initLinkedDataEngine();
 
 		// Initialize the SOAP cache if needed
 		// TODO remove?
@@ -356,6 +338,32 @@ abstract class Olap4ldConnection implements OlapConnection {
 				// Julian has told me about
 				new Olap4ldConnection.DatabaseHandler(), null);
 		Database pop = olapDatabases.get(0);
+	}
+
+	private void initLinkedDataEngine() {
+		// This is the SPARQL engine
+		// Depending on the databaseName, we create a different Linked Data
+		// Engine
+		if (databaseName.equals("QCRUMB")) {
+			myLinkedData = new OpenVirtuosoEngine(serverUrlObject,
+					datastructuredefinitions, datasets, databaseName);
+		}
+		if (databaseName.equals("OPENVIRTUOSO")) {
+			myLinkedData = new OpenVirtuosoEngine(serverUrlObject,
+					datastructuredefinitions, datasets, databaseName);
+		}
+		if (databaseName.equals("OPENVIRTUOSORULESET")) {
+			myLinkedData = new OpenVirtuosoEngine(serverUrlObject,
+					datastructuredefinitions, datasets, databaseName);
+		}
+		if (databaseName.equals("SESAME")) {
+			myLinkedData = new SesameEngine(serverUrlObject,
+					datastructuredefinitions, datasets, databaseName);
+		}
+		if (databaseName.equals("EMBEDDEDSESAME")) {
+			myLinkedData = new EmbeddedSesameEngine(serverUrlObject,
+					datastructuredefinitions, datasets, databaseName);
+		}
 	}
 
 	/**
@@ -471,9 +479,12 @@ abstract class Olap4ldConnection implements OlapConnection {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * Here, I empty the linked data store.
+	 */
 	public void rollback() throws SQLException {
-		//throw new UnsupportedOperationException();
-		;
+		// throw new UnsupportedOperationException();
+		this.myLinkedData.rollback();
 	}
 
 	public void close() throws SQLException {
@@ -527,8 +538,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 				this.olap4jCatalog = null;
 				this.olap4jSchema = null;
 			} else {
-				this.olap4jDatabase = (Olap4ldDatabase) getOlapDatabases()
-						.get(this.databaseName);
+				this.olap4jDatabase = (Olap4ldDatabase) getOlapDatabases().get(
+						this.databaseName);
 				this.olap4jCatalog = null;
 				this.olap4jSchema = null;
 				if (this.olap4jDatabase == null) {
@@ -551,11 +562,12 @@ abstract class Olap4ldConnection implements OlapConnection {
 	}
 
 	public void setCatalog(String catalogName) throws OlapException {
+		
 		if (catalogName == null) {
 			throw new OlapException("Catalog name cannot be null.");
 		}
-		this.olap4jCatalog = (Olap4ldCatalog) getOlapCatalogs().get(
-				catalogName);
+		this.olap4jCatalog = (Olap4ldCatalog) getOlapCatalogs()
+				.get(catalogName);
 		if (this.olap4jCatalog == null) {
 			throw new OlapException("No catalog named " + catalogName
 					+ " could be found.");
@@ -605,8 +617,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 			throw new OlapException("Schema name cannot be null.");
 		}
 		final Catalog catalog = getOlapCatalog();
-		this.olap4jSchema = (Olap4ldSchema) catalog.getSchemas().get(
-				schemaName);
+		this.olap4jSchema = (Olap4ldSchema) catalog.getSchemas()
+				.get(schemaName);
 		if (this.olap4jSchema == null) {
 			throw new OlapException("No schema named " + schemaName
 					+ " could be found in catalog " + catalog.getName());
@@ -621,8 +633,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 				if (catalog.getSchemas().size() == 0) {
 					throw new OlapException("No schemas could be found.");
 				}
-				this.olap4jSchema = (Olap4ldSchema) catalog.getSchemas()
-						.get(0);
+				this.olap4jSchema = (Olap4ldSchema) catalog.getSchemas().get(0);
 			} else {
 				this.olap4jSchema = (Olap4ldSchema) catalog.getSchemas().get(
 						this.schemaName);
@@ -782,7 +793,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 	 */
 	String getURL() {
 		return url;
-		//throw Olap4jUtil.needToImplement(this);
+		// throw Olap4jUtil.needToImplement(this);
 	}
 
 	public void setLocale(Locale locale) {
@@ -847,8 +858,6 @@ abstract class Olap4ldConnection implements OlapConnection {
 	public Scenario getScenario() {
 		throw new UnsupportedOperationException();
 	}
-
-
 
 	/**
 	 * Encodes a string for use in an XML CDATA section.
@@ -927,8 +936,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 			 * description available</DESCRIPTION> <ROLES>California manager,No
 			 * HR Cube</ROLES> </row>
 			 */
-			String catalogName = Olap4ldLinkedDataUtil.convertNodeToMDX(row[mapFields
-					.get("?TABLE_CAT")]);
+			String catalogName = Olap4ldLinkedDataUtil
+					.convertNodeToMDX(row[mapFields.get("?TABLE_CAT")]);
 			// Unused: DESCRIPTION, ROLES
 			list.add(new Olap4ldCatalog(context.olap4jDatabaseMetaData,
 					database, catalogName));
@@ -942,8 +951,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 				List<Olap4ldCube> list) throws OlapException {
 
 			// We need to make the cubeName MDX compatible
-			String cubeName = Olap4ldLinkedDataUtil.convertNodeToMDX(row[mapFields
-					.get("?CUBE_NAME")]);
+			String cubeName = Olap4ldLinkedDataUtil
+					.convertNodeToMDX(row[mapFields.get("?CUBE_NAME")]);
 
 			String caption = Olap4ldLinkedDataUtil.makeCaption(
 					row[mapFields.get("?CUBE_CAPTION")].toString(),
@@ -969,8 +978,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 
 			// This typically should be a uri so that we need to make it MDX
 			// ready
-			String dimensionName = Olap4ldLinkedDataUtil.convertNodeToMDX(row[mapFields
-					.get("?DIMENSION_NAME")]);
+			String dimensionName = Olap4ldLinkedDataUtil
+					.convertNodeToMDX(row[mapFields.get("?DIMENSION_NAME")]);
 			// This should always be a URI
 			String dimensionUniqueName = Olap4ldLinkedDataUtil
 					.convertNodeToMDX(row[mapFields
@@ -1003,8 +1012,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 			list.add(dimension);
 			if (dimensionOrdinal != null) {
 				Collections.sort(list, new Comparator<Olap4ldDimension>() {
-					public int compare(Olap4ldDimension d1,
-							Olap4ldDimension d2) {
+					public int compare(Olap4ldDimension d1, Olap4ldDimension d2) {
 						if (d1.getOrdinal() == d2.getOrdinal()) {
 							return 0;
 						} else if (d1.getOrdinal() > d2.getOrdinal()) {
@@ -1205,17 +1213,16 @@ abstract class Olap4ldConnection implements OlapConnection {
 			Aggregator aggregator = Measure.Aggregator.COUNT;
 			ParseTreeNode expression = null;
 			Measure.Aggregator measureAggregator = aggregator;
-			final Datatype datatype;
 			Node rowAggregator = row[mapFields.get("?MEASURE_AGGREGATOR")];
-			if (rowAggregator.toString().toLowerCase().equals("sum")) {
+			if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#sum")) {
 				measureAggregator = Measure.Aggregator.SUM;
-			} else if (rowAggregator.toString().toLowerCase().equals("avg")) {
+			} else if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#avg")) {
 				measureAggregator = Measure.Aggregator.AVG;
-			} else if (rowAggregator.toString().toLowerCase().equals("max")) {
+			} else if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#max")) {
 				measureAggregator = Measure.Aggregator.MIN;
-			} else if (rowAggregator.toString().toLowerCase().equals("min")) {
+			} else if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#min")) {
 				measureAggregator = Measure.Aggregator.MAX;
-			} else if (rowAggregator.toString().toLowerCase().equals("count")) {
+			} else if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#count")) {
 				measureAggregator = Measure.Aggregator.COUNT;
 			} else if (rowAggregator.toString().toLowerCase()
 					.equals("calculated")) {
@@ -1243,17 +1250,25 @@ abstract class Olap4ldConnection implements OlapConnection {
 			final String description = row[mapFields.get("?MEASURE_CAPTION")]
 					.toString();
 
-			// Here, for a certain name, we get a datatype (encoded as rdfs:range of xsd type)
-			Datatype ordinalDatatype = Datatype.INTEGER;
+			// Here, for a certain name, we get a datatype (encoded as
+			// rdfs:range of xsd type)
+			// final Datatype datatype;
+			final Datatype ordinalDatatype;
 			String rowdatatype = row[mapFields.get("?DATA_TYPE")].toString();
-			if (rowdatatype.toString().toLowerCase().equals("http://www.w3.org/2001/XMLSchema#integer")) {
+			if (rowdatatype.toString().toLowerCase()
+					.equals("http://www.w3.org/2001/XMLSchema#integer")) {
 				ordinalDatatype = Datatype.INTEGER;
-			} else if (rowAggregator.toString().toLowerCase().equals("http://www.w3.org/2001/XMLSchema#decimal")) {
+			} else if (rowAggregator.toString().toLowerCase()
+					.equals("http://www.w3.org/2001/XMLSchema#decimal")) {
 				ordinalDatatype = Datatype.DOUBLE;
-			} else if (rowAggregator.toString().toLowerCase().equals("http://www.w3.org/2001/XMLSchema#boolean")) {
+			} else if (rowAggregator.toString().toLowerCase()
+					.equals("http://www.w3.org/2001/XMLSchema#boolean")) {
 				ordinalDatatype = Datatype.BOOLEAN;
-			} else if (rowAggregator.toString().toLowerCase().equals("http://www.w3.org/2001/XMLSchema#string")) {
+			} else if (rowAggregator.toString().toLowerCase()
+					.equals("http://www.w3.org/2001/XMLSchema#string")) {
 				ordinalDatatype = Datatype.STRING;
+			} else {
+				ordinalDatatype = Datatype.DOUBLE;
 			}
 
 			// Here, we need a boolean
@@ -1283,8 +1298,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 
 			list.add(new Olap4ldMeasure((Olap4ldLevel) member.getLevel(),
 					measureUniqueName, measureName, measureCaption,
-					description, null, measureAggregator, expression, ordinalDatatype,
-					measureIsVisible, member.getOrdinal()));
+					description, null, measureAggregator, expression,
+					ordinalDatatype, measureIsVisible, member.getOrdinal()));
 
 		}
 	}
@@ -1386,8 +1401,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 			int memberOrdinal = 0;
 			String memberUniqueName = Olap4ldLinkedDataUtil
 					.convertNodeToMDX(row[mapFields.get("?MEMBER_UNIQUE_NAME")]);
-			String memberName = Olap4ldLinkedDataUtil.convertNodeToMDX(row[mapFields
-					.get("?MEMBER_NAME")]);
+			String memberName = Olap4ldLinkedDataUtil
+					.convertNodeToMDX(row[mapFields.get("?MEMBER_NAME")]);
 			// Parent unique name should be null if no parent is available.
 			// TODO: Null handling is still not thought through since LDEngine
 			// returns <null>
@@ -1486,8 +1501,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 			 * <SCHEMA_NAME>FoodMart</SCHEMA_NAME>
 			 * <SCHEMA_OWNER>dbo</SCHEMA_OWNER> </row>
 			 */
-			String schemaName = Olap4ldLinkedDataUtil.convertNodeToMDX(row[mapFields
-					.get("?SCHEMA_NAME")]);
+			String schemaName = Olap4ldLinkedDataUtil
+					.convertNodeToMDX(row[mapFields.get("?SCHEMA_NAME")]);
 			list.add(new Olap4ldSchema(context.getCatalog(row, mapFields),
 					(schemaName == null) ? "" : schemaName));
 		}
@@ -1521,13 +1536,14 @@ abstract class Olap4ldConnection implements OlapConnection {
 			// on the catalog name. Some servers don't support nor include the
 			// SCHEMA_NAME column in its response. If it's null, we convert it
 			// to an empty string as to not cause problems later on.
-			final String schemaName = Olap4ldUtil.stringElement(row, "TABLE_SCHEM");
-			final String catalogName = Olap4ldUtil.stringElement(row, "TABLE_CATALOG");
+			final String schemaName = Olap4ldUtil.stringElement(row,
+					"TABLE_SCHEM");
+			final String catalogName = Olap4ldUtil.stringElement(row,
+					"TABLE_CATALOG");
 			final String schemaName2 = (schemaName == null) ? "" : schemaName;
 			if (this.catalogName.equals(catalogName)
 					&& ((NamedList<Olap4ldSchema>) list).get(schemaName2) == null) {
-				list.add(new Olap4ldSchema(context.getCatalog(row),
-						schemaName2));
+				list.add(new Olap4ldSchema(context.getCatalog(row), schemaName2));
 			}
 		}
 
@@ -1581,7 +1597,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 			 * Cube - Store Hierarchy - Store Name Level - Store Manager
 			 * Property</DESCRIPTION> </row>
 			 */
-			
+
 			String description = Olap4ldUtil.stringElement(row, "DESCRIPTION");
 			String uniqueName = Olap4ldUtil.stringElement(row, "DESCRIPTION");
 			String caption = Olap4ldUtil.stringElement(row, "PROPERTY_CAPTION");
@@ -1761,8 +1777,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 				// Apparently, the code has requested a member that is
 				// not queried for yet. We must force the initialization
 				// of the dimension tree first.
-				final String dimensionUniqueName = Olap4ldUtil.stringElement(row,
-						"DIMENSION_UNIQUE_NAME");
+				final String dimensionUniqueName = Olap4ldUtil.stringElement(
+						row, "DIMENSION_UNIQUE_NAME");
 				String dimensionName = Olap4jUtil.parseUniqueName(
 						dimensionUniqueName).get(0);
 				Olap4ldDimension dimension = getCube(row).dimensions
@@ -1874,8 +1890,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 				// Apparently, the code has requested a member that is
 				// not queried for yet. We must force the initialization
 				// of the dimension tree first.
-				final String dimensionUniqueName = Olap4ldUtil.stringElement(row,
-						"DIMENSION_UNIQUE_NAME");
+				final String dimensionUniqueName = Olap4ldUtil.stringElement(
+						row, "DIMENSION_UNIQUE_NAME");
 				String dimensionName = Olap4jUtil.parseUniqueName(
 						dimensionUniqueName).get(0);
 				Olap4ldDimension dimension = getCube(row).dimensions
@@ -1912,8 +1928,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 				// dimensionUniqueName).get(0);
 				String dimensionName = dimensionUniqueName;
 				Olap4ldCube cube = getCube(row, mapFields);
-				Olap4ldDimension dimension = cube.dimensions
-						.get(dimensionName);
+				Olap4ldDimension dimension = cube.dimensions.get(dimensionName);
 				for (Hierarchy hierarchyInit : dimension.getHierarchies()) {
 					hierarchyInit.getLevels().size();
 				}
@@ -1928,7 +1943,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 			if (olap4jCatalog != null) {
 				return olap4jCatalog;
 			}
-			final String catalogName = Olap4ldUtil.stringElement(row, "CATALOG_NAME");
+			final String catalogName = Olap4ldUtil.stringElement(row,
+					"CATALOG_NAME");
 			return (Olap4ldCatalog) olap4jConnection.getOlapCatalogs().get(
 					catalogName);
 		}

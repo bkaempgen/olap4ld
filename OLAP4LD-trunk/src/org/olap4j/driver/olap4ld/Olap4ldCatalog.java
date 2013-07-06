@@ -18,6 +18,8 @@
  */
 package org.olap4j.driver.olap4ld;
 
+import java.sql.SQLException;
+
 import org.olap4j.OlapDatabaseMetaData;
 import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.Olap4ldCatalog;
@@ -73,6 +75,14 @@ class Olap4ldCatalog implements Catalog, Named {
 	public NamedList<Schema> getSchemas() throws OlapException {
 		Olap4ldUtil._log.info("getSchemas()...");
 
+		// Set back
+		try {
+			database.getOlapConnection().rollback();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// ResultSet cubes = olap4jDatabaseMetaData.getCubes(null, null, null);
 		// ResultSet dimensions = olap4jDatabaseMetaData.getDimensions(null,
 		// null, null, null);

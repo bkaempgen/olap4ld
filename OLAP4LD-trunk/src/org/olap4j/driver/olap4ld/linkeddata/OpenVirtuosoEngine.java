@@ -2468,7 +2468,8 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 	@Override
 	public List<Node[]> getOlapResult(LogicalOlapQueryPlan queryplan) {
-		LogicalOlap2PhysicalOlap r2a = new LogicalOlap2PhysicalOlap();
+		// XXX: Will not work.
+		LogicalOlap2PhysicalOlap r2a = new LogicalOlap2PhysicalOlap(null);
 		
     	ExecIterator newRoot;
 		try {
@@ -2494,6 +2495,11 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	@Override
+	public void rollback() {
+		;
 	}
 
 }
