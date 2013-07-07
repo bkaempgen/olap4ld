@@ -7,6 +7,9 @@ the datastructuredefinition should have been resolved as well).
 * with setCatalog() in Connection, I reset the LinkedDataEngine from now on. <= does not work!
 ** We reset at getSchemas() of Catalog. Also, we now load only if instance qb:DataSet.
 * We inserted checks from specification for when qb:DataSet is loaded.
+* Problem: Beim Identifizieren von Identifiern, muss ich durch alle elemente gehen, dabei frage ich 
+auch, ob es sich um einen Cube/DS handelt. Lösung: Bevor ich es mache, überprüfe ich erst, ob es sich 
+tatsächlich um ein DS handelt.
 
 ==2013-07-4==
 * Problem came up that the following elements have the same name in our current model:

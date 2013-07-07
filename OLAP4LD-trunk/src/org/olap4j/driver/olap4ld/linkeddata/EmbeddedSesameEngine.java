@@ -310,15 +310,21 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			} else if (location.endsWith(".ttl")) {
 				con.add(url, url.toString(), RDFFormat.TURTLE);
 			} else {
-				throw new UnsupportedOperationException(
-						"How is the RDF encoded of location: " + location + "?");
+
+				// Guess file format
+				RDFFormat format = RDFFormat.forFileName(location);
+				con.add(url, url.toString(), format);
+
+				// throw new UnsupportedOperationException(
+				// "How is the RDF encoded of location: " + location + "?");
 			}
 			locationsMap.put(location.hashCode(), true);
 			con.close();
 
 			// Log content
 			String query = "select * where {?s ?p ?o} limit 100";
-			//query = "PREFIX dcterms: <http://purl.org/dc/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX xkos: <http://purl.org/linked-data/xkos#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT * WHERE { ?CUBE_NAME qb:structure ?dsd. ?dsd qb:component ?compSpec. ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME rdfs:range ?range FILTER (?range != skos:Concept). ?obs qb:dataSet ?CUBE_NAME. ?obs ?DIMENSION_UNIQUE_NAME ?MEMBER_UNIQUE_NAME.   } ";
+			// query =
+			// "PREFIX dcterms: <http://purl.org/dc/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX xkos: <http://purl.org/linked-data/xkos#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT * WHERE { ?CUBE_NAME qb:structure ?dsd. ?dsd qb:component ?compSpec. ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME rdfs:range ?range FILTER (?range != skos:Concept). ?obs qb:dataSet ?CUBE_NAME. ?obs ?DIMENSION_UNIQUE_NAME ?MEMBER_UNIQUE_NAME.   } ";
 			sparql(query, false);
 
 		} catch (RepositoryException e) {
@@ -614,16 +620,18 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						// not support measureType, yet.
 						// IC-16. Single measure on measure dimension
 						// observation
-						
-						// Own check: Dataset should have at least one observation
-						testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ASK { ?obs qb:dataSet ?CUBE_NAME FILTER (?CUBE_NAME = <"+ uri + ">)}";
+
+						// Own check: Dataset should have at least one
+						// observation
+						testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ASK { ?obs qb:dataSet ?CUBE_NAME FILTER (?CUBE_NAME = <"
+								+ uri + ">)}";
 						booleanQuery = con.prepareBooleanQuery(
 								QueryLanguage.SPARQL, testquery);
 						if (booleanQuery.evaluate() == false) {
 							throw new UnsupportedOperationException(
 									"Failed own check: Dataset should have at least one observation. ");
-						} 
-						
+						}
+
 						// XXX Possible other checks
 						// No dimensions
 						// No aggregation function

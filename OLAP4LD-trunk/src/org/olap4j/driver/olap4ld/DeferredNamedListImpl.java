@@ -115,9 +115,13 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 		return getList().size();
 	}
 
+	/**
+	 * If we want a specific element, we only ask for this specific element. No matter whether
+	 * State.NEW or not.
+	 */
 	public T get(String name) {
-		// If "new" and name != null, then we need to populate selectively
-		if (name != null && this.state == State.NEW) {
+		if (name != null) {
+				
 			try {
 				// Create own restriction for cube
 				if (metadataRequest == MetadataRequest.MDSCHEMA_CUBES) {
@@ -125,15 +129,15 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 					context.olap4jConnection.olap4jDatabaseMetaData
 							.populateList(list, context, metadataRequest,
 									handler, restrictions);
-					return list.get(name);
 				}
 				// TODO add other possible Requests.
 			} catch (OlapException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		} else {
+			getList();
 		}
-		getList();
 		return list.get(name);
 	}
 
