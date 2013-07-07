@@ -1510,69 +1510,23 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// TreeOp = Self or null
 			Olap4ldUtil._log.info("TreeOp:SELF");
 
-			// First we ask for the dimensionWithoutHierarchies
-			String dimensionWithoutHierarchies = null;
-			if (restrictions.dimensionUniqueName != null) {
-				dimensionWithoutHierarchies = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.dimensionUniqueName);
-			} else if (restrictions.hierarchyUniqueName != null) {
-				dimensionWithoutHierarchies = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.hierarchyUniqueName);
-			} else if (restrictions.levelUniqueName != null) {
-				dimensionWithoutHierarchies = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.levelUniqueName);
-			}
-
-			// Here, we need specific filters, since only cube and dimension
-			// unique name makes sense
-			String alteredadditionalFilters = "";
-			if (restrictions.cubeNamePattern != null) {
-				alteredadditionalFilters += " FILTER (?CUBE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.cubeNamePattern)
-						+ ">) ";
-			}
-			if (restrictions.memberUniqueName != null) {
-				// Check whether uri or Literal
-				String resource = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.memberUniqueName);
-				if (isResourceAndNotLiteral(resource)) {
-					alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = <"
-							+ resource + ">) ";
-				} else {
-					alteredadditionalFilters += " FILTER (str(?MEMBER_UNIQUE_NAME) = \""
-							+ resource + "\") ";
-				}
-			}
-
-			// It is possible that dimensionWithoutHierarchies is null
-			List<Node[]> memberUris1 = null;
-
-			if (dimensionWithoutHierarchies == null) {
-
-				;
-
-			} else {
-
-				;
-
-			}
-
-			String querytemplate = Olap4ldLinkedDataUtil
-					.readInQueryTemplate("sesame_getMembers_degenerated.txt");
-			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
-					askForFrom(true));
-			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
-			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
-					TABLE_SCHEM);
-			querytemplate = querytemplate.replace("{{{FILTERS}}}",
-					alteredadditionalFilters);
-
-			memberUris1 = sparql(querytemplate, true);
-
-			return memberUris1;
-
 		}
+		
+		String alteredadditionalFilters = createFilterForRestrictions(restrictions);
+		
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getMembers_degenerated.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+				TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				alteredadditionalFilters);
+
+		List<Node[]> memberUris1 = sparql(querytemplate, true);
+
+		return memberUris1;
 
 	}
 
@@ -1598,10 +1552,21 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				+ Olap4ldLinkedDataUtil
 						.convertMDXtoURI(restrictions.levelUniqueName) + ">) "
 				: "";
-		String memberUniqueNameFilter = (restrictions.memberUniqueName != null) ? " FILTER (str(?MEMBER_UNIQUE_NAME) = str(<"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.memberUniqueName)
-				+ ">)) " : "";
+		
+		String memberUniqueNameFilter;
+		if (restrictions.memberUniqueName != null) {
+			String resource = Olap4ldLinkedDataUtil
+					.convertMDXtoURI(restrictions.memberUniqueName);
+			if (isResourceAndNotLiteral(resource)) {
+				memberUniqueNameFilter = " FILTER (?MEMBER_UNIQUE_NAME = <"
+						+ resource + ">) ";
+			} else {
+				memberUniqueNameFilter = " FILTER (str(?MEMBER_UNIQUE_NAME) = \""
+						+ resource + "\") ";
+			}
+		} else {
+			memberUniqueNameFilter = "";
+		}
 
 		return cubeNamePatternFilter + dimensionUniqueNameFilter
 				+ hierarchyUniqueNameFilter + levelUniqueNameFilter

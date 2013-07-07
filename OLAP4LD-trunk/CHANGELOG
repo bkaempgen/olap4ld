@@ -1,3 +1,9 @@
+==2013-07-07==
+* Nested crossjoins are possible, now.
+* Examples listed in demo
+* ld-cubes-explorer added
+* Problem: Have caption shown instead of elements.
+
 ==2013-07-05==
 * Problem: GetCubes() auf dem Schema gibt uns keinerlei Cubes, da das System nicht weiß, woher
 er sie nehmen soll. Daher setzen wir auf getMeasures(Cube), getDimensions(Cube) etc., müssen hier

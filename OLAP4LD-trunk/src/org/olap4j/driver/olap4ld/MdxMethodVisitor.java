@@ -185,14 +185,15 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		 * From the method visitor, we get a list of (possible list of) members
 		 */
 		rowPositions = this.createPositionsList(listResult2);
-		
+
 		if (axisList.size() > 2) {
-			throw new UnsupportedOperationException("Only columns and rows are supported in MDX query!");
+			throw new UnsupportedOperationException(
+					"Only columns and rows are supported in MDX query!");
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * TODO: From the parsed list of lists of members, it should be possible to
 	 * create the hierarchy list. Note, we do also include the measures
@@ -288,9 +289,9 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 					calculatedMemberName, calculatedMemberName, "", null,
 					Aggregator.CALCULATED, callNode, Datatype.INTEGER, true,
 					member1.getLevel().getMembers().size() + withMembers.size());
-			
+
 			withMembers.add(calculatedMeasure);
-			
+
 			return null;
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
@@ -394,35 +395,41 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	}
 
 	/**
-	 * This operator should seldomly be called since most calculations will be done in the engine and
-	 * not when interpreting the MDX.
+	 * This operator should seldomly be called since most calculations will be
+	 * done in the engine and not when interpreting the MDX.
 	 * 
 	 * @param call
 	 * @return
 	 */
 	private Object callNumBinOp(CallNode call) {
-		
+
 		try {
 			// If we cannot cast to double, we return null.
 			// Also, we need to decode to uri representation
-			Double one = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call.getArgList().get(0).accept(this).toString()));
-			Double two = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call.getArgList().get(1).accept(this).toString()));
+			Double one = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call
+					.getArgList().get(0).accept(this).toString()));
+			Double two = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call
+					.getArgList().get(1).accept(this).toString()));
 			if (call.getOperatorName().equals("+")) {
-				return (Object) new Double(one.doubleValue() + two.doubleValue());
+				return (Object) new Double(one.doubleValue()
+						+ two.doubleValue());
 			}
 			if (call.getOperatorName().equals("-")) {
-				return (Object) new Double(one.doubleValue() - two.doubleValue());
+				return (Object) new Double(one.doubleValue()
+						- two.doubleValue());
 			}
 			if (call.getOperatorName().equals("*")) {
-				return (Object) new Double(one.doubleValue() * two.doubleValue());
+				return (Object) new Double(one.doubleValue()
+						* two.doubleValue());
 			}
 			if (call.getOperatorName().equals("/")) {
-				return (Object) new Double(one.doubleValue() / two.doubleValue());
+				return (Object) new Double(one.doubleValue()
+						/ two.doubleValue());
 			}
 		} catch (Exception e) {
 			return null;
 		}
-		
+
 		throw new UnsupportedOperationException(
 				"Binary numeric operator unknown.");
 	}
@@ -485,7 +492,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		// The second parameter gives us the cast
 		String caster = (String) call.getArgList().get(1).accept(this);
 		String value = (String) call.getArgList().get(0).accept(this);
-		// We have to translate MDX first to real value since for the square brackets
+		// We have to translate MDX first to real value since for the square
+		// brackets
 		value = Olap4ldLinkedDataUtil.convertMDXtoURI(value);
 		if (caster.equals("NUMERIC")) {
 			return (Object) (new Double(value));
@@ -497,18 +505,35 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	@SuppressWarnings("unchecked")
 	private Object callCrossJoin(CallNode call) {
 		// Will be two lists
-		List<Object> list = (List<Object>) call.getArgList().get(0)
+		List<Object> listArg1 = (List<Object>) call.getArgList().get(0)
 				.accept(this);
 		List<List<Object>> result = new ArrayList<List<Object>>();
-		List<Object> list2 = (List<Object>) call.getArgList().get(1)
+		List<Object> listArg2 = (List<Object>) call.getArgList().get(1)
 				.accept(this);
 		// Would return one list of lists
-		for (Object object : list) {
-			for (Object object1 : list2) {
+		for (Object objectArg1 : listArg1) {
+			for (Object objectArg2 : listArg2) {
+				
 				List<Object> newList = new ArrayList<Object>();
-				// TODO: Possibly, object and object1 are tuples of members.
-				newList.add(object);
-				newList.add(object1);
+				
+				// Possibly, object and object1 are tuples of members.
+				if (objectArg1 instanceof List<?>) {
+					ArrayList<Object> mylist = (ArrayList<Object>) objectArg1;
+					for (Object myobject : mylist) {
+						newList.add(myobject);
+					}
+				} else {
+					newList.add(objectArg1);
+				}
+				if (objectArg2 instanceof List<?>) {
+					ArrayList<Object> mylist = (ArrayList<Object>) objectArg2;
+					for (Object myobject : mylist) {
+						newList.add(myobject);
+					}
+				} else {
+					newList.add(objectArg2);
+				}
+				
 				result.add(newList);
 			}
 		}
@@ -700,7 +725,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		 * TODO: .members is then seen as part of the name which is not ideal.
 		 */
 		int segmentIndex = 0;
-		// .name() removes the square brackets if contained, therefore, we use toString()
+		// .name() removes the square brackets if contained, therefore, we use
+		// toString()
 		String segmentName = segmentList.get(segmentIndex).toString();
 		segmentIndex++;
 		// Now, we check whether name is available
@@ -784,7 +810,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 								&& segmentIndex >= segmentList.size()) {
 							return (Object) hierarchy;
 						} else {
-							segmentName = segmentList.get(segmentIndex).toString();
+							segmentName = segmentList.get(segmentIndex)
+									.toString();
 
 							Level level = hierarchy.getLevels()
 									.get(segmentName);
@@ -797,7 +824,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 									&& segmentIndex >= segmentList.size()) {
 								return (Object) level;
 							} else {
-								segmentName = segmentList.get(segmentIndex).toString();
+								segmentName = segmentList.get(segmentIndex)
+										.toString();
 
 								for (Member member : level.getMembers()) {
 									if (member.getName().equals(segmentName)) {
