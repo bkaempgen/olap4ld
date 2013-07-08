@@ -313,7 +313,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 				// Guess file format
 				RDFFormat format = RDFFormat.forFileName(location);
-				con.add(url, url.toString(), format);
+				if (format != null) {
+					con.add(url, url.toString(), format);	
+				}
 
 				// throw new UnsupportedOperationException(
 				// "How is the RDF encoded of location: " + location + "?");

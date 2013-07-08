@@ -148,16 +148,56 @@ public class SSBQueryTest extends TestCase {
 			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs().get(0).getSchemas().get(0).getCubes().get("["+name+"]");
 			// Currently, we have to first query for dimensions.
 			List<Dimension> dimensions = cube.getDimensions();
-			assertEquals(5, dimensions.size());
+			assertEquals(7, dimensions.size());
 			for (Dimension dimension : dimensions) {
 				List<Member> members = dimension.getHierarchies().get(0).getLevels().get(0).getMembers();
 				assertEquals(true, members.size() >= 1);
 			}
 			List<Measure> measures = cube.getMeasures();
-			assertEquals(5, measures.size());
+			assertEquals(1, measures.size());
 			
 			
-			String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds]");
+			String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])})) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
+			assertContains("| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 7116579.0 |      4.0 |     7413105.0 |     51.0 |   261639.0 |"
+					, result);
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+				
+		
+	}
+	
+	/**
+	 * Generic Query
+	 */
+	public void testEurostatRealGDPGrowthRateExample() {
+		
+		try {
+			
+			//String name = "httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds";
+			String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsieb020_ds.rdf#ds";
+			name = URLEncoder.encode(name, "UTF-8");
+			name = name.replace("%", "XXX");
+			name = name.replace(".", "YYY");
+			name = name.replace("-", "ZZZ");
+			// xmla4js is attaching square brackets automatically
+			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs().get(0).getSchemas().get(0).getCubes().get("["+name+"]");
+			// Currently, we have to first query for dimensions.
+			List<Dimension> dimensions = cube.getDimensions();
+			assertEquals(3, dimensions.size());
+			for (Dimension dimension : dimensions) {
+				List<Member> members = dimension.getHierarchies().get(0).getLevels().get(0).getMembers();
+				assertEquals(true, members.size() >= 1);
+			}
+			List<Measure> measures = cube.getMeasures();
+			assertEquals(1, measures.size());
+			
+			
+			String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsieb020_dsdYYYrdfXXX23CL_geo])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsieb020_dsYYYrdfXXX23ds]");
 			assertContains("| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 7116579.0 |      4.0 |     7413105.0 |     51.0 |   261639.0 |"
 					, result);
 		} catch (OlapException e) {
