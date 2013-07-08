@@ -186,6 +186,8 @@ class Olap4ldCube implements Cube, Named {
 	}
 
 	public List<Measure> getMeasures() {
+		
+		Olap4ldUtil._log.info("getMeasures()...");
 
 		return Olap4jUtil.cast(measures);
 	}

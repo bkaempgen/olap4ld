@@ -25,7 +25,7 @@
 @prefix sdmx-code:       <http://purl.org/linked-data/sdmx/2009/code#> .
 @prefix sdmx-subject:    <http://purl.org/linked-data/sdmx/2009/subject#> .
 
-@prefix eg:       	<http://localhost/fios_xmla4js/example.ttl#> .
+@prefix eg:       	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#> .
 
 # -- Data Set --------------------------------------------
 
