@@ -60,7 +60,7 @@ class Olap4ldDatabase implements Database, Named {
 								.getMetaData(), null, null, null, null, null,
 						null), new Olap4ldConnection.CatalogHandler(this),
 				null);
-		Olap4ldCatalog pop = catalogs.get(0);
+		//Olap4ldCatalog pop = catalogs.get(0);
 	}
 
 	public List<AuthenticationMode> getAuthenticationModes()

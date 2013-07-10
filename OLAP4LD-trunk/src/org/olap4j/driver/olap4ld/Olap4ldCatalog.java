@@ -57,7 +57,7 @@ class Olap4ldCatalog implements Catalog, Named {
 						olap4jDatabaseMetaData, this, null, null, null, null,
 						null), new Olap4ldConnection.CatalogSchemaHandler(
 						this.name), null);
-		Olap4ldSchema pop = schemas.get(0);
+		//Olap4ldSchema pop = schemas.get(0);
 	}
 
 	public int hashCode() {
@@ -77,6 +77,7 @@ class Olap4ldCatalog implements Catalog, Named {
 
 		// Set back
 		try {
+			Olap4ldUtil._log.info("rollback OlapConnection...");
 			database.getOlapConnection().rollback();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

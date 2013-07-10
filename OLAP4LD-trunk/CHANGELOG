@@ -1,5 +1,20 @@
+==Next TODO==
+* Full spec tests on test data
+* Full spec test better loging for users, independent from logging level. Better log-out.
+* Deployment on server (old FIOS server)
+* Test cases for SMART + Edgar
+* Finding and testing new datasets
+* Comparison with related work
+* Development plan for future work
+* Documentation for paper
+
 ==2013-07-10==
 * Eurostat examples. Have English labels.
+* Extended test cases
+* Retrieving of data so far very simple: 
+** rollback every time we ask the database catalog for its schema.
+** loading of uris if we check whether something is a cube; loading ds, then dsd.
+** loading of other uris just by coincidence if we check if they are cubes.
 
 ==2013-07-07==
 * Nested crossjoins are possible, now.
