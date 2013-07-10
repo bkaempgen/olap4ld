@@ -111,21 +111,25 @@ eg:lo_supplycost  a rdf:Property, qb:MeasureProperty;
 # -- Code lists -------------------------------------------
 
 eg:lo_orderdateCodeList a skos:ConceptScheme, sdmx:CodeList;
+	rdfs:label "orderdate"@en ;
     skos:hasTopConcept eg:date_19940101;
     skos:hasTopConcept eg:date_19940601;
     .
 
 eg:lo_custkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
+	rdfs:label "custkey"@en ;
     skos:hasTopConcept eg:customer_1;
     skos:hasTopConcept eg:customer_2;
     .
 
 eg:lo_partkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
+	rdfs:label "partkey"@en ;
     skos:hasTopConcept eg:part_1;
     skos:hasTopConcept eg:part_2;
     .
 
 eg:lo_suppkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
+	rdfs:label "supplycost"@en ;
     skos:hasTopConcept eg:supplier_1;
     skos:hasTopConcept eg:supplier_2;
     .

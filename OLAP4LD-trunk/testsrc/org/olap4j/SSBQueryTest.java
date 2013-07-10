@@ -29,7 +29,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.apache.catalina.tribes.membership.Membership;
 import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
@@ -38,11 +37,9 @@ import org.olap4j.mdx.parser.MdxParser;
 import org.olap4j.mdx.parser.MdxParserFactory;
 import org.olap4j.mdx.parser.MdxValidator;
 import org.olap4j.metadata.Cube;
-import org.olap4j.metadata.Database;
 import org.olap4j.metadata.Dimension;
 import org.olap4j.metadata.Measure;
 import org.olap4j.metadata.Member;
-import org.olap4j.metadata.NamedList;
 import org.olap4j.test.TestContext;
 
 /**
@@ -105,6 +102,7 @@ public class SSBQueryTest extends TestCase {
 			name = name.replace(".", "YYY");
 			name = name.replace("-", "ZZZ");
 			// xmla4js is attaching square brackets automatically
+			// xmla-server is using a set of values for a restriction.
 			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs().get(0).getSchemas().get(0).getCubes().get("["+name+"]");
 			// Currently, we have to first query for dimensions.
 			List<Dimension> dimensions = cube.getDimensions();
@@ -158,7 +156,9 @@ public class SSBQueryTest extends TestCase {
 			
 			
 			String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])})) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-			assertContains("| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 7116579.0 |      4.0 |     7413105.0 |     51.0 |   261639.0 |"
+			assertContains("|      |   T |   AT   |       75.6 |"
+					, result);
+			assertContains("|      |     |   JP   |            |"
 					, result);
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
@@ -198,7 +198,9 @@ public class SSBQueryTest extends TestCase {
 			
 			
 			String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsieb020_dsdYYYrdfXXX23CL_geo])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsieb020_dsYYYrdfXXX23ds]");
-			assertContains("| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 7116579.0 |      4.0 |     7413105.0 |     51.0 |   261639.0 |"
+			assertContains("|   DE   |       1.38 |"
+					, result);
+			assertContains("|   GR   |       0.59 |"
 					, result);
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
