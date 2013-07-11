@@ -1,12 +1,14 @@
 ==Next TODO==
-* Full spec tests on test data
-* Full spec test better loging for users, independent from logging level. Better log-out.
 * Deployment on server (old FIOS server)
 * Test cases for SMART + Edgar
 * Finding and testing new datasets
 * Comparison with related work
 * Development plan for future work
 * Documentation for paper
+
+==2013-07-11==
+* Full spec tests on test data
+* Full spec test better loging for users, independent from logging level. Better log-out.
 
 ==2013-07-10==
 * Eurostat examples. Have English labels.

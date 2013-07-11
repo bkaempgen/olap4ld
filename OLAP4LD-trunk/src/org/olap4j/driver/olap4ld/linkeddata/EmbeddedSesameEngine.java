@@ -42,6 +42,8 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResultHandlerException;
+import org.openrdf.query.Update;
+import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -554,81 +556,21 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 								}
 							}
 
-							// Now, we run checks.
+							// Now that we presumably have loaded all necessary
+							// data, we check integrity constraints
+							runNormalizationAlgorithm();
 
+							checkIntegrityConstraints();
+
+							// Own checks:
 							con = repo.getConnection();
 
-							// IC-1. Unique DataSet. Every qb:Observation
-							// has exactly one associated qb:DataSet. <=
-							// takes too long since every observation tested
+							String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
 
-							// IC-2. Unique DSD. Every qb:DataSet has
-							// exactly one associated
-							// qb:DataStructureDefinition. <= tested before
-
-							// IC-3. DSD includes measure
-							// XXX: Not fully like in spec
-							testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> ASK { ?dsd a qb:DataStructureDefinition . FILTER NOT EXISTS { ?dsd qb:component [qb:measure []] }}";
-							booleanQuery = con.prepareBooleanQuery(
-									QueryLanguage.SPARQL, testquery);
-							if (booleanQuery.evaluate() == true) {
-								throw new UnsupportedOperationException(
-										"Failed specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure. ");
-							}
-
-							// IC-4. Dimensions have range
-							testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ASK { ?dim a qb:DimensionProperty . FILTER NOT EXISTS { ?dim rdfs:range [] }}";
-							booleanQuery = con.prepareBooleanQuery(
-									QueryLanguage.SPARQL, testquery);
-							if (booleanQuery.evaluate() == true) {
-								throw new UnsupportedOperationException(
-										"Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.");
-							}
-
-							// IC-5. Concept dimensions have code lists
-							testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ASK { ?dim a qb:DimensionProperty ; rdfs:range skos:Concept . FILTER NOT EXISTS { ?dim qb:codeList [] }}";
-							booleanQuery = con.prepareBooleanQuery(
-									QueryLanguage.SPARQL, testquery);
-							if (booleanQuery.evaluate() == true) {
-								throw new UnsupportedOperationException(
-										"Failed specification check: IC-14. All measures present. Every dimension with range skos:Concept must have a qb:codeList. ");
-							}
-
-							// IC-6. Only attributes may be optional <= not
-							// important right now. We do not regard
-							// attributes.
-
-							// IC-7. Slice Keys must be declared <= not
-							// important right now. We do not regard slices.
-							// IC-8. Slice Keys consistent with DSD
-							// IC-9. Unique slice structure
-							// IC-10. Slice dimensions complete
-
-							// IC-11. All dimensions required <= takes too
-							// long
-							// IC-12. No duplicate observations <= takes too
-							// long
-
-							// IC-13. Required attributes <= We do not
-							// regard attributes
-
-							// IC-14. All measures present
-							testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ASK { ?obs qb:dataSet/qb:structure ?dsd . FILTER NOT EXISTS { ?dsd qb:component/qb:componentProperty qb:measureType } ?dsd qb:component/qb:componentProperty ?measure . ?measure a qb:MeasureProperty; FILTER NOT EXISTS { ?obs ?measure [] }}";
-							booleanQuery = con.prepareBooleanQuery(
-									QueryLanguage.SPARQL, testquery);
-							if (booleanQuery.evaluate() == true) {
-								throw new UnsupportedOperationException(
-										"Failed specification check: IC-14. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure. ");
-							}
-
-							// IC-15. Measure dimension consistent <= We do
-							// not support measureType, yet.
-							// IC-16. Single measure on measure dimension
+							// Dataset should have at least one
 							// observation
-
-							// Own check: Dataset should have at least one
-							// observation
-							testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ASK { ?obs qb:dataSet ?CUBE_NAME FILTER (?CUBE_NAME = <"
+							testquery = prefixbindings
+									+ "ASK { ?obs qb:dataSet ?CUBE_NAME FILTER (?CUBE_NAME = <"
 									+ uri + ">)}";
 							booleanQuery = con.prepareBooleanQuery(
 									QueryLanguage.SPARQL, testquery);
@@ -662,8 +604,273 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (UpdateExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
+	}
+
+	private void checkIntegrityConstraints() throws RepositoryException,
+			MalformedQueryException, QueryEvaluationException {
+		// Now, we check the integrity constraints
+		RepositoryConnection con;
+		con = repo.getConnection();
+
+		String testquery;
+		BooleanQuery booleanQuery;
+
+		boolean error = false;
+		String overview = "";
+
+		// Each integrity constraint query assumes the following set of prefix
+		// bindings:
+		String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
+
+		// IC-1. Unique DataSet. Every qb:Observation
+		// has exactly one associated qb:DataSet. <=
+		// takes too long since every observation tested
+//		testquery = prefixbindings
+//				+ "ASK {  {        ?obs a qb:Observation .    FILTER NOT EXISTS { ?obs qb:dataSet ?dataset1 . } } UNION {        ?obs a qb:Observation ;       qb:dataSet ?dataset1, ?dataset2 .    FILTER (?dataset1 != ?dataset2)  }}";
+//		BooleanQuery booleanQuery = con.prepareBooleanQuery(
+//				QueryLanguage.SPARQL, testquery);
+//		if (booleanQuery.evaluate() == true) {
+//			error = true;
+//			overview += "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet. \n";
+//		} else {
+//			overview += "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet. \n";
+//		}
+
+		// IC-2. Unique DSD. Every qb:DataSet has
+		// exactly one associated
+		// qb:DataStructureDefinition. <= tested before
+		testquery = prefixbindings
+				+ "ASK {  {        ?dataset a qb:DataSet .    FILTER NOT EXISTS { ?dataset qb:structure ?dsd . }  } UNION {    ?dataset a qb:DataSet ;       qb:structure ?dsd1, ?dsd2 .    FILTER (?dsd1 != ?dsd2)  }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition.  \n";
+		} else {
+			overview += "Successful specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition. \n";
+		}
+
+		// IC-3. DSD includes measure
+		// XXX: Not fully like in spec
+		testquery = prefixbindings
+				+ "ASK {  ?dsd a qb:DataStructureDefinition .  FILTER NOT EXISTS { ?dsd qb:component [qb:componentProperty [a qb:MeasureProperty]] }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure. \n";
+		} else {
+			overview += "Successful specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure. \n";
+		}
+
+		// IC-4. Dimensions have range
+		testquery = prefixbindings
+				+ "ASK { ?dim a qb:DimensionProperty . FILTER NOT EXISTS { ?dim rdfs:range [] }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
+		} else {
+			overview += "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range. \n";
+		}
+
+		// IC-5. Concept dimensions have code lists
+		testquery = prefixbindings
+				+ "ASK { ?dim a qb:DimensionProperty ; rdfs:range skos:Concept . FILTER NOT EXISTS { ?dim qb:codeList [] }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList.  \n";
+		} else {
+			overview += "Successful specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList.  \n";
+		}
+
+		// IC-6. Only attributes may be optional <= not
+		// important right now. We do not regard
+		// attributes.
+		testquery = prefixbindings
+				+ "ASK {  ?dsd qb:component ?componentSpec .  ?componentSpec qb:componentRequired \"false\"^^xsd:boolean ;                 qb:componentProperty ?component .  FILTER NOT EXISTS { ?component a qb:AttributeProperty }} ";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes.\n";
+		} else {
+			overview += "Successful specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes. \n";
+		}
+
+		// IC-7. Slice Keys must be declared <= not
+		// important right now. We do not regard slices.
+		testquery = prefixbindings
+				+ "ASK {    ?sliceKey a qb:SliceKey .    FILTER NOT EXISTS { [a qb:DataStructureDefinition] qb:sliceKey ?sliceKey }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition. \n";
+		} else {
+			overview += "Successful specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition. \n";
+		}
+
+		// IC-8. Slice Keys consistent with DSD
+		testquery = prefixbindings
+				+ "ASK {  ?slicekey a qb:SliceKey;      qb:componentProperty ?prop .  ?dsd qb:sliceKey ?sliceKey .  FILTER NOT EXISTS { ?dsd qb:component [qb:componentProperty ?prop] }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition. \n";
+		} else {
+			overview += "Successful specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition.  \n";
+		}
+
+		// IC-9. Unique slice structure
+		testquery = prefixbindings
+				+ "ASK {  {    ?slice a qb:Slice .    FILTER NOT EXISTS { ?slice qb:sliceStructure ?key } } UNION {    ?slice a qb:Slice ;           qb:sliceStructure ?key1, ?key2;    FILTER (?key1 != ?key2)  }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure.  \n";
+		} else {
+			overview += "Successful specification check: IC-1. IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure.  \n";
+		}
+
+		// IC-10. Slice dimensions complete
+		testquery = prefixbindings
+				+ "ASK {  ?slice qb:sliceStructure [qb:componentProperty ?dim] .  FILTER NOT EXISTS { ?slice ?dim [] }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure. \n";
+		} else {
+			overview += "Successful specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure. \n";
+		}
+
+		// IC-11. All dimensions required <= takes too
+		// long
+//		testquery = prefixbindings
+//				+ "ASK {    ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty;    FILTER NOT EXISTS { ?obs ?dim [] }}";
+//		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+//		if (booleanQuery.evaluate() == true) {
+//			error = true;
+//			overview += "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
+//		} else {
+//			overview += "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
+//		}
+
+		// IC-12. No duplicate observations <= takes too
+		// long
+//		testquery = prefixbindings
+//				+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
+//		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+//		if (booleanQuery.evaluate() == true) {
+//			error = true;
+//			overview += "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
+//		} else {
+//			overview += "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
+//		}
+
+		// IC-13. Required attributes <= We do not
+		// regard attributes
+		testquery = prefixbindings
+				+ "ASK { ?obs qb:dataSet/qb:structure/qb:component ?component .   ?component qb:componentRequired \"true\"^^xsd:boolean ;               qb:componentProperty ?attr .    FILTER NOT EXISTS { ?obs ?attr [] }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required. \n";
+		} else {
+			overview += "Successful specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required.  \n";
+		}
+
+		// IC-14. All measures present
+		testquery = prefixbindings
+				+ "ASK { ?obs qb:dataSet/qb:structure ?dsd . FILTER NOT EXISTS { ?dsd qb:component/qb:componentProperty qb:measureType } ?dsd qb:component/qb:componentProperty ?measure . ?measure a qb:MeasureProperty; FILTER NOT EXISTS { ?obs ?measure [] }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure. \n";
+		} else {
+			overview += "Successful specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure. \n";
+		}
+
+		// IC-15. Measure dimension consistent <= We do
+		// not support measureType, yet.
+		testquery = prefixbindings
+				+ "ASK {    ?obs qb:dataSet/qb:structure ?dsd ;         qb:measureType ?measure .    ?dsd qb:component/qb:componentProperty qb:measureType .    FILTER NOT EXISTS { ?obs ?measure [] }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType. \n";
+		} else {
+			overview += "Successful specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType. \n";
+		}
+
+		// IC-16. Single measure on measure dimension
+		// observation
+		testquery = prefixbindings
+				+ "ASK {    ?obs qb:dataSet/qb:structure ?dsd ;         qb:measureType ?measure ;         ?omeasure [] .    ?dsd qb:component/qb:componentProperty qb:measureType ;         qb:component/qb:componentProperty ?omeasure .    ?omeasure a qb:MeasureProperty .        FILTER (?omeasure != ?measure)}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType). \n";
+		} else {
+			overview += "Successful specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType).  \n";
+		}
+
+		// IC-17. All measures present in measures dimension cube
+		testquery = prefixbindings
+				+ "ASK { {      SELECT ?numMeasures (COUNT(?obs2) AS ?count) WHERE {         {             SELECT ?dsd (COUNT(?m) AS ?numMeasures) WHERE {                 ?dsd qb:component/qb:componentProperty ?m.                  ?m a qb:MeasureProperty .              } GROUP BY ?dsd          }                  ?obs1 qb:dataSet/qb:structure ?dsd;                qb:dataSet ?dataset ;                qb:measureType ?m1 .              ?obs2 qb:dataSet ?dataset ;                qb:measureType ?m2 .          FILTER NOT EXISTS {              ?dsd qb:component/qb:componentProperty ?dim .              FILTER (?dim != qb:measureType)              ?dim a qb:DimensionProperty .              ?obs1 ?dim ?v1 .              ?obs2 ?dim ?v2.              FILTER (?v1 != ?v2)          }                } GROUP BY ?obs1 ?numMeasures        HAVING (?count != ?numMeasures)  }}";
+		booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL, testquery);
+		if (booleanQuery.evaluate() == true) {
+			error = true;
+			overview += "Failed specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures. \n";
+		} else {
+			overview += "Successful specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures. \n";
+		}
+
+		// Important!
+		con.close();
+		
+		// Logging
+		Olap4ldUtil._log.info("Integrity constraints overview: "+overview);
+		
+		if (error) {
+			throw new UnsupportedOperationException("Integrity constraints overview: "+overview);
+		}
+	}
+
+	private void runNormalizationAlgorithm() throws RepositoryException,
+			MalformedQueryException, UpdateExecutionException {
+
+		RepositoryConnection con;
+
+		con = repo.getConnection();
+
+		// First, we run normalization algorithm
+		String updateQuery = "PREFIX rdf:            <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX qb:             <http://purl.org/linked-data/cube#> INSERT { ?o rdf:type qb:Observation .} WHERE {    [] qb:observation ?o .}; INSERT { ?o rdf:type qb:Observation .} WHERE { ?o qb:dataSet [] .}; INSERT {    ?s rdf:type qb:Slice . } WHERE {  [] qb:slice ?s.}; INSERT {    ?cs qb:componentProperty ?p .    ?p  rdf:type qb:DimensionProperty .} WHERE {    ?cs qb:dimension ?p .}; INSERT {    ?cs qb:componentProperty ?p .    ?p  rdf:type qb:MeasureProperty .} WHERE {    ?cs qb:measure ?p .};INSERT {    ?cs qb:componentProperty ?p .    ?p  rdf:type qb:AttributeProperty .} WHERE {    ?cs qb:attribute ?p .}";
+		Update updateQueryQuery = con.prepareUpdate(QueryLanguage.SPARQL, updateQuery);
+		updateQueryQuery.execute();
+
+		// # Dataset attachments
+		updateQuery = "PREFIX qb:             <http://purl.org/linked-data/cube#> INSERT {    ?obs  ?comp ?value} WHERE {    ?spec    qb:componentProperty ?comp ;            qb:componentAttachment qb:DataSet .    ?dataset qb:structure [qb:component ?spec];             ?comp ?value .    ?obs     qb:dataSet ?dataset.};";
+		con.prepareUpdate(QueryLanguage.SPARQL, updateQuery);
+		updateQueryQuery = con.prepareUpdate(QueryLanguage.SPARQL, updateQuery);
+		updateQueryQuery.execute();
+
+		// # Slice attachments
+		updateQuery = "PREFIX qb:             <http://purl.org/linked-data/cube#> INSERT {    ?obs  ?comp ?value} WHERE {    ?spec    qb:componentProperty ?comp;             qb:componentAttachment qb:Slice .    ?dataset qb:structure [qb:component ?spec];             qb:slice ?slice .    ?slice ?comp ?value;           qb:observation ?obs .};";
+		con.prepareUpdate(QueryLanguage.SPARQL, updateQuery);
+		updateQueryQuery = con.prepareUpdate(QueryLanguage.SPARQL, updateQuery);
+		updateQueryQuery.execute();
+
+		// # Dimension values on slices
+		updateQuery = "PREFIX qb:             <http://purl.org/linked-data/cube#> INSERT {    ?obs  ?comp ?value} WHERE {    ?spec    qb:componentProperty ?comp .    ?comp a  qb:DimensionProperty .    ?dataset qb:structure [qb:component ?spec];             qb:slice ?slice .    ?slice ?comp ?value;           qb:observation ?obs .}";
+		con.prepareUpdate(QueryLanguage.SPARQL, updateQuery);
+		updateQueryQuery = con.prepareUpdate(QueryLanguage.SPARQL, updateQuery);
+		updateQueryQuery.execute();
+
+		// Important!
+		con.close();
 	}
 
 	/**

@@ -156,7 +156,7 @@ eg:lineorder_1_2
     a qb:Observation ; 
     qb:dataSet eg:ds ;
     eg:lo_orderdate eg:date_19940101 ;
-    eg:lo_custkey eg:customer_1 ;
+    eg:lo_custkey eg:customer_2 ;
     eg:lo_partkey eg:part_1 ;
     eg:lo_suppkey eg:supplier_1 ;
     eg:lo_quantity 17 ;
@@ -172,7 +172,7 @@ eg:lineorder_1_3
     qb:dataSet eg:ds ;
     eg:lo_orderdate eg:date_19940101 ;
     eg:lo_custkey eg:customer_1 ;
-    eg:lo_partkey eg:part_1 ;
+    eg:lo_partkey eg:part_2 ;
     eg:lo_suppkey eg:supplier_1 ;
     eg:lo_quantity 17 ;
     eg:lo_discount 4e0 ;
@@ -202,7 +202,7 @@ eg:lineorder_1_5
     qb:dataSet eg:ds ;
     eg:lo_orderdate eg:date_19940101 ;
     eg:lo_custkey eg:customer_2 ;
-    eg:lo_partkey eg:part_1 ;
+    eg:lo_partkey eg:part_2 ;
     eg:lo_suppkey eg:supplier_2 ;
     eg:lo_quantity 17 ;
     eg:lo_discount 4e0 ;
