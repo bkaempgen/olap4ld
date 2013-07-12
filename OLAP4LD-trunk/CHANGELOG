@@ -6,6 +6,9 @@
 * Development plan for future work
 * Documentation for paper
 
+==2013-07-12==
+* Removed sesame libraries. Sesame is to be added externally when using sesame engines in olap4ld
+
 ==2013-07-11==
 * Full spec tests on test data
 * Full spec test better loging for users, independent from logging level. Better log-out.

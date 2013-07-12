@@ -20,68 +20,6 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib_sesame/sesame-config-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-console-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-http-client-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-http-protocol-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-http-server-spring-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-model-2.7.2.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://openrdf.callimachus.net/sesame/2.7/apidocs/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib_sesame/sesame-query-2.7.2.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://openrdf.callimachus.net/sesame/2.7/apidocs/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryalgebra-evaluation-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryalgebra-model-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryparser-api-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryparser-serql-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryparser-sparql-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryrender-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-api-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-binary-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-sparqljson-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-sparqlxml-2.7.2.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://openrdf.callimachus.net/sesame/2.7/apidocs/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib_sesame/sesame-queryresultio-text-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-repository-api-2.7.2.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://openrdf.callimachus.net/sesame/2.7/apidocs/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib_sesame/sesame-repository-contextaware-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-repository-dataset-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-repository-event-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-repository-http-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-repository-manager-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-repository-sail-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-repository-sparql-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-api-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-binary-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-datatypes-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-languages-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-n3-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-nquads-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-ntriples-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-rdfjson-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-rdfxml-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-trig-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-trix-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-rio-turtle-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-runtime-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-sail-api-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-sail-federation-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-sail-inferencer-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-sail-memory-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-sail-nativerdf-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-sail-rdbms-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/sesame-util-2.7.2.jar"/>
-	<classpathentry kind="lib" path="lib_sesame/slf4j-api-1.6.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Sesame Triple Store"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
