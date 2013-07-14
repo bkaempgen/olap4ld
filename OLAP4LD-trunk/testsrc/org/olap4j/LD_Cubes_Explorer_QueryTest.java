@@ -256,6 +256,52 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 				result);
 
 	}
+	
+	public void testSmartDbWrapExampleMetadata() {
+		try {
+
+			// String name =
+			// "httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds";
+			String name = "http://smartdbwrap.appspot.com/id/locationdataset/AD0514/Q";
+			name = URLEncoder.encode(name, "UTF-8");
+			name = name.replace("%", "XXX");
+			name = name.replace(".", "YYY");
+			name = name.replace("-", "ZZZ");
+			// xmla4js is attaching square brackets automatically
+			// xmla-server is using a set of values for a restriction.
+			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs()
+					.get(0).getSchemas().get(0).getCubes()
+					.get("[" + name + "]");
+			// Currently, we have to first query for dimensions.
+			List<Dimension> dimensions = cube.getDimensions();
+			assertEquals(7, dimensions.size());
+			for (Dimension dimension : dimensions) {
+				List<Member> members = dimension.getHierarchies().get(0)
+						.getLevels().get(0).getMembers();
+				assertEquals(true, members.size() >= 1);
+			}
+			List<Measure> measures = cube.getMeasures();
+			assertEquals(3, measures.size());
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Generic Query
+	 */
+	public void testSmartDbWrapExampleOlap() {
+
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds]");
+		assertContains(
+				"| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 7116579.0 |      4.0 |     7413105.0 |     51.0 |   261639.0 |",
+				result);
+
+	}
 
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
