@@ -760,7 +760,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 					 */
 					if (dimension == null) {
 
-						// Go through everything
+						// Go through dimensions
 						for (Dimension dimension1 : dimensions) {
 							NamedList<Hierarchy> hierarchies = dimension1
 									.getHierarchies();
@@ -769,6 +769,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 							if (hierarchy != null) {
 								return (Object) hierarchy;
 							} else {
+								
+								// Go through hierarchies
 								for (Hierarchy hierarchy1 : hierarchies) {
 									NamedList<Level> levels = hierarchy1
 											.getLevels();
@@ -777,9 +779,13 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 									if (level != null) {
 										return (Object) level;
 									} else {
+										
+										// Go through levels
 										for (Level level1 : levels) {
 											List<Member> members = level1
 													.getMembers();
+											
+											// Go through members
 											for (Member member : members) {
 												if (member.getName().equals(
 														segmentName)) {
@@ -792,6 +798,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 							}
 						}
 
+					// More detailed segment list
 					} else if (dimension != null
 							&& segmentIndex >= segmentList.size()) {
 						return (Object) dimension;

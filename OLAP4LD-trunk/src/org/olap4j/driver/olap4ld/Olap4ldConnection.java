@@ -285,7 +285,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 		while (urltokenizer1.hasMoreTokens()) {
 			datastructuredefinitions.add(urltokenizer1.nextToken());
 		}
-		
+
 		initLinkedDataEngine();
 
 		// Initialize the SOAP cache if needed
@@ -562,7 +562,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 	}
 
 	public void setCatalog(String catalogName) throws OlapException {
-		
+
 		if (catalogName == null) {
 			throw new OlapException("Catalog name cannot be null.");
 		}
@@ -1204,7 +1204,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 			 * Cube - Profit Member</DESCRIPTION> </row>
 			 */
 
-			// Here, we need to have a certain number
+			// XXX: Here, we Linked Data Engine actually need to have a certain number
 			/*
 			 * Here, we get a string with the aggregation function, which we
 			 * need to translate into an Aggregator. If no aggregation function
@@ -1214,15 +1214,20 @@ abstract class Olap4ldConnection implements OlapConnection {
 			ParseTreeNode expression = null;
 			Measure.Aggregator measureAggregator = aggregator;
 			Node rowAggregator = row[mapFields.get("?MEASURE_AGGREGATOR")];
-			if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#sum")) {
+			if (rowAggregator.toString().toLowerCase()
+					.equals("http://purl.org/olap#sum")) {
 				measureAggregator = Measure.Aggregator.SUM;
-			} else if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#avg")) {
+			} else if (rowAggregator.toString().toLowerCase()
+					.equals("http://purl.org/olap#avg")) {
 				measureAggregator = Measure.Aggregator.AVG;
-			} else if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#max")) {
+			} else if (rowAggregator.toString().toLowerCase()
+					.equals("http://purl.org/olap#max")) {
 				measureAggregator = Measure.Aggregator.MIN;
-			} else if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#min")) {
+			} else if (rowAggregator.toString().toLowerCase()
+					.equals("http://purl.org/olap#min")) {
 				measureAggregator = Measure.Aggregator.MAX;
-			} else if (rowAggregator.toString().toLowerCase().equals("http://purl.org/olap#count")) {
+			} else if (rowAggregator.toString().toLowerCase()
+					.equals("http://purl.org/olap#count")) {
 				measureAggregator = Measure.Aggregator.COUNT;
 			} else if (rowAggregator.toString().toLowerCase()
 					.equals("calculated")) {
@@ -1240,6 +1245,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 			final String measureUniqueName = Olap4ldLinkedDataUtil
 					.convertNodeToMDX(row[mapFields.get("?MEASURE_UNIQUE_NAME")]);
 			// Measure caption will contain the measure property
+			// XXX: Does it? We need to make sure that DatabaseMetadata and the
+			// Metadata objects return the same elements.
 			final String measureCaption = Olap4ldLinkedDataUtil.makeCaption(
 					row[mapFields.get("?MEASURE_CAPTION")].toString(),
 					row[mapFields.get("?MEASURE_UNIQUE_NAME")].toString());
@@ -1250,6 +1257,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 			final String description = row[mapFields.get("?MEASURE_CAPTION")]
 					.toString();
 
+			// XXX: Here, we Linked Data Engine actually need to have a certain number
 			// Here, for a certain name, we get a datatype (encoded as
 			// rdfs:range of xsd type)
 			// final Datatype datatype;

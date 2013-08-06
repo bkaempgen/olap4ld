@@ -114,6 +114,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	 * @throws org.olap4j.OlapException
 	 *             on error
 	 */
+	@SuppressWarnings("unused")
 	private ResultSet getMetadataLd(
 			Olap4ldConnection.MetadataRequest metadataRequest,
 			Map<Olap4ldConnection.MetadataColumn, String> overrides,
@@ -287,6 +288,8 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 				if (mapFields.containsKey(columName)) {
 					int index = mapFields.get(columName);
 
+					
+					// We convert every value into MDX format (no exceptions)
 					value = Olap4ldLinkedDataUtil.convertNodeToMDX(row[index]);
 				} else {
 					value = "";

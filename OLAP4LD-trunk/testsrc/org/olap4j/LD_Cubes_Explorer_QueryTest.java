@@ -127,12 +127,26 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 	 */
 	public void testSsb001ExampleOlap() {
 
-		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds]");
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]");
 		assertContains(
-				"| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 7116579.0 |      4.0 |     7413105.0 |     51.0 |   261639.0 |",
+				"| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
+				result);
+		assertContains(
+				"| Customer  2 | Date 19940101 | Part  1 | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
+				result);
+	}
+	
+	/**
+	 * We test the possibility to add measure dices
+	 */
+	public void testSsb001MeasureDiceExampleOlap() {
+
+		String result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice]}");
+		assertContains(
+				"| Customer  1 | 2471035.0 | 2471035.0 |",
 				result);
 
-	}
+	}	
 
 	public void testEurostatEmploymentRateExampleMetadata() {
 		try {
@@ -281,7 +295,7 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 				assertEquals(true, members.size() >= 1);
 			}
 			List<Measure> measures = cube.getMeasures();
-			assertEquals(3, measures.size());
+			assertEquals(1, measures.size());
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -290,13 +304,63 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 			e.printStackTrace();
 		}
 	}
+	
 
 	/**
 	 * Generic Query
 	 */
 	public void testSmartDbWrapExampleOlap() {
 
-		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds]");
+		String result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2Flocation])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2Fyear])} ON ROWS FROM [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FidXXX2FlocationdatasetXXX2FAD0514XXX2FQ]");
+		assertContains(
+				"| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 7116579.0 |      4.0 |     7413105.0 |     51.0 |   261639.0 |",
+				result);
+
+	}
+	
+	public void testYahooFinanceWrapExampleMetadata() {
+		try {
+
+			// String name =
+			// "httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds";
+			String name = "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
+			name = URLEncoder.encode(name, "UTF-8");
+			name = name.replace("%", "XXX");
+			name = name.replace(".", "YYY");
+			name = name.replace("-", "ZZZ");
+			// xmla4js is attaching square brackets automatically
+			// xmla-server is using a set of values for a restriction.
+			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs()
+					.get(0).getSchemas().get(0).getCubes()
+					.get("[" + name + "]");
+			// Currently, we have to first query for dimensions.
+			List<Dimension> dimensions = cube.getDimensions();
+			// Including Measures dimension
+			assertEquals(5, dimensions.size());
+			for (Dimension dimension : dimensions) {
+				List<Member> members = dimension.getHierarchies().get(0)
+						.getLevels().get(0).getMembers();
+				assertEquals(true, members.size() >= 1);
+			}
+			List<Measure> measures = cube.getMeasures();
+			assertEquals(1, measures.size());
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+
+	/**
+	 * Generic Query
+	 */
+	public void testYahooFinanceWrapExampleOlap() {
+
+		// Problem: 
+		String result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FvocabXXX2FyahooXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FarchiveXXX2FBACXXX2F2012ZZZ12ZZZ12XXX23ds]");
 		assertContains(
 				"| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 7116579.0 |      4.0 |     7413105.0 |     51.0 |   261639.0 |",
 				result);

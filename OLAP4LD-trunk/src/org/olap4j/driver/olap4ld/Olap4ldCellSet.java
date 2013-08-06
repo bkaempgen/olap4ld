@@ -150,6 +150,55 @@ abstract class Olap4ldCellSet implements CellSet {
 
 	public void populate(SelectNode selectNode) {
 
+
+		// Fill in cellset metadata
+		createMetadata(selectNode);
+		
+		// Visitor to create: Logical OLAP Operator Query Tree
+
+		// Before, create OLAP subcube query
+		// olapquery = createOlapQueryFromMetadata();
+
+		/*
+		 * Now, create Logical OLAP Operator Query Tree 
+		 */
+
+		this.queryplan = createLogicalOlapQueryPlan();
+
+		// Before, execute OLAP subcube query
+		// /*
+		// * If groupbylist or measurelist is empty, we do not need to proceed.
+		// */
+		// if (olapquery.slicesrollups.isEmpty()
+		// || olapquery.projections.isEmpty()) {
+		// return;
+		// }
+		//
+		// List<Node[]> olapQueryResult =
+		// this.olap4jStatement.olap4jConnection.myLinkedData
+		// .getOlapResult(olapquery.cube, olapquery.slicesrollups,
+		// olapquery.dices, olapquery.projections);
+		// cacheDataFromOlapQuery(olapQueryResult);
+
+		/*
+		 * Now, execute Logical OLAP Operator Query Tree in LinkedDataEngine
+		 */
+		List<Node[]> olapQueryResult = olap4jStatement.olap4jConnection.myLinkedData
+				.getOlapResult(queryplan);
+		
+		cacheDataFromOlapQuery(olapQueryResult);
+	}
+
+	/**
+	 * We create:
+	 * 	this.metaData = metadata;
+	 *	this.axisList = axisList;
+	 *	this.immutableAxisList = Olap4jUtil.cast(Collections.unmodifiableList(axisList));
+	 *	this.filterAxis = filterCellSetAxis;
+	 *
+	 * @param selectNode
+	 */
+	private void createMetadata(SelectNode selectNode) {
 		// I pre-process the select node
 		// I need to replace Identifier.Members with Members(Identifier)
 		PreprocessMdxVisitor<Object> preprocessMdxVisitor = new PreprocessMdxVisitor<Object>();
@@ -248,40 +297,6 @@ abstract class Olap4ldCellSet implements CellSet {
 		this.immutableAxisList = Olap4jUtil.cast(Collections
 				.unmodifiableList(axisList));
 		this.filterAxis = filterCellSetAxis;
-
-		// Visitor to create: Logical OLAP Operator Query Tree
-
-		// Before, create OLAP subcube query
-		// olapquery = createOlapQueryFromMetadata();
-
-		/*
-		 * Now, create Logical OLAP Operator Query Tree
-		 */
-
-		this.queryplan = createLogicalOlapQueryPlan();
-
-		// Before, execute OLAP subcube query
-		// /*
-		// * If groupbylist or measurelist is empty, we do not need to proceed.
-		// */
-		// if (olapquery.slicesrollups.isEmpty()
-		// || olapquery.projections.isEmpty()) {
-		// return;
-		// }
-		//
-		// List<Node[]> olapQueryResult =
-		// this.olap4jStatement.olap4jConnection.myLinkedData
-		// .getOlapResult(olapquery.cube, olapquery.slicesrollups,
-		// olapquery.dices, olapquery.projections);
-		// cacheDataFromOlapQuery(olapQueryResult);
-
-		/*
-		 * Now, execute Logical OLAP Operator Query Tree in LinkedDataEngine
-		 */
-		List<Node[]> olapQueryResult = olap4jStatement.olap4jConnection.myLinkedData
-				.getOlapResult(queryplan);
-		
-		cacheDataFromOlapQuery(olapQueryResult);
 	}
 
 	private LogicalOlapQueryPlan createLogicalOlapQueryPlan() {
@@ -337,6 +352,7 @@ abstract class Olap4ldCellSet implements CellSet {
 
 		// Now, fill projections
 		for (Member member : usedMeasureSet) {
+			
 			projections.add((Measure) member);
 		}
 		// We store this list of measures for later looking up the number of a measure.
@@ -345,7 +361,26 @@ abstract class Olap4ldCellSet implements CellSet {
 		LogicalOlapOp projection = new ProjectionOp(basecube, projections);
 		
 		// Dice operator
-		LogicalOlapOp dice = new DiceOp(projection, filterAxis.positions);
+		
+		// Watch out: We do not want to have measure positions in the dice, since measures are projected
+		List<Position> newfilterAxisPositions = new ArrayList<Position>();
+		for (Position position2 : filterAxis.positions) {
+			List<Member> newMembers = new ArrayList<Member>();
+			List<Member> members = position2.getMembers();
+			for (Member member : members) {
+				if (member.getMemberType() != Member.Type.MEASURE) {
+					newMembers.add(member);
+				}
+			}
+			// Only if not empty, we create and add the position
+			if (!newMembers.isEmpty()) {
+			Olap4ldPosition aPosition = new Olap4ldPosition(newMembers,
+					position2.getOrdinal());
+			newfilterAxisPositions.add(aPosition);
+			}
+		}
+		
+		LogicalOlapOp dice = new DiceOp(projection, newfilterAxisPositions);
 		
 		// Slice operator
 		
@@ -379,7 +414,8 @@ abstract class Olap4ldCellSet implements CellSet {
 		for (Dimension dimension : dimensions) {
 			boolean contained = false;
 			for (Level slicesrollup : rollups) {
-				if (slicesrollup.getDimension().getUniqueName().equals(slicesrollup.getUniqueName())) {
+				// Check whether dimension contained in rollup.
+				if (slicesrollup.getDimension().getUniqueName().equals(dimension.getUniqueName())) {
 					contained = true;
 				}
 			}

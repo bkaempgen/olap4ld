@@ -29,9 +29,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
 
 import junit.framework.TestCase;
 
+import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.impl.Olap4jUtil;
 import org.olap4j.mdx.SelectNode;
@@ -45,11 +47,16 @@ import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.NodeComparator;
 
 /**
- * Unit test for olap4j metadata methods.
+ * This test simply tries to execute rowset metadata queries to a certain url.
  * 
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
 public class GenericCubeReturnMetadataTest extends TestCase {
+	
+	//private static final String TESTURL = "http://localhost/fios_xmla4js/example.ttl#ds";
+	private static final String TESTURL = "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
+	//private static final String TESTURL = "http://data.webfoundation.org/webindex/dataset/ITUA-Imputed";
+	
 	private static final String NL = System.getProperty("line.separator");
 
 	private final TestContext testContext = TestContext.instance();
@@ -143,7 +150,7 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 
 		// String dsduri =
 		// "http://public.b-kaempgen.de:8080/edg/archive/1013237/0001193125-11-005034#dsd";
-		Node node = new Literal("http://localhost/fios_xmla4js/example.ttl#ds");
+		Node node = new Literal(TESTURL);
 		// New Yhf example
 		this.cubeNamePattern = Olap4ldLinkedDataUtil.convertNodeToMDX(node);
 
@@ -167,6 +174,10 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 		olapDatabaseMetaData = olapConnection.getMetaData();
 
 		this.resultDecorator = new ResultsDecoratorHTML(null);
+		
+    	// We set the logging level
+    	// Set the level to a particular level
+    	Olap4ldUtil._log.setLevel(Level.FINE);
 	}
 
 	protected void tearDown() throws Exception {

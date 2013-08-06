@@ -30,6 +30,11 @@ public class Olap4ldLinkedDataUtil {
 	 */
 	static HashMap<Integer, String> standard_prefix2uri = null;
 	static HashMap<Integer, String> standard_uri2prefix = null;
+	
+	/*
+	 * As stated in encodeNode2Mdx
+	 */
+	public static final String MEASURE_DIMENSION_NAME = "Measures";
 
 	/**
 	 * Elements (identifiers) used in MDX need to follow certain rules in order
