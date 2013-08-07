@@ -1788,7 +1788,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	 * @return The SPARQL output of the relational format of the
 	 *         multidimensional result.
 	 */
-	public List<Node[]> getOlapResult(Cube cube, List<Level> slicesrollups,
+	public List<Node[]> executeOlapQuery(Cube cube, List<Level> slicesrollups,
 			List<Position> dices, List<Measure> projections) {
 		// cube is olap4ld
 		Cube mycube = (Cube) cube;
@@ -2467,7 +2467,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	}
 
 	@Override
-	public List<Node[]> getOlapResult(LogicalOlapQueryPlan queryplan) {
+	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) {
 		// XXX: Will not work.
 		LogicalOlap2PhysicalOlap r2a = new LogicalOlap2PhysicalOlap(null);
 		

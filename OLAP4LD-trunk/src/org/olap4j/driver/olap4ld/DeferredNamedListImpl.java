@@ -135,8 +135,8 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 				// Default
 				getList();	
 			} catch (OlapException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// Is a problem.
+				throw new RuntimeException(e);
 			}
 		} else {
 			getList();

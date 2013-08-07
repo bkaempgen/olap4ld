@@ -43,7 +43,9 @@ import org.olap4j.metadata.Member;
 import org.olap4j.test.TestContext;
 
 /**
- * Unit test for LD-Cubes Explorer Queries on external test data.
+ * Unit test for LD-Cubes Explorer Queries on external example data.
+ * 
+ * For each example given on LDCX website, we want to add a unit test.
  * 
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
@@ -87,14 +89,11 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 			connection = null;
 		}
 	}
-
-	public void testSsb001ExampleMetadata() {
+	
+	private void metadataTest(String dsUri, int numberOfDimensions, int numberOfMeasures) {
 		try {
 
-			// String name =
-			// "httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds";
-			String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
-			name = URLEncoder.encode(name, "UTF-8");
+			String name = URLEncoder.encode(dsUri, "UTF-8");
 			name = name.replace("%", "XXX");
 			name = name.replace(".", "YYY");
 			name = name.replace("-", "ZZZ");
@@ -103,16 +102,24 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs()
 					.get(0).getSchemas().get(0).getCubes()
 					.get("[" + name + "]");
+			
 			// Currently, we have to first query for dimensions.
 			List<Dimension> dimensions = cube.getDimensions();
-			assertEquals(5, dimensions.size());
+			
+			// Number of dimensions
+			assertEquals(numberOfDimensions, dimensions.size());
 			for (Dimension dimension : dimensions) {
 				List<Member> members = dimension.getHierarchies().get(0)
 						.getLevels().get(0).getMembers();
+				
+				// Each dimension should have some members
 				assertEquals(true, members.size() >= 1);
 			}
+			
 			List<Measure> measures = cube.getMeasures();
-			assertEquals(5, measures.size());
+			
+			// Number of measures
+			assertEquals(numberOfMeasures, measures.size());
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -120,6 +127,14 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * 
+	 */
+	public void testSsb001ExampleMetadata() {
+		String dsUri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
+		metadataTest(dsUri, 5, 5);
 	}
 
 	/**
@@ -146,41 +161,16 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 				"| Customer  1 | 2471035.0 | 2471035.0 |",
 				result);
 
-	}	
+	}
+	
+	
 
 	public void testEurostatEmploymentRateExampleMetadata() {
-		try {
-
-			// String name =
-			// "httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds";
-			String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
-			name = URLEncoder.encode(name, "UTF-8");
-			name = name.replace("%", "XXX");
-			name = name.replace(".", "YYY");
-			name = name.replace("-", "ZZZ");
-			// xmla4js is attaching square brackets automatically
-			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs()
-					.get(0).getSchemas().get(0).getCubes()
-					.get("[" + name + "]");
-			// Currently, we have to first query for dimensions.
-			List<Dimension> dimensions = cube.getDimensions();
-			assertEquals(7, dimensions.size());
-			for (Dimension dimension : dimensions) {
-				List<Member> members = dimension.getHierarchies().get(0)
-						.getLevels().get(0).getMembers();
-				assertEquals(true, members.size() >= 1);
-			}
-			List<Measure> measures = cube.getMeasures();
-			assertEquals(1, measures.size());
-		} catch (OlapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
+		//name = "http://estatwrap.ontologycentral.com/id/tec00114";
+		metadataTest(name, 7, 1);
 	}
-
+	
 	/**
 	 * Generic Query
 	 */

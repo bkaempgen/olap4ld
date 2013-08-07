@@ -6,6 +6,32 @@
 * Development plan for future work
 * Documentation for paper
 
+===TODO: Add new normalization algorithm part from spec===
+* ...
+
+===TODO: Improving catalog, schema handling===
+* Currently, we always have the same catalog and schema.
+* We query for specific cubes by asking getCubes() from schema and then asking the DefferedList for
+a specific cube .get(cubename). 
+* A better solution would be to take into account cataglogs and schemas. 
+* For that, Olap4ldConnection manages some attributes, schemaName, catalogName, databaseName:
+
+	/**
+	 * Name of the database to which the user wishes to bind this connection.
+	 * This value can be set through the JDBC URL or via
+	 * {@link Olap4ldConnection#setCatalog(String)}
+	 */
+	private String databaseName;
+
+* If we now that XMLA and other clients set this value not only by the connection string, we can
+change their value and depending on their values, execute getCubes() etc. (and also return OlapExceptions 
+directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
+* However, for now it works.
+
+==2013-08-07==
+* Improved exception handling. Now, LinkedDataEngine also returns OlapExceptions which are forwarded
+to the using engine in order to make transparent errors to users.
+
 ==2013-07-12==
 * Removed sesame libraries. Sesame is to be added externally when using sesame engines in olap4ld
 

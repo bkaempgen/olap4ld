@@ -1547,7 +1547,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	 */
 	protected List<org.semanticweb.yars.nx.Node[]> executeMetadataRequestOnLd(
 			Context context, MetadataRequest metadataRequest,
-			Restrictions myRestrictionsObject) {
+			Restrictions myRestrictionsObject) throws OlapException {
 
 		// Create result
 		switch (metadataRequest) {

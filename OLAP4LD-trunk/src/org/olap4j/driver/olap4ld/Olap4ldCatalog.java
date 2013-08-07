@@ -72,6 +72,9 @@ class Olap4ldCatalog implements Catalog, Named {
 		return false;
 	}
 
+	/**
+	 * Note, currently, we rollback the connection, every time getSchemas is called.
+	 */
 	public NamedList<Schema> getSchemas() throws OlapException {
 		Olap4ldUtil._log.info("getSchemas()...");
 

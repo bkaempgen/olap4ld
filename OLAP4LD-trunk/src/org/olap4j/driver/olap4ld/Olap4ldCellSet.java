@@ -148,7 +148,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		return olap4jStatement.olap4jConnection.helper;
 	}
 
-	public void populate(SelectNode selectNode) {
+	public void populate(SelectNode selectNode) throws OlapException {
 
 
 		// Fill in cellset metadata
@@ -184,7 +184,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		 * Now, execute Logical OLAP Operator Query Tree in LinkedDataEngine
 		 */
 		List<Node[]> olapQueryResult = olap4jStatement.olap4jConnection.myLinkedData
-				.getOlapResult(queryplan);
+				.executeOlapQuery(queryplan);
 		
 		cacheDataFromOlapQuery(olapQueryResult);
 	}

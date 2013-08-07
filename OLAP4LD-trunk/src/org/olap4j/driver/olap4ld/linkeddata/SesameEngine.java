@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.olap4j.OlapException;
 import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.Olap4ldConnection;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
@@ -502,7 +503,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @return Node[]{}
 	 */
 	public List<Node[]> getCubes(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) {
+			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
 
 		
 		// If new cube is created, I empty the cache of the Linked Data Engine
@@ -564,7 +565,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @throws MalformedURLException
 	 */
 	public List<Node[]> getDimensions(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) {
+			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
 
 		// Get all dimensions
 		String query = "";
@@ -635,7 +636,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @return
 	 */
 	public List<Node[]> getMeasures(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) {
+			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
 
 		// ///////////QUERY//////////////////////////
 		/*
@@ -671,7 +672,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @return
 	 */
 	public List<Node[]> getHierarchies(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) {
+			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
 
 		// Get all hierarchies
 		String query = STANDARDPREFIX
@@ -755,7 +756,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @return
 	 */
 	public List<Node[]> getLevels(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) {
+			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
 
 		// Get all levels
 		String query = STANDARDPREFIX
@@ -858,7 +859,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @throws MalformedURLException
 	 */
 	public List<Node[]> getMembers(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) {
+			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
 		/*
 		 * For each dimension, get the possible members
 		 */
@@ -998,7 +999,7 @@ public class SesameEngine implements LinkedDataEngine {
 	}
 
 	public List<Node[]> getSets(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) {
+			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1006,7 +1007,7 @@ public class SesameEngine implements LinkedDataEngine {
 	@Override
 	public List<Node[]> getOlapResult(List<Level> groupbylist,
 			List<Measure> measurelist,
-			List<List<Member>> selectionpredicatelist, Cube cube) {
+			List<List<Member>> selectionpredicatelist, Cube cube) throws OlapException {
 		// TODO Auto-generated method stub
 		return null;
 	}

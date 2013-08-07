@@ -21,6 +21,7 @@ package org.olap4j.driver.olap4ld.linkeddata;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import org.olap4j.OlapException;
 import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.metadata.Cube;
@@ -29,6 +30,10 @@ import org.olap4j.metadata.Measure;
 import org.semanticweb.yars.nx.Node;
 
 /**
+ * 
+ * An LinkedDataEngine is basically an OLAP Engine on Linked Data. It implements
+ * Metadata Queries such as getCubes() and OLAP Queries such as getOlapResult().
+ * 
  * Implements methods of XmlaOlap4jDatabaseMetadata, returning the specified
  * columns as nodes from a sparql endpoint.
  * 
@@ -36,17 +41,17 @@ import org.semanticweb.yars.nx.Node;
  * 
  */
 public interface LinkedDataEngine {
-	
+
 	/**
 	 * Puts engine to its default init state.
 	 */
 	public void rollback();
 
-	public List<Node[]> getDatabases(Restrictions restrictions);
+	public List<Node[]> getDatabases(Restrictions restrictions) throws OlapException;
 
-	public List<Node[]> getCatalogs(Restrictions restrictions);
+	public List<Node[]> getCatalogs(Restrictions restrictions) throws OlapException;
 
-	public List<Node[]> getSchemas(Restrictions restrictions);
+	public List<Node[]> getSchemas(Restrictions restrictions) throws OlapException;
 
 	/**
 	 * 
@@ -62,7 +67,7 @@ public interface LinkedDataEngine {
 	 * 
 	 * @return Node[]{}
 	 */
-	public List<Node[]> getCubes(Restrictions restrictions);
+	public List<Node[]> getCubes(Restrictions restrictions) throws OlapException;
 
 	/**
 	 * Get possible dimensions (component properties) for each cube from the
@@ -76,7 +81,7 @@ public interface LinkedDataEngine {
 	 * @return Node[]{?dsd ?dimension ?compPropType ?name}
 	 * @throws MalformedURLException
 	 */
-	public List<Node[]> getDimensions(Restrictions restrictions);
+	public List<Node[]> getDimensions(Restrictions restrictions) throws OlapException;
 
 	/**
 	 * Every measure also needs to be listed as member. When I create the dsd, I
@@ -96,18 +101,18 @@ public interface LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getMeasures(Restrictions restrictions);
+	public List<Node[]> getMeasures(Restrictions restrictions) throws OlapException;
 
 	/**
 	 * 
 	 * Return hierarchies
-	 *  
+	 * 
 	 * @param context
 	 * @param metadataRequest
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getHierarchies(Restrictions restrictions);
+	public List<Node[]> getHierarchies(Restrictions restrictions) throws OlapException;
 
 	/**
 	 * 
@@ -116,7 +121,7 @@ public interface LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getLevels(Restrictions restrictions);
+	public List<Node[]> getLevels(Restrictions restrictions) throws OlapException;
 
 	/**
 	 * Important issues to remember: Every measure also needs to be listed as
@@ -142,9 +147,9 @@ public interface LinkedDataEngine {
 	 * @return Node[]{?memberURI ?name}
 	 * @throws MalformedURLException
 	 */
-	public List<Node[]> getMembers(Restrictions restrictions);
+	public List<Node[]> getMembers(Restrictions restrictions) throws OlapException;
 
-	public List<Node[]> getSets(Restrictions restrictions);
+	public List<Node[]> getSets(Restrictions restrictions) throws OlapException;
 
 	/**
 	 * In the current Olap4LD implementation, an OLAP query is issued from the
@@ -154,17 +159,19 @@ public interface LinkedDataEngine {
 	 * 
 	 * @return
 	 */
-	public List<Node[]> getOlapResult(Cube cube, List<Level> slicesrollups,
-			List<Position> dices, List<Measure> projections);
+	public List<Node[]> executeOlapQuery(Cube cube, List<Level> slicesrollups,
+			List<Position> dices, List<Measure> projections) throws OlapException;
 
 	/**
-	 * In the extended olap4ld implementation, an OLAP query is issued from the input of
-	 * a logical OLAP operator query plan: a tree of logical OLAP operators that are then
-	 * translated into a physical OLAP operator query plan depending on the implementation.
+	 * In the extended olap4ld implementation, an OLAP query is issued from the
+	 * input of a logical OLAP operator query plan: a tree of logical OLAP
+	 * operators that are then translated into a physical OLAP operator query
+	 * plan depending on the implementation.
 	 * 
 	 * 
 	 * @param queryplan
-	 * @return a relational representation of resulting observations in the resulting data cube
+	 * @return a relational representation of resulting observations in the
+	 *         resulting data cube
 	 */
-	public List<Node[]> getOlapResult(LogicalOlapQueryPlan queryplan);
+	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) throws OlapException;
 }
