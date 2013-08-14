@@ -67,7 +67,7 @@ import org.semanticweb.yars.nx.parser.NxParser;
  * @author b-kaempgen
  * 
  */
-public class EmbeddedSesameEngine implements LinkedDataEngine {
+public class QcrumbEngine implements LinkedDataEngine {
 
 	// Meta data attributes
 	private static final String DATASOURCEDESCRIPTION = "OLAP data from the statistical Linked Data cloud.";
@@ -98,7 +98,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	private SailRepository repo;
 
-	public EmbeddedSesameEngine(URL serverUrlObject,
+	public QcrumbEngine(URL serverUrlObject,
 			ArrayList<String> datastructuredefinitions,
 			ArrayList<String> datasets, String databasename) {
 
@@ -1935,7 +1935,6 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	}
 
-	@SuppressWarnings("unused")
 	private boolean isResourceAndNotLiteral(String resource) {
 		return resource.startsWith("http:");
 	}
@@ -1966,10 +1965,13 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		if (restrictions.memberUniqueName != null) {
 			String resource = Olap4ldLinkedDataUtil
 					.convertMDXtoURI(restrictions.memberUniqueName);
-				// Since we sometimes manually build member names, we have to check on strings
+			if (isResourceAndNotLiteral(resource)) {
+				memberUniqueNameFilter = " FILTER (?MEMBER_UNIQUE_NAME = <"
+						+ resource + ">) ";
+			} else {
 				memberUniqueNameFilter = " FILTER (str(?MEMBER_UNIQUE_NAME) = \""
 						+ resource + "\") ";
-
+			}
 		} else {
 			memberUniqueNameFilter = "";
 		}

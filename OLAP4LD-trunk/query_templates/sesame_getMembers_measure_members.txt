@@ -7,10 +7,14 @@ PREFIX qb: <http://purl.org/linked-data/cube#>
 PREFIX xkos: <http://purl.org/linked-data/xkos#> 
 PREFIX owl: <http://www.w3.org/2002/07/owl#> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX qb4o: <http://purl.org/olap#>
+
 SELECT 
 ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME ?MEMBER_NAME ?MEMBER_CAPTION ?MEMBER_TYPE ?PARENT_UNIQUE_NAME ?PARENT_LEVEL 
 {{{STANDARDFROM}}} 
 WHERE { 
+{
+
 ?CUBE_NAME qb:structure ?dsd. 
 ?dsd qb:component ?compSpec. 
 ?compSpec qb:measure ?MEMBER_UNIQUE_NAME.  
@@ -25,6 +29,54 @@ BIND('0' as ?LEVEL_NUMBER).
 BIND('3' as ?MEMBER_TYPE). 
 BIND('null' as ?PARENT_UNIQUE_NAME). 
 BIND('null' as ?PARENT_LEVEL). 
-{{{FILTERS}}} 
-} ORDER BY ?CUBE_NAME ?MEASURE_UNIQUE_NAME 
+{{{FILTERS}}}
+
+} UNION {
+
+?CUBE_NAME qb:structure ?dsd. 
+?dsd qb:component ?compSpec. 
+?compSpec qb:measure ?MEMBER_UNIQUE_NAME_PREFIX.  
+OPTIONAL {?MEMBER_UNIQUE_NAME_PREFIX rdfs:label ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = "en" ) } 
+
+FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR }
+BIND(CONCAT(STR(?MEMBER_UNIQUE_NAME_PREFIX), "count") as ?MEMBER_UNIQUE_NAME).
+
+BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 
+BIND('{{{TABLE_SCHEM}}}' as ?SCHEMA_NAME). 
+BIND('Measures' as ?DIMENSION_UNIQUE_NAME). 
+BIND('Measures' as ?HIERARCHY_UNIQUE_NAME). 
+BIND('Measures' as ?LEVEL_UNIQUE_NAME). 
+BIND(?MEMBER_UNIQUE_NAME_PREFIX as ?MEMBER_NAME). 
+BIND('0' as ?LEVEL_NUMBER). 
+BIND('3' as ?MEMBER_TYPE). 
+BIND('null' as ?PARENT_UNIQUE_NAME). 
+BIND('null' as ?PARENT_LEVEL). 
+{{{FILTERS}}}
+
+} UNION {
+
+?CUBE_NAME qb:structure ?dsd. 
+?dsd qb:component ?compSpec. 
+?compSpec qb:measure ?MEMBER_UNIQUE_NAME_PREFIX.  
+OPTIONAL {?MEMBER_UNIQUE_NAME_PREFIX rdfs:label ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = "en" ) } 
+
+FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR }
+BIND(CONCAT(STR(?MEMBER_UNIQUE_NAME_PREFIX), "avg") as ?MEMBER_UNIQUE_NAME).
+
+BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 
+BIND('{{{TABLE_SCHEM}}}' as ?SCHEMA_NAME). 
+BIND('Measures' as ?DIMENSION_UNIQUE_NAME). 
+BIND('Measures' as ?HIERARCHY_UNIQUE_NAME). 
+BIND('Measures' as ?LEVEL_UNIQUE_NAME). 
+BIND(?MEMBER_UNIQUE_NAME_PREFIX as ?MEMBER_NAME). 
+BIND('0' as ?LEVEL_NUMBER). 
+BIND('3' as ?MEMBER_TYPE). 
+BIND('null' as ?PARENT_UNIQUE_NAME). 
+BIND('null' as ?PARENT_LEVEL). 
+{{{FILTERS}}}
+
+
+}
+ 
+} ORDER BY ?CUBE_NAME ?MEMBER_UNIQUE_NAME 
 

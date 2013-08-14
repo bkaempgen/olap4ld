@@ -651,7 +651,7 @@ public class LogicalOlap2PhysicalOlap implements Visitor {
 
 				} else {
 
-					// Measure
+					// As always, remove Aggregation Function from Measure Name
 					String measureProperty = Olap4ldLinkedDataUtil
 							.convertMDXtoURI(measure.getUniqueName()).replace(
 									" " + measure.getAggregator().name(), "");

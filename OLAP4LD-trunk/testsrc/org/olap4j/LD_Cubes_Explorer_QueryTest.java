@@ -163,6 +163,14 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 
 	}
 	
+	public void testEdgarExampleMetadata() {
+		String name = "http://edgarwrap.ontologycentral.com/archive/909832/0001193125-10-230379#ds";
+		name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds";
+		//name = "http://estatwrap.ontologycentral.com/id/tec00114";
+		metadataTest(name, 7, 1);
+	}
+	
+	
 	
 
 	public void testEurostatEmploymentRateExampleMetadata() {
@@ -175,72 +183,47 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 	 * Generic Query
 	 */
 	public void testEurostatEmploymentRateExampleOlap() {
-
-		// Query asking for date on rows, sex on columns.
-		String result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		assertContains("|      |   F   |   M   |   T   |", result);
-		assertContains("| 2005 | 62.42 | 77.73 | 70.04 |", result);
-		assertContains("| 2012 | 62.09 | 74.12 |  68.1 |", result);
-
-		// Query asking for date and geo on rows, sex on columns.
-		result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])}) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		assertContains("|               |   F  |   M  |   T  |", result);
-		assertContains("| 2005 |   AT   | 64.9 | 78.5 | 71.7 |", result);
-		assertContains("| 2012 |   AT   | 70.3 | 80.9 | 75.6 |", result);
-
-		// Query asking for date on rows, sex and geo on columns.
-		result = executeStatement("SELECT CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])}) ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		assertContains(
-				"|      |   F                                                                                                                                                                                                                                                         |   M                                                                                                                                                                                                                                                         |   T                                                                                                                                                                                                                                                         |",
-				result);
-		assertContains(
-				"|      |   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |   IE |   IS |   IT |   JP |   LT |   LU |   LV |   MK |   MT |   NL |   NO |   PL |   PT |   RO |   SE |   SI |   SK |   TR |   UK |   US |   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |   IE |   IS |   IT |   JP |   LT |   LU |   LV |   MK |   MT |   NL |   NO |   PL |   PT |   RO |   SE |   SI |   SK |   TR |   UK |   US |   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |   IE |   IS |   IT |   JP |   LT |   LU |   LV |   MK |   MT |   NL |   NO |   PL |   PT |   RO |   SE |   SI |   SK |   TR |   UK |   US |",
-				result);
-		assertContains(
-				"| 2005 | 64.9 | 58.6 | 57.1 | 72.7 | 63.8 | 61.3 | 63.1 | 73.7 | 69.0 | 49.6 | 54.4 |   60.0 | 70.8 | 63.7 | 52.8 | 55.6 | 62.4 | 81.2 | 48.4 | 61.7 | 66.6 | 58.4 | 65.7 |      | 35.1 | 67.6 | 74.6 | 51.7 | 66.0 | 56.9 | 75.5 | 66.2 | 56.7 |      | 68.5 | 68.1 | 78.5 | 74.3 | 66.8 | 87.1 | 85.5 | 80.1 | 75.6 | 82.3 | 75.4 | 79.8 | 79.9 |   76.0 | 75.1 | 75.3 | 67.5 | 69.2 | 82.8 | 89.6 | 74.8 | 86.1 | 74.9 | 79.4 | 75.4 |      | 80.6 | 82.4 | 81.6 | 65.1 | 78.7 | 70.4 | 80.7 | 75.8 | 72.5 |      | 82.0 | 81.7 | 71.7 | 66.5 | 61.9 | 79.9 | 74.4 | 70.7 | 69.4 | 78.0 | 72.0 | 64.6 | 67.2 |   68.0 | 73.0 | 69.4 | 60.0 | 62.2 | 72.6 | 85.5 | 61.6 | 73.9 | 70.6 | 69.0 | 70.3 |      | 57.9 | 75.1 | 78.2 | 58.3 | 72.3 | 63.6 | 78.1 | 71.1 | 64.5 |      | 75.2 | 74.8 |",
-				result);
-		assertContains(
-				"| 2012 | 70.3 | 61.7 | 60.2 | 76.0 | 64.8 | 62.5 | 71.5 | 72.2 | 69.3 | 45.2 | 54.0 |   62.4 | 72.5 | 65.0 | 50.2 | 56.4 | 59.4 | 79.1 | 50.5 |      | 67.9 | 64.1 | 66.4 | 38.7 | 46.8 | 71.9 | 77.3 | 57.5 | 63.1 | 56.3 | 76.8 | 64.6 | 57.3 | 30.9 | 68.4 |      | 80.9 | 72.7 | 65.8 | 87.9 | 76.1 | 80.2 | 81.8 | 78.6 | 75.2 | 65.3 | 64.5 |   74.6 | 75.5 | 73.8 | 60.6 | 68.1 | 68.1 | 84.4 | 71.6 |      | 69.4 | 78.5 | 70.2 | 57.5 | 79.0 | 82.5 | 82.4 | 72.0 | 69.9 | 71.4 | 81.9 | 71.8 | 72.8 | 75.0 | 80.0 |      | 75.6 | 67.2 | 63.0 | 82.0 | 70.2 | 71.5 | 76.7 | 75.4 | 72.1 | 55.3 | 59.3 |   68.5 | 74.0 | 69.3 | 55.3 | 62.1 | 63.7 | 81.8 | 61.0 |      | 68.7 | 71.4 | 68.2 | 48.2 | 63.1 | 77.2 | 79.9 | 64.7 | 66.5 | 63.8 | 79.4 | 68.3 | 65.1 | 52.8 | 74.2 |      |",
-				result);
+		String result;
+//		// Query asking for date on rows, sex on columns.
+//		result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
+//		assertContains("|      |   F   |   M   |   T   |", result);
+//		assertContains("| 2005 | 62.42 | 77.73 | 70.04 |", result);
+//		assertContains("| 2012 | 62.09 | 74.12 |  68.1 |", result);
+//
+//		// Query asking for date and geo on rows, sex on columns.
+//		result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])}) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
+//		assertContains("|               |   F  |   M  |   T  |", result);
+//		assertContains("| 2005 |   AT   | 64.9 | 78.5 | 71.7 |", result);
+//		assertContains("| 2012 |   AT   | 70.3 | 80.9 | 75.6 |", result);
+//
+//		// Query asking for date on rows, sex and geo on columns.
+//		result = executeStatement("SELECT CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])}) ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
+//		assertContains(
+//				"|      |   F                                                                                                                                                                                                                                                         |   M                                                                                                                                                                                                                                                         |   T                                                                                                                                                                                                                                                         |",
+//				result);
+//		assertContains(
+//				"|      |   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |   IE |   IS |   IT |   JP |   LT |   LU |   LV |   MK |   MT |   NL |   NO |   PL |   PT |   RO |   SE |   SI |   SK |   TR |   UK |   US |   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |   IE |   IS |   IT |   JP |   LT |   LU |   LV |   MK |   MT |   NL |   NO |   PL |   PT |   RO |   SE |   SI |   SK |   TR |   UK |   US |   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |   IE |   IS |   IT |   JP |   LT |   LU |   LV |   MK |   MT |   NL |   NO |   PL |   PT |   RO |   SE |   SI |   SK |   TR |   UK |   US |",
+//				result);
+//		assertContains(
+//				"| 2005 | 64.9 | 58.6 | 57.1 | 72.7 | 63.8 | 61.3 | 63.1 | 73.7 | 69.0 | 49.6 | 54.4 |   60.0 | 70.8 | 63.7 | 52.8 | 55.6 | 62.4 | 81.2 | 48.4 | 61.7 | 66.6 | 58.4 | 65.7 |      | 35.1 | 67.6 | 74.6 | 51.7 | 66.0 | 56.9 | 75.5 | 66.2 | 56.7 |      | 68.5 | 68.1 | 78.5 | 74.3 | 66.8 | 87.1 | 85.5 | 80.1 | 75.6 | 82.3 | 75.4 | 79.8 | 79.9 |   76.0 | 75.1 | 75.3 | 67.5 | 69.2 | 82.8 | 89.6 | 74.8 | 86.1 | 74.9 | 79.4 | 75.4 |      | 80.6 | 82.4 | 81.6 | 65.1 | 78.7 | 70.4 | 80.7 | 75.8 | 72.5 |      | 82.0 | 81.7 | 71.7 | 66.5 | 61.9 | 79.9 | 74.4 | 70.7 | 69.4 | 78.0 | 72.0 | 64.6 | 67.2 |   68.0 | 73.0 | 69.4 | 60.0 | 62.2 | 72.6 | 85.5 | 61.6 | 73.9 | 70.6 | 69.0 | 70.3 |      | 57.9 | 75.1 | 78.2 | 58.3 | 72.3 | 63.6 | 78.1 | 71.1 | 64.5 |      | 75.2 | 74.8 |",
+//				result);
+//		assertContains(
+//				"| 2012 | 70.3 | 61.7 | 60.2 | 76.0 | 64.8 | 62.5 | 71.5 | 72.2 | 69.3 | 45.2 | 54.0 |   62.4 | 72.5 | 65.0 | 50.2 | 56.4 | 59.4 | 79.1 | 50.5 |      | 67.9 | 64.1 | 66.4 | 38.7 | 46.8 | 71.9 | 77.3 | 57.5 | 63.1 | 56.3 | 76.8 | 64.6 | 57.3 | 30.9 | 68.4 |      | 80.9 | 72.7 | 65.8 | 87.9 | 76.1 | 80.2 | 81.8 | 78.6 | 75.2 | 65.3 | 64.5 |   74.6 | 75.5 | 73.8 | 60.6 | 68.1 | 68.1 | 84.4 | 71.6 |      | 69.4 | 78.5 | 70.2 | 57.5 | 79.0 | 82.5 | 82.4 | 72.0 | 69.9 | 71.4 | 81.9 | 71.8 | 72.8 | 75.0 | 80.0 |      | 75.6 | 67.2 | 63.0 | 82.0 | 70.2 | 71.5 | 76.7 | 75.4 | 72.1 | 55.3 | 59.3 |   68.5 | 74.0 | 69.3 | 55.3 | 62.1 | 63.7 | 81.8 | 61.0 |      | 68.7 | 71.4 | 68.2 | 48.2 | 63.1 | 77.2 | 79.9 | 64.7 | 66.5 | 63.8 | 79.4 | 68.3 | 65.1 | 52.8 | 74.2 |      |",
+//				result);
 
 		// Query asking for three dimensions at a time.
-		result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])})) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		assertContains("| 2005 |   F |   AT   |        64.9 |", result);
+		result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23employment_rate]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])})) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
+		assertContains("| 2005 |   F |   AT   |             64.9 |", result);
 		assertContains("| 2012 |   F |   AT   |        70.3 |", result);
+		
+		
 	}
 
 	public void testEurostatRealGDPGrowthRateExampleMetadata() {
-		try {
-
-			// String name =
-			// "httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds";
-			String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsieb020_ds.rdf#ds";
-			name = URLEncoder.encode(name, "UTF-8");
-			name = name.replace("%", "XXX");
-			name = name.replace(".", "YYY");
-			name = name.replace("-", "ZZZ");
-			// xmla4js is attaching square brackets automatically
-			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs()
-					.get(0).getSchemas().get(0).getCubes()
-					.get("[" + name + "]");
-			// Currently, we have to first query for dimensions.
-			List<Dimension> dimensions = cube.getDimensions();
-			assertEquals(3, dimensions.size());
-			for (Dimension dimension : dimensions) {
-				List<Member> members = dimension.getHierarchies().get(0)
-						.getLevels().get(0).getMembers();
-				assertEquals(true, members.size() >= 1);
-			}
-			List<Measure> measures = cube.getMeasures();
-			assertEquals(1, measures.size());
-		} catch (OlapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		
+		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsieb020_ds.rdf#ds";
+		//name = "http://estatwrap.ontologycentral.com/id/tec00114";
+		metadataTest(name, 3, 1);
 	}
 
 	/**
@@ -262,37 +245,10 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 	}
 	
 	public void testSmartDbWrapExampleMetadata() {
-		try {
-
-			// String name =
-			// "httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds";
-			String name = "http://smartdbwrap.appspot.com/id/locationdataset/AD0514/Q";
-			name = URLEncoder.encode(name, "UTF-8");
-			name = name.replace("%", "XXX");
-			name = name.replace(".", "YYY");
-			name = name.replace("-", "ZZZ");
-			// xmla4js is attaching square brackets automatically
-			// xmla-server is using a set of values for a restriction.
-			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs()
-					.get(0).getSchemas().get(0).getCubes()
-					.get("[" + name + "]");
-			// Currently, we have to first query for dimensions.
-			List<Dimension> dimensions = cube.getDimensions();
-			assertEquals(7, dimensions.size());
-			for (Dimension dimension : dimensions) {
-				List<Member> members = dimension.getHierarchies().get(0)
-						.getLevels().get(0).getMembers();
-				assertEquals(true, members.size() >= 1);
-			}
-			List<Measure> measures = cube.getMeasures();
-			assertEquals(1, measures.size());
-		} catch (OlapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		String name = "http://smartdbwrap.appspot.com/id/locationdataset/AD0514/Q";
+		//name = "http://estatwrap.ontologycentral.com/id/tec00114";
+		metadataTest(name, 7, 1);
 	}
 	
 

@@ -28,6 +28,11 @@ change their value and depending on their values, execute getCubes() etc. (and a
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
+==2013-08-14==
+* If now aggregation function is found, we automatically create new measures with certain
+aggregation functions. However, WATCH OUT, BIND-syntax of SPARQL is complicated: You should not be
+using the variable that you are binding to in other patterns (see, e.g., ?MEASURE_AGGREGATOR_PART)
+
 ==2013-08-07==
 * Improved exception handling. Now, LinkedDataEngine also returns OlapExceptions which are forwarded
 to the using engine in order to make transparent errors to users.
