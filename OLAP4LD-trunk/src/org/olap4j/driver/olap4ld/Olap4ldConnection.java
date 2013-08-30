@@ -2155,6 +2155,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 
 		final List<MetadataColumn> columns;
 		final Map<String, MetadataColumn> columnsByName;
+		final Map<String, Integer> indexByName;
 
 		/**
 		 * Creates a MetadataRequest.
@@ -2180,10 +2181,14 @@ abstract class Olap4ldConnection implements OlapConnection {
 			}
 			this.columns = UnmodifiableArrayList.asCopyOf(columns);
 			final Map<String, MetadataColumn> map = new HashMap<String, MetadataColumn>();
+			final Map<String, Integer> indexmap = new HashMap<String, Integer>();
+			int index = 0;
 			for (MetadataColumn column : columns) {
 				map.put(column.name, column);
+				indexmap.put(column.name, index++);
 			}
 			this.columnsByName = Collections.unmodifiableMap(map);
+			this.indexByName = Collections.unmodifiableMap(indexmap);
 		}
 
 		/**
@@ -2234,6 +2239,15 @@ abstract class Olap4ldConnection implements OlapConnection {
 		 */
 		public MetadataColumn getColumn(String name) {
 			return columnsByName.get(name);
+		}
+		
+		/**
+		 * Same as getColumn() but returns index.
+		 * @param name
+		 * @return
+		 */
+		public int getColumnIndex(String name) {
+			return indexByName.get(name);
 		}
 
 		public boolean allowsLocale() {

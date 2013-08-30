@@ -32,6 +32,7 @@ import junit.framework.TestCase;
 import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
+import org.olap4j.driver.olap4ld.linkeddata.LinkedDataEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
@@ -54,7 +55,7 @@ import org.semanticweb.yars.nx.Node;
  */
 public class Slicer_QueryTest extends TestCase {
 	
-	private EmbeddedSesameEngine myLinkedData;
+	private LinkedDataEngine myLinkedData;
 
 	public Slicer_QueryTest() throws SQLException {
 		

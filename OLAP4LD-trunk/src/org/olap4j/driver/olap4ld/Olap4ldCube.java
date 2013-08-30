@@ -19,6 +19,9 @@ import org.olap4j.driver.olap4ld.Olap4ldSchema;
 import org.olap4j.impl.*;
 import org.olap4j.mdx.*;
 import org.olap4j.metadata.*;
+import org.semanticweb.yars.nx.Literal;
+import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Variable;
 
 import java.util.*;
 import java.lang.ref.SoftReference;
@@ -593,6 +596,33 @@ class Olap4ldCube implements Cube, Named {
 			throw new UnsupportedOperationException(
 					"The right type of dimension should have been found.");
 		}
+	}
+	
+	public List<Node[]> transformMetadataObject2NxNodes() {
+		List<Node[]> nodes = new ArrayList<Node[]>();
+
+			// Create header
+
+			/*
+			 * ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
+			 * ?DESCRIPTION
+			 */
+
+			Node[] header = new Node[] { new Variable("?CATALOG_NAME"),
+					new Variable("?SCHEMA_NAME"), new Variable("?CUBE_NAME"),
+					new Variable("?CUBE_TYPE"), new Variable("?CUBE_CAPTION"),
+					new Variable("?DESCRIPTION") };
+			nodes.add(header);
+			
+			Node[] cubenode = new Node[] {
+					new Literal(this.getSchema().getCatalog().getName()),
+					new Literal(this.getSchema().getName()),
+					new Literal(this.getUniqueName()), new Literal("CUBE"),
+					new Literal(this.getCaption()),
+					new Literal(this.getDescription()) };
+			nodes.add(cubenode);
+
+		return nodes;
 	}
 }
 

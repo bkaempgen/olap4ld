@@ -10,7 +10,7 @@ import org.semanticweb.yars.engine.Visitor;
  * 
  * @author aharth
  */
-public class Exec2XML implements Visitor {
+public class Exec2XML implements LogicalOlapOperatorQueryPlanVisitor {
     StringBuffer _buf = null;
     
     /**

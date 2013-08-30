@@ -19,5 +19,5 @@ public interface LogicalOlapOp { //TreeNode {
      * @param v vistor object
      * @param obj node for the new tree
      */
-    public void accept(Visitor v) throws QueryException;
+    public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException;
 }

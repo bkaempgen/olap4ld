@@ -45,7 +45,7 @@ public class ExecPlan {
     /**
      * Entry method that visits all nodes recursively.
      */
-    public Object visitAll(Visitor v) throws QueryException {
+    public Object visitAll(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
     	_root.accept(v);
         
         return v.getNewRoot();

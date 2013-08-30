@@ -56,17 +56,4 @@ public class Restrictions {
 			}
 		}
 	}
-
-	public void resetRestrictions() {
-		// Restrictions
-		catalog = null;
-		schemaPattern = null;
-		cubeNamePattern = null;
-		dimensionUniqueName = null;
-		hierarchyUniqueName = null;
-		levelUniqueName = null;
-		memberUniqueName = null;
-		tree = null;
-		treeOps = null;
-	}
 }

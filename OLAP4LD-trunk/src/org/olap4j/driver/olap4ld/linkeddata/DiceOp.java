@@ -42,7 +42,7 @@ public class DiceOp implements LogicalOlapOp {
     }
 
 	@Override
-	public void accept(Visitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
 		// TODO Auto-generated method stub
 		v.visit(this);
         // visit the projection input op

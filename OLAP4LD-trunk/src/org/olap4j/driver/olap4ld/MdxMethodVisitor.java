@@ -733,6 +733,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		try {
 			NamedList<Cube> cubes = this.olap4jStatement.olap4jConnection
 					.getOlapSchema().getCubes();
+			
+			// Here, it can happen that we search for something that is not a cube.
 			Cube cube = cubes.get(segmentName);
 			// Watch out cubes.contains has as parameter a cube!
 			if (cube != null) {

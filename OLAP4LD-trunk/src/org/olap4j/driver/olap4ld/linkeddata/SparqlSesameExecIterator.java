@@ -146,9 +146,16 @@ public class SparqlSesameExecIterator implements ExecIterator {
 	}
 
 	@Override
-	public void accept(Visitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
 		// Needed in case we have as arguments further exec iterators.
 		;
 	}
 
+	/**
+	 * Returns String representation of op.
+	 */
+	public String toString() {
+		return query;
+	}
+	
 }

@@ -15,7 +15,11 @@ import org.olap4j.driver.olap4ld.Olap4ldLevel;
 import org.olap4j.driver.olap4ld.Olap4ldMember;
 import org.olap4j.impl.*;
 import org.olap4j.metadata.*;
+import org.semanticweb.yars.nx.Literal;
+import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Variable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -119,6 +123,40 @@ class Olap4ldHierarchy
             && this.uniqueName.equals(
                 ((Olap4ldHierarchy) obj).getUniqueName());
     }
+    
+	public List<Node[]> transformMetadataObject2NxNodes(Cube cube) {
+		List<Node[]> nodes = new ArrayList<Node[]>();
+
+		// Create header
+
+		/*
+		 * ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME
+		 * ?MEASURE_NAME ?MEASURE_CAPTION ?DATA_TYPE ?MEASURE_IS_VISIBLE
+		 * ?MEASURE_AGGREGATOR ?EXPRESSION
+		 */
+
+		// Create header
+				Node[] header = new Node[] { new Variable("?CATALOG_NAME"),
+						new Variable("?SCHEMA_NAME"), new Variable("?CUBE_NAME"),
+						new Variable("?DIMENSION_UNIQUE_NAME"),
+						new Variable("?HIERARCHY_UNIQUE_NAME"),
+						new Variable("?HIERARCHY_NAME"),
+						new Variable("?HIERARCHY_CAPTION"),
+						new Variable("?DESCRIPTION") };
+		nodes.add(header);
+
+		Node[] metadatanode = new Node[] {
+				new Literal(cube.getSchema().getCatalog().getName()),
+				new Literal(cube.getSchema().getName()),
+				new Literal(cube.getUniqueName()),
+				new Literal(this.getDimension().getUniqueName()), new Literal(this.getUniqueName()),
+				new Literal(this.getName()),
+				new Literal(this.getCaption()),
+				new Literal(this.getDescription()) };
+		nodes.add(metadatanode);
+
+		return nodes;
+	}
 }
 
 // End XmlaOlap4jHierarchy.java

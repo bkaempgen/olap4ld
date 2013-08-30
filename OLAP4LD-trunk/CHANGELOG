@@ -23,14 +23,23 @@ a specific cube .get(cubename).
 	 */
 	private String databaseName;
 
-* If we now that XMLA and other clients set this value not only by the connection string, we can
+* If we know that XMLA and other clients set this value not only by the connection string, we can
 change their value and depending on their values, execute getCubes() etc. (and also return OlapExceptions 
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
+==2013-08-16==
+* Added methods to metadata objects to get List<Node[]> representation to be used in olap 
+operators (as an interface to Linked Data Engine).
+
+==2013-08-15==
+* Logical OLAP Operators (http://www.linked-data-cubes.org/index.php/Olap4ld_Query_Optimizer)
+* Changed Visitor to LogicalOlapOperatorPlanVisitor
+
 ==2013-08-14==
 * If now aggregation function is found, we automatically create new measures with certain
-aggregation functions. However, WATCH OUT, BIND-syntax of SPARQL is complicated: You should not be
+aggregation functions (simply added aggregation fnct name to the end). 
+However, WATCH OUT, BIND-syntax of SPARQL is complicated: You should not be
 using the variable that you are binding to in other patterns (see, e.g., ?MEASURE_AGGREGATOR_PART)
 
 ==2013-08-07==

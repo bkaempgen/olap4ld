@@ -32,7 +32,7 @@ import org.semanticweb.yars.index.DataStore;
  * 
  * @author aharth
  */
-public class Relational2Exec implements Visitor {
+public class Relational2Exec implements LogicalOlapOperatorQueryPlanVisitor {
 	// the new root node
 	ExecIterator _root;
 	// the physical access plans need access to the data store component

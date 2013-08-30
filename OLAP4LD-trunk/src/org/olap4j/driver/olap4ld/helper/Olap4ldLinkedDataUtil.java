@@ -12,8 +12,10 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.Transformer;
@@ -22,6 +24,11 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
+import org.olap4j.metadata.*;
+import org.olap4j.metadata.MetadataElement;
+import org.semanticweb.yars.nx.Literal;
+import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Variable;
 
 public class Olap4ldLinkedDataUtil {
 
@@ -30,7 +37,7 @@ public class Olap4ldLinkedDataUtil {
 	 */
 	static HashMap<Integer, String> standard_prefix2uri = null;
 	static HashMap<Integer, String> standard_uri2prefix = null;
-	
+
 	/*
 	 * As stated in encodeNode2Mdx
 	 */
@@ -47,7 +54,8 @@ public class Olap4ldLinkedDataUtil {
 	 */
 	static String encodeUriWithPrefix(String uri) {
 
-		// Since we do not manage prefixes, we have to come up with one ourselves
+		// Since we do not manage prefixes, we have to come up with one
+		// ourselves
 		// (which if possible should be always the same):
 		return encodeSpecialMdxCharactersInNames(uri);
 	}
@@ -134,8 +142,7 @@ public class Olap4ldLinkedDataUtil {
 	public static String readInQueryTemplate(String name) {
 		try {
 			StreamSource stream = new StreamSource(
-					Olap4ldLinkedDataUtil.class
-							.getResourceAsStream("/"+name));
+					Olap4ldLinkedDataUtil.class.getResourceAsStream("/" + name));
 			InputStream inputStream = stream.getInputStream();
 
 			InputStreamReader reader = new InputStreamReader(inputStream);
@@ -198,11 +205,11 @@ public class Olap4ldLinkedDataUtil {
 	 * and which do encoding/decoding, but which are not explicitly defined in a
 	 * SPARQL query.
 	 * 
-	 * Deprecated, since we do not dynamically build SPARQL queries but use templates.
+	 * Deprecated, since we do not dynamically build SPARQL queries but use
+	 * templates. Not true, since we still use it for OLAP queries.
 	 * 
 	 * @return
 	 */
-	@Deprecated
 	public static String getStandardPrefixes() {
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
@@ -390,9 +397,11 @@ public class Olap4ldLinkedDataUtil {
 	 * We need to make sure that names of multidimensional elements do not carry
 	 * any MDX special characters.
 	 * 
-	 * Note: You can use a bash command for translating a URI into an MDX applicable form:
+	 * Note: You can use a bash command for translating a URI into an MDX
+	 * applicable form:
 	 * 
-	 * echo "http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list" | sed 's/\./YYY/g' | sed 's/-/ZZZ/g' | sed 's/%/XXX/g'
+	 * echo "http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list" | sed
+	 * 's/\./YYY/g' | sed 's/-/ZZZ/g' | sed 's/%/XXX/g'
 	 * 
 	 * @param name
 	 * @return
@@ -489,5 +498,4 @@ public class Olap4ldLinkedDataUtil {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-
 }

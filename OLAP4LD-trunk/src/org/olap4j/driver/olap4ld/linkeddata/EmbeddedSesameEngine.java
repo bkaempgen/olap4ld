@@ -2008,7 +2008,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		Olap4ldUtil._log.info("Logical query plan to string: "
 				+ queryplan.toString());
 
-		LogicalOlap2PhysicalOlap r2a = new LogicalOlap2PhysicalOlap(repo);
+		LogicalOlap2SparqlOlapVisitor r2a = new LogicalOlap2SparqlOlapVisitor(repo);
 
 		ExecIterator newRoot;
 		try {

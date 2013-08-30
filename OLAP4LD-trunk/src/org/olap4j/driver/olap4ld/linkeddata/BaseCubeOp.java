@@ -1,6 +1,11 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import org.olap4j.metadata.Cube;
+import java.util.List;
+import java.util.Map;
+
+import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
+import org.semanticweb.yars.nx.Node;
+
 
 /**
  * This operator reads the data from a Cube.
@@ -9,24 +14,35 @@ import org.olap4j.metadata.Cube;
  *
  */
 public class BaseCubeOp implements LogicalOlapOp {
-
-	private Cube cube;
-
-	public BaseCubeOp(Cube cube) {
-		this.cube = cube;
-	}
 	
-	public Cube getCube() {
-		return cube;
+	private List<Node[]> cube;
+
+	public BaseCubeOp(List<Node[]> list) {
+		this.setCube(list);
 	}
 	
     public String toString() {
-    	return "BaseCube ("+cube.getUniqueName()+")";
+		
+    	Map<String, Integer> map = Olap4ldLinkedDataUtil.getNodeResultFields(cube.get(0));
+    	
+    	Node[] cubeNodes = cube.get(1);
+    	int index = map.get("?CUBE_NAME");
+    	String cubename = cubeNodes[index].toString();
+    	
+    	return "BaseCube ("+cubename+")";
     }
 
-	public void accept(Visitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
 		// There is nothing more to visit.
 		;
+	}
+
+	public List<Node[]> getCube() {
+		return cube;
+	}
+
+	private void setCube(List<Node[]> cube) {
+		this.cube = cube;
 	}
 
 }

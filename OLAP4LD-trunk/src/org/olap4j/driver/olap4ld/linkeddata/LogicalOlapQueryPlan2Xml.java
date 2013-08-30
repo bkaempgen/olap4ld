@@ -6,7 +6,7 @@ package org.olap4j.driver.olap4ld.linkeddata;
  * 
  * @author aharth
  */
-public class LogicalOlapQueryPlan2Xml implements Visitor {
+public class LogicalOlapQueryPlan2Xml implements LogicalOlapOperatorQueryPlanVisitor {
     StringBuffer _buf = new StringBuffer();
     
     /**

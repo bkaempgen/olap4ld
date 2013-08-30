@@ -2469,7 +2469,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 	@Override
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) {
 		// XXX: Will not work.
-		LogicalOlap2PhysicalOlap r2a = new LogicalOlap2PhysicalOlap(null);
+		LogicalOlap2SparqlOlapVisitor r2a = new LogicalOlap2SparqlOlapVisitor(null);
 		
     	ExecIterator newRoot;
 		try {

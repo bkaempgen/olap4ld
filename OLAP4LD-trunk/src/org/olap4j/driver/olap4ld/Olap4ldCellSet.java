@@ -62,6 +62,7 @@ import org.olap4j.CellSetMetaData;
 import org.olap4j.OlapException;
 import org.olap4j.OlapStatement;
 import org.olap4j.Position;
+import org.olap4j.driver.olap4ld.Olap4ldConnection.MetadataColumn;
 import org.olap4j.driver.olap4ld.helper.LdHelper;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.helper.PreprocessMdxVisitor;
@@ -302,7 +303,10 @@ abstract class Olap4ldCellSet implements CellSet {
 	private LogicalOlapQueryPlan createLogicalOlapQueryPlan() {
 
 		// BaseCube operator
-		LogicalOlapOp basecube = new BaseCubeOp(metaData.cube);
+		// Instead, I would like to give in a metadataRequest result (String[])
+
+		
+		LogicalOlapOp basecube = new BaseCubeOp(metaData.cube.transformMetadataObject2NxNodes());
 		
 		// Projection operator
 		// Prepare measurelist, a ordered set of members

@@ -31,7 +31,7 @@ public class SliceOp implements LogicalOlapOp {
     }
 
 	@Override
-	public void accept(Visitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
 		v.visit(this);
         // visit the projection input op
 		inputOp.accept(v);
