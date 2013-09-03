@@ -32,6 +32,7 @@ directly from getCubes() etc. We would not need to populate a deferred list on g
 * Renamed LD_Cubes test case to "Example_QB_Datasets_QueryTest".
 * Logical Olap Op DiceOp now receives List<Node[]> of cube that is
 used in query processing.
+* removed all errors in sources
 
 ==31 Aug 2013==
 * Logical Olap Op ProjectionOp now receives List<Node[]> of cube that is

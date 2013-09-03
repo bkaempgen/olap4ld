@@ -32,16 +32,12 @@ import java.util.Map;
 
 import org.olap4j.OlapException;
 import org.olap4j.Position;
-import org.olap4j.driver.olap4ld.Olap4ldConnection;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
-import org.olap4j.driver.olap4ld.Olap4ldConnection.Context;
-import org.olap4j.driver.olap4ld.Olap4ldConnection.MetadataRequest;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
+import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.metadata.Cube;
-import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
-import org.olap4j.metadata.Member;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Variable;
@@ -313,8 +309,8 @@ public class SesameEngine implements LinkedDataEngine {
 	}
 
 	private List<Node[]> applyRestrictions(List<Node[]> result,
-			Object[] restrictions) {
-
+			Restrictions restrictions) {
+		
 		/*
 		 * We go through all the nodes. For each node, if it does not fulfill
 		 * one of the restrictions, we remove that node from the result (lets
@@ -326,92 +322,92 @@ public class SesameEngine implements LinkedDataEngine {
 		boolean isFirst = true;
 		Map<String, Integer> mapFields = null;
 		ArrayList<Node[]> addList = new ArrayList<Node[]>();
-		for (Node[] node : result) {
-			boolean isToRemove = false;
-			if (isFirst) {
-				mapFields = Olap4ldLinkedDataUtil.getNodeResultFields(node);
-				isFirst = false;
-			} else {
-				// restrictions are structured: %2=0 restriction name, %2=1
-				// restriction value
-				for (int i = 0; i <= restrictions.length - 1; i = i + 2) {
-					// TREE_OP is special, needs to be handled differently
-					if (restrictions[i].toString().equals("TREE_OP")) {
-
-						// TODO: In this case, we should prioritize treeOp
-
-						int tree = new Integer(restrictions[i + 1].toString());
-						if ((tree & 1) == 1) {
-							// CHILDREN
-							Olap4ldUtil._log.info("TreeOp:CHILDREN");
-						} else {
-							// Remove all children
-							// TODO: So far, we do not support children.
-						}
-						if ((tree & 2) == 2) {
-							// SIBLINGS
-							Olap4ldUtil._log.info("TreeOp:SIBLINGS");
-
-						} else {
-							// How to remove all siblings?
-							/*
-							 * We can assume that we are at a specific cube,
-							 * dim, hier, level
-							 */
-						}
-						if ((tree & 4) == 4) {
-							// PARENT
-							Olap4ldUtil._log.info("TreeOp:PARENT");
-						} else {
-							// Remove all parents
-							// TODO: So far, we do not support parents.
-						}
-						if ((tree & 8) == 8) {
-							// SELF
-							Olap4ldUtil._log.info("TreeOp:SELF");
-						} else {
-							// How can we remove only oneself?
-
-						}
-						if ((tree & 16) == 16) {
-							// DESCENDANTS
-							Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
-
-						} else {
-							// Remove all descendants
-							// TODO: So far, we do not support descendants.
-						}
-						if ((tree & 32) == 32) {
-							// ANCESTORS
-							Olap4ldUtil._log.info("TreeOp:ANCESTORS");
-						} else {
-							// Remove all ancestors
-							// TODO: So far, we do not support ancestors.
-						}
-
-					} else {
-
-						String restriction = restrictions[i + 1].toString();
-						String value = Olap4ldLinkedDataUtil
-								.convertNodeToMDX(node[mapFields.get("?"
-										+ restrictions[i].toString())]);
-
-						if (restriction == null || restriction.equals(value)) {
-							// fine
-						} else {
-							isToRemove = true;
-							// TODO does it jump out of the whole thing?
-							// We need to go to the next node
-							break;
-						}
-					}
-				}
-			}
-			// If node is marked as delete, nothing, else add it to addList
-			if (!isToRemove) {
-				addList.add(node);
-			}
-		}
+//		for (Node[] node : result) {
+//			boolean isToRemove = false;
+//			if (isFirst) {
+//				mapFields = Olap4ldLinkedDataUtil.getNodeResultFields(node);
+//				isFirst = false;
+//			} else {
+//				// restrictions are structured: %2=0 restriction name, %2=1
+//				// restriction value
+//				for (int i = 0; i <= restrictions.length - 1; i = i + 2) {
+//					// TREE_OP is special, needs to be handled differently
+//					if (restrictions[i].toString().equals("TREE_OP")) {
+//
+//						// TODO: In this case, we should prioritize treeOp
+//
+//						int tree = new Integer(restrictions[i + 1].toString());
+//						if ((tree & 1) == 1) {
+//							// CHILDREN
+//							Olap4ldUtil._log.info("TreeOp:CHILDREN");
+//						} else {
+//							// Remove all children
+//							// TODO: So far, we do not support children.
+//						}
+//						if ((tree & 2) == 2) {
+//							// SIBLINGS
+//							Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+//
+//						} else {
+//							// How to remove all siblings?
+//							/*
+//							 * We can assume that we are at a specific cube,
+//							 * dim, hier, level
+//							 */
+//						}
+//						if ((tree & 4) == 4) {
+//							// PARENT
+//							Olap4ldUtil._log.info("TreeOp:PARENT");
+//						} else {
+//							// Remove all parents
+//							// TODO: So far, we do not support parents.
+//						}
+//						if ((tree & 8) == 8) {
+//							// SELF
+//							Olap4ldUtil._log.info("TreeOp:SELF");
+//						} else {
+//							// How can we remove only oneself?
+//
+//						}
+//						if ((tree & 16) == 16) {
+//							// DESCENDANTS
+//							Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+//
+//						} else {
+//							// Remove all descendants
+//							// TODO: So far, we do not support descendants.
+//						}
+//						if ((tree & 32) == 32) {
+//							// ANCESTORS
+//							Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+//						} else {
+//							// Remove all ancestors
+//							// TODO: So far, we do not support ancestors.
+//						}
+//
+//					} else {
+//
+//						String restriction = restrictions[i + 1].toString();
+//						String value = Olap4ldLinkedDataUtil
+//								.convertNodeToMDX(node[mapFields.get("?"
+//										+ restrictions[i].toString())]);
+//
+//						if (restriction == null || restriction.equals(value)) {
+//							// fine
+//						} else {
+//							isToRemove = true;
+//							// TODO does it jump out of the whole thing?
+//							// We need to go to the next node
+//							break;
+//						}
+//					}
+//				}
+//			}
+//			// If node is marked as delete, nothing, else add it to addList
+//			if (!isToRemove) {
+//				addList.add(node);
+//			}
+//		}
 		return addList;
 	}
 
@@ -502,8 +498,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * 
 	 * @return Node[]{}
 	 */
-	public List<Node[]> getCubes(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
+	public List<Node[]> getCubes(Restrictions restrictions) throws OlapException {
 
 		
 		// If new cube is created, I empty the cache of the Linked Data Engine
@@ -564,8 +559,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @return Node[]{?dsd ?dimension ?compPropType ?name}
 	 * @throws MalformedURLException
 	 */
-	public List<Node[]> getDimensions(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
+	public List<Node[]> getDimensions(Restrictions restrictions) throws OlapException {
 
 		// Get all dimensions
 		String query = "";
@@ -635,8 +629,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getMeasures(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
+	public List<Node[]> getMeasures(Restrictions restrictions) throws OlapException {
 
 		// ///////////QUERY//////////////////////////
 		/*
@@ -671,8 +664,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getHierarchies(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
+	public List<Node[]> getHierarchies(Restrictions restrictions) throws OlapException {
 
 		// Get all hierarchies
 		String query = STANDARDPREFIX
@@ -755,8 +747,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getLevels(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
+	public List<Node[]> getLevels(Restrictions restrictions) throws OlapException {
 
 		// Get all levels
 		String query = STANDARDPREFIX
@@ -858,8 +849,7 @@ public class SesameEngine implements LinkedDataEngine {
 	 * @return Node[]{?memberURI ?name}
 	 * @throws MalformedURLException
 	 */
-	public List<Node[]> getMembers(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
+	public List<Node[]> getMembers(Restrictions restrictions) throws OlapException {
 		/*
 		 * For each dimension, get the possible members
 		 */
@@ -998,16 +988,49 @@ public class SesameEngine implements LinkedDataEngine {
 		return result;
 	}
 
-	public List<Node[]> getSets(Context context,
-			MetadataRequest metadataRequest, Object[] restrictions) throws OlapException {
+	public List<Node[]> getSets(Restrictions restrictions) throws OlapException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Node[]> getOlapResult(List<Level> groupbylist,
-			List<Measure> measurelist,
-			List<List<Member>> selectionpredicatelist, Cube cube) throws OlapException {
+	public void rollback() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<Node[]> getDatabases(Restrictions restrictions)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node[]> getCatalogs(Restrictions restrictions)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node[]> getSchemas(Restrictions restrictions)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node[]> executeOlapQuery(Cube cube, List<Level> slicesrollups,
+			List<Position> dices, List<Measure> projections)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
 		// TODO Auto-generated method stub
 		return null;
 	}

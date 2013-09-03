@@ -26,6 +26,10 @@ public class ProjectionOp implements LogicalOlapOp {
 		return projectedMeasures;
 	}
 	
+	public LogicalOlapOp getInputOp() {
+		return this.inputOp;
+	}
+	
     public String toString() {
     	Map<String, Integer> map = Olap4ldLinkedDataUtil.getNodeResultFields(projectedMeasures.get(0));
     	

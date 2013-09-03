@@ -78,4 +78,8 @@ public class DiceOp implements LogicalOlapOp {
 		inputOp.accept(v);
 	}
 
+	public LogicalOlapOp getInputOp() {
+			return this.inputOp;
+	}
+
 }

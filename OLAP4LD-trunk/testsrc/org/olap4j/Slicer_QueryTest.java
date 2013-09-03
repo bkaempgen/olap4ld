@@ -83,13 +83,15 @@ public class Slicer_QueryTest extends TestCase {
 			
 			Node[] cube = cubes.get(1);
 			
-			Cube cubeObject = new 
-			
+			//Cube cubeObject = new 
 			
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		// XXX
+		return null;
 	}
 	
 

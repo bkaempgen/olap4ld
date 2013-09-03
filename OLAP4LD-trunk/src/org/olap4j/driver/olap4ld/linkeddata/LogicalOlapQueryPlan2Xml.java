@@ -14,7 +14,7 @@ public class LogicalOlapQueryPlan2Xml implements LogicalOlapOperatorQueryPlanVis
      * spit out XML.
      */
     public void visit(Object op) throws QueryException {
-        if (op instanceof BaseCube) {
+        if (op instanceof BaseCubeOp) {
             _buf.append("<basecube><![CDATA[");
             _buf.append(op.toString());
             _buf.append("]]></basecube>\n");
@@ -25,7 +25,7 @@ public class LogicalOlapQueryPlan2Xml implements LogicalOlapOperatorQueryPlanVis
             _buf.append("<![CDATA[");
             _buf.append(pop);
             _buf.append("]]>");
-            pop._o.accept(this);
+            pop.getInputOp().accept(this);
             _buf.append("</projection>\n");
         } else if (op instanceof DiceOp) {
         	DiceOp cop = (DiceOp)op;
@@ -34,26 +34,26 @@ public class LogicalOlapQueryPlan2Xml implements LogicalOlapOperatorQueryPlanVis
             _buf.append("<![CDATA[");
             _buf.append(cop);
             _buf.append("]]>");
-            cop._o.accept(this);
+            cop.getInputOp().accept(this);
             _buf.append("</construct>\n");
-        } else if (op instanceof JoinOp) {
-        	JoinOp jop = (JoinOp)op;
-        	
-        	_buf.append("<join var='");
-        	_buf.append(jop._var);
-        	_buf.append("'>\n");
-        	jop._left.accept(this);
-            jop._right.accept(this);
-            _buf.append("</join>\n");
-        } else if (op instanceof DifferenceOp) {
-        	DifferenceOp dop = (DifferenceOp)op;
-        	
-        	_buf.append("<difference var='");
-        	_buf.append(dop._var);
-        	_buf.append("'>\n");
-        	dop._left.accept(this);
-            dop._right.accept(this);
-            _buf.append("</difference>\n");
+//        } else if (op instanceof JoinOp) {
+//        	JoinOp jop = (JoinOp)op;
+//        	
+//        	_buf.append("<join var='");
+//        	_buf.append(jop._var);
+//        	_buf.append("'>\n");
+//        	jop._left.accept(this);
+//            jop._right.accept(this);
+//            _buf.append("</join>\n");
+//        } else if (op instanceof DifferenceOp) {
+//        	DifferenceOp dop = (DifferenceOp)op;
+//        	
+//        	_buf.append("<difference var='");
+//        	_buf.append(dop._var);
+//        	_buf.append("'>\n");
+//        	dop._left.accept(this);
+//            dop._right.accept(this);
+//            _buf.append("</difference>\n");
         } else {
         	_buf.append("<unspec>");
         	_buf.append(toString());
@@ -64,4 +64,34 @@ public class LogicalOlapQueryPlan2Xml implements LogicalOlapOperatorQueryPlanVis
     public Object getNewRoot() {
         return new String(_buf);
     }
+
+	@Override
+	public void visit(RollupOp op) throws QueryException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(SliceOp op) throws QueryException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(DiceOp op) throws QueryException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(ProjectionOp op) throws QueryException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(BaseCubeOp op) throws QueryException {
+		// TODO Auto-generated method stub
+		
+	}
 }
