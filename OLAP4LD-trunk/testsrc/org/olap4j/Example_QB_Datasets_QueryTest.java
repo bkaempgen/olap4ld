@@ -1,11 +1,10 @@
 /*
-//$Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
 //
-//Licensed to Julian Hyde under one or more contributor license
+//Licensed to Benedikt Kämpgen under one or more contributor license
 //agreements. See the NOTICE file distributed with this work for
 //additional information regarding copyright ownership.
 //
-//Julian Hyde licenses this file to you under the Apache License,
+//Benedikt Kämpgen licenses this file to you under the Apache License,
 //Version 2.0 (the "License"); you may not use this file except in
 //compliance with the License. You may obtain a copy of the License at:
 //
@@ -43,13 +42,20 @@ import org.olap4j.metadata.Member;
 import org.olap4j.test.TestContext;
 
 /**
- * Unit test for LD-Cubes Explorer Queries on external example data.
+ * Unit test for OLAP4LD Queries on external example data.
  * 
- * For each example given on LDCX website, we want to add a unit test.
+ * For most Example QB Datasets given at [1], we want to add a unit test.
  * 
- * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
+ * [1] http://www.linked-data-cubes.org/index.php/Example_QB_Datasets
+ * 
+ * Remember to set test.properties:
+ * org.olap4j.test.helperClassName=org.olap4j.LdRemoteOlap4jTester
+ * org.olap4j.RemoteXmlaTester.JdbcUrl=jdbc:ld://olap4ld;Catalog=LdCatalog;JdbcDrivers=com.mysql.jdbc.Driver;Server=http://;Database=EMBEDDEDSESAME;Datastructuredefinitions=;Datasets=;
+ * 
+ * @version 0.1
+ * @author bkaempgen
  */
-public class LD_Cubes_Explorer_QueryTest extends TestCase {
+public class Example_QB_Datasets_QueryTest extends TestCase {
 	private final TestContext testContext = TestContext.instance();
 	private final TestContext.Tester tester = testContext.getTester();
 	private Connection connection;
@@ -58,7 +64,7 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 	private MdxParserFactory parserFactory;
 	private MdxParser parser;
 
-	public LD_Cubes_Explorer_QueryTest() throws SQLException {
+	public Example_QB_Datasets_QueryTest() throws SQLException {
 	}
 
 	protected void setUp() throws SQLException {
@@ -93,6 +99,7 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 	private void metadataTest(String dsUri, int numberOfDimensions, int numberOfMeasures) {
 		try {
 
+			// We have to use MDX encoded name
 			String name = URLEncoder.encode(dsUri, "UTF-8");
 			name = name.replace("%", "XXX");
 			name = name.replace(".", "YYY");
@@ -144,10 +151,10 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 
 		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]");
 		assertContains(
-				"| Customer  1 | Date 19940101 | Part  1 | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
+				"|  | Customer  1 |  | Date 19940101 |  | Part  1 |  | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
 				result);
 		assertContains(
-				"| Customer  2 | Date 19940101 | Part  1 | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
+				"|  | Customer  2 |  | Date 19940101 |  | Part  1 |  | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
 				result);
 	}
 	
@@ -186,15 +193,15 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 		String result;
 		// Query asking for date on rows, sex on columns.
 		result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		assertContains("|      |   F   |   M   |   T   |", result);
+		assertContains("|   F   |   M   |   T   |", result);
 		assertContains("| 2005 | 62.42 | 77.73 | 70.04 |", result);
 		assertContains("| 2012 | 62.09 | 74.12 |  68.1 |", result);
 
 		// Query asking for date and geo on rows, sex on columns.
 		result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])}) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		assertContains("|               |   F  |   M  |   T  |", result);
-		assertContains("| 2005 |   AT   | 64.9 | 78.5 | 71.7 |", result);
-		assertContains("| 2012 |   AT   | 70.3 | 80.9 | 75.6 |", result);
+		assertContains("|   F  |   M  |   T  |", result);
+		assertContains("|  | 2005 |  |   AT   | 64.9 | 78.5 | 71.7 |", result);
+		assertContains("|  | 2012 |  |   AT   | 70.3 | 80.9 | 75.6 |", result);
 
 		// Query asking for date on rows, sex and geo on columns.
 		result = executeStatement("SELECT CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])}) ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
@@ -233,7 +240,7 @@ public class LD_Cubes_Explorer_QueryTest extends TestCase {
 
 		String result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23time])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsieb020_dsdYYYrdfXXX23CL_geo])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsieb020_dsYYYrdfXXX23ds]");
 		assertContains(
-				"|        |  2005 |  2006 |  2007 |  2008 |  2009 |  2010 |  2011 |  2012 |",
+				"|  2005 |  2006 |  2007 |  2008 |  2009 |  2010 |  2011 |  2012 |",
 				result);
 		assertContains(
 				"|   AT   |   2.5 |   3.6 |   3.7 |   2.2 |  -3.9 |   2.0 |   1.7 |   2.1 |",

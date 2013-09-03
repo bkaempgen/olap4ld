@@ -142,7 +142,8 @@ class Olap4ldHierarchy
 						new Variable("?HIERARCHY_UNIQUE_NAME"),
 						new Variable("?HIERARCHY_NAME"),
 						new Variable("?HIERARCHY_CAPTION"),
-						new Variable("?DESCRIPTION") };
+						new Variable("?DESCRIPTION"),
+						new Variable("?HIERARCHY_MAX_LEVEL_NUMBER")};
 		nodes.add(header);
 
 		Node[] metadatanode = new Node[] {
@@ -152,7 +153,9 @@ class Olap4ldHierarchy
 				new Literal(this.getDimension().getUniqueName()), new Literal(this.getUniqueName()),
 				new Literal(this.getName()),
 				new Literal(this.getCaption()),
-				new Literal(this.getDescription()) };
+				new Literal(this.getDescription()),
+				// Not exactly what HIERARCHY_MAX_LEVEL_NUMBER means, but should be sufficient.
+				new Literal(this.getLevels().size()+"")};
 		nodes.add(metadatanode);
 
 		return nodes;

@@ -115,7 +115,7 @@ class Olap4ldMeasure extends Olap4ldMember implements Measure, Named {
 				new Literal(this.getCaption()),
 				new Literal(this.getDatatype().toString()),
 				new Literal(this.isVisible()+""),
-				new Literal(this.getAggregator().toString()),
+				new Literal("http://purl.org/olap#"+this.getAggregator().toString()),
 				new Literal(this.getDescription()) };
 		nodes.add(cubenode);
 

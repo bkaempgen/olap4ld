@@ -1145,18 +1145,21 @@ abstract class Olap4ldConnection implements OlapConnection {
 			final String description = row[mapFields.get("?DESCRIPTION")]
 					.toString();
 			// The distance of the level from the root of the hierarchy. Root
-			// level is zero (0).
+			// level (abstract/implicit all level) is zero (0).
 			// Default is root level.
-			int levelNumber = 0;
+			int levelNumber;
 			if (Olap4ldLinkedDataUtil.convertNodeToMDX(row[mapFields
 					.get("?LEVEL_NUMBER")]) != null) {
 				// Since we use depth, we need to reduce the size with 1.
 				levelNumber = new Integer(
-						row[mapFields.get("?LEVEL_NUMBER")].toString()) - 1;
+						row[mapFields.get("?LEVEL_NUMBER")].toString());
 				if (levelNumber < 0) {
 					throw new UnsupportedOperationException(
 							"The levelNumber cannot be negative!");
 				}
+			} else {
+				throw new UnsupportedOperationException(
+						"A LEVEL_NUMBER should always be given!");
 			}
 			// Is Hexadecimal therefore little more complicated
 			String level_type = row[mapFields.get("?LEVEL_TYPE")].toString();
@@ -1230,7 +1233,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 					.equals("http://purl.org/olap#count")) {
 				measureAggregator = Measure.Aggregator.COUNT;
 			} else if (rowAggregator.toString().toLowerCase()
-					.equals("calculated")) {
+					.equals("http://purl.org/olap#calculated")) {
 				measureAggregator = Measure.Aggregator.CALCULATED;
 				// In this case, we should also have an expression.
 				// expression =

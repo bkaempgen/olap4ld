@@ -250,7 +250,6 @@ class Olap4ldLevel
 				new Literal(this.getCaption()),
 				new Literal(this.getName()),
 				new Literal(this.getDescription()),
-				// Actually, no direct correspondence; however, not important now.
 				new Literal(this.getDepth()+""),
 				new Literal(this.getCardinality()+""),
 				new Literal(this.getLevelType().toString()) };

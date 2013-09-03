@@ -10,14 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.mdx.CallNode;
-import org.olap4j.mdx.MemberNode;
 import org.olap4j.metadata.Level;
-import org.olap4j.metadata.Measure;
 import org.olap4j.metadata.Member;
 import org.openrdf.repository.sail.SailRepository;
+import org.semanticweb.yars.nx.Node;
 
 /**
  * Converts from relational algebra plans to physical access plans.
@@ -79,10 +76,12 @@ public class LogicalOlap2SparqlOlapVisitor implements
 			// most
 			// granular value
 			// For that, the maximum depth and the level depth are used.
+			// If max depth == level depth => levelHeight == 0
+			// If max depth > level depth => levelHeight == max depth - level depth 
 			// TODO: THis is quite a simple approach, does not consider
 			// possible
 			// access restrictions.
-			Integer levelHeight = (level.getHierarchy().getLevels().size() - 1 - level
+			Integer levelHeight = (level.getHierarchy().getLevels().size() - level
 					.getDepth());
 
 			// Note as inserted.
@@ -112,31 +111,49 @@ public class LogicalOlap2SparqlOlapVisitor implements
 	public void visit(DiceOp o) throws QueryException {
 		DiceOp dop = (DiceOp) o;
 
-		List<Position> dices = dop.getPositions();
+		List<ArrayList<Node[]>> membercombinations = dop
+				.getMemberCombinations();
+		List<Node[]> hierarchysignature = dop.getHierarchySignature();
 
 		// For each filter tuple
-		if (dices != null && !dices.isEmpty()) {
+		if (membercombinations != null && !membercombinations.isEmpty()) {
 			// We assume that each position has the same metadata (i.e.,
 			// Levels)
 			// so that we only need to add graph patterns for the first
 			// position
-			for (Member member : dices.get(0).getMembers()) {
+			Map<String, Integer> map = Olap4ldLinkedDataUtil
+					.getNodeResultFields(membercombinations.get(0).get(0));
+			Map<String, Integer> signaturemap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(hierarchysignature.get(0));
+
+			// First is header
+			for (int i = 1; i < membercombinations.get(0).size(); i++) {
+				int levelnumber = new Integer(
+						membercombinations.get(0).get(i)[map
+								.get("?LEVEL_NUMBER")].toString());
+				int levelmaxnumber = new Integer(
+						hierarchysignature.get(i)[signaturemap
+								.get("?HIERARCHY_MAX_LEVEL_NUMBER")].toString());
 				// We should be testing whether diceslevelHeight higher than
 				// slicesRollupsLevelHeight
 				// Dices Level Height
-				Integer diceslevelHeight = (member.getHierarchy().getLevels()
-						.size() - 1 - member.getLevel().getDepth());
+				Integer diceslevelHeight = levelmaxnumber - levelnumber;
 				String dimensionProperty = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(member.getLevel().getDimension()
-								.getUniqueName());
+						.convertMDXtoURI(membercombinations.get(0).get(i)[map
+								.get("?DIMENSION_UNIQUE_NAME")].toString());
 				Integer slicesRollupsLevelHeight = (levelHeightMap
 						.containsKey(dimensionProperty.hashCode())) ? levelHeightMap
 						.get(dimensionProperty.hashCode()) : 0;
-				if (member.getMemberType() != Member.Type.MEASURE
+
+				if (new Integer(
+						membercombinations.get(0).get(i)[map
+								.get("?MEMBER_TYPE")].toString()) != Member.Type.MEASURE
+						.ordinal()
 						&& diceslevelHeight > slicesRollupsLevelHeight) {
 
 					String levelURI = Olap4ldLinkedDataUtil
-							.convertMDXtoURI(member.getLevel().getUniqueName());
+							.convertMDXtoURI(membercombinations.get(0).get(i)[map
+									.get("?LEVEL_UNIQUE_NAME")].toString());
 
 					whereClause += addLevelPropertyPath(
 							slicesRollupsLevelHeight, diceslevelHeight,
@@ -148,26 +165,39 @@ public class LogicalOlap2SparqlOlapVisitor implements
 			whereClause += " FILTER (";
 			List<String> orList = new ArrayList<String>();
 
-			for (Position position : dices) {
+			for (ArrayList<Node[]> membercombination : membercombinations) {
 
 				// Each position is an OR
 				List<String> andList = new ArrayList<String>();
 
-				for (Member member : position.getMembers()) {
+				Map<String, Integer> map1 = Olap4ldLinkedDataUtil
+						.getNodeResultFields(membercombination.get(0));
+				Map<String, Integer> signaturemap1 = Olap4ldLinkedDataUtil
+						.getNodeResultFields(hierarchysignature.get(0));
+
+				// First is header
+				for (int i = 1; i <= membercombination.size(); i++) {
 					// We need to know the variable to filter
 					// First, we need to convert it to URI representation.
 					String dimensionPropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil
-							.convertMDXtoURI(member.getLevel().getDimension()
-									.getUniqueName()));
+							.convertMDXtoURI(membercombination.get(i)[map1
+									.get("?DIMENSION_UNIQUE_NAME")].toString()));
 
 					// We need to know the member to filter
 					String memberResource = Olap4ldLinkedDataUtil
-							.convertMDXtoURI(member.getUniqueName());
+							.convertMDXtoURI(membercombination.get(1)[map1
+									.get("?MEMBER_UNIQUE_NAME")].toString());
+
+					int levelnumber = new Integer(
+							membercombination.get(i)[map1.get("?LEVEL_NUMBER")]
+									.toString());
+					int levelmaxnumber = new Integer(
+							hierarchysignature.get(i)[signaturemap1
+									.get("?HIERARCHY_MAX_LEVEL_NUMBER")]
+									.toString());
 
 					// Need to know the level of the member
-					Integer diceslevelHeight = (member.getHierarchy()
-							.getLevels().size() - 1 - member.getLevel()
-							.getDepth());
+					Integer diceslevelHeight = levelmaxnumber - levelnumber;
 
 					if (isResourceAndNotLiteral(memberResource)) {
 						andList.add(" ?" + dimensionPropertyVariable
@@ -583,80 +613,104 @@ public class LogicalOlap2SparqlOlapVisitor implements
 	public void visit(ProjectionOp o) throws QueryException {
 		ProjectionOp po = (ProjectionOp) o;
 
-		ArrayList<Measure> projections = po.getProjectedMeasures();
+		ArrayList<Node[]> projections = po.getProjectedMeasures();
 
 		// Now, for each measure, we create a measure value column.
 		// Any measure should be contained only once, unless calculated
 		// measures
 		HashMap<Integer, Boolean> measureMap = new HashMap<Integer, Boolean>();
+		Map<String, Integer> map = Olap4ldLinkedDataUtil
+				.getNodeResultFields(projections.get(0));
+		boolean first = true;
 
-		for (Measure measure : projections) {
+		for (Node[] measure : projections) {
+
+			if (first) {
+				first = false;
+				continue;
+			}
 
 			// For formulas, this is different
-			if (measure.getAggregator().equals(Measure.Aggregator.CALCULATED)) {
+			// XXX: Needs to be put before creating the Logical Olap Operator
+			// Tree
+			// Will probably not work since MEASURE_AGGREGATOR
+			if (measure[map.get("?MEASURE_AGGREGATOR")].toString().equals(
+					"http://purl.org/olap#calculated")) {
 
 				/*
 				 * For now, hard coded. Here, I also partly evaluate a query
 				 * string, thus, I could do the same with filters.
 				 */
-				Measure measure1 = (Measure) ((MemberNode) ((CallNode) measure
-						.getExpression()).getArgList().get(0)).getMember();
-				Measure measure2 = (Measure) ((MemberNode) ((CallNode) measure
-						.getExpression()).getArgList().get(1)).getMember();
-
-				String operatorName = ((CallNode) measure.getExpression())
-						.getOperatorName();
+				// Measure measure1 = (Measure) ((MemberNode) ((CallNode)
+				// measure
+				// .getExpression()).getArgList().get(0)).getMember();
+				// Measure measure2 = (Measure) ((MemberNode) ((CallNode)
+				// measure
+				// .getExpression()).getArgList().get(1)).getMember();
+				//
+				// String operatorName = ((CallNode) measure.getExpression())
+				// .getOperatorName();
 
 				// Measure
 				// Measure property has aggregator attached to it at the end,
 				// e.g., "AVG".
-				String measureProperty1 = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure1.getUniqueName()).replace(
-								"AGGFUNC" + measure.getAggregator().name(), "");
+				// String measureProperty1 = Olap4ldLinkedDataUtil
+				// .convertMDXtoURI(measure1.getUniqueName()).replace(
+				// "AGGFUNC" + measure.getAggregator().name(), "");
 				// We do not encode the aggregation function in the measure,
 				// any
 				// more.
-				String measurePropertyVariable1 = makeUriToParameter(measure1
-						.getUniqueName());
-
-				String measureProperty2 = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure2.getUniqueName()).replace(
-								"AGGFUNC" + measure.getAggregator().name(), "");
-				String measurePropertyVariable2 = makeUriToParameter(measure2
-						.getUniqueName());
+				// String measurePropertyVariable1 = makeUriToParameter(measure1
+				// .getUniqueName());
+				//
+				// String measureProperty2 = Olap4ldLinkedDataUtil
+				// .convertMDXtoURI(measure2.getUniqueName()).replace(
+				// "AGGFUNC" + measure.getAggregator().name(), "");
+				// String measurePropertyVariable2 = makeUriToParameter(measure2
+				// .getUniqueName());
 
 				// We take the aggregator from the measure
-				selectClause += " " + measure1.getAggregator().name() + "(?"
-						+ measurePropertyVariable1 + " " + operatorName + " "
-						+ "?" + measurePropertyVariable2 + ")";
-
-				// I have to select them only, if we haven't inserted any
-				// before.
-				if (!measureMap.containsKey(measureProperty1.hashCode())) {
-					whereClause += " ?obs <" + measureProperty1 + "> ?"
-							+ measurePropertyVariable1 + ". ";
-					measureMap.put(measureProperty1.hashCode(), true);
-				}
-				if (!measureMap.containsKey(measureProperty2.hashCode())) {
-					whereClause += " ?obs <" + measureProperty2 + "> ?"
-							+ measurePropertyVariable2 + ". ";
-					measureMap.put(measureProperty2.hashCode(), true);
-				}
+				// selectClause += " " + measure1.getAggregator().name() + "(?"
+				// + measurePropertyVariable1 + " " + operatorName + " "
+				// + "?" + measurePropertyVariable2 + ")";
+				//
+				// // I have to select them only, if we haven't inserted any
+				// // before.
+				// if (!measureMap.containsKey(measureProperty1.hashCode())) {
+				// whereClause += " ?obs <" + measureProperty1 + "> ?"
+				// + measurePropertyVariable1 + ". ";
+				// measureMap.put(measureProperty1.hashCode(), true);
+				// }
+				// if (!measureMap.containsKey(measureProperty2.hashCode())) {
+				// whereClause += " ?obs <" + measureProperty2 + "> ?"
+				// + measurePropertyVariable2 + ". ";
+				// measureMap.put(measureProperty2.hashCode(), true);
+				// }
 
 			} else {
 
 				// As always, remove Aggregation Function from Measure Name
-				String measureProperty = Olap4ldLinkedDataUtil.convertMDXtoURI(
-						measure.getUniqueName()).replace(
-						"AGGFUNC" + measure.getAggregator().name(), "");
-				String measurePropertyVariable = makeUriToParameter(measure
-						.getUniqueName());
+				String measureProperty = Olap4ldLinkedDataUtil
+						.convertMDXtoURI(
+								measure[map.get("?MEASURE_UNIQUE_NAME")]
+										.toString())
+						.replace(
+								"AGGFUNC"
+										+ measure[map.get("?MEASURE_AGGREGATOR")]
+												.toString()
+												.replace(
+														"http://purl.org/olap#",
+														""), "");
+				String measurePropertyVariable = makeUriToParameter(measure[map
+						.get("?MEASURE_UNIQUE_NAME")].toString());
 
 				// We take the aggregator from the measure
 				// Since we use OPTIONAL, there might be empty columns,
 				// which is why we need
 				// to convert them to decimal.
-				selectClause += " (" + measure.getAggregator().name() + "(?"
+				selectClause += " ("
+						+ measure[map.get("?MEASURE_AGGREGATOR")].toString()
+								.replace("http://purl.org/olap#", "") + "(?"
 						+ measurePropertyVariable + ") as ?"
 						+ measurePropertyVariable + ")";
 
@@ -674,12 +728,15 @@ public class LogicalOlap2SparqlOlapVisitor implements
 	public void visit(BaseCubeOp o) throws QueryException {
 		BaseCubeOp so = (BaseCubeOp) o;
 
-		Map<String, Integer> map = Olap4ldLinkedDataUtil.getNodeResultFields(so.getCube().get(0));
-		
+		Map<String, Integer> map = Olap4ldLinkedDataUtil.getNodeResultFields(so
+				.getCube().get(0));
+
 		// Cube gives us the URI of the dataset that we want to resolve
-		String ds = Olap4ldLinkedDataUtil.convertMDXtoURI(so.getCube().get(1)[map.get("CUBE_NAME")].toString());
-		
-		whereClause += "?obs qb:dataSet"+ds+". ";
+		String ds = Olap4ldLinkedDataUtil
+				.convertMDXtoURI(so.getCube().get(1)[map.get("CUBE_NAME")]
+						.toString());
+
+		whereClause += "?obs qb:dataSet" + ds + ". ";
 
 		// TODO One possibility is it to directly create the tree
 		// Add physical operator that retrieves data from URI and stores it

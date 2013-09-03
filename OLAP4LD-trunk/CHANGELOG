@@ -28,6 +28,21 @@ change their value and depending on their values, execute getCubes() etc. (and a
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
+==2 Sep 2013==
+* Renamed LD_Cubes test case to "Example_QB_Datasets_QueryTest".
+* Logical Olap Op DiceOp now receives List<Node[]> of cube that is
+used in query processing.
+
+==31 Aug 2013==
+* Logical Olap Op ProjectionOp now receives List<Node[]> of cube that is
+used in query processing.
+
+==30 Aug 2013==
+* Logical Olap Op BaseCube now receives List<Node[]> of cube that is
+used in query processing.
+* Status of junit test LD_Cubes_Explorer_QueryTest.java: Only tests
+related to the setDatabase problem and Edgar loading do not succeed.
+
 ==2013-08-16==
 * Added methods to metadata objects to get List<Node[]> representation to be used in olap 
 operators (as an interface to Linked Data Engine).

@@ -4,11 +4,12 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/> 
 PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
 PREFIX qb: <http://purl.org/linked-data/cube#> 
-PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#>
+PREFIX xkos: <http://purl.org/linked-data/xkos#> 
 PREFIX owl: <http://www.w3.org/2002/07/owl#> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
 SELECT 
-?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_NAME ?HIERARCHY_CAPTION ?DESCRIPTION 
+?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_NAME ?HIERARCHY_CAPTION ?DESCRIPTION ?HIERARCHY_MAX_LEVEL_NUMBER  
 {{{STANDARDFROM}}}
 WHERE {
 ?CUBE_NAME qb:structure ?dsd. 
@@ -19,7 +20,8 @@ OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:label ?HIERARCHY_CAPTION FILTER ( lang(?HI
 OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = "en" ) } 
 BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 
 BIND('{{{TABLE_SCHEM}}}' as ?SCHEMA_NAME). 
-BIND(?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_NAME). 
+BIND(?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_NAME).
+BIND('1' as ?HIERARCHY_MAX_LEVEL_NUMBER). 
 {{{FILTERS}}}
 } ORDER BY ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME 
 

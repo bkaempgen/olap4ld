@@ -390,9 +390,8 @@ class Olap4ldMember
 				new Literal(this.getLevel().getDepth()+""),
 				new Literal(this.getName()),
 				new Literal(this.getUniqueName()),
-				// Actually, no direct correspondence; however, not important now.
 				new Literal(this.getCaption()),
-				new Literal(this.getMemberType().toString()),
+				new Literal(this.getMemberType().ordinal()+""),
 				new Literal(this.getParentMember().getUniqueName()),
 				new Literal(this.getParentMember().getLevel().getDepth()+"")
 				};

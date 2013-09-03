@@ -1,35 +1,38 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.metadata.Measure;
+import org.semanticweb.yars.nx.Node;
 
 /**
- * This operator removes facts from a result of a LogicalOlapOp that does not 
- * comply with a condition.
+ * This operator defines the projected measures.
  * 
  * @author benedikt
  *
  */
 public class ProjectionOp implements LogicalOlapOp {
 	
-	private ArrayList<Measure> projectedMeasures;
+	private ArrayList<Node[]> projectedMeasures;
 	private LogicalOlapOp inputOp;
 
-	public ProjectionOp(LogicalOlapOp inputOp, ArrayList<Measure> projectedMeasures) {
+	public ProjectionOp(LogicalOlapOp inputOp, ArrayList<Node[]> projections) {
 		this.inputOp = inputOp;
-		this.projectedMeasures = projectedMeasures;
+		this.projectedMeasures = projections;
 	}
 	
-	public ArrayList<Measure> getProjectedMeasures() {
+	public ArrayList<Node[]> getProjectedMeasures() {
 		return projectedMeasures;
 	}
 	
     public String toString() {
+    	Map<String, Integer> map = Olap4ldLinkedDataUtil.getNodeResultFields(projectedMeasures.get(0));
+    	
     	String measuresStringArray[] = new String[projectedMeasures.size()];
-    	for (int i = 0; i < measuresStringArray.length; i++) {
-    		measuresStringArray[i] = projectedMeasures.get(i).getUniqueName();
+    	// First is the header!
+    	for (int i = 1; i < measuresStringArray.length; i++) {
+    		measuresStringArray[i] = projectedMeasures.get(i)[map.get("?MEASURE_UNIQUE_NAME")].toString();
     	}
     	
         return "Projection (" + inputOp.toString() + ", "+ Olap4ldLinkedDataUtil.implodeArray(measuresStringArray, ", ") +")";

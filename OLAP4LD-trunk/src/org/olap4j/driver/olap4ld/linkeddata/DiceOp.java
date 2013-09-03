@@ -1,51 +1,80 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.metadata.Member;
+import org.semanticweb.yars.nx.Node;
 
 /**
- * This operator removes facts from a result of a LogicalOlapOp that does not 
+ * This operator removes facts from a result of a LogicalOlapOp that does not
  * comply with a condition.
  * 
  * @author benedikt
- *
+ * 
  */
 public class DiceOp implements LogicalOlapOp {
 
 	private LogicalOlapOp inputOp;
-	private List<Position> positions;
+	private List<ArrayList<Node[]>> membercombinations;
+	private List<Node[]> hierarchysignature;
 
-	public DiceOp(LogicalOlapOp op, List<Position> positions) {
+	public DiceOp(LogicalOlapOp op, List<Node[]> hierarchysignature,
+			ArrayList<ArrayList<Node[]>> membercombinations) {
 		this.inputOp = op;
-		this.positions = positions;
+		this.membercombinations = membercombinations;
+		this.hierarchysignature = hierarchysignature;
 	}
-	
-	public List<Position> getPositions() {
-		return positions;
+
+	public List<ArrayList<Node[]>> getMemberCombinations() {
+		return membercombinations;
 	}
-	
-    public String toString() {
-    	String positionsStringArray = "";
-    	for (int i = 0; i < positions.size(); i++) {
-    		String positionStringArray[] = new String[positions.size()];
-    		List<Member> members = positions.get(i).getMembers();
-    		for (int j = 0; j < members.size(); j++) {
-    			positionStringArray[i] = members.get(i).getUniqueName();
+
+	public List<Node[]> getHierarchySignature() {
+		return hierarchysignature;
+	}
+
+	public String toString() {
+		String positionsStringArray = "";
+
+		// Every member same schema
+		if (membercombinations == null || membercombinations.isEmpty()) {
+			positionsStringArray = "{}";
+		} else {
+			Map<String, Integer> map = Olap4ldLinkedDataUtil
+					.getNodeResultFields(membercombinations.get(0).get(0));
+			Map<String, Integer> signaturemap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(hierarchysignature.get(0));
+
+			for (int i = 0; i < membercombinations.size(); i++) {
+				String positionStringArray[] = new String[membercombinations
+						.size()];
+				List<Node[]> members = membercombinations.get(i);
+				// First is header
+				for (int j = 1; j < members.size(); j++) {
+					positionStringArray[i] = this.hierarchysignature.get(j)[signaturemap
+							.get("?HIERARCHY_UNIQUE_NAME")]
+							+ " = "
+							+ members.get(j)[map.get("?MEMBER_UNIQUE_NAME")]
+									.toString();
+				}
+				positionsStringArray += "("
+						+ Olap4ldLinkedDataUtil.implodeArray(
+								positionStringArray, ", ") + ")";
 			}
-    		positionsStringArray += "("+Olap4ldLinkedDataUtil.implodeArray(positionStringArray, ", ")+")";
-    	}
-    	
-        return "Dice (" + inputOp.toString() + ", "+ positionsStringArray +")";
-    }
+		}
+
+		return "Dice (" + inputOp.toString() + ", " + positionsStringArray
+				+ ")";
+	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+			throws QueryException {
 		// TODO Auto-generated method stub
 		v.visit(this);
-        // visit the projection input op
+		// visit the projection input op
 		inputOp.accept(v);
 	}
 
