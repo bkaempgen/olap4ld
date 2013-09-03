@@ -15,6 +15,7 @@ import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.Olap4ldCube;
 import org.olap4j.driver.olap4ld.Olap4ldDimension;
 import org.olap4j.driver.olap4ld.Olap4ldHierarchy;
+import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.impl.*;
 import org.olap4j.metadata.*;
 import org.semanticweb.yars.nx.Literal;
@@ -107,9 +108,12 @@ class Olap4ldDimension extends Olap4ldElement implements Dimension, Named {
 		nodes.add(header);
 
 		Node[] cubenode = new Node[] {
-				new Literal(this.olap4jCube.getSchema().getCatalog().getName()),
-				new Literal(this.olap4jCube.getSchema().getName()),
-				new Literal(this.getUniqueName()), new Literal(this.getCaption()),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.olap4jCube.getSchema().getCatalog().getName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.olap4jCube.getSchema().getName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getUniqueName())), new Literal(this.getCaption()),
 				new Literal(this.getOrdinal()+""),
 				new Literal(this.type.toString()),
 				new Literal(this.getDescription()) };

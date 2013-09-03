@@ -1,9 +1,10 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
 import java.util.List;
+import java.util.Map;
 
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.metadata.Dimension;
+import org.semanticweb.yars.nx.Node;
 
 /**
  * This operator removes a Dimension from a Cube, a result of a lower LogicalOlapOp.
@@ -14,17 +15,20 @@ import org.olap4j.metadata.Dimension;
 public class SliceOp implements LogicalOlapOp {
 
 	private LogicalOlapOp inputOp;
-	private List<Dimension> slicedDimensions;
+	private List<Node[]> slicedDimensions;
 
-	public SliceOp(LogicalOlapOp inputOp, List<Dimension> slicedDimensions) {
+	public SliceOp(LogicalOlapOp inputOp, List<Node[]> slicedDimensions2) {
 		this.inputOp = inputOp;
-		this.slicedDimensions = slicedDimensions;
+		this.slicedDimensions = slicedDimensions2;
 	}
 	
     public String toString() {
     	String dimensionsStringArray[] = new String[slicedDimensions.size()];
     	for (int i = 0; i < dimensionsStringArray.length; i++) {
-    		dimensionsStringArray[i] = slicedDimensions.get(i).getUniqueName();
+    		Map<String, Integer> map = Olap4ldLinkedDataUtil
+					.getNodeResultFields(slicedDimensions.get(0));
+    		
+    		dimensionsStringArray[i] = slicedDimensions.get(i)[map.get("?DIMENSION_UNIQUE_NAME")].toString();
     	}
     	
         return "Slice (" + inputOp.toString() + ", "+ Olap4ldLinkedDataUtil.implodeArray(dimensionsStringArray, ", ") +")";

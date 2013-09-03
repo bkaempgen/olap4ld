@@ -16,6 +16,7 @@ import org.olap4j.driver.olap4ld.Olap4ldLevel;
 import org.olap4j.driver.olap4ld.Olap4ldMeasure;
 import org.olap4j.driver.olap4ld.Olap4ldMember;
 import org.olap4j.driver.olap4ld.Olap4ldSchema;
+import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.impl.*;
 import org.olap4j.mdx.*;
 import org.olap4j.metadata.*;
@@ -307,7 +308,7 @@ class Olap4ldCube implements Cube, Named {
 
 		private final Map<Olap4ldLevel, SoftReference<List<Olap4ldMember>>> levelMemberListMap = new HashMap<Olap4ldLevel, SoftReference<List<Olap4ldMember>>>();
 
-		private NamedList<Olap4ldMeasure> measures;
+		//private NamedList<Olap4ldMeasure> measures;
 
 		/**
 		 * Creates a CachingMetadataReader.
@@ -321,7 +322,7 @@ class Olap4ldCube implements Cube, Named {
 		CachingMetadataReader(MetadataReader metadataReader,
 				NamedList<Olap4ldMeasure> measures) {
 			super(metadataReader);
-			this.measures = measures;
+			//this.measures = measures;
 		}
 
 		public Olap4ldMember lookupMemberByUniqueName(String memberUniqueName)
@@ -615,9 +616,12 @@ class Olap4ldCube implements Cube, Named {
 			nodes.add(header);
 			
 			Node[] cubenode = new Node[] {
-					new Literal(this.getSchema().getCatalog().getName()),
-					new Literal(this.getSchema().getName()),
-					new Literal(this.getUniqueName()), new Literal("CUBE"),
+					new Literal(Olap4ldLinkedDataUtil
+							.convertMDXtoURI(this.getSchema().getCatalog().getName())),
+					new Literal(Olap4ldLinkedDataUtil
+							.convertMDXtoURI(this.getSchema().getName())),
+					new Literal(Olap4ldLinkedDataUtil
+							.convertMDXtoURI(this.getUniqueName())), new Literal("CUBE"),
 					new Literal(this.getCaption()),
 					new Literal(this.getDescription()) };
 			nodes.add(cubenode);

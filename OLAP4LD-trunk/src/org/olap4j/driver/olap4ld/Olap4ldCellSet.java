@@ -439,8 +439,10 @@ abstract class Olap4ldCellSet implements CellSet {
 		// When going through the axes: Prepare groupbylist, a set of levels
 		// Prepare list of levels (excluding Measures!)
 		// Go through tuple get dimensions, if not measure
-		ArrayList<Level> rollups = new ArrayList<Level>();
+		ArrayList<Node[]> rollups = new ArrayList<Node[]>();
+		ArrayList<Node[]> rollupssignature = new ArrayList<Node[]>();
 
+		boolean first = true;
 		for (Olap4ldCellSetAxis cellSetAxis : axisList) {
 
 			List<Position> positions = cellSetAxis.positions;
@@ -453,34 +455,54 @@ abstract class Olap4ldCellSet implements CellSet {
 			List<Member> members = position.getMembers();
 
 			for (Member member : members) {
-
 				if (member.getMemberType() != Member.Type.MEASURE) {
-					rollups.add(member.getLevel());
+					Olap4ldHierarchy olaphierarchy = (Olap4ldHierarchy) member.getLevel().getHierarchy();
+					Olap4ldLevel olaplevel = (Olap4ldLevel) member.getLevel();
+					if (first) {
+						first = false;
+						rollups.add(olaplevel.transformMetadataObject2NxNodes(
+								metaData.cube).get(0));
+						rollupssignature.add(olaphierarchy.transformMetadataObject2NxNodes(
+								metaData.cube).get(0));
+					}
+					rollups.add(olaplevel.transformMetadataObject2NxNodes(
+							metaData.cube).get(1));
+					rollupssignature.add(olaphierarchy.transformMetadataObject2NxNodes(
+							metaData.cube).get(1));
 				}
 			}
 		}
 
 		// Find out which Dimensions to slice
-		List<Dimension> slicedDimensions = new ArrayList<Dimension>();
+		List<Node[]> slicedDimensions = new ArrayList<Node[]>();
 		NamedList<Dimension> dimensions = metaData.cube.getDimensions();
 		for (Dimension dimension : dimensions) {
 			boolean contained = false;
-			for (Level slicesrollup : rollups) {
+			for (Node[] slicesrollup : rollups) {
+				
+				Map<String, Integer> map = Olap4ldLinkedDataUtil
+						.getNodeResultFields(rollups.get(0));
 				// Check whether dimension contained in rollup (dice?).
 				// TODO: We would also need to check whether in dice, actually.
-				if (slicesrollup.getDimension().getUniqueName()
+				if (slicesrollup[map.get("?DIMENSION_UNIQUE_NAME")].toString()
 						.equals(dimension.getUniqueName())) {
 					contained = true;
 				}
 			}
+			boolean first1 = true;
 			if (!contained) {
-				slicedDimensions.add(dimension);
+				Olap4ldDimension olapdimension = (Olap4ldDimension) dimension;
+				if (first1) {
+					first1 = false;
+					slicedDimensions.add(olapdimension.transformMetadataObject2NxNodes().get(0));
+				}
+				slicedDimensions.add(olapdimension.transformMetadataObject2NxNodes().get(1));
 			}
 		}
 		LogicalOlapOp slice = new SliceOp(dice, slicedDimensions);
 
 		// Rollup operator
-		LogicalOlapOp rollup = new RollupOp(slice, rollups);
+		LogicalOlapOp rollup = new RollupOp(slice, rollupssignature, rollups);
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(rollup);
 		return myplan;
@@ -1331,7 +1353,7 @@ abstract class Olap4ldCellSet implements CellSet {
 					.getNodeResultFields(measureList.get(0));
 
 			if (measureList.get(i)[map.get("?MEASURE_UNIQUE_NAME")].toString()
-					.equals(measure.getName())) {
+					.equals(Olap4ldLinkedDataUtil.convertMDXtoURI(measure.getName()))) {
 				// First is header
 				index = i - 1;
 				break;

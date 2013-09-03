@@ -208,10 +208,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// Query asking for date on rows, sex and geo on columns.
 		result = executeStatement("SELECT CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])}) ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
 		assertContains(
-				"|      |   F                                                                                                                                                                                                                                                         |   M                                                                                                                                                                                                                                                         |   T                                                                                                                                                                                                                                                         |",
-				result);
-		assertContains(
-				"|      |   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |   IE |   IS |   IT |   JP |   LT |   LU |   LV |   MK |   MT |   NL |   NO |   PL |   PT |   RO |   SE |   SI |   SK |   TR |   UK |   US |   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |   IE |   IS |   IT |   JP |   LT |   LU |   LV |   MK |   MT |   NL |   NO |   PL |   PT |   RO |   SE |   SI |   SK |   TR |   UK |   US |   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |   IE |   IS |   IT |   JP |   LT |   LU |   LV |   MK |   MT |   NL |   NO |   PL |   PT |   RO |   SE |   SI |   SK |   TR |   UK |   US |",
+				"|   AT |   BE |   BG |   CH |   CY |   CZ |   DE |   DK |   EE |   EL |   ES |  27 EU |   FI |   FR |   HR |   HU |",
 				result);
 		assertContains(
 				"| 2005 | 64.9 | 58.6 | 57.1 | 72.7 | 63.8 | 61.3 | 63.1 | 73.7 | 69.0 | 49.6 | 54.4 |   60.0 | 70.8 | 63.7 | 52.8 | 55.6 | 62.4 | 81.2 | 48.4 | 61.7 | 66.6 | 58.4 | 65.7 |      | 35.1 | 67.6 | 74.6 | 51.7 | 66.0 | 56.9 | 75.5 | 66.2 | 56.7 |      | 68.5 | 68.1 | 78.5 | 74.3 | 66.8 | 87.1 | 85.5 | 80.1 | 75.6 | 82.3 | 75.4 | 79.8 | 79.9 |   76.0 | 75.1 | 75.3 | 67.5 | 69.2 | 82.8 | 89.6 | 74.8 | 86.1 | 74.9 | 79.4 | 75.4 |      | 80.6 | 82.4 | 81.6 | 65.1 | 78.7 | 70.4 | 80.7 | 75.8 | 72.5 |      | 82.0 | 81.7 | 71.7 | 66.5 | 61.9 | 79.9 | 74.4 | 70.7 | 69.4 | 78.0 | 72.0 | 64.6 | 67.2 |   68.0 | 73.0 | 69.4 | 60.0 | 62.2 | 72.6 | 85.5 | 61.6 | 73.9 | 70.6 | 69.0 | 70.3 |      | 57.9 | 75.1 | 78.2 | 58.3 | 72.3 | 63.6 | 78.1 | 71.1 | 64.5 |      | 75.2 | 74.8 |",
@@ -222,8 +219,8 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 		// Query asking for three dimensions at a time.
 		result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23employment_rate]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])})) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		assertContains("| 2005 |   F |   AT   |             64.9 |", result);
-		assertContains("| 2012 |   F |   AT   |             70.3 |", result);
+		assertContains("| 2005 |  |   F |  |   AT   |             64.9 |", result);
+		assertContains("| 2012 |  |   F |  |   AT   |             70.3 |", result);
 
 	}
 

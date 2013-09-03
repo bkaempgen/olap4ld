@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Member;
 import org.openrdf.repository.sail.SailRepository;
 import org.semanticweb.yars.nx.Node;
@@ -53,23 +52,30 @@ public class LogicalOlap2SparqlOlapVisitor implements
 		// For rollup,
 		RollupOp so = (RollupOp) o;
 
-		List<Level> rollups = so.getRollups();
+		List<Node[]> rollups = so.getRollups();
+		List<Node[]> rollupssignature = so.getRollupsSignature();
 
 		// HashMaps for level height of dimension
 		this.levelHeightMap = new HashMap<Integer, Integer>();
 
-		for (Level level : rollups) {
+		// First is header
+		for (int i = 1; i < rollups.size(); i++) {
+
+			Map<String, Integer> map = Olap4ldLinkedDataUtil
+					.getNodeResultFields(rollups.get(0));
+			Map<String, Integer> mapsignature = Olap4ldLinkedDataUtil
+					.getNodeResultFields(rollupssignature.get(0));
 
 			// At the moment, we do not support hierarchy/roll-up, but
 			// simply
 			// query for all dimension members
 			// String hierarchyURI = LdOlap4jUtil.decodeUriForMdx(hierarchy
 			// .getUniqueName());
-			String dimensionProperty = Olap4ldLinkedDataUtil
-					.convertMDXtoURI(level.getDimension().getUniqueName());
+			String dimensionProperty = rollups.get(i)[map
+							.get("?DIMENSION_UNIQUE_NAME")].toString();
 			// XXX Why exactly do I include the level?
-			String levelURI = Olap4ldLinkedDataUtil.convertMDXtoURI(level
-					.getUniqueName());
+			String levelURI = rollups
+					.get(i)[map.get("?LEVEL_UNIQUE_NAME")].toString();
 
 			// Now, depending on level depth we need to behave differently
 			// Slicer level is the number of property-value pairs from the
@@ -77,12 +83,15 @@ public class LogicalOlap2SparqlOlapVisitor implements
 			// granular value
 			// For that, the maximum depth and the level depth are used.
 			// If max depth == level depth => levelHeight == 0
-			// If max depth > level depth => levelHeight == max depth - level depth 
+			// If max depth > level depth => levelHeight == max depth - level
+			// depth
 			// TODO: THis is quite a simple approach, does not consider
 			// possible
 			// access restrictions.
-			Integer levelHeight = (level.getHierarchy().getLevels().size() - level
-					.getDepth());
+			Integer levelHeight = (new Integer(
+					rollupssignature.get(i)[mapsignature
+							.get("?HIERARCHY_MAX_LEVEL_NUMBER")].toString()) - new Integer(
+					rollups.get(i)[map.get("?LEVEL_NUMBER")].toString()));
 
 			// Note as inserted.
 			levelHeightMap.put(dimensionProperty.hashCode(), levelHeight);
@@ -138,9 +147,8 @@ public class LogicalOlap2SparqlOlapVisitor implements
 				// slicesRollupsLevelHeight
 				// Dices Level Height
 				Integer diceslevelHeight = levelmaxnumber - levelnumber;
-				String dimensionProperty = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(membercombinations.get(0).get(i)[map
-								.get("?DIMENSION_UNIQUE_NAME")].toString());
+				String dimensionProperty = membercombinations.get(0).get(i)[map
+								.get("?DIMENSION_UNIQUE_NAME")].toString();
 				Integer slicesRollupsLevelHeight = (levelHeightMap
 						.containsKey(dimensionProperty.hashCode())) ? levelHeightMap
 						.get(dimensionProperty.hashCode()) : 0;
@@ -151,9 +159,8 @@ public class LogicalOlap2SparqlOlapVisitor implements
 						.ordinal()
 						&& diceslevelHeight > slicesRollupsLevelHeight) {
 
-					String levelURI = Olap4ldLinkedDataUtil
-							.convertMDXtoURI(membercombinations.get(0).get(i)[map
-									.get("?LEVEL_UNIQUE_NAME")].toString());
+					String levelURI = membercombinations.get(0).get(i)[map
+									.get("?LEVEL_UNIQUE_NAME")].toString();
 
 					whereClause += addLevelPropertyPath(
 							slicesRollupsLevelHeight, diceslevelHeight,
@@ -179,14 +186,12 @@ public class LogicalOlap2SparqlOlapVisitor implements
 				for (int i = 1; i <= membercombination.size(); i++) {
 					// We need to know the variable to filter
 					// First, we need to convert it to URI representation.
-					String dimensionPropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil
-							.convertMDXtoURI(membercombination.get(i)[map1
-									.get("?DIMENSION_UNIQUE_NAME")].toString()));
+					String dimensionPropertyVariable = makeUriToParameter(membercombination.get(i)[map1
+									.get("?DIMENSION_UNIQUE_NAME")].toString());
 
 					// We need to know the member to filter
-					String memberResource = Olap4ldLinkedDataUtil
-							.convertMDXtoURI(membercombination.get(1)[map1
-									.get("?MEMBER_UNIQUE_NAME")].toString());
+					String memberResource = membercombination.get(1)[map1
+									.get("?MEMBER_UNIQUE_NAME")].toString();
 
 					int levelnumber = new Integer(
 							membercombination.get(i)[map1.get("?LEVEL_NUMBER")]
@@ -690,10 +695,9 @@ public class LogicalOlap2SparqlOlapVisitor implements
 			} else {
 
 				// As always, remove Aggregation Function from Measure Name
-				String measureProperty = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(
+				String measureProperty = 
 								measure[map.get("?MEASURE_UNIQUE_NAME")]
-										.toString())
+										.toString()
 						.replace(
 								"AGGFUNC"
 										+ measure[map.get("?MEASURE_AGGREGATOR")]
@@ -732,9 +736,8 @@ public class LogicalOlap2SparqlOlapVisitor implements
 				.getCube().get(0));
 
 		// Cube gives us the URI of the dataset that we want to resolve
-		String ds = Olap4ldLinkedDataUtil
-				.convertMDXtoURI(so.getCube().get(1)[map.get("CUBE_NAME")]
-						.toString());
+		String ds = so.getCube().get(1)[map.get("CUBE_NAME")]
+						.toString();
 
 		whereClause += "?obs qb:dataSet" + ds + ". ";
 

@@ -117,7 +117,8 @@ public class Olap4ldLinkedDataUtil {
 	public static String convertNodeToMDX(org.semanticweb.yars.nx.Node node) {
 		// If value is uri, then convert into MDX friendly format
 		if (node.toString().equals("null")) {
-			return null;
+			// XXX: Not sure whether it is clever to have this like an object name with square br.
+			return "[null]";
 		} else if (node.toString().equals("Measures")) {
 			// Measures does not get encoded, can stay.
 			return node.toString();

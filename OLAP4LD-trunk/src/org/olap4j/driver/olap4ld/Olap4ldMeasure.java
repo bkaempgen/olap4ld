@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.impl.Named;
 import org.olap4j.mdx.ParseTreeNode;
 import org.olap4j.metadata.Cube;
@@ -108,10 +109,15 @@ class Olap4ldMeasure extends Olap4ldMember implements Measure, Named {
 		nodes.add(header);
 
 		Node[] cubenode = new Node[] {
-				new Literal(cube.getSchema().getCatalog().getName()),
-				new Literal(cube.getSchema().getName()),
-				new Literal(cube.getUniqueName()),
-				new Literal(this.getUniqueName()), new Literal(this.getName()),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getCatalog().getName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getUniqueName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getUniqueName())), new Literal(Olap4ldLinkedDataUtil
+								.convertMDXtoURI(this.getName())),
 				new Literal(this.getCaption()),
 				new Literal(this.getDatatype().toString()),
 				new Literal(this.isVisible()+""),

@@ -15,6 +15,7 @@ import org.olap4j.driver.olap4ld.Olap4ldDimension;
 import org.olap4j.driver.olap4ld.Olap4ldHierarchy;
 import org.olap4j.driver.olap4ld.Olap4ldLevel;
 import org.olap4j.driver.olap4ld.Olap4ldMember;
+import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.impl.*;
 import org.olap4j.mdx.ParseTreeNode;
 import org.olap4j.metadata.*;
@@ -382,14 +383,22 @@ class Olap4ldMember
 		nodes.add(header);
 
 		Node[] metadatanode = new Node[] {
-				new Literal(cube.getSchema().getCatalog().getName()),
-				new Literal(cube.getSchema().getName()),
-				new Literal(cube.getUniqueName()),
-				new Literal(this.getDimension().getUniqueName()), new Literal(this.getHierarchy().getUniqueName()),
-				new Literal(this.getLevel().getUniqueName()),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getCatalog().getName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getUniqueName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getDimension().getUniqueName())), new Literal(Olap4ldLinkedDataUtil
+								.convertMDXtoURI(this.getHierarchy().getUniqueName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getLevel().getUniqueName())),
 				new Literal(this.getLevel().getDepth()+""),
-				new Literal(this.getName()),
-				new Literal(this.getUniqueName()),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getUniqueName())),
 				new Literal(this.getCaption()),
 				new Literal(this.getMemberType().ordinal()+""),
 				new Literal(this.getParentMember().getUniqueName()),
