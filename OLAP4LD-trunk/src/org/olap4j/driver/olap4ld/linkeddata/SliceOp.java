@@ -7,10 +7,11 @@ import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.semanticweb.yars.nx.Node;
 
 /**
- * This operator removes a Dimension from a Cube, a result of a lower LogicalOlapOp.
+ * This operator removes a Dimension from a Cube, a result of a lower
+ * LogicalOlapOp.
  * 
  * @author benedikt
- *
+ * 
  */
 public class SliceOp implements LogicalOlapOp {
 
@@ -21,23 +22,33 @@ public class SliceOp implements LogicalOlapOp {
 		this.inputOp = inputOp;
 		this.slicedDimensions = slicedDimensions2;
 	}
-	
-    public String toString() {
-    	String dimensionsStringArray[] = new String[slicedDimensions.size()];
-    	for (int i = 0; i < dimensionsStringArray.length; i++) {
-    		Map<String, Integer> map = Olap4ldLinkedDataUtil
-					.getNodeResultFields(slicedDimensions.get(0));
-    		
-    		dimensionsStringArray[i] = slicedDimensions.get(i)[map.get("?DIMENSION_UNIQUE_NAME")].toString();
-    	}
-    	
-        return "Slice (" + inputOp.toString() + ", "+ Olap4ldLinkedDataUtil.implodeArray(dimensionsStringArray, ", ") +")";
-    }
+
+	public String toString() {
+		if (slicedDimensions != null && !slicedDimensions.isEmpty()) {
+			String dimensionsStringArray[] = new String[slicedDimensions.size() - 1];
+			// First is header
+			for (int i = 1; i < dimensionsStringArray.length; i++) {
+				Map<String, Integer> map = Olap4ldLinkedDataUtil
+						.getNodeResultFields(slicedDimensions.get(0));
+
+				dimensionsStringArray[i] = slicedDimensions.get(i)[map
+						.get("?DIMENSION_UNIQUE_NAME")].toString();
+			}
+
+			return "Slice ("
+					+ inputOp.toString()
+					+ ", {"
+					+ Olap4ldLinkedDataUtil.implodeArray(dimensionsStringArray,
+							", ") + "})";
+		}
+		return "Slice (" + inputOp.toString() + ", {})";
+	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+			throws QueryException {
 		v.visit(this);
-        // visit the projection input op
+		// visit the projection input op
 		inputOp.accept(v);
 	}
 

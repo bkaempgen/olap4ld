@@ -21,11 +21,8 @@ package org.olap4j;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,17 +44,7 @@ import org.olap4j.driver.olap4ld.linkeddata.RollupOp;
 import org.olap4j.driver.olap4ld.linkeddata.SliceOp;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
-import org.olap4j.mdx.SelectNode;
-import org.olap4j.mdx.parser.MdxParser;
-import org.olap4j.mdx.parser.MdxParserFactory;
-import org.olap4j.mdx.parser.MdxValidator;
-import org.olap4j.metadata.Cube;
-import org.olap4j.metadata.Dimension;
-import org.olap4j.metadata.Measure;
-import org.olap4j.metadata.Member;
-import org.olap4j.test.TestContext;
 import org.semanticweb.yars.nx.Node;
-import org.semanticweb.yars.util.Array;
 
 /**
  * Tests on building a slicer. Input: Arbitrary dataset. Output: For each
@@ -91,7 +78,7 @@ public class Slicer_QueryTest extends TestCase {
 
 	}
 
-	public void testSsb001ExampleMetadata() {
+	public void test_example_ssb001_slicer_oneDim() {
 		String dsUri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
 		List<LogicalOlapQueryPlan> queryplans = getOneDimSlices(dsUri);
 		for (LogicalOlapQueryPlan logicalOlapQueryPlan : queryplans) {
@@ -128,6 +115,10 @@ public class Slicer_QueryTest extends TestCase {
 			Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(dimensions.get(0));
 			for (Node[] dim2rollup : dimensions) {
+				// No measure dimension
+				if (dim2rollup[dimensionmap.get("?DIMENSION_UNIQUE_NAME")].toString().equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+					continue;
+				}
 				if (first) {
 					first = false;
 					continue;
@@ -137,6 +128,10 @@ public class Slicer_QueryTest extends TestCase {
 				List<Node[]> fixeddims = new ArrayList<Node[]>();
 				first = true;
 				for (Node[] dim2fix : dimensions) {
+					// No measure dimension
+					if (dim2fix[dimensionmap.get("?DIMENSION_UNIQUE_NAME")].toString().equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+						continue;
+					}
 					if (first) {
 						first = false;
 						fixeddims.add(dimensions.get(0));
@@ -298,7 +293,14 @@ public class Slicer_QueryTest extends TestCase {
 			// For now, we simply return plan
 			System.out.println("--------------");
 			System.out.println(queryplan.toString());
-			//this.lde.executeOlapQuery(queryplan);
+			// No execution, yet.
+//			List<Node[]> result = this.lde.executeOlapQuery(queryplan);
+//			for (Node[] nodes : result) {
+//				for (Node node : nodes) {
+//					System.out.print(node.toString()+"; ");
+//				}
+//				System.out.println();
+//			}
 			System.out.println("--------------");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

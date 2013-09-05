@@ -10,10 +10,10 @@ import org.semanticweb.yars.nx.Node;
  * This operator defines the projected measures.
  * 
  * @author benedikt
- *
+ * 
  */
 public class ProjectionOp implements LogicalOlapOp {
-	
+
 	private List<Node[]> projectedMeasures;
 	private LogicalOlapOp inputOp;
 
@@ -21,31 +21,42 @@ public class ProjectionOp implements LogicalOlapOp {
 		this.inputOp = inputOp;
 		this.projectedMeasures = projections;
 	}
-	
+
 	public List<Node[]> getProjectedMeasures() {
 		return projectedMeasures;
 	}
-	
+
 	public LogicalOlapOp getInputOp() {
 		return this.inputOp;
 	}
-	
-    public String toString() {
-    	Map<String, Integer> map = Olap4ldLinkedDataUtil.getNodeResultFields(projectedMeasures.get(0));
-    	
-    	String measuresStringArray[] = new String[projectedMeasures.size()];
-    	// First is the header!
-    	for (int i = 1; i < measuresStringArray.length; i++) {
-    		measuresStringArray[i] = projectedMeasures.get(i)[map.get("?MEASURE_UNIQUE_NAME")].toString();
-    	}
-    	
-        return "Projection (" + inputOp.toString() + ", "+ Olap4ldLinkedDataUtil.implodeArray(measuresStringArray, ", ") +")";
-    }
+
+	public String toString() {
+		if (projectedMeasures != null && !projectedMeasures.isEmpty()) {
+
+			Map<String, Integer> map = Olap4ldLinkedDataUtil
+					.getNodeResultFields(projectedMeasures.get(0));
+
+			String measuresStringArray[] = new String[projectedMeasures.size() - 1];
+			// First is the header!
+			for (int i = 1; i < projectedMeasures.size(); i++) {
+				measuresStringArray[i - 1] = projectedMeasures.get(i)[map
+						.get("?MEASURE_UNIQUE_NAME")].toString();
+			}
+
+			return "Projection ("
+					+ inputOp.toString()
+					+ ", {"
+					+ Olap4ldLinkedDataUtil.implodeArray(measuresStringArray,
+							", ") + "})";
+		}
+		return "Projection (" + inputOp.toString() + ", {})";
+	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+			throws QueryException {
 		v.visit(this);
-        // visit the projection input op
+		// visit the projection input op
 		inputOp.accept(v);
 	}
 

@@ -46,13 +46,14 @@ public class DiceOp implements LogicalOlapOp {
 			Map<String, Integer> signaturemap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(hierarchysignature.get(0));
 
+			// There is no header
 			for (int i = 0; i < membercombinations.size(); i++) {
-				String positionStringArray[] = new String[membercombinations
-						.size()];
 				List<Node[]> members = membercombinations.get(i);
+				String positionStringArray[] = new String[members
+				                  						.size()-1];
 				// First is header
 				for (int j = 1; j < members.size(); j++) {
-					positionStringArray[i] = this.hierarchysignature.get(j)[signaturemap
+					positionStringArray[j-1] = this.hierarchysignature.get(j)[signaturemap
 							.get("?HIERARCHY_UNIQUE_NAME")]
 							+ " = "
 							+ members.get(j)[map.get("?MEMBER_UNIQUE_NAME")]

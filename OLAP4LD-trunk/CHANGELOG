@@ -30,6 +30,8 @@ directly from getCubes() etc. We would not need to populate a deferred list on g
 
 ==5 Sep 2013==
 * Restrictions now use URI representation, but also are able to convert from MDX representation.
+* Slicer_QueryTest.java [1] now contains test "test_example_ssb001_slicer_oneDim()", that creates 
+all 1-dimensional OLAP queries to example cube
 
 ==2 Sep 2013==
 * Renamed LD_Cubes test case to "Example_QB_Datasets_QueryTest".
