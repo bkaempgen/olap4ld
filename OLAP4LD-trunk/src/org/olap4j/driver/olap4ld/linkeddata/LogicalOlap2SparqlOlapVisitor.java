@@ -120,7 +120,7 @@ public class LogicalOlap2SparqlOlapVisitor implements
 	public void visit(DiceOp o) throws QueryException {
 		DiceOp dop = (DiceOp) o;
 
-		List<ArrayList<Node[]>> membercombinations = dop
+		List<List<Node[]>> membercombinations = dop
 				.getMemberCombinations();
 		List<Node[]> hierarchysignature = dop.getHierarchySignature();
 
@@ -172,7 +172,7 @@ public class LogicalOlap2SparqlOlapVisitor implements
 			whereClause += " FILTER (";
 			List<String> orList = new ArrayList<String>();
 
-			for (ArrayList<Node[]> membercombination : membercombinations) {
+			for (List<Node[]> membercombination : membercombinations) {
 
 				// Each position is an OR
 				List<String> andList = new ArrayList<String>();
@@ -618,7 +618,7 @@ public class LogicalOlap2SparqlOlapVisitor implements
 	public void visit(ProjectionOp o) throws QueryException {
 		ProjectionOp po = (ProjectionOp) o;
 
-		ArrayList<Node[]> projections = po.getProjectedMeasures();
+		List<Node[]> projections = po.getProjectedMeasures();
 
 		// Now, for each measure, we create a measure value column.
 		// Any measure should be contained only once, unless calculated

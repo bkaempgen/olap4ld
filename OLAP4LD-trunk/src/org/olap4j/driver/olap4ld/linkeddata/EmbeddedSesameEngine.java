@@ -99,8 +99,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	private SailRepository repo;
 
 	public EmbeddedSesameEngine(URL serverUrlObject,
-			ArrayList<String> datastructuredefinitions,
-			ArrayList<String> datasets, String databasename) {
+			List<String> datastructuredefinitions,
+			List<String> datasets, String databasename) {
 
 		// We actually do not need that.
 		URL = serverUrlObject.toString();
@@ -581,8 +581,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		try {
 			if (restrictions.cubeNamePattern != null) {
-				String uri = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.cubeNamePattern);
+				// There is no need to translate to URI, since restrictions already contain URI representation.
+				String uri = restrictions.cubeNamePattern;
 
 				if (!isStored(uri)) {
 					// We also store URI in map
@@ -1673,8 +1673,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 				if (restrictions.cubeNamePattern != null) {
 					additionalFilters += " FILTER (?CUBE_NAME = <"
-							+ Olap4ldLinkedDataUtil
-									.convertMDXtoURI(restrictions.cubeNamePattern)
+							+ restrictions.cubeNamePattern
 							+ ">) ";
 				}
 			}
@@ -1743,8 +1742,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 				// Here, we need a specific filter
 				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.memberUniqueName)
+						+ restrictions.memberUniqueName
 						+ ">) ";
 
 			}
@@ -1943,29 +1941,24 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	private String createFilterForRestrictions(Restrictions restrictions) {
 		// We need to create a filter for the specific restriction
 		String cubeNamePatternFilter = (restrictions.cubeNamePattern != null) ? " FILTER (?CUBE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.cubeNamePattern) + ">) "
+				+ restrictions.cubeNamePattern + ">) "
 				: "";
 		String dimensionUniqueNameFilter = (restrictions.dimensionUniqueName != null && !restrictions.dimensionUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?DIMENSION_UNIQUE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.dimensionUniqueName)
+				+ restrictions.dimensionUniqueName
 				+ ">) " : "";
 		String hierarchyUniqueNameFilter = (restrictions.hierarchyUniqueName != null && !restrictions.hierarchyUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?HIERARCHY_UNIQUE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.hierarchyUniqueName)
+				+ restrictions.hierarchyUniqueName
 				+ ">) " : "";
 		String levelUniqueNameFilter = (restrictions.levelUniqueName != null && !restrictions.levelUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?LEVEL_UNIQUE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.levelUniqueName) + ">) "
+				+ restrictions.levelUniqueName + ">) "
 				: "";
 
 		String memberUniqueNameFilter;
 		if (restrictions.memberUniqueName != null) {
-			String resource = Olap4ldLinkedDataUtil
-					.convertMDXtoURI(restrictions.memberUniqueName);
+			String resource = restrictions.memberUniqueName;
 				// Since we sometimes manually build member names, we have to check on strings
 				memberUniqueNameFilter = " FILTER (str(?MEMBER_UNIQUE_NAME) = \""
 						+ resource + "\") ";

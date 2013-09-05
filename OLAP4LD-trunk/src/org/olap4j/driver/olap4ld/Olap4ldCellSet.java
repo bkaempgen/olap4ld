@@ -377,7 +377,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		// since measures are projected
 
 		List<Node[]> newfilterAxisSignature = new ArrayList<Node[]>();
-		ArrayList<ArrayList<Node[]>> newfilterAxisPositions = new ArrayList<ArrayList<Node[]>>();
+		List<List<Node[]>> newfilterAxisPositions = new ArrayList<List<Node[]>>();
 
 		// With first position we create signature to be diced but only if diced
 		// members available

@@ -1,6 +1,6 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
@@ -16,20 +16,20 @@ import org.semanticweb.yars.nx.Node;
 public class RollupOp implements LogicalOlapOp {
 
 	private LogicalOlapOp inputOp;
-	private ArrayList<Node[]> rollups;
-	private ArrayList<Node[]> rollupssignature;
+	private List<Node[]> rollups;
+	private List<Node[]> rollupssignature;
 
-	public RollupOp(LogicalOlapOp slice, ArrayList<Node[]> rollupssignature, ArrayList<Node[]> rollups) {
+	public RollupOp(LogicalOlapOp slice, List<Node[]> rollupssignature, List<Node[]> rollups) {
 		this.inputOp = slice;
 		this.rollups = rollups;
 		this.rollupssignature = rollupssignature;
 	}
 	
-	public ArrayList<Node[]> getRollups() {
+	public List<Node[]> getRollups() {
 		return rollups;
 	}
 	
-	public ArrayList<Node[]> getRollupsSignature() {
+	public List<Node[]> getRollupsSignature() {
 		return rollupssignature;
 	}
 	

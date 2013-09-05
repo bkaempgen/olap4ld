@@ -1,6 +1,6 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
@@ -14,15 +14,15 @@ import org.semanticweb.yars.nx.Node;
  */
 public class ProjectionOp implements LogicalOlapOp {
 	
-	private ArrayList<Node[]> projectedMeasures;
+	private List<Node[]> projectedMeasures;
 	private LogicalOlapOp inputOp;
 
-	public ProjectionOp(LogicalOlapOp inputOp, ArrayList<Node[]> projections) {
+	public ProjectionOp(LogicalOlapOp inputOp, List<Node[]> projections) {
 		this.inputOp = inputOp;
 		this.projectedMeasures = projections;
 	}
 	
-	public ArrayList<Node[]> getProjectedMeasures() {
+	public List<Node[]> getProjectedMeasures() {
 		return projectedMeasures;
 	}
 	

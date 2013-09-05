@@ -16,41 +16,63 @@ public class Restrictions {
 	public Integer tree = null;
 	public Set<Member.TreeOp> treeOps = null;
 
+	/**
+	 * Creates empty restrictions.
+	 */
+	public Restrictions() {
+		;
+	}
+
+	/**
+	 * Restrictions are URI representations of olap metadata objects. This
+	 * constructor creates restrictions from an olap4j restrictions array.
+	 * 
+	 * @param restrictions
+	 */
 	public Restrictions(Object[] restrictions) {
 
 		for (int i = 0; i < restrictions.length; i = i + 2) {
 			if ("CATALOG_NAME".equals((String) restrictions[i])) {
-				catalog = (String) restrictions[i + 1];
+				catalog = Olap4ldLinkedDataUtil
+						.convertMDXtoURI((String) restrictions[i + 1]);
 				// we do not consider catalogs for now.
 				continue;
 			}
 			if ("SCHEMA_NAME".equals((String) restrictions[i])) {
-				schemaPattern = (String) restrictions[i + 1];
+				schemaPattern = Olap4ldLinkedDataUtil
+						.convertMDXtoURI((String) restrictions[i + 1]);
 				// we do not consider schema for now
 				continue;
 			}
 			if ("CUBE_NAME".equals((String) restrictions[i])) {
-				cubeNamePattern = (String) restrictions[i + 1];
+				cubeNamePattern = Olap4ldLinkedDataUtil
+						.convertMDXtoURI((String) restrictions[i + 1]);
 				continue;
 			}
 			if ("DIMENSION_UNIQUE_NAME".equals((String) restrictions[i])) {
-				dimensionUniqueName = (String) restrictions[i + 1];
+				dimensionUniqueName = Olap4ldLinkedDataUtil
+						.convertMDXtoURI((String) restrictions[i + 1]);
 				continue;
 			}
 			if ("HIERARCHY_UNIQUE_NAME".equals((String) restrictions[i])) {
-				hierarchyUniqueName = (String) restrictions[i + 1];
+				hierarchyUniqueName = Olap4ldLinkedDataUtil
+						.convertMDXtoURI((String) restrictions[i + 1]);
 				continue;
 			}
 			if ("LEVEL_UNIQUE_NAME".equals((String) restrictions[i])) {
-				levelUniqueName = (String) restrictions[i + 1];
+				levelUniqueName = Olap4ldLinkedDataUtil
+						.convertMDXtoURI((String) restrictions[i + 1]);
 				continue;
 			}
 			if ("MEMBER_UNIQUE_NAME".equals((String) restrictions[i])) {
-				memberUniqueName = (String) restrictions[i + 1];
+				memberUniqueName = Olap4ldLinkedDataUtil
+						.convertMDXtoURI((String) restrictions[i + 1]);
 				continue;
 			}
 			if ("TREE_OP".equals((String) restrictions[i])) {
-				tree = new Integer((String) restrictions[i + 1]);
+				tree = new Integer(
+						Olap4ldLinkedDataUtil
+								.convertMDXtoURI((String) restrictions[i + 1]));
 				// treeOps erstellen wie in OpenVirtuoso
 				continue;
 			}

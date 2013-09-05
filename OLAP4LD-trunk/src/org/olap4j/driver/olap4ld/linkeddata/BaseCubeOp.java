@@ -17,6 +17,10 @@ public class BaseCubeOp implements LogicalOlapOp {
 	
 	private List<Node[]> cube;
 
+	/**
+	 * 
+	 * @param list with header and one cube
+	 */
 	public BaseCubeOp(List<Node[]> list) {
 		this.setCube(list);
 	}

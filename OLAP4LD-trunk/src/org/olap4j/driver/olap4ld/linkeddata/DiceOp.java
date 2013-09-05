@@ -1,6 +1,5 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,17 +16,17 @@ import org.semanticweb.yars.nx.Node;
 public class DiceOp implements LogicalOlapOp {
 
 	private LogicalOlapOp inputOp;
-	private List<ArrayList<Node[]>> membercombinations;
+	private List<List<Node[]>> membercombinations;
 	private List<Node[]> hierarchysignature;
 
 	public DiceOp(LogicalOlapOp op, List<Node[]> hierarchysignature,
-			ArrayList<ArrayList<Node[]>> membercombinations) {
+			List<List<Node[]>> membercombinations) {
 		this.inputOp = op;
 		this.membercombinations = membercombinations;
 		this.hierarchysignature = hierarchysignature;
 	}
 
-	public List<ArrayList<Node[]>> getMemberCombinations() {
+	public List<List<Node[]>> getMemberCombinations() {
 		return membercombinations;
 	}
 

@@ -28,6 +28,9 @@ change their value and depending on their values, execute getCubes() etc. (and a
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
+==5 Sep 2013==
+* Restrictions now use URI representation, but also are able to convert from MDX representation.
+
 ==2 Sep 2013==
 * Renamed LD_Cubes test case to "Example_QB_Datasets_QueryTest".
 * Logical Olap Op DiceOp now receives List<Node[]> of cube that is
