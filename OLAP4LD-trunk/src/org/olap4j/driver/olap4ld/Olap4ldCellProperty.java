@@ -29,7 +29,7 @@ import java.util.Set;
  * for a cell in a cellset
  * from XML/A providers.
  *
- * @author jhyde
+ * @author jhyde, bkaempgen
  * @version $Id: XmlaOlap4jCellProperty.java 374 2010-12-03 02:29:37Z jhyde $
  * @since Dec 8, 2007
  */

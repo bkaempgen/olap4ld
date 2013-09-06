@@ -27,7 +27,7 @@ import java.util.*;
  * Implementation of {@link org.olap4j.CellSetAxis}
  * for XML/A providers.
  *
- * @author jhyde
+ * @author jhyde, bkaempgen
  * @version $Id: XmlaOlap4jCellSetAxis.java 315 2010-05-29 00:56:11Z jhyde $
  * @since Dec 5, 2007
  */

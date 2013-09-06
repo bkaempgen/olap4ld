@@ -1,10 +1,20 @@
 /*
-// This software is subject to the terms of the Eclipse Public License v1.0
-// Agreement, available at the following URL:
-// http://www.eclipse.org/legal/epl-v10.html.
-// Copyright (C) 2007-2011 Julian Hyde
-// All Rights Reserved.
-// You must accept the terms of that agreement to use this software.
+//
+// Licensed to Benedikt Kämpgen under one or more contributor license
+// agreements. See the NOTICE file distributed with this work for
+// additional information regarding copyright ownership.
+//
+// Benedikt Kämpgen licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at:
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
  */
 package org.olap4j.driver.olap4ld;
 
@@ -41,10 +51,10 @@ import org.olap4j.PreparedOlapStatement;
 import org.olap4j.Scenario;
 import org.olap4j.driver.olap4ld.helper.LdHelper;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataEngine;
 import org.olap4j.driver.olap4ld.linkeddata.OpenVirtuosoEngine;
+import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.driver.olap4ld.linkeddata.SesameEngine;
 import org.olap4j.driver.olap4ld.proxy.XmlaOlap4jCachedProxy;
 import org.olap4j.driver.olap4ld.proxy.XmlaOlap4jProxy;
@@ -84,7 +94,7 @@ import org.w3c.dom.Element;
  * instantiated using {@link Factory#newConnection}.
  * </p>
  * 
- * @author jhyde
+ * @author jhyde, bkaempgen
  * @version $Id: XmlaOlap4jConnection.java 471 2011-08-03 21:46:56Z jhyde $
  * @since May 23, 2007
  */

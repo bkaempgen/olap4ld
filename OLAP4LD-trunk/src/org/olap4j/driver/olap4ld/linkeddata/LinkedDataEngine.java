@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.olap4j.OlapException;
 import org.olap4j.Position;
-import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
@@ -159,6 +158,7 @@ public interface LinkedDataEngine {
 	 * 
 	 * @return
 	 */
+	@Deprecated
 	public List<Node[]> executeOlapQuery(Cube cube, List<Level> slicesrollups,
 			List<Position> dices, List<Measure> projections) throws OlapException;
 

@@ -32,7 +32,7 @@ import org.olap4j.metadata.*;
 /**
  * Implementation of {@link org.olap4j.metadata.Catalog} for XML/A providers.
  * 
- * @author jhyde
+ * @author jhyde, bkaempgen
  * @version $Id: XmlaOlap4jCatalog.java 455 2011-05-24 10:01:26Z jhyde $
  * @since May 23, 2007
  */

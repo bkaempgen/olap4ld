@@ -48,7 +48,7 @@ import org.xml.sax.SAXParseException;
  * useful for implementing any olap4j driver, see the org.olap4j.impl package
  * and in particular {@link org.olap4j.impl.Olap4jUtil}.
  * 
- * @author jhyde
+ * @author jhyde, bkaempgen
  * @version $Id: XmlaOlap4jUtil.java 315 2010-05-29 00:56:11Z jhyde $
  * @since Dec 2, 2007
  */

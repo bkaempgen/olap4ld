@@ -27,12 +27,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import junit.framework.TestCase;
 
 import org.olap4j.CellSetFormatterTest.Format;
+import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.DiceOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
@@ -40,6 +41,7 @@ import org.olap4j.driver.olap4ld.linkeddata.LinkedDataEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.ProjectionOp;
+import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.driver.olap4ld.linkeddata.RollupOp;
 import org.olap4j.driver.olap4ld.linkeddata.SliceOp;
 import org.olap4j.layout.RectangularCellSetFormatter;
@@ -58,6 +60,10 @@ public class Slicer_QueryTest extends TestCase {
 
 	public Slicer_QueryTest() throws SQLException {
 
+		// Logging
+    	Olap4ldUtil._log.setLevel(Level.SEVERE);
+    	//Olap4ldUtil._log.setLevel(Level.INFO);
+		
 		try {
 			URL serverUrlObject = new URL("http://example.de");
 			List<String> datastructuredefinitions = new ArrayList<String>();
@@ -294,13 +300,13 @@ public class Slicer_QueryTest extends TestCase {
 			System.out.println("--------------");
 			System.out.println(queryplan.toString());
 			// No execution, yet.
-//			List<Node[]> result = this.lde.executeOlapQuery(queryplan);
-//			for (Node[] nodes : result) {
-//				for (Node node : nodes) {
-//					System.out.print(node.toString()+"; ");
-//				}
-//				System.out.println();
-//			}
+			List<Node[]> result = this.lde.executeOlapQuery(queryplan);
+			for (Node[] nodes : result) {
+				for (Node node : nodes) {
+					System.out.print(node.toString()+"; ");
+				}
+				System.out.println();
+			}
 			System.out.println("--------------");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -30,7 +30,7 @@ import java.util.*;
  * Implementation of {@link org.olap4j.Cell}
  * for XML/A providers.
  *
- * @author jhyde
+ * @author jhyde, bkaempgen
  * @version $Id: XmlaOlap4jCell.java 404 2011-03-18 21:54:56Z lucboudreau $
  * @since Dec 5, 2007
  */

@@ -20,7 +20,7 @@ import org.olap4j.metadata.Property;
  * Implementation of {@link org.olap4j.CellSetMetaData}
  * for XML/A providers.
  *
- * @author jhyde
+ * @author jhyde, bkaempgen
  * @version $Id: XmlaOlap4jCellSetAxisMetaData.java 315 2010-05-29 00:56:11Z jhyde $
 * @since Nov 17, 2007
 */

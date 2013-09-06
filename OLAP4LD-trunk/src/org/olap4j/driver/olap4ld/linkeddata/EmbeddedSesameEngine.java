@@ -35,7 +35,6 @@ import org.olap4j.OlapException;
 import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
@@ -1293,7 +1292,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				new Variable("?HIERARCHY_UNIQUE_NAME"),
 				new Variable("?HIERARCHY_NAME"),
 				new Variable("?HIERARCHY_CAPTION"),
-				new Variable("?DESCRIPTION") };
+				new Variable("?DESCRIPTION"),
+				new Variable("?HIERARCHY_MAX_LEVEL_NUMBER") };
 		result.add(header);
 
 		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,

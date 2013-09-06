@@ -34,7 +34,6 @@ import org.olap4j.mdx.LevelNode;
 import org.olap4j.mdx.LiteralNode;
 import org.olap4j.mdx.MemberNode;
 import org.olap4j.mdx.ParameterNode;
-import org.olap4j.mdx.ParseTreeNode;
 import org.olap4j.mdx.ParseTreeVisitor;
 import org.olap4j.mdx.PropertyValueNode;
 import org.olap4j.mdx.SelectNode;
@@ -43,7 +42,6 @@ import org.olap4j.mdx.WithSetNode;
 import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Measure;
 import org.olap4j.metadata.Member;
-import org.semanticweb.yars.util.Array;
 
 public class AxisPositionListVisitor<T> implements ParseTreeVisitor<T> {
 

@@ -1,9 +1,17 @@
-package org.olap4j.driver.olap4ld.helper;
+package org.olap4j.driver.olap4ld.linkeddata;
 
 import java.util.Set;
 
+import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.metadata.Member;
 
+/**
+ * Restrictions describe filters for multidimensional elements in terms of
+ * Linked Data elements (Literal values and URIs).
+ * 
+ * @author benedikt
+ * 
+ */
 public class Restrictions {
 	// Restrictions
 	public String catalog = null;

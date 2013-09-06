@@ -32,7 +32,6 @@ import java.util.List;
 import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.driver.olap4ld.helper.Restrictions;
 import org.olap4j.mdx.CallNode;
 import org.olap4j.mdx.MemberNode;
 import org.olap4j.metadata.Cube;

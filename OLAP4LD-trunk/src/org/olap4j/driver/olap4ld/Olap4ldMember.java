@@ -35,7 +35,7 @@ import java.util.*;
  * <li>implement Hierarchy.getRootMembers</li>
  * </ol>
  *
- * @author jhyde
+ * @author jhyde, bkaempgen
  * @version $Id: XmlaOlap4jMember.java 372 2010-12-02 20:24:17Z jhyde $
  * @since Dec 5, 2007
  */
