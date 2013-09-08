@@ -2009,7 +2009,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 		Olap4ldUtil._log.info("Logical query plan to string: "
 				+ queryplan.toString());
 
-		LogicalOlap2SparqlOlapVisitor r2a = new LogicalOlap2SparqlOlapVisitor(repo);
+		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(repo);
 
 		ExecIterator newRoot;
 		try {

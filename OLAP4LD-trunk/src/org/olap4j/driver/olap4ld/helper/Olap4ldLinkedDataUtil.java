@@ -12,10 +12,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.Transformer;
@@ -24,11 +22,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
-import org.olap4j.metadata.*;
-import org.olap4j.metadata.MetadataElement;
-import org.semanticweb.yars.nx.Literal;
-import org.semanticweb.yars.nx.Node;
-import org.semanticweb.yars.nx.Variable;
 
 public class Olap4ldLinkedDataUtil {
 
@@ -485,7 +478,6 @@ public class Olap4ldLinkedDataUtil {
 			StreamResult sresult = new StreamResult(baos);
 
 			Olap4ldUtil._log.info("...applying xslt to transform xml to nx...");
-			// System.out.println("herwe");
 
 			t.transform(ssource, sresult);
 

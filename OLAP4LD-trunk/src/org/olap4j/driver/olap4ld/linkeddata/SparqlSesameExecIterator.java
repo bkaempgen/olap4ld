@@ -155,7 +155,7 @@ public class SparqlSesameExecIterator implements ExecIterator {
 	 * Returns String representation of op.
 	 */
 	public String toString() {
-		return query;
+		return "SparqlSesame: "+query;
 	}
 	
 }

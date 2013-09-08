@@ -19,7 +19,7 @@ import org.semanticweb.yars.nx.Node;
  * 
  * @author benedikt
  */
-public class LogicalOlap2SparqlOlapVisitor implements
+public class LogicalOlap2SparqlSesameOlapVisitor implements
 		LogicalOlapOperatorQueryPlanVisitor {
 	// the new root node
 	ExecIterator _root;
@@ -43,7 +43,7 @@ public class LogicalOlap2SparqlOlapVisitor implements
 	 * 
 	 * @param ds
 	 */
-	public LogicalOlap2SparqlOlapVisitor(SailRepository repo) {
+	public LogicalOlap2SparqlSesameOlapVisitor(SailRepository repo) {
 		this.repo = repo;
 	}
 

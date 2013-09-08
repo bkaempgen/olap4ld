@@ -97,6 +97,19 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	private SailRepository repo;
 
+	/**
+	 * The last executed physical execution plan
+	 */
+	private ExecPlan execplan;
+
+	public ExecPlan getExecplan() {
+		return execplan;
+	}
+
+	public void setExecplan(ExecPlan execplan) {
+		this.execplan = execplan;
+	}
+
 	public EmbeddedSesameEngine(URL serverUrlObject,
 			List<String> datastructuredefinitions,
 			List<String> datasets, String databasename) {
@@ -2001,7 +2014,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		Olap4ldUtil._log.info("Logical query plan to string: "
 				+ queryplan.toString());
 
-		LogicalOlap2SparqlOlapVisitor r2a = new LogicalOlap2SparqlOlapVisitor(repo);
+		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(repo);
 
 		ExecIterator newRoot;
 		try {
@@ -2009,9 +2022,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			Olap4ldUtil._log.info("bytes iterator " + newRoot);
 
-			ExecPlan ap = new ExecPlan(newRoot);
+			this.execplan = new ExecPlan(newRoot);
 
-			ExecIterator resultIterator = ap.getIterator();
+			ExecIterator resultIterator = execplan.getIterator();
 
 			List<Node[]> result = new ArrayList<Node[]>();
 			while (resultIterator.hasNext()) {
@@ -2031,8 +2044,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	public List<Node[]> executeOlapQuery(Cube cube, List<Level> slicesrollups,
 			List<Position> dices, List<Measure> projections)
 			throws OlapException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Only LogicalOlapQuery trees can be executed!");
 	}
 
 	/**

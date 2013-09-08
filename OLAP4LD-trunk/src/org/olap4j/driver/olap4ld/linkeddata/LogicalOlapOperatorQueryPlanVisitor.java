@@ -4,7 +4,7 @@ package org.olap4j.driver.olap4ld.linkeddata;
 /**
  * A visitor has to implement this interface.
  * 
- * @author aharth
+ * @author aharth, bkaempgen
  */
 public interface LogicalOlapOperatorQueryPlanVisitor {
     /**

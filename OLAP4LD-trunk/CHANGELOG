@@ -28,6 +28,14 @@ change their value and depending on their values, execute getCubes() etc. (and a
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
+==8 Sep 2013==
+* Problem: 
+** How to ask for representation of Physical Query Tree?
+*** simply allowing to ask LDE for last Physical Operator Tree
+*** OR: How about defining better logging mechanism? 
+*** Currently, we define logging level at Driver. We now try to log to a file.
+* More logging in Slicer
+
 ==6 Sep 2013==
 * Slicer_QueryTest.java [1] now executes all 1-dimensional OLAP queries to example cube.
 
