@@ -590,7 +590,6 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	private void checkSufficientInformationGathered(Restrictions restrictions)
 			throws OlapException {
 		// For now, if only cube is asked for, we load ds and dsd and run checks
-
 		try {
 			if (restrictions.cubeNamePattern != null) {
 				// There is no need to translate to URI, since restrictions already contain URI representation.
@@ -642,6 +641,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					}
 				}
 			}
+			// Load other metadata objects?
 		} catch (MalformedURLException e) {
 			throw new OlapException("Problem with malformed url: "
 					+ e.getMessage());

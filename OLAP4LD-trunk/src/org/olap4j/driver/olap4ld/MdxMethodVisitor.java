@@ -528,9 +528,9 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		// Would return one list of lists
 		for (Object objectArg1 : listArg1) {
 			for (Object objectArg2 : listArg2) {
-				
+
 				List<Object> newList = new ArrayList<Object>();
-				
+
 				// Possibly, object and object1 are tuples of members.
 				if (objectArg1 instanceof List<?>) {
 					ArrayList<Object> mylist = (ArrayList<Object>) objectArg1;
@@ -548,7 +548,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				} else {
 					newList.add(objectArg2);
 				}
-				
+
 				result.add(newList);
 			}
 		}
@@ -748,12 +748,16 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		try {
 			NamedList<Cube> cubes = this.olap4jStatement.olap4jConnection
 					.getOlapSchema().getCubes();
-			
-			// Here, it can happen that we search for something that is not a cube.
-			Cube cube = cubes.get(segmentName);
+
+			Cube queriedcube = null;
+			// Here, we need to make sure that we search for a cube
+			// which we know if a cube is not already given (== null).
+			if (this.cube == null) {
+				queriedcube = cubes.get(segmentName);
+			}
 			// Watch out cubes.contains has as parameter a cube!
-			if (cube != null) {
-				return (Object) cube;
+			if (queriedcube != null) {
+				return (Object) queriedcube;
 			} else {
 				boolean first = true;
 				for (Cube cube1 : cubes) {
@@ -762,7 +766,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 					if (this.cube != null && first) {
 						cube1 = this.cube;
 						first = false;
-					} else if (cube != null && !first) {
+					} else if (queriedcube != null && !first) {
 						throw new UnsupportedOperationException(
 								"If a cube is given, we should find the identifier in there!");
 					}
@@ -786,7 +790,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 							if (hierarchy != null) {
 								return (Object) hierarchy;
 							} else {
-								
+
 								// Go through hierarchies
 								for (Hierarchy hierarchy1 : hierarchies) {
 									NamedList<Level> levels = hierarchy1
@@ -796,12 +800,12 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 									if (level != null) {
 										return (Object) level;
 									} else {
-										
+
 										// Go through levels
 										for (Level level1 : levels) {
 											List<Member> members = level1
 													.getMembers();
-											
+
 											// Go through members
 											for (Member member : members) {
 												if (member.getName().equals(
@@ -815,7 +819,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 							}
 						}
 
-					// More detailed segment list
+						// More detailed segment list
 					} else if (dimension != null
 							&& segmentIndex >= segmentList.size()) {
 						return (Object) dimension;

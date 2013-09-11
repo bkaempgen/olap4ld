@@ -78,9 +78,9 @@ public class Restrictions {
 				continue;
 			}
 			if ("TREE_OP".equals((String) restrictions[i])) {
+				// Tree OP cannot be transformed into URI representation
 				tree = new Integer(
-						Olap4ldLinkedDataUtil
-								.convertMDXtoURI((String) restrictions[i + 1]));
+						(String) restrictions[i + 1]);
 				// treeOps erstellen wie in OpenVirtuoso
 				continue;
 			}

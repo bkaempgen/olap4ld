@@ -126,12 +126,12 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 	}
 
 	/**
-	 * If we want a specific element, we only ask for this specific element. No matter whether
-	 * State.NEW or not.
+	 * If we want a specific element, we only ask for this specific element. No
+	 * matter whether State.NEW or not.
 	 */
 	public T get(String name) {
 		if (name != null) {
-				
+
 			try {
 				// Create own restriction for cube
 				if (metadataRequest == MetadataRequest.MDSCHEMA_CUBES) {
@@ -141,9 +141,10 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 									handler, restrictions);
 				}
 				// TODO add other possible Requests.
-				
-				// Default
-				getList();	
+				else {
+					// Default
+					getList();
+				}
 			} catch (OlapException e) {
 				// Is a problem.
 				throw new RuntimeException(e);

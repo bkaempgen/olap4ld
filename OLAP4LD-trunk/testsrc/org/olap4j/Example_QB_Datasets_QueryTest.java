@@ -145,6 +145,12 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 */
 	public void testSsb001ExampleMetadata() {
 		String dsUri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
+		try {
+			olapConnection.setDatabase("http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds");
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		metadataTest(dsUri, 5, 5);
 	}
 
