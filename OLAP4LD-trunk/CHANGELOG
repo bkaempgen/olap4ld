@@ -1,6 +1,10 @@
 ==Roadmap==
 
 ===LDCX TODO===
+* LDCX should be working on example datasets
+** Estatwrap is mostly offline. Therefore, we created example datasets.
+** 
+
 * Deployment on server (old FIOS server)
 * Test cases for SMART + Edgar
 * Finding and testing new datasets
@@ -60,6 +64,11 @@ a specific cube .get(cubename).
 change their value and depending on their values, execute getCubes() etc. (and also return OlapExceptions 
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
+
+==16 Sep 2013==
+* Problem: If we create measures based on a measure without aggregation function, and we select several measures,
+we do not create separate graph patterns. *solved*
+
 
 ==12 Sep 2013==
 * When transforming an MDX query to a query in MdxMethodVisitor, we distinguish whether a cube

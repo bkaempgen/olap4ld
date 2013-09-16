@@ -714,8 +714,21 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 										.toString().replace(
 												"http://purl.org/olap#", ""),
 						"");
+
+				// We also remove aggregation function from Measure Property
+				// Variable so
+				// that the same property is not selected twice.
 				String measurePropertyVariable = makeUriToParameter(measure[map
-						.get("?MEASURE_UNIQUE_NAME")].toString());
+						.get("?MEASURE_UNIQUE_NAME")].toString().replace(
+						"AGGFUNC"
+								+ measure[map.get("?MEASURE_AGGREGATOR")]
+										.toString().replace(
+												"http://purl.org/olap#", ""),
+						""));
+				
+				// Unique name for variable
+				String uniqueMeasurePropertyVariable = makeUriToParameter(measure[map
+				                                    						.get("?MEASURE_UNIQUE_NAME")].toString());
 
 				// We take the aggregator from the measure
 				// Since we use OPTIONAL, there might be empty columns,
@@ -725,10 +738,10 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 						+ measure[map.get("?MEASURE_AGGREGATOR")].toString()
 								.replace("http://purl.org/olap#", "") + "(?"
 						+ measurePropertyVariable + ") as ?"
-						+ measurePropertyVariable + ")";
+						+ uniqueMeasurePropertyVariable + ")";
 
 				// According to spec, every measure needs to be set for every
-				// observation
+				// observation only once
 				if (!measureMap.containsKey(measureProperty.hashCode())) {
 					whereClause += "?obs <" + measureProperty + "> ?"
 							+ measurePropertyVariable + ".";
