@@ -215,7 +215,7 @@ class Olap4ldLevel
     }
 
     public List<Member> getMembers() throws OlapException {
-    	Olap4ldUtil._log.info("getMembers()...");
+    	Olap4ldUtil._log.info("Metadata object getMembers()...");
     	
         return Olap4jUtil.cast(this.memberList);
     }

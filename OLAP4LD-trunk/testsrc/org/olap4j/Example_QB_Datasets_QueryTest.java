@@ -272,7 +272,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 
 	/**
-	 * Generic Query
+	 * Generic Query for both measures with certain values
 	 */
 	public void testSmartDbWrapExampleOlapMeasure() {
 
@@ -280,11 +280,8 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// cubes:
 		// "A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one http://smartdbwrap.appspot.com/obsValueAGGFUNCAVG!"
 
-		// String result =
-		// executeStatement("SELECT {[httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FobsValueAGGFUNCAVG]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2Fanalysis_Object])} ON ROWS FROM [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FidXXX2FlocationdatasetXXX2FAD0514XXX2FQ]");
-		// assertContains(
-		// "|  1974 |      2.6 |",
-		// result);
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FobsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FobsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2Fanalysis_Object])} ON ROWS FROM [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FidXXX2FlocationdatasetXXX2FAD0514XXX2FQ]");
+		assertContains("|   Q |                  3.19 |                    24.0 |", result);
 	}
 
 	public void testYahooFinanceWrapExampleMetadata() {

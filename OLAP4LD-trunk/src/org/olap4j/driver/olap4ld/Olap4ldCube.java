@@ -170,12 +170,14 @@ class Olap4ldCube implements Cube, Named {
 	}
 
 	public NamedList<Dimension> getDimensions() {
-		Olap4ldUtil._log.info("getDimensions()...");
+		Olap4ldUtil._log.info("Metadata object getDimensions()...");
 
 		return Olap4jUtil.cast(dimensions);
 	}
 
 	public NamedList<Hierarchy> getHierarchies() {
+		Olap4ldUtil._log.info("Metadata object getHierarchies()...");
+		
 		// This is a costly operation. It forces the init
 		// of all dimensions and all hierarchies.
 		// We defer it to this point.
@@ -201,7 +203,7 @@ class Olap4ldCube implements Cube, Named {
 
 	public List<Measure> getMeasures() {
 		
-		Olap4ldUtil._log.info("getMeasures()...");
+		Olap4ldUtil._log.info("Metadata object getMeasures()...");
 
 		return Olap4jUtil.cast(measures);
 	}

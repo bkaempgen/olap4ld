@@ -18,6 +18,11 @@
 ===TODO: Add new normalization algorithm part from spec===
 * ...
 
+===TODO: Improve performance by having more directed uniquenames with segments as in mondrian===
+* olap4ld often has to search the entire cube if resolving members, e.g., measures.
+* Here, we can speed up olap4ld by having the dimension mentioned in the uniquename by segments. 
+* However, we need to make sure that this is consistent.
+
 ===TODO: Improving catalog, schema handling===
 * How do the different platforms define the data sources?
 
@@ -68,8 +73,9 @@ directly from getCubes() etc. We would not need to populate a deferred list on g
 ==16 Sep 2013==
 * Problem: If we create measures based on a measure without aggregation function, and we select several measures,
 we do not create separate graph patterns. *solved*
-
-
+* olap4ld tests were running endless since parentuniquemember with [null] had to be searched for.
+Bug of having [null] names for "null"/null (according to spec) removed in Connection.Handler and Olap4ldUtil. 
+* Status: Yahoo! Finance tests are not successful.
 ==12 Sep 2013==
 * When transforming an MDX query to a query in MdxMethodVisitor, we distinguish whether a cube
 is identified or not, via this.cube that is stored when visiting the from clause.

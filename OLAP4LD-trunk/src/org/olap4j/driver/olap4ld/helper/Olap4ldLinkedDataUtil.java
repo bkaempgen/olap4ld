@@ -111,7 +111,8 @@ public class Olap4ldLinkedDataUtil {
 		// If value is uri, then convert into MDX friendly format
 		if (node.toString().equals("null")) {
 			// XXX: Not sure whether it is clever to have this like an object name with square br.
-			return "[null]";
+			// No this is complete nonsense. We need to make sure that "null" gets returned by rowset and null by metadata object.  
+			return null;
 		} else if (node.toString().equals("Measures")) {
 			// Measures does not get encoded, can stay.
 			return node.toString();

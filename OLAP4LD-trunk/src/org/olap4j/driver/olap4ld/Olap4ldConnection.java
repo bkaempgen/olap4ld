@@ -1086,8 +1086,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 					row[mapFields.get("?HIERARCHY_CAPTION")].toString(),
 					row[mapFields.get("?HIERARCHY_UNIQUE_NAME")].toString());
 
-			final String description = Olap4ldLinkedDataUtil
-					.convertNodeToMDX(row[mapFields.get("?DESCRIPTION")]);
+			// Descriptions do not need to be transformed into MDX.
+			final String description = row[mapFields.get("?DESCRIPTION")].toString();
 			// TODO: For us, the all member is always null
 			// final String allMember = row[mapFields.get("?ALL_MEMBER")]
 			// .toString();
@@ -1440,6 +1440,9 @@ abstract class Olap4ldConnection implements OlapConnection {
 					row[mapFields.get("?MEMBER_UNIQUE_NAME")].toString());
 			// TODO: For now, we only have cardinality 0
 			int childrenCardinality = 0;
+			
+			// According to the olap4j spec, description always returns null.
+			String description = null;
 
 			// Gather member property values into a temporary map, so we can
 			// create the member with all properties known. XmlaOlap4jMember
@@ -1467,7 +1470,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 			// member for internal use.
 			// TODO: Expressions are not supported, yet, for members.
 			Olap4ldMember member = new Olap4ldMember(level, memberUniqueName,
-					memberName, memberCaption, "", parentUniqueName,
+					memberName, memberCaption, description, parentUniqueName,
 					memberType, childrenCardinality, memberOrdinal, map, null);
 			list.add(member);
 		}
