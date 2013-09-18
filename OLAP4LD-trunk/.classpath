@@ -8,19 +8,89 @@
 	<classpathentry exported="true" kind="lib" path="lib/nxparser-1.2.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/saxon-9.2.jar"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/OLAP4J-trunk"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
 	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0">
+	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0">
 		<attributes>
 			<attribute name="owner.project.facets" value="jst.utility"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-6-openjdk-i386">
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-6-openjdk-i386">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/Sesame Triple Store"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Sesame Triple Store 2.7.6"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/aopalliance-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/asm-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/cglib-2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/commons-cli-1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/commons-codec-1.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/commons-dbcp-1.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/commons-httpclient-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/commons-io-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/commons-pool-1.5.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/jackson-core-2.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/jcl-over-slf4j-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/jstl-1.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/logback-classic-0.9.28.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/logback-core-0.9.28.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/opencsv-2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-config-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-console-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-http-client-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-http-protocol-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-http-server-spring-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-model-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-query-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryalgebra-evaluation-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryalgebra-model-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryparser-api-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryparser-serql-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryparser-sparql-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryrender-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryresultio-api-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryresultio-binary-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryresultio-sparqljson-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryresultio-sparqlxml-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-queryresultio-text-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-repository-api-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-repository-contextaware-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-repository-dataset-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-repository-event-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-repository-http-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-repository-manager-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-repository-sail-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-repository-sparql-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-api-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-binary-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-datatypes-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-languages-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-n3-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-nquads-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-ntriples-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-rdfjson-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-rdfxml-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-trig-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-trix-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-rio-turtle-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-runtime-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-sail-api-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-sail-federation-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-sail-inferencer-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-sail-memory-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-sail-nativerdf-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-sail-rdbms-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/sesame-util-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/slf4j-api-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/spring-aop-2.5.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/spring-beans-2.5.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/spring-context-2.5.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/spring-context-support-2.5.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/spring-core-2.5.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/spring-web-2.5.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/spring-webmvc-2.5.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/standard-1.1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

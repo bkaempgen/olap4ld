@@ -75,7 +75,9 @@ directly from getCubes() etc. We would not need to populate a deferred list on g
 we do not create separate graph patterns. *solved*
 * olap4ld tests were running endless since parentuniquemember with [null] had to be searched for.
 Bug of having [null] names for "null"/null (according to spec) removed in Connection.Handler and Olap4ldUtil. 
-* Status: Yahoo! Finance tests are not successful.
+* Status: Yahoo! Finance tests are not successful. Yes, they are, there apparently was some temporal error.
+* Have been working on Edgar dataset example
+
 ==12 Sep 2013==
 * When transforming an MDX query to a query in MdxMethodVisitor, we distinguish whether a cube
 is identified or not, via this.cube that is stored when visiting the from clause.

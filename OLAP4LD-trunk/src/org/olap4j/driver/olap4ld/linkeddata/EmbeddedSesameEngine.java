@@ -790,6 +790,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					;
 				} else {
 					boolean first = true;
+					// So far, members are not crawled.
 					for (Node[] nodes : codelists) {
 						if (first) {
 							first = false;

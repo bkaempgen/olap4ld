@@ -178,14 +178,17 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 	}
 
+	/**
+	 * Test cik/90983#id COSTCO WHOLESALE CORP /NEW (example form)
+	 */
 	public void testEdgarExampleMetadata() {
 		// XXX Does not work, currently, since Edgar loading does not work, yet.
-		// String name =
-		// "http://edgarwrap.ontologycentral.com/archive/909832/0001193125-10-230379#ds";
-		// name =
-		// "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds";
-		// //name = "http://estatwrap.ontologycentral.com/id/tec00114";
-		// metadataTest(name, 7, 1);
+		 String name =
+		 "http://edgarwrap.ontologycentral.com/archive/909832/0001193125-10-230379#ds";
+		 //name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds";
+		 //name = "http://localhost:8888/archive/909832/0001193125-10-230379#ds";
+		 
+		 metadataTest(name, 6, 1);
 	}
 
 	public void testEurostatEmploymentRateExampleMetadata() {
@@ -285,38 +288,10 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 
 	public void testYahooFinanceWrapExampleMetadata() {
-		try {
-
-			// String name =
-			// "httpXXX3AXXX2FXXX2FlocalhostXXX2Ffios_xmla4jsXXX2FexampleYYYttlXXX23ds";
-			String name = "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
-			name = URLEncoder.encode(name, "UTF-8");
-			name = name.replace("%", "XXX");
-			name = name.replace(".", "YYY");
-			name = name.replace("-", "ZZZ");
-			// xmla4js is attaching square brackets automatically
-			// xmla-server is using a set of values for a restriction.
-			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs()
-					.get(0).getSchemas().get(0).getCubes()
-					.get("[" + name + "]");
-			// Currently, we have to first query for dimensions.
-			List<Dimension> dimensions = cube.getDimensions();
-			// Including Measures dimension
-			assertEquals(5, dimensions.size());
-			for (Dimension dimension : dimensions) {
-				List<Member> members = dimension.getHierarchies().get(0)
-						.getLevels().get(0).getMembers();
-				assertEquals(true, members.size() >= 1);
-			}
-			List<Measure> measures = cube.getMeasures();
-			assertEquals(2, measures.size());
-		} catch (OlapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		String name = "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
+		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
+		metadataTest(name, 5, 2);
 	}
 
 	/**
