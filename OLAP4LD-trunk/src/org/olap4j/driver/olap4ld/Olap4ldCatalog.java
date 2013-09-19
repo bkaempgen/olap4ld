@@ -72,20 +72,8 @@ class Olap4ldCatalog implements Catalog, Named {
 		return false;
 	}
 
-	/**
-	 * Note, currently, we rollback the connection, every time getSchemas is called.
-	 */
 	public NamedList<Schema> getSchemas() throws OlapException {
 		Olap4ldUtil._log.info("getSchemas()...");
-
-		// Set back
-		try {
-			Olap4ldUtil._log.info("rollback OlapConnection...");
-			database.getOlapConnection().rollback();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		// ResultSet cubes = olap4jDatabaseMetaData.getCubes(null, null, null);
 		// ResultSet dimensions = olap4jDatabaseMetaData.getDimensions(null,

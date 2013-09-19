@@ -77,6 +77,8 @@ we do not create separate graph patterns. *solved*
 Bug of having [null] names for "null"/null (according to spec) removed in Connection.Handler and Olap4ldUtil. 
 * Status: Yahoo! Finance tests are not successful. Yes, they are, there apparently was some temporal error.
 * Have been working on Edgar dataset example
+* Problem: Suddenly, LDCX did not work, anymore. Solution: There was an error in the JavaScript. Use Firebug and look at error console.
+* Repository is now rollback() if catalog or schema are set, not get.
 
 ==12 Sep 2013==
 * When transforming an MDX query to a query in MdxMethodVisitor, we distinguish whether a cube

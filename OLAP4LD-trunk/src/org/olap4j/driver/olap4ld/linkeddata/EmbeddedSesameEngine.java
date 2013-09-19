@@ -435,8 +435,12 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 		}
 		// Log content
-		String query = "select * where {?s ?p ?o}";
+		String query = "select * where {?s ?p ?o} limit 10";
 		Olap4ldUtil._log.info("Check loaded data: " + query);
+		sparql(query, false);
+		// Log size
+		query = "select (count(?s) as ?count) where {?s ?p ?o}";
+		Olap4ldUtil._log.info("Size of loaded data: " + query);
 		sparql(query, false);
 	}
 

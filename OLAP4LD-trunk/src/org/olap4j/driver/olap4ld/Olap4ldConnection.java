@@ -571,6 +571,9 @@ abstract class Olap4ldConnection implements OlapConnection {
 		return Olap4jUtil.cast(this.olapDatabases);
 	}
 
+	/**
+	 * Note, we set back connection when we set the catalog.
+	 */
 	public void setCatalog(String catalogName) throws OlapException {
 
 		if (catalogName == null) {
@@ -584,6 +587,15 @@ abstract class Olap4ldConnection implements OlapConnection {
 		}
 		this.catalogName = catalogName;
 		this.olap4jSchema = null;
+		
+		// Set back
+		try {
+			Olap4ldUtil._log.info("rollback OlapConnection...");
+			rollback();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public String getCatalog() throws OlapException {
@@ -622,6 +634,9 @@ abstract class Olap4ldConnection implements OlapConnection {
 		return getOlapSchema().getName();
 	}
 
+	/**
+	 * Note, we set back connection when we set the catalog.
+	 */
 	public void setSchema(String schemaName) throws OlapException {
 		if (schemaName == null) {
 			throw new OlapException("Schema name cannot be null.");
@@ -634,6 +649,15 @@ abstract class Olap4ldConnection implements OlapConnection {
 					+ " could be found in catalog " + catalog.getName());
 		}
 		this.schemaName = schemaName;
+
+		// Set back
+		try {
+			Olap4ldUtil._log.info("rollback OlapConnection...");
+			rollback();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public synchronized Schema getOlapSchema() throws OlapException {
@@ -1087,7 +1111,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 					row[mapFields.get("?HIERARCHY_UNIQUE_NAME")].toString());
 
 			// Descriptions do not need to be transformed into MDX.
-			final String description = row[mapFields.get("?DESCRIPTION")].toString();
+			final String description = row[mapFields.get("?DESCRIPTION")]
+					.toString();
 			// TODO: For us, the all member is always null
 			// final String allMember = row[mapFields.get("?ALL_MEMBER")]
 			// .toString();
@@ -1217,7 +1242,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 			 * Cube - Profit Member</DESCRIPTION> </row>
 			 */
 
-			// XXX: Here, we Linked Data Engine actually need to have a certain number
+			// XXX: Here, we Linked Data Engine actually need to have a certain
+			// number
 			/*
 			 * Here, we get a string with the aggregation function, which we
 			 * need to translate into an Aggregator. If no aggregation function
@@ -1270,7 +1296,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 			final String description = row[mapFields.get("?MEASURE_CAPTION")]
 					.toString();
 
-			// XXX: Here, we Linked Data Engine actually need to have a certain number
+			// XXX: Here, we Linked Data Engine actually need to have a certain
+			// number
 			// Here, for a certain name, we get a datatype (encoded as
 			// rdfs:range of xsd type)
 			// final Datatype datatype;
@@ -1440,7 +1467,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 					row[mapFields.get("?MEMBER_UNIQUE_NAME")].toString());
 			// TODO: For now, we only have cardinality 0
 			int childrenCardinality = 0;
-			
+
 			// According to the olap4j spec, description always returns null.
 			String description = null;
 
@@ -2256,9 +2283,10 @@ abstract class Olap4ldConnection implements OlapConnection {
 		public MetadataColumn getColumn(String name) {
 			return columnsByName.get(name);
 		}
-		
+
 		/**
 		 * Same as getColumn() but returns index.
+		 * 
 		 * @param name
 		 * @return
 		 */
