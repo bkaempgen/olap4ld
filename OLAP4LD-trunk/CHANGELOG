@@ -3,7 +3,18 @@
 ===LDCX TODO===
 * LDCX should be working on example datasets
 ** Estatwrap is mostly offline. Therefore, we created example datasets.
-** 
+** Edgar, unfortunately, most filings cannot be represented, currently.
+** Show proper dataset name for Edgar
+** Allow any Edgar dataset from feed
+
+* Demo should work on hierarchies, also
+** Extend ssb example with skos:ConceptScheme possibilities
+
+* Demo should work properly on server
+** Heap space bigger?
+** Build in security that too big files are not loaded and that we store not too many triples in the repository (maybe should be possible to setup) 
+** Connect from the outside?
+** Monitoring usage (Session + Logical Query + Successful/Unsuccessful error) = normal running logger.
 
 * Deployment on server (old FIOS server)
 * Test cases for SMART + Edgar
@@ -14,6 +25,8 @@
 
 ===Slicer TODO===
 * Tracking usage
+
+* Check howto create all html pages (with links etc.)
 
 ===TODO: Add new normalization algorithm part from spec===
 * ...
@@ -79,6 +92,7 @@ Bug of having [null] names for "null"/null (according to spec) removed in Connec
 * Have been working on Edgar dataset example
 * Problem: Suddenly, LDCX did not work, anymore. Solution: There was an error in the JavaScript. Use Firebug and look at error console.
 * Repository is now rollback() if catalog or schema are set, not get.
+* Added new version of Example Edgar dataset
 
 ==12 Sep 2013==
 * When transforming an MDX query to a query in MdxMethodVisitor, we distinguish whether a cube
