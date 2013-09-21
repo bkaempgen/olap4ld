@@ -305,8 +305,8 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	public void testOriginalEurostatGDPpercapitainPPSMetadata() {
 		String name = "http://estatwrap.ontologycentral.com/id/tec00114#ds";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
-		name = "http://localhost:8888/id/tec00114#ds";
-		metadataTest(name, 4, 2);
+		name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114#ds";
+		metadataTest(name, 5, 2);
 	}
 	
 	

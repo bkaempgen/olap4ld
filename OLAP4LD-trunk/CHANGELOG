@@ -67,6 +67,7 @@ directly from getCubes() etc. We would not need to populate a deferred list on g
 * Problem: Apparently, loading "http://estatwrap.ontologycentral.com/id/../data/tec00114" fails, 
 whereas loading "http://estatwrap.ontologycentral.com/data/tec00114" does not.
 * Improved logging, see http://www.linked-data-cubes.org/index.php/Logging_Olap4ld
+* new estatwrap example: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds
 
 ==20 Sep 2013==
 * LDCX should be working on example datasets
