@@ -302,7 +302,14 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 				result);
 	}
 
-	public void testOriginalEurostatGDPpercapitainPPSMetadata() {
+	/**
+	 * This is how Estatwrap shall publish data currently.
+	 * 
+	 * Properties:
+	 * Separate ds and dsd uris. Some have codelists, some do not (time, geo). No aggregation function.
+	 * 
+	 */
+	public void testOriginalEstatwrapGDPpercapitainPPSMetadata() {
 		String name = "http://estatwrap.ontologycentral.com/id/tec00114#ds";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
 		// name = "http://localhost:8888/id/tec00114#ds";
@@ -310,19 +317,19 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		metadataTest(name, 5, 2);
 	}
 	
+	// TODO add query test
 	
-		
-	
-	public void testEurostatEmploymentRateExampleMetadata() {
+	public void testExampleEurostatEmploymentRateMetadata() {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
 		metadataTest(name, 6, 1);
 	}
 
 	/**
-	 * Generic Query
+	 * Generic Queries on Eurostat. Several queries one after another. Should be rather fast since
+	 * not every time the repository is filled?
 	 */
-	public void testEurostatEmploymentRateExampleOlap() {
+	public void testExampleEurostatEmploymentRateOlap() {
 		String result;
 		// Query asking for date on rows, sex on columns.
 		result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
@@ -357,8 +364,10 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 	}
 
-	public void testEurostatRealGDPGrowthRateExampleMetadata() {
-
+	/**
+	 * Similar queries than above but other dataset
+	 */
+	public void testExampleEurostatRealGDPGrowthRateMetadata() {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsieb020_ds.rdf#ds";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
 		metadataTest(name, 3, 1);
@@ -367,7 +376,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	/**
 	 * Generic Query
 	 */
-	public void testEurostatRealGDPGrowthRateExampleOlap() {
+	public void testExampleEurostatRealGDPGrowthRateOlap() {
 
 		String result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23time])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsieb020_dsdYYYrdfXXX23CL_geo])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsieb020_dsYYYrdfXXX23ds]");
 		assertContains(
@@ -381,8 +390,23 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 				result);
 
 	}
+	
+	/**
+	 * Queries on smartdbwrap. Here, no example is needed?
+	 */
+	public void testExampleSmartDbWrapMetadata() {
 
-	public void testSmartDbWrapExampleMetadata() {
+		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/smartdbwrap/AD0514-Q.rdf#ds";
+		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
+		metadataTest(name, 7, 2);
+	}
+
+	// TODO: olap query test
+	
+	/**
+	 * Queries on smartdbwrap. Here, no example is needed?
+	 */
+	public void testSmartDbWrapMetadata() {
 
 		String name = "http://smartdbwrap.appspot.com/id/locationdataset/AD0514/Q";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";

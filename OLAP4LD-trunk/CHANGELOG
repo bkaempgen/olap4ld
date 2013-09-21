@@ -69,6 +69,7 @@ whereas loading "http://estatwrap.ontologycentral.com/data/tec00114" does not.
 * Improved logging, see http://www.linked-data-cubes.org/index.php/Logging_Olap4ld
 * new estatwrap example: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds
 ** had to adapt it: every observation links to #ds. Structure has certain uri (with hash #).
+* added SMARTDBWRAP example
 
 ==20 Sep 2013==
 * LDCX should be working on example datasets
