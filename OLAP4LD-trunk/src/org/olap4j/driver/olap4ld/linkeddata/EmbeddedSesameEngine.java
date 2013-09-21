@@ -231,7 +231,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						String domain = url.getHost();
 						String protocol = url.getProtocol();
 						int port = url.getPort();
-						if (port != 80) {
+						if (port != 80 && port != -1) {
 							uri = protocol + "://" + domain + ":" + port
 									+ header;
 						} else {

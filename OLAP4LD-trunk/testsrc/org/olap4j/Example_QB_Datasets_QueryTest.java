@@ -25,12 +25,10 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
 
 import junit.framework.TestCase;
 
 import org.olap4j.CellSetFormatterTest.Format;
-import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.olap4j.mdx.SelectNode;
@@ -392,19 +390,18 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 	
 	/**
-	 * Queries on smartdbwrap. Here, no example is needed?
+	 * Queries on smartdbwrap. 
 	 */
 	public void testExampleSmartDbWrapMetadata() {
 
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/smartdbwrap/AD0514-Q.rdf#ds";
-		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
 		metadataTest(name, 7, 2);
 	}
 
 	// TODO: olap query test
 	
 	/**
-	 * Queries on smartdbwrap. Here, no example is needed?
+	 * Queries on smartdbwrap. 
 	 */
 	public void testSmartDbWrapMetadata() {
 
@@ -427,10 +424,6 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 */
 	public void testSmartDbWrapExampleOlapMeasure() {
 
-		// XXX: Does not work currently, since currently measures are taken as
-		// cubes:
-		// "A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one http://smartdbwrap.appspot.com/obsValueAGGFUNCAVG!"
-
 		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FobsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FobsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2Fanalysis_Object])} ON ROWS FROM [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FidXXX2FlocationdatasetXXX2FAD0514XXX2FQ]");
 		assertContains(
 				"|   Q |                  3.19 |                    24.0 |",
@@ -438,7 +431,6 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 
 	public void testYahooFinanceWrapExampleMetadata() {
-
 		String name = "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
 		metadataTest(name, 5, 2);
