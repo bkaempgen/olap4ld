@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -111,8 +112,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	}
 
 	public EmbeddedSesameEngine(URL serverUrlObject,
-			List<String> datastructuredefinitions,
-			List<String> datasets, String databasename) {
+			List<String> datastructuredefinitions, List<String> datasets,
+			String databasename) {
 
 		// We actually do not need that.
 		URL = serverUrlObject.toString();
@@ -120,18 +121,6 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		if (databasename.equals("EMBEDDEDSESAME")) {
 			DATASOURCENAME = databasename;
 			DATASOURCEVERSION = "1.0";
-		}
-
-		// Store
-		this.repo = new SailRepository(new MemoryStore());
-		try {
-			repo.initialize();
-
-			// do something interesting with the values here...
-			// con.close();
-		} catch (RepositoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 
 		// Those given URIs we load and add to the location map
@@ -157,6 +146,34 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				e.printStackTrace();
 			}
 		}
+
+		initialize();
+	}
+
+	private void initialize() {
+
+		if (this.repo != null) {
+			try {
+				this.repo.shutDown();
+			} catch (RepositoryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		// Store
+		this.repo = new SailRepository(new MemoryStore());
+		try {
+			repo.initialize();
+
+			// do something interesting with the values here...
+			// con.close();
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// LoadedMap
+		loadedMap.clear();
 	}
 
 	/**
@@ -184,7 +201,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	private String askForLocation(String uri) throws MalformedURLException {
 
-		Olap4ldUtil._log.info("Ask for location: " + uri + "...");
+		Olap4ldUtil._log.config("Ask for location: " + uri + "...");
 
 		URL url;
 		url = new URL(uri);
@@ -213,7 +230,14 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					if (header.startsWith("/")) {
 						String domain = url.getHost();
 						String protocol = url.getProtocol();
-						uri = protocol + "://" + domain + header;
+						int port = url.getPort();
+						if (port != 80) {
+							uri = protocol + "://" + domain + ":" + port
+									+ header;
+						} else {
+							uri = protocol + "://" + domain + header;
+						}
+
 					} else if (header.startsWith("../")
 							|| header.startsWith("./")) {
 						// Header only contains the local uri
@@ -235,7 +259,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			throw new MalformedURLException(e.getMessage());
 		}
 
-		Olap4ldUtil._log.info("... result: " + uri);
+		Olap4ldUtil._log.config("... result: " + uri);
 		return uri;
 	}
 
@@ -256,7 +280,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	private List<Node[]> sparql(String query, boolean caching) {
 
-		Olap4ldUtil._log.info("SPARQL query: " + query);
+		Olap4ldUtil._log.config("SPARQL query: " + query);
 
 		List<Node[]> myBindings = new ArrayList<Node[]>();
 
@@ -282,9 +306,13 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// System.out.println(xmlwriterstreamString);
 			// Transform sparql xml to nx
 			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(bais);
-			String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
-			Olap4ldUtil._log.info("NX output: " + test2);
-			nx.reset();
+
+			// Only if logging level accordingly
+			if (Olap4ldUtil._isDebug) {
+				String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
+				Olap4ldUtil._log.config("NX output: " + test2);
+				nx.reset();
+			}
 
 			NxParser nxp = new NxParser(nx);
 
@@ -294,8 +322,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					nxx = nxp.next();
 					myBindings.add(nxx);
 				} catch (Exception e) {
+
+					// Might happen often, therefore config only
 					Olap4ldUtil._log
-							.warning("NxParser: Could not parse properly: "
+							.config("NxParser: Could not parse properly: "
 									+ e.getMessage());
 				}
 				;
@@ -341,6 +371,25 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			con = repo.getConnection();
 			URL locationurl = new URL(location);
 
+			// Check size and set size to have of heap space
+			URLConnection urlConnection = locationurl.openConnection();
+			urlConnection.connect();
+			// assuming both bytes
+			int file_size = urlConnection.getContentLength();
+			// Apparently file size often wrong?
+			Olap4ldUtil._log.info("File size: " + file_size);
+			long memory_size = Olap4ldUtil.getFreeMemory();
+			Olap4ldUtil._log.info("Current memory size: " + memory_size);
+
+			if (file_size > memory_size) {
+				con.close();
+				Olap4ldUtil._log
+						.warning("Warning: Files to load exceed amount of heap space memory!");
+				throw new UnsupportedOperationException("Warning: File ("
+						+ location
+						+ ") to load exceeds amount of heap space memory!");
+			}
+
 			if (location.endsWith(".rdf") || location.endsWith(".xml")) {
 				con.add(locationurl, locationurl.toString(), RDFFormat.RDFXML);
 			} else if (location.endsWith(".ttl")) {
@@ -370,7 +419,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						while ((line = rd.readLine()) != null) {
 							response += line;
 						}
-						Olap4ldUtil._log.info("Error response: " + response);
+						Olap4ldUtil._log
+								.warning("Warning: URL not possible to load: "
+										+ response);
 						rd.close();
 						is.close();
 					} else {
@@ -394,17 +445,18 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 							con.add(locationurl, locationurl.toString(),
 									RDFFormat.RDFXML);
 							Olap4ldUtil._log
-									.info("Had to guess format to be RDFXML: "
+									.config("Had to guess format to be RDFXML: "
 											+ location);
 						} else {
 							con.add(locationurl, locationurl.toString(),
 									RDFFormat.TURTLE);
 							Olap4ldUtil._log
-									.info("Had to guess format to be Turtle: "
+									.config("Had to guess format to be Turtle: "
 											+ location);
 						}
 						in.close();
 						is.close();
+						connection.disconnect();
 					}
 
 				}
@@ -434,14 +486,18 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				e.printStackTrace();
 			}
 		}
-		// Log content
-		String query = "select * where {?s ?p ?o} limit 10";
-		Olap4ldUtil._log.info("Check loaded data: " + query);
-		sparql(query, false);
-		// Log size
-		query = "select (count(?s) as ?count) where {?s ?p ?o}";
-		Olap4ldUtil._log.info("Size of loaded data: " + query);
-		sparql(query, false);
+		// Log content only if log level accordingly
+		if (Olap4ldUtil._isDebug) {
+
+			String query = "select * where {?s ?p ?o} limit 10";
+			Olap4ldUtil._log.config("Check loaded data (10 triples): " + query);
+			sparql(query, false);
+			// Log size
+			query = "select (count(?s) as ?count) where {?s ?p ?o}";
+			Olap4ldUtil._log.config("Size of loaded data: " + query);
+			sparql(query, false);
+
+		}
 	}
 
 	/**
@@ -596,7 +652,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		// For now, if only cube is asked for, we load ds and dsd and run checks
 		try {
 			if (restrictions.cubeNamePattern != null) {
-				// There is no need to translate to URI, since restrictions already contain URI representation.
+				// There is no need to translate to URI, since restrictions
+				// already contain URI representation.
 				String uri = restrictions.cubeNamePattern;
 
 				if (!isStored(uri)) {
@@ -686,7 +743,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			if (!isDataset) {
 				throw new OlapException(
-						"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "+uri+"!");
+						"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "
+								+ uri + "!");
 			} else {
 
 				// If loading ds, also load dsd. Ask for DSD URI and
@@ -1079,13 +1137,15 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// Important!
 			con.close();
 
-			// Logging
-			Olap4ldUtil._log
-					.info("Integrity constraints overview: " + overview);
-
 			if (error) {
+				Olap4ldUtil._log.warning("Integrity constraints overview: "
+						+ overview);
 				throw new UnsupportedOperationException(
 						"Integrity constraints overview: \n" + overview);
+			} else {
+				// Logging
+				Olap4ldUtil._log.config("Integrity constraints overview: "
+						+ overview);
 			}
 
 		} catch (RepositoryException e) {
@@ -1682,36 +1742,35 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 				if (restrictions.cubeNamePattern != null) {
 					additionalFilters += " FILTER (?CUBE_NAME = <"
-							+ restrictions.cubeNamePattern
-							+ ">) ";
+							+ restrictions.cubeNamePattern + ">) ";
 				}
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 		}
 
@@ -1756,31 +1815,30 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 				// Here, we need a specific filter
 				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
-						+ restrictions.memberUniqueName
-						+ ">) ";
+						+ restrictions.memberUniqueName + ">) ";
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 			throw new UnsupportedOperationException(
@@ -1788,7 +1846,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 		}
 
@@ -1834,26 +1892,26 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 			throw new UnsupportedOperationException(
@@ -1861,7 +1919,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 			// First, ask for all members
 			// Get all members of hierarchies without levels, that simply
@@ -1905,26 +1963,26 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 			throw new UnsupportedOperationException(
@@ -1932,7 +1990,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 		}
 
@@ -1963,12 +2021,12 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				: "";
 		String dimensionUniqueNameFilter = (restrictions.dimensionUniqueName != null && !restrictions.dimensionUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?DIMENSION_UNIQUE_NAME = <"
-				+ restrictions.dimensionUniqueName
-				+ ">) " : "";
+				+ restrictions.dimensionUniqueName + ">) "
+				: "";
 		String hierarchyUniqueNameFilter = (restrictions.hierarchyUniqueName != null && !restrictions.hierarchyUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?HIERARCHY_UNIQUE_NAME = <"
-				+ restrictions.hierarchyUniqueName
-				+ ">) " : "";
+				+ restrictions.hierarchyUniqueName + ">) "
+				: "";
 		String levelUniqueNameFilter = (restrictions.levelUniqueName != null && !restrictions.levelUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?LEVEL_UNIQUE_NAME = <"
 				+ restrictions.levelUniqueName + ">) "
@@ -1977,9 +2035,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		String memberUniqueNameFilter;
 		if (restrictions.memberUniqueName != null) {
 			String resource = restrictions.memberUniqueName;
-				// Since we sometimes manually build member names, we have to check on strings
-				memberUniqueNameFilter = " FILTER (str(?MEMBER_UNIQUE_NAME) = \""
-						+ resource + "\") ";
+			// Since we sometimes manually build member names, we have to check
+			// on strings
+			memberUniqueNameFilter = " FILTER (str(?MEMBER_UNIQUE_NAME) = \""
+					+ resource + "\") ";
 
 		} else {
 			memberUniqueNameFilter = "";
@@ -2014,18 +2073,20 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	}
 
 	@Override
-	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) throws OlapException {
+	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
 		// Log logical query plan
-		Olap4ldUtil._log.info("Logical query plan to string: "
-				+ queryplan.toString());
+		Olap4ldUtil._log.info("Logical query plan: " + queryplan.toString());
 
-		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(repo);
+		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(
+				repo);
 
 		ExecIterator newRoot;
 		try {
+			// Transform into physical query plan
 			newRoot = (ExecIterator) queryplan.visitAll(r2a);
 
-			Olap4ldUtil._log.info("bytes iterator " + newRoot);
+			Olap4ldUtil._log.info("Physical query plan: " + newRoot);
 
 			this.execplan = new ExecPlan(newRoot);
 
@@ -2041,7 +2102,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			return result;
 
 		} catch (QueryException e) {
-			throw new OlapException("Olap query execution went wrong: "+e.getMessage());
+			Olap4ldUtil._log.warning("Olap query execution went wrong: "
+					+ e.getMessage());
+			throw new OlapException("Olap query execution went wrong: "
+					+ e.getMessage());
 		}
 	}
 
@@ -2049,29 +2113,15 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	public List<Node[]> executeOlapQuery(Cube cube, List<Level> slicesrollups,
 			List<Position> dices, List<Measure> projections)
 			throws OlapException {
-		throw new UnsupportedOperationException("Only LogicalOlapQuery trees can be executed!");
+		throw new UnsupportedOperationException(
+				"Only LogicalOlapQuery trees can be executed!");
 	}
 
 	/**
 	 * Empties store and locationMap.
 	 */
 	public void rollback() {
-
-		// Store
-		try {
-			// Rely on garbage collector
-			// this.repo.initialize();
-			// this.repo.shutDown();
-			this.repo = new SailRepository(new MemoryStore());
-			repo.initialize();
-
-			// do something interesting with the values here...
-			// con.close();
-		} catch (RepositoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		loadedMap.clear();
+		initialize();
 	}
 
 }

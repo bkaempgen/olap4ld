@@ -100,7 +100,7 @@ class Olap4ldHierarchy
     }
 
     public NamedList<Level> getLevels() {
-    	Olap4ldUtil._log.info("Metadata object getLevels()...");
+    	Olap4ldUtil._log.config("Metadata object getLevels()...");
     	
         return Olap4jUtil.cast(levels);
     }

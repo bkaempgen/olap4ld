@@ -49,8 +49,12 @@ import org.xml.sax.SAXParseException;
  * @since Dec 2, 2007
  */
 public abstract class Olap4ldUtil {
+
+	// Debugging ?
+	public static boolean _isDebug;
+	
 	// Logging?
-	public static Logger _log = Logger.getLogger("XmlaOlap4jUtil");
+	public static Logger _log;
 
 	/*
 	 * XMLA prefixes
@@ -511,6 +515,40 @@ public abstract class Olap4ldUtil {
 			this.exception = exception;
 		}
 	}
+	
+	/**
+	 * 
+	 * Reused from http://viralpatel.net/blogs/getting-jvm-heap-size-used-memory-total-memory-using-java-runtime/
+	 * Class: TestMemory
+	 * @author: Viral Patel
+	 * @description: Prints JVM memory utilization statistics
+	 * @returns memory in mb 
+	*/
+	public static long getFreeMemory() {
+	         
+	        int mb = 1024*1024;
+	         
+	        //Getting the runtime reference from system
+	        Runtime runtime = Runtime.getRuntime();
+	        
+	        Olap4ldUtil._log.config("##### Heap utilization statistics [MB] #####");
+	         
+	        //Print used memory
+	        Olap4ldUtil._log.config("Used Memory:"
+	            + (runtime.totalMemory() - runtime.freeMemory()) / mb);
+	 
+	        //Print free memory
+	        Olap4ldUtil._log.config("Free Memory:"
+	            + runtime.freeMemory() / mb);
+	         
+	        //Print total available memory
+	        Olap4ldUtil._log.config("Total Memory:" + runtime.totalMemory() / mb);
+	 
+	        //Print Maximum available memory
+	        Olap4ldUtil._log.config("Max Memory:" + runtime.maxMemory() / mb);
+	        
+	        return runtime.freeMemory();
+	    }
 
 }
 

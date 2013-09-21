@@ -18,16 +18,13 @@
  */
 package org.olap4j.driver.olap4ld;
 
-import java.sql.SQLException;
-
 import org.olap4j.OlapDatabaseMetaData;
 import org.olap4j.OlapException;
-import org.olap4j.driver.olap4ld.Olap4ldCatalog;
-import org.olap4j.driver.olap4ld.Olap4ldDatabase;
-import org.olap4j.driver.olap4ld.Olap4ldSchema;
 import org.olap4j.impl.Named;
 import org.olap4j.impl.Olap4jUtil;
-import org.olap4j.metadata.*;
+import org.olap4j.metadata.Catalog;
+import org.olap4j.metadata.NamedList;
+import org.olap4j.metadata.Schema;
 
 /**
  * Implementation of {@link org.olap4j.metadata.Catalog} for XML/A providers.
@@ -73,7 +70,7 @@ class Olap4ldCatalog implements Catalog, Named {
 	}
 
 	public NamedList<Schema> getSchemas() throws OlapException {
-		Olap4ldUtil._log.info("getSchemas()...");
+		Olap4ldUtil._log.config("Metadata object getSchemas()...");
 		
 		// ResultSet cubes = olap4jDatabaseMetaData.getCubes(null, null, null);
 		// ResultSet dimensions = olap4jDatabaseMetaData.getDimensions(null,

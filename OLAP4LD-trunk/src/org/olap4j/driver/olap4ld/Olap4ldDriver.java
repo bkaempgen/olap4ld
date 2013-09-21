@@ -9,7 +9,6 @@
  */
 package org.olap4j.driver.olap4ld;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -26,9 +25,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import org.olap4j.driver.olap4ld.proxy.XmlaOlap4jHttpProxy;
 import org.olap4j.driver.olap4ld.proxy.XmlaOlap4jProxy;
@@ -140,9 +139,9 @@ public class Olap4ldDriver implements Driver {
 	 */
 	private static final ExecutorService executor;
 
-	private static final int LOG_SIZE = 100;
+	//private static final int LOG_SIZE = 100;
 
-	private static final int LOG_ROTATION_COUNT = 10;
+	//private static final int LOG_ROTATION_COUNT = 10;
 
 	static {
 		executor = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -207,23 +206,33 @@ public class Olap4ldDriver implements Driver {
 	}
 
 	public Connection connect(String url, Properties info) throws SQLException {
+		
+		// Debugging
+		Olap4ldUtil._isDebug = true;
+		
+		// Setup logging
+		Olap4ldUtil._log = Logger.getLogger("Olap4ldDriver");
+		
+		System.setProperty( "java.util.logging.config.file", "logging.properties" );
 
-		// We set the logging level
-		// Set the level to a particular level
-		Olap4ldUtil._log.setLevel(Level.INFO);
 
-		// We want to log to a file.
-		try {
-			Handler handler = new FileHandler("log/olap4ld.log", LOG_SIZE,
-					LOG_ROTATION_COUNT);
-			Olap4ldUtil._log.addHandler(handler);
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		try { LogManager.getLogManager().readConfiguration(); }
+		catch ( Exception e ) { e.printStackTrace(); }
+		
+		Olap4ldUtil._log.setLevel(Level.ALL);
+
+//		// We want to log to a file.
+//		try {
+//			Handler handler = new FileHandler("log/olap4ld.log", LOG_SIZE,
+//					LOG_ROTATION_COUNT);
+//			Olap4ldUtil._log.addHandler(handler);
+//		} catch (SecurityException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		// Set the level to that of its parent
 		// LdOlap4jUtil._log.setLevel(null);

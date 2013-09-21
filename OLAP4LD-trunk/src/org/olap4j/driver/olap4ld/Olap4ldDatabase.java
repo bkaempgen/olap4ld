@@ -80,7 +80,7 @@ class Olap4ldDatabase implements Database, Named {
 
 	public NamedList<Catalog> getCatalogs() throws OlapException {
 		// TODO: We could give the catalogs, here.
-		Olap4ldUtil._log.info("getCatalogs()...");
+		Olap4ldUtil._log.config("Metadata object getCatalogs()...");
 		return Olap4jUtil.cast(catalogs);
 	}
 

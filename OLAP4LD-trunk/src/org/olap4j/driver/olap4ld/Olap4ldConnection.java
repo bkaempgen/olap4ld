@@ -567,7 +567,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 
 		// return Olap4jUtil.cast(this.myOlapServer.getOlapConnection()
 		// .getOlapDatabases());
-		Olap4ldUtil._log.info("getOlapDatabases()...");
+		Olap4ldUtil._log.config("Metadata object getOlapDatabases()...");
 		return Olap4jUtil.cast(this.olapDatabases);
 	}
 
@@ -590,7 +590,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 		
 		// Set back
 		try {
-			Olap4ldUtil._log.info("rollback OlapConnection...");
+			Olap4ldUtil._log.config("rollback OlapConnection...");
 			rollback();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -652,7 +652,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 
 		// Set back
 		try {
-			Olap4ldUtil._log.info("rollback OlapConnection...");
+			Olap4ldUtil._log.config("rollback OlapConnection...");
 			rollback();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -853,7 +853,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 	private void clearCache() {
 		// clearCache probably does not work
 		// TODO: remove or improve logging
-		Olap4ldUtil._log.warning("Caching olapDatabases... does this work?");
+		Olap4ldUtil._log.warning("Warning: Caching olapDatabases... does this work?");
 		((DeferredNamedListImpl) this.olapDatabases).reset();
 		this.olap4jCatalog = null;
 		this.olap4jDatabase = null;
@@ -1275,7 +1275,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 				// expression =
 				// LdOlap4jUtil.convertNodeToMDX(row[mapFields.get("?EXPRESSION")]);
 				Olap4ldUtil._log
-						.info("Calculated members from the DSD are not supported, yet.");
+						.warning("Warning: Calculated members from the DSD are not supported, yet.");
 			}
 
 			// Names

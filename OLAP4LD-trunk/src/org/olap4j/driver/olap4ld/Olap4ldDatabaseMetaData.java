@@ -184,8 +184,8 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		String[] restrictions = patternValueList.toArray(new String[patternValueList
 		    								.size()]);
 		
-		Olap4ldUtil._log.info("********************************************");
-		Olap4ldUtil._log.info("** SENDING REQUEST :");
+		Olap4ldUtil._log.config("********************************************");
+		Olap4ldUtil._log.config("** SENDING REQUEST :");
 		String restrictionString = "";
 		for (int i = 0; i < restrictions.length; i = i + 2) {
 			if ("CATALOG_NAME".equals((String) restrictions[i])) {
@@ -234,9 +234,9 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 
 		}
 
-		Olap4ldUtil._log.info("executeMetadataRequestOnLd("
+		Olap4ldUtil._log.config("executeMetadataRequestOnLd("
 				+ metadataRequest.name() + ") with " + restrictionString + ";");
-		Olap4ldUtil._log.info("********************************************");
+		Olap4ldUtil._log.config("********************************************");
 
 		/*
 		 * Specification of those metadata requests, see MetaDataRequest,
@@ -893,14 +893,14 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	}
 
 	public ResultSet getSchemas() throws OlapException {
-		Olap4ldUtil._log.info("MetaData getSchemas()...");
+		Olap4ldUtil._log.config("MetaData resultset getSchemas()...");
 
 		return getMetadataLd(Olap4ldConnection.MetadataRequest.DBSCHEMA_SCHEMATA);
 	}
 
 	public ResultSet getCatalogs() throws OlapException {
 
-		Olap4ldUtil._log.info("MetaData getCatalogs()...");
+		Olap4ldUtil._log.config("MetaData resultset getCatalogs()...");
 		return getMetadataLd(Olap4ldConnection.MetadataRequest.DBSCHEMA_CATALOGS);
 	}
 
@@ -1144,7 +1144,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	public ResultSet getActions(String catalog, String schemaPattern,
 			String cubeNamePattern, String actionNamePattern)
 			throws OlapException {
-		Olap4ldUtil._log.info("MetaData getActions()...");
+		Olap4ldUtil._log.config("Metadata resultset getActions()...");
 		// We simply return empty result set, since the relevance of those
 		// methods is not clear
 		return olap4jConnection.factory.newEmptyResultSet(olap4jConnection);
@@ -1166,7 +1166,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 
 	public ResultSet getDatabases() throws OlapException {
 		// We can really query LD
-		Olap4ldUtil._log.info("MetaData getDatabases()...");
+		Olap4ldUtil._log.config("MetaData resultset getDatabases()...");
 		// ResultSet betweenResult = this.olap4jConnection.myOlapServer
 		// .getOlapConnection().getMetaData().getDatabases();
 		// return betweenResult;
@@ -1174,7 +1174,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	}
 
 	public ResultSet getLiterals() throws OlapException {
-		Olap4ldUtil._log.info("MetaData getLiterals()...");
+		Olap4ldUtil._log.config("MetaData resultset getLiterals()...");
 		// We simply return empty result set, since the relevance of those
 		// methods is not clear
 		return olap4jConnection.factory.newEmptyResultSet(olap4jConnection);
@@ -1189,7 +1189,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 
 	public ResultSet getDatabaseProperties(String dataSourceName,
 			String propertyNamePattern) throws OlapException {
-		Olap4ldUtil._log.info("MetaData getDatabaseProperties()...");
+		Olap4ldUtil._log.config("MetaData resultset getDatabaseProperties()...");
 		// We simply return empty result set, since the relevance of those
 		// methods is not clear: It returns the specific features of the
 		// database.
@@ -1209,7 +1209,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 			String hierarchyUniqueName, String levelUniqueName,
 			String memberUniqueName, String propertyNamePattern)
 			throws OlapException {
-		Olap4ldUtil._log.info("MetaData getProperties()...");
+		Olap4ldUtil._log.config("MetaData resultset getProperties()...");
 		// We simply return empty result set, since the relevance of those
 		// methods is not clear
 		return olap4jConnection.factory.newEmptyResultSet(olap4jConnection);
@@ -1235,7 +1235,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	}
 
 	public String getMdxKeywords() throws OlapException {
-		Olap4ldUtil._log.info("MetaData getMdxKeywords()...");
+		Olap4ldUtil._log.config("MetaData resultset getMdxKeywords()...");
 		// We simply return empty result set, since the relevance of those
 		// methods is not clear
 		return "";
@@ -1280,7 +1280,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		// return betweenResult;
 		// XMLA doesn't support drillthrough so override
 		// whatever the server returns.
-		Olap4ldUtil._log.info("MetaData getCubes(catalog: "+catalog+", schemapattern"+schemaPattern+", cubenamepattern"+cubeNamePattern+")...");
+		Olap4ldUtil._log.config("MetaData resultset getCubes(catalog: "+catalog+", schemapattern"+schemaPattern+", cubenamepattern"+cubeNamePattern+")...");
 
 		final Map<Olap4ldConnection.MetadataColumn, String> overrides = new HashMap<Olap4ldConnection.MetadataColumn, String>();
 
@@ -1302,7 +1302,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		// .getDimensions(catalog, schemaPattern, cubeNamePattern,
 		// dimensionNamePattern);
 		// return betweenResult;
-		Olap4ldUtil._log.info("MetaData getDimensions(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", dimensionNamePattern: "+dimensionNamePattern+")...");
+		Olap4ldUtil._log.config("MetaData resultset getDimensions(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", dimensionNamePattern: "+dimensionNamePattern+")...");
 
 		return getMetadataLd(
 				Olap4ldConnection.MetadataRequest.MDSCHEMA_DIMENSIONS,
@@ -1314,7 +1314,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 
 	public ResultSet getOlapFunctions(String functionNamePattern)
 			throws OlapException {
-		Olap4ldUtil._log.info("MetaData getOLapFunctions()...");
+		Olap4ldUtil._log.config("MetaData resultset getOLapFunctions()...");
 		// We simply return empty result set, since the relevance of those
 		// methods is not clear
 		return olap4jConnection.factory.newEmptyResultSet(olap4jConnection);
@@ -1338,7 +1338,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		// .getHierarchies(catalog, schemaPattern, cubeNamePattern,
 		// dimensionUniqueName, hierarchyNamePattern);
 		// return betweenResult;
-		Olap4ldUtil._log.info("MetaData getHierarchies(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", dimensionUniqueName: "+dimensionUniqueName+", hierarchyNamePattern: "+hierarchyNamePattern);
+		Olap4ldUtil._log.config("MetaData resultset getHierarchies(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", dimensionUniqueName: "+dimensionUniqueName+", hierarchyNamePattern: "+hierarchyNamePattern);
 
 		return getMetadataLd(
 				Olap4ldConnection.MetadataRequest.MDSCHEMA_HIERARCHIES,
@@ -1358,7 +1358,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		// .getMeasures(catalog, schemaPattern, cubeNamePattern,
 		// measureNamePattern, measureUniqueName);
 		// return betweenResult;
-		Olap4ldUtil._log.info("MetaData getMeasures(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", measureNamePattern: "+measureNamePattern+" measureUniqueName: "+measureUniqueName);
+		Olap4ldUtil._log.config("MetaData resultset getMeasures(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", measureNamePattern: "+measureNamePattern+" measureUniqueName: "+measureUniqueName);
 
 		return getMetadataLd(
 				Olap4ldConnection.MetadataRequest.MDSCHEMA_MEASURES,
@@ -1385,7 +1385,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 				treeOpRestriction += treeOp.name();
 			}
 		}
-		Olap4ldUtil._log.info("MetaData getMembers(" + catalog + ","
+		Olap4ldUtil._log.config("MetaData resultset getMembers(" + catalog + ","
 				+ schemaPattern + "," + cubeNamePattern + ","
 				+ dimensionUniqueName + "," + hierarchyUniqueName + ","
 				+ levelUniqueName + "," + memberUniqueName + ","
@@ -1422,7 +1422,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		// dimensionUniqueName, hierarchyUniqueName,
 		// levelNamePattern);
 		// return betweenResult;
-		Olap4ldUtil._log.info("MetaData getLevels(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", dimensionUniqueName: "+dimensionUniqueName+", hierarchyUniqueName: "+hierarchyUniqueName+", levelNamePattern: "+levelNamePattern);
+		Olap4ldUtil._log.config("MetaData resultset getLevels(catalog: "+catalog+", schemaPattern: "+schemaPattern+", cubeNamePattern: "+cubeNamePattern+", dimensionUniqueName: "+dimensionUniqueName+", hierarchyUniqueName: "+hierarchyUniqueName+", levelNamePattern: "+levelNamePattern);
 
 		return getMetadataLd(
 				Olap4ldConnection.MetadataRequest.MDSCHEMA_LEVELS,
@@ -1435,7 +1435,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 
 	public ResultSet getSets(String catalog, String schemaPattern,
 			String cubeNamePattern, String setNamePattern) throws OlapException {
-		Olap4ldUtil._log.info("MetaData getSets()...");
+		Olap4ldUtil._log.config("MetaData resultset getSets()...");
 		// We simply return empty result set, since the relevance of those
 		// methods is not clear
 		return olap4jConnection.factory.newEmptyResultSet(olap4jConnection);

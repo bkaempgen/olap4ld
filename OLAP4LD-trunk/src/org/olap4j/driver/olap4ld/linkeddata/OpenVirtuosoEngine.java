@@ -349,7 +349,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			}
 		}
 
-		Olap4ldUtil._log.info("SPARQL query: " + query);
+		Olap4ldUtil._log.config("SPARQL query: " + query);
 		List<Node[]> result;
 		switch (SPARQLSERVERTYPE) {
 		case QCRUMB:
@@ -491,13 +491,13 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 			// InputStream inputStream = con.getInputStream();
 			// String test = XmlaOlap4jUtil.convertStreamToString(inputStream);
-			// _log.info("XML output: " + test);
+			// _log.config("XML output: " + test);
 
 			// Transform sparql xml to nx
 			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(con
 					.getInputStream());
 			String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
-			Olap4ldUtil._log.info("NX output: " + test2);
+			Olap4ldUtil._log.config("NX output: " + test2);
 			nx.reset();
 
 			NxParser nxp = new NxParser(nx);
@@ -585,7 +585,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(con
 					.getInputStream());
 			String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
-			Olap4ldUtil._log.info("NX output: " + test2);
+			Olap4ldUtil._log.config("NX output: " + test2);
 			nx.reset();
 
 			NxParser nxp = new NxParser(nx);
@@ -1310,12 +1310,12 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 				if (restrictions.cubeNamePattern != null) {
 					additionalFilters += " FILTER (?CUBE_NAME = <"
@@ -1326,21 +1326,21 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 			if (restrictions.cubeNamePattern != null) {
 				additionalFilters += " FILTER (?CUBE_NAME = <"
@@ -1401,7 +1401,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 				// Here, we need a specific filter
 				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
@@ -1429,21 +1429,21 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 			throw new UnsupportedOperationException(
@@ -1451,7 +1451,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 			// XXX: Can be aligned with other sparql query??
 			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
@@ -1502,26 +1502,26 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 			throw new UnsupportedOperationException(
@@ -1529,7 +1529,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 			// Here, we again need specific filters, since only cube makes
 			// sense
@@ -1591,26 +1591,26 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 			throw new UnsupportedOperationException(
@@ -1618,7 +1618,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 			// First we ask for the dimensionWithoutHierarchies
 			String dimensionWithoutHierarchies = null;
@@ -2474,7 +2474,7 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 		try {
 			newRoot = (ExecIterator) queryplan.visitAll(r2a);
 			
-	    	Olap4ldUtil._log.finer("bytes iterator " + newRoot);
+	    	Olap4ldUtil._log.info("Physical query plan: " + newRoot);
 	    	
 	    	ExecPlan ap = new ExecPlan(newRoot);
 	    	

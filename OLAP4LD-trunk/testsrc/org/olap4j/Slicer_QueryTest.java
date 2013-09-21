@@ -62,8 +62,14 @@ public class Slicer_QueryTest extends TestCase {
 	public Slicer_QueryTest() throws SQLException {
 
 		// Logging
-		Olap4ldUtil._log.setLevel(Level.SEVERE);
-		//Olap4ldUtil._log.setLevel(Level.INFO);
+		// For debugging purposes
+    	Olap4ldUtil._log.setLevel(Level.CONFIG);
+    	
+    	// For monitoring usage
+    	//Olap4ldUtil._log.setLevel(Level.INFO);
+    	
+    	// For warnings (and errors) only
+    	//Olap4ldUtil._log.setLevel(Level.WARNING);
 
 		try {
 			// Must have settings without influence on query processing

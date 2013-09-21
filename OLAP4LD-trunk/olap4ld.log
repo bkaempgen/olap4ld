@@ -1,0 +1,365 @@
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Olap4LdDriver to connect...
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldConnection getOlapDatabases
+CONFIG: Metadata object getOlapDatabases()...
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldDatabase getCatalogs
+CONFIG: Metadata object getCatalogs()...
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldDatabase getCatalogs
+CONFIG: Metadata object getCatalogs()...
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldConnection getOlapDatabases
+CONFIG: Metadata object getOlapDatabases()...
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldDatabase getCatalogs
+CONFIG: Metadata object getCatalogs()...
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldCatalog getSchemas
+CONFIG: Metadata object getSchemas()...
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldSchema getCubes
+CONFIG: Schema.getCubes()...
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://localhost:8888/id/tec00114#ds...
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://localhost:8888/data/tec00114
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Load in store: http://localhost:8888/data/tec00114
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: File size: -1
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: ##### Heap utilization statistics [MB] #####
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Used Memory:1
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Free Memory:56
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Total Memory:58
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Max Memory:867
+Sep 21, 2013 5:05:30 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Current memory size: 59699464
+Sep 21, 2013 5:05:31 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Had to guess format to be RDFXML: http://localhost:8888/data/tec00114
+Sep 21, 2013 5:05:31 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Check loaded data (10 triples): select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:05:31 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?s ?p ?o .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#comment> "No guarantee of correctness! USE AT YOUR OWN RISK!" .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/publisher> "Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)" .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://estatwrap.ontologycentral.com/table_of_contents.rdf> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/maker> <http://cbasewrap.ontologycentral.com/company/ontologycentral#id> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/topic> <http://localhost:8888/data/tec00114#ds> .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/date> "2013-09-21T15:05:30+0000" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/linked-data/cube#DataSet> .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#label> "GDP per capita in PPS" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#comment> "Source: Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)." .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://epp.eurostat.ec.europa.eu/portal/page/portal/about_eurostat/corporate/copyright_licence_policy> .
+
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Size of loaded data: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?count .
+"2422"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<http://localhost:8888/id/tec00114#ds> qb:structure ?dsd}
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?dsd .
+<http://localhost:8888/dsd/tec00114#dsd> .
+
+Sep 21, 2013 5:05:32 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://localhost:8888/dsd/tec00114#dsd...
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://localhost:8888/dsd/tec00114
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Load in store: http://localhost:8888/dsd/tec00114
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: File size: -1
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: ##### Heap utilization statistics [MB] #####
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Used Memory:12
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Free Memory:46
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Total Memory:58
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Max Memory:867
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Current memory size: 48562584
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Had to guess format to be RDFXML: http://localhost:8888/dsd/tec00114
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Check loaded data (10 triples): select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?s ?p ?o .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#comment> "No guarantee of correctness! USE AT YOUR OWN RISK!" .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/publisher> "Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)" .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://estatwrap.ontologycentral.com/table_of_contents.rdf> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/maker> <http://cbasewrap.ontologycentral.com/company/ontologycentral#id> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/topic> <http://localhost:8888/data/tec00114#ds> .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/date> "2013-09-21T15:05:30+0000" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/linked-data/cube#DataSet> .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#label> "GDP per capita in PPS" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#comment> "Source: Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)." .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://epp.eurostat.ec.europa.eu/portal/page/portal/about_eurostat/corporate/copyright_licence_policy> .
+
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Size of loaded data: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?count .
+"2598"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?measure WHERE {<http://localhost:8888/id/tec00114#ds> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:measure ?measure}
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?measure .
+<http://purl.org/linked-data/sdmx/2009/measure#obsValue> .
+
+Sep 21, 2013 5:05:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://purl.org/linked-data/sdmx/2009/measure#obsValue...
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://publishing-statistical-data.googlecode.com/svn/trunk/specs/src/main/vocab/sdmx-measure.ttl
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Load in store: http://publishing-statistical-data.googlecode.com/svn/trunk/specs/src/main/vocab/sdmx-measure.ttl
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: File size: 3790
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: ##### Heap utilization statistics [MB] #####
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Used Memory:16
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Free Memory:41
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Total Memory:58
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Max Memory:867
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Current memory size: 43457392
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Check loaded data (10 triples): select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?s ?p ?o .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#comment> "No guarantee of correctness! USE AT YOUR OWN RISK!" .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/publisher> "Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)" .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://estatwrap.ontologycentral.com/table_of_contents.rdf> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/maker> <http://cbasewrap.ontologycentral.com/company/ontologycentral#id> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/topic> <http://localhost:8888/data/tec00114#ds> .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/date> "2013-09-21T15:05:30+0000" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/linked-data/cube#DataSet> .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#label> "GDP per capita in PPS" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#comment> "Source: Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)." .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://epp.eurostat.ec.europa.eu/portal/page/portal/about_eurostat/corporate/copyright_licence_policy> .
+
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Size of loaded data: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?count .
+"2646"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dimension WHERE {<http://localhost:8888/id/tec00114#ds> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension}
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?dimension .
+<http://purl.org/dc/terms/date> .
+<http://ontologycentral.com/2009/01/eurostat/ns#geo> .
+<http://ontologycentral.com/2009/01/eurostat/ns#indic_na> .
+<http://ontologycentral.com/2009/01/eurostat/ns#aggreg95> .
+<http://ontologycentral.com/2009/01/eurostat/ns#timeformat> .
+<http://ontologycentral.com/2009/01/eurostat/ns#freq> .
+<http://ontologycentral.com/2009/01/eurostat/ns#obs_status> .
+
+Sep 21, 2013 5:05:55 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://purl.org/dc/terms/date...
+Sep 21, 2013 5:05:59 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://dublincore.org/2012/06/14/dcterms
+Sep 21, 2013 5:05:59 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Load in store: http://dublincore.org/2012/06/14/dcterms
+Sep 21, 2013 5:06:00 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: File size: 268
+Sep 21, 2013 5:06:00 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: ##### Heap utilization statistics [MB] #####
+Sep 21, 2013 5:06:00 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Used Memory:5
+Sep 21, 2013 5:06:00 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Free Memory:52
+Sep 21, 2013 5:06:00 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Total Memory:58
+Sep 21, 2013 5:06:00 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Max Memory:867
+Sep 21, 2013 5:06:00 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Current memory size: 55077192
+Sep 21, 2013 5:06:01 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Check loaded data (10 triples): select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:06:01 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:06:01 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:06:01 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?s ?p ?o .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#comment> "No guarantee of correctness! USE AT YOUR OWN RISK!" .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/publisher> "Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)" .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://estatwrap.ontologycentral.com/table_of_contents.rdf> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/maker> <http://cbasewrap.ontologycentral.com/company/ontologycentral#id> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/topic> <http://localhost:8888/data/tec00114#ds> .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/date> "2013-09-21T15:05:30+0000" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/linked-data/cube#DataSet> .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#label> "GDP per capita in PPS" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#comment> "Source: Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)." .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://epp.eurostat.ec.europa.eu/portal/page/portal/about_eurostat/corporate/copyright_licence_policy> .
+
+Sep 21, 2013 5:06:01 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Size of loaded data: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:06:01 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:06:01 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:06:01 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?count .
+"2646"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+Sep 21, 2013 5:06:01 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://ontologycentral.com/2009/01/eurostat/ns#geo...
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://ontologycentral.com/2009/01/eurostat/ns
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Load in store: http://ontologycentral.com/2009/01/eurostat/ns
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: File size: 1506
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: ##### Heap utilization statistics [MB] #####
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Used Memory:9
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Free Memory:49
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Total Memory:58
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.Olap4ldUtil getFreeMemory
+CONFIG: Max Memory:867
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+INFO: Current memory size: 51395792
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Had to guess format to be RDFXML: http://ontologycentral.com/2009/01/eurostat/ns
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Check loaded data (10 triples): select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select * where {?s ?p ?o} limit 10
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?s ?p ?o .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#comment> "No guarantee of correctness! USE AT YOUR OWN RISK!" .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/publisher> "Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)" .
+<http://localhost:8888/data/tec00114> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://estatwrap.ontologycentral.com/table_of_contents.rdf> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/maker> <http://cbasewrap.ontologycentral.com/company/ontologycentral#id> .
+<http://localhost:8888/data/tec00114> <http://xmls.com/foaf/0.1/topic> <http://localhost:8888/data/tec00114#ds> .
+<http://localhost:8888/data/tec00114> <http://purl.org/dc/terms/date> "2013-09-21T15:05:30+0000" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/linked-data/cube#DataSet> .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#label> "GDP per capita in PPS" .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#comment> "Source: Eurostat (http://epp.eurostat.ec.europa.eu/) via Linked Eurostat (http://estatwrap.ontologycentral.com/)." .
+<http://localhost:8888/id/tec00114#ds> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://epp.eurostat.ec.europa.eu/portal/page/portal/about_eurostat/corporate/copyright_licence_policy> .
+
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadInStore
+CONFIG: Size of loaded data: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: select (count(?s) as ?count) where {?s ?p ?o}
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?count .
+"2658"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://ontologycentral.com/2009/01/eurostat/ns#indic_na...
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://ontologycentral.com/2009/01/eurostat/ns
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://ontologycentral.com/2009/01/eurostat/ns#aggreg95...
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://ontologycentral.com/2009/01/eurostat/ns
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://ontologycentral.com/2009/01/eurostat/ns#timeformat...
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://ontologycentral.com/2009/01/eurostat/ns
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://ontologycentral.com/2009/01/eurostat/ns#freq...
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://ontologycentral.com/2009/01/eurostat/ns
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://ontologycentral.com/2009/01/eurostat/ns#obs_status...
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://ontologycentral.com/2009/01/eurostat/ns
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: SPARQL query: PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?codelist WHERE {<http://localhost:8888/id/tec00114#ds> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension qb:codeList ?codelist}
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil transformSparqlXmlToNx
+CONFIG: ...applying xslt to transform xml to nx...
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine sparql
+CONFIG: NX output: ?codelist .
+<http://localhost:8888/dsd/tec00114#cl_indic_na> .
+<http://localhost:8888/dsd/tec00114#cl_aggreg95> .
+<http://localhost:8888/dsd/tec00114#cl_time_format> .
+<http://localhost:8888/dsd/tec00114#cl_freq> .
+<http://localhost:8888/dsd/tec00114#cl_obs_status> .
+
+Sep 21, 2013 5:06:03 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://localhost:8888/dsd/tec00114#cl_indic_na...
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://localhost:8888/dsd/tec00114
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://localhost:8888/dsd/tec00114#cl_aggreg95...
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://localhost:8888/dsd/tec00114
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://localhost:8888/dsd/tec00114#cl_time_format...
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://localhost:8888/dsd/tec00114
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://localhost:8888/dsd/tec00114#cl_freq...
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://localhost:8888/dsd/tec00114
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: Ask for location: http://localhost:8888/dsd/tec00114#cl_obs_status...
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine askForLocation
+CONFIG: ... result: http://localhost:8888/dsd/tec00114
+Sep 21, 2013 5:06:04 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine checkIntegrityConstraints
+WARNING: Integrity constraints overview: Successful specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition. 
+Successful specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure. 
+Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.
+Successful specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList.  
+Successful specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes. 
+Successful specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition. 
+Successful specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition.  
+Successful specification check: IC-1. IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure.  
+Successful specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure. 
+Successful specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required.  
+Successful specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure. 
+Successful specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType. 
+Successful specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType).  
+Successful specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures. 
+

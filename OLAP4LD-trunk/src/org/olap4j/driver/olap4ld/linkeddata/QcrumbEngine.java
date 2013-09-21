@@ -171,7 +171,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 	 */
 	private String askForLocation(String uri) throws MalformedURLException {
 
-		Olap4ldUtil._log.info("Ask for location: " + uri + "...");
+		Olap4ldUtil._log.config("Ask for location: " + uri + "...");
 
 		URL url;
 		url = new URL(uri);
@@ -222,7 +222,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 			throw new MalformedURLException(e.getMessage());
 		}
 
-		Olap4ldUtil._log.info("... result: " + uri);
+		Olap4ldUtil._log.config("... result: " + uri);
 		return uri;
 	}
 
@@ -243,7 +243,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 	 */
 	private List<Node[]> sparql(String query, boolean caching) {
 
-		Olap4ldUtil._log.info("SPARQL query: " + query);
+		Olap4ldUtil._log.config("SPARQL query: " + query);
 
 		List<Node[]> myBindings = new ArrayList<Node[]>();
 
@@ -270,7 +270,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 			// Transform sparql xml to nx
 			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(bais);
 			String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
-			Olap4ldUtil._log.info("NX output: " + test2);
+			Olap4ldUtil._log.config("NX output: " + test2);
 			nx.reset();
 
 			NxParser nxp = new NxParser(nx);
@@ -323,7 +323,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 	private void loadInStore(String location) {
 		SailRepositoryConnection con = null;
 		try {
-			Olap4ldUtil._log.info("Load in store: " + location);
+			Olap4ldUtil._log.config("Load in store: " + location);
 
 			con = repo.getConnection();
 			URL locationurl = new URL(location);
@@ -357,7 +357,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 						while ((line = rd.readLine()) != null) {
 							response += line;
 						}
-						Olap4ldUtil._log.info("Error response: " + response);
+						Olap4ldUtil._log.config("Error response: " + response);
 						rd.close();
 						is.close();
 					} else {
@@ -423,7 +423,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 		}
 		// Log content
 		String query = "select * where {?s ?p ?o}";
-		Olap4ldUtil._log.info("Check loaded data: " + query);
+		Olap4ldUtil._log.config("Check loaded data: " + query);
 		sparql(query, false);
 	}
 
@@ -1663,12 +1663,12 @@ public class QcrumbEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 				if (restrictions.cubeNamePattern != null) {
 					additionalFilters += " FILTER (?CUBE_NAME = <"
@@ -1679,21 +1679,21 @@ public class QcrumbEngine implements LinkedDataEngine {
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 		}
 
@@ -1738,7 +1738,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 				// Here, we need a specific filter
 				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
@@ -1749,21 +1749,21 @@ public class QcrumbEngine implements LinkedDataEngine {
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 			throw new UnsupportedOperationException(
@@ -1771,7 +1771,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 		}
 
@@ -1817,26 +1817,26 @@ public class QcrumbEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 			throw new UnsupportedOperationException(
@@ -1844,7 +1844,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 			// First, ask for all members
 			// Get all members of hierarchies without levels, that simply
@@ -1888,26 +1888,26 @@ public class QcrumbEngine implements LinkedDataEngine {
 
 			if ((restrictions.tree & 1) == 1) {
 				// CHILDREN
-				Olap4ldUtil._log.info("TreeOp:CHILDREN");
+				Olap4ldUtil._log.config("TreeOp:CHILDREN");
 
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
-				Olap4ldUtil._log.info("TreeOp:SIBLINGS");
+				Olap4ldUtil._log.config("TreeOp:SIBLINGS");
 
 			}
 			if ((restrictions.tree & 4) == 4) {
 				// PARENT
-				Olap4ldUtil._log.info("TreeOp:PARENT");
+				Olap4ldUtil._log.config("TreeOp:PARENT");
 			}
 			if ((restrictions.tree & 16) == 16) {
 				// DESCENDANTS
-				Olap4ldUtil._log.info("TreeOp:DESCENDANTS");
+				Olap4ldUtil._log.config("TreeOp:DESCENDANTS");
 
 			}
 			if ((restrictions.tree & 32) == 32) {
 				// ANCESTORS
-				Olap4ldUtil._log.info("TreeOp:ANCESTORS");
+				Olap4ldUtil._log.config("TreeOp:ANCESTORS");
 			}
 
 			throw new UnsupportedOperationException(
@@ -1915,7 +1915,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 
 		} else {
 			// TreeOp = Self or null
-			Olap4ldUtil._log.info("TreeOp:SELF");
+			Olap4ldUtil._log.config("TreeOp:SELF");
 
 		}
 
@@ -2006,7 +2006,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 	@Override
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) throws OlapException {
 		// Log logical query plan
-		Olap4ldUtil._log.info("Logical query plan to string: "
+		Olap4ldUtil._log.config("Logical query plan to string: "
 				+ queryplan.toString());
 
 		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(repo);
@@ -2015,7 +2015,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 		try {
 			newRoot = (ExecIterator) queryplan.visitAll(r2a);
 
-			Olap4ldUtil._log.info("bytes iterator " + newRoot);
+			Olap4ldUtil._log.config("bytes iterator " + newRoot);
 
 			ExecPlan ap = new ExecPlan(newRoot);
 

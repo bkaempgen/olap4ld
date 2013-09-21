@@ -19,8 +19,6 @@
  */
 package org.olap4j;
 
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -36,15 +34,10 @@ import junit.framework.TestCase;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.impl.Olap4jUtil;
-import org.olap4j.mdx.SelectNode;
-import org.olap4j.mdx.parser.MdxParser;
-import org.olap4j.mdx.parser.MdxParserFactory;
-import org.olap4j.mdx.parser.MdxValidator;
 import org.olap4j.metadata.Member;
 import org.olap4j.test.TestContext;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
-import org.semanticweb.yars.nx.NodeComparator;
 
 /**
  * This test simply tries to execute rowset metadata queries to a certain url.
@@ -177,7 +170,15 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 		
     	// We set the logging level
     	// Set the level to a particular level
-    	Olap4ldUtil._log.setLevel(Level.FINE);
+		
+		// For debugging purposes
+    	Olap4ldUtil._log.setLevel(Level.CONFIG);
+    	
+    	// For monitoring usage
+    	//Olap4ldUtil._log.setLevel(Level.INFO);
+    	
+    	// For warnings (and errors) only
+    	//Olap4ldUtil._log.setLevel(Level.WARNING);
 	}
 
 	protected void tearDown() throws Exception {

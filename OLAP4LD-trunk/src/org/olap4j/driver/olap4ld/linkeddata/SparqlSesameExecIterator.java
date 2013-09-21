@@ -33,21 +33,22 @@ public class SparqlSesameExecIterator implements ExecIterator {
 	public SparqlSesameExecIterator(SailRepository repo, String query) {
 		this.repo = repo;
 		this.query = query;
-		
+
 		this.result = sparql();
-		
+
 		this.iterator = result.iterator();
 	}
-	
+
 	/**
 	 * Simply copied over from embedded sesame.
+	 * 
 	 * @param query
 	 * @param caching
 	 * @return
 	 */
 	private List<Node[]> sparql() {
 
-		Olap4ldUtil._log.info("SPARQL query: " + query);
+		Olap4ldUtil._log.config("SPARQL query: " + query);
 
 		List<Node[]> myBindings = new ArrayList<Node[]>();
 
@@ -73,9 +74,13 @@ public class SparqlSesameExecIterator implements ExecIterator {
 			// System.out.println(xmlwriterstreamString);
 			// Transform sparql xml to nx
 			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(bais);
-			String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
-			Olap4ldUtil._log.info("NX output: " + test2);
-			nx.reset();
+
+			// Only log if needed
+			if (Olap4ldUtil._log.getLevel() == java.util.logging.Level.CONFIG) {
+				String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
+				Olap4ldUtil._log.config("NX output: " + test2);
+				nx.reset();
+			}
 
 			NxParser nxp = new NxParser(nx);
 
@@ -85,8 +90,10 @@ public class SparqlSesameExecIterator implements ExecIterator {
 					nxx = nxp.next();
 					myBindings.add(nxx);
 				} catch (Exception e) {
+					
+					// Might happen often, therefore config only
 					Olap4ldUtil._log
-							.warning("NxParser: Could not parse properly: "
+							.config("NxParser: Could not parse properly: "
 									+ e.getMessage());
 				}
 				;
@@ -146,7 +153,8 @@ public class SparqlSesameExecIterator implements ExecIterator {
 	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+			throws QueryException {
 		// Needed in case we have as arguments further exec iterators.
 		;
 	}
@@ -155,7 +163,7 @@ public class SparqlSesameExecIterator implements ExecIterator {
 	 * Returns String representation of op.
 	 */
 	public String toString() {
-		return "SparqlSesame: "+query;
+		return "SparqlSesame: " + query;
 	}
-	
+
 }

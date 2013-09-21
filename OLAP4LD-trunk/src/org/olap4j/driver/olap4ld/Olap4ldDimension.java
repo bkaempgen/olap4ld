@@ -76,7 +76,7 @@ class Olap4ldDimension extends Olap4ldElement implements Dimension, Named {
 	}
 
 	public NamedList<Hierarchy> getHierarchies() {
-		Olap4ldUtil._log.info("Metadata object getHierarchies()...");
+		Olap4ldUtil._log.config("Metadata object getHierarchies()...");
 
 		return Olap4jUtil.cast(hierarchies);
 	}

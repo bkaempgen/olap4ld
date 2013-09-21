@@ -1,27 +1,7 @@
 ==Roadmap==
 
-===LDCX TODO===
-* LDCX should be working on example datasets
-** Estatwrap is mostly offline. Therefore, we created example datasets.
-** Edgar, unfortunately, most filings cannot be represented, currently.
-** Show proper dataset name for Edgar
-** Allow any Edgar dataset from feed
-
-* Demo should work on hierarchies, also
-** Extend ssb example with skos:ConceptScheme possibilities
-
-* Demo should work properly on server
-** Heap space bigger?
-** Build in security that too big files are not loaded and that we store not too many triples in the repository (maybe should be possible to setup) 
-** Connect from the outside?
-** Monitoring usage (Session + Logical Query + Successful/Unsuccessful error) = normal running logger.
-
-* Deployment on server (old FIOS server)
-* Test cases for SMART + Edgar
-* Finding and testing new datasets
-* Comparison with related work
-* Development plan for future work
-* Documentation for paper
+===LDCX Demo===
+* See Beta-Tester.
 
 ===Slicer TODO===
 * Tracking usage
@@ -83,16 +63,49 @@ change their value and depending on their values, execute getCubes() etc. (and a
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
+==21 Sep 2013==
+* Problem: Apparently, loading "http://estatwrap.ontologycentral.com/id/../data/tec00114" fails, 
+whereas loading "http://estatwrap.ontologycentral.com/data/tec00114" does not.
+* Improved logging, see http://www.linked-data-cubes.org/index.php/Logging_Olap4ld
+
+==20 Sep 2013==
+* LDCX should be working on example datasets
+** Estatwrap is mostly offline. Therefore, we created example datasets.
+** Edgar, unfortunately, most filings cannot be represented, currently.
+** Show proper dataset name for Edgar
+
+* Improve LDCX
+** Monitoring usage (Session + Logical Query + Successful/Unsuccessful error) = normal running logger.
+** Logging levels: 
+    FINEST <= not used
+    FINER <= not used
+    FINE <= not used
+    CONFIG <= debugging
+    INFO <= usage monitoring (only the most important bits and pieces)
+    WARNING <= possible errors
+    SEVERE <= not used
+
+
+* More robust w.r.t. memory usage
+** Heap space bigger?
+** Build in security that too big files are not loaded and that we store not too many triples in the repository (maybe should be possible to setup) 
+
+* Demo should work on hierarchies, also
+** Extend ssb example with skos:ConceptScheme possibilities
+
+==19 Sep 2013==
+* Have been working on Edgar dataset example
+* Problem: Suddenly, LDCX did not work, anymore. Solution: There was an error in the JavaScript. Use Firebug and look at error console.
+* Repository is now rollback() if catalog or schema are set, not get.
+* Added new version of Example Edgar dataset
+** Allow any Edgar dataset from feed - *not necessary for demo*
+
 ==16 Sep 2013==
 * Problem: If we create measures based on a measure without aggregation function, and we select several measures,
 we do not create separate graph patterns. *solved*
 * olap4ld tests were running endless since parentuniquemember with [null] had to be searched for.
 Bug of having [null] names for "null"/null (according to spec) removed in Connection.Handler and Olap4ldUtil. 
 * Status: Yahoo! Finance tests are not successful. Yes, they are, there apparently was some temporal error.
-* Have been working on Edgar dataset example
-* Problem: Suddenly, LDCX did not work, anymore. Solution: There was an error in the JavaScript. Use Firebug and look at error console.
-* Repository is now rollback() if catalog or schema are set, not get.
-* Added new version of Example Edgar dataset
 
 ==12 Sep 2013==
 * When transforming an MDX query to a query in MdxMethodVisitor, we distinguish whether a cube

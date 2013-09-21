@@ -342,7 +342,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		if (usedMeasureSet.isEmpty()) {
 			// Default is simply the first we find.
 			Olap4ldUtil._log
-					.info("Get default (first available) measure in cube.");
+					.config("Get default (first available) measure in cube.");
 			if (!metaData.cube.getMeasures().isEmpty()) {
 				usedMeasureSet.add(metaData.cube.getMeasures().get(0));
 			} else {

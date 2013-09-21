@@ -123,7 +123,7 @@ class Olap4ldSchema implements Schema, Named {
 	}
 
 	public NamedList<Cube> getCubes() throws OlapException {
-		Olap4ldUtil._log.info("Schema.getCubes()...");
+		Olap4ldUtil._log.config("Schema.getCubes()...");
 
 		return Olap4jUtil.cast(cubes);
 	}

@@ -31,13 +31,13 @@
 
 eg:ds
 	a qb:DataSet ;
-	rdfs:label "Example Star Schema Benchmark DS"@en ;
+	rdfs:label "Example Star Schema Benchmark Dataset"@en ;
 	qb:structure eg:dsd.	
 
 # -- Data structure definition ----------------------------
 
 eg:dsd
-	rdfs:label "Example Star Schema Benchmark DSD"@en ;
+	rdfs:label "Example Star Schema Benchmark Datastructuredefinition"@en ;
 	a qb:DataStructureDefinition ;
 	qb:component 
 		[ qb:dimension eg:lo_orderdate ],

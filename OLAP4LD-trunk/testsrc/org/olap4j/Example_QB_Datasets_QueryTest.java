@@ -25,10 +25,12 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
 
 import junit.framework.TestCase;
 
 import org.olap4j.CellSetFormatterTest.Format;
+import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.olap4j.mdx.SelectNode;
@@ -93,6 +95,11 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 
 	protected void tearDown() throws Exception {
+		if (olapConnection != null && !olapConnection.isClosed()) {
+			olapConnection.close();
+			olapConnection = null;
+		}
+
 		if (connection != null && !connection.isClosed()) {
 			connection.close();
 			connection = null;
@@ -141,25 +148,43 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 
 	/**
-	 * 
+	 * Eventually, we want to allow to set the database for an olap4ld
+	 * connection.
 	 */
-	public void testSsb001ExampleMetadata() {
+	public void testSettingDatabase() {
+		// String dsUri =
+		// "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
+		//
+		// try {
+		// olapConnection.setDatabase("http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds");
+		// } catch (OlapException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+	}
+
+	/**
+	 * We test Example SSB 001 dataset that we created manually.
+	 * 
+	 * Properties: Example SSB dataset uses hasTopConcept for codelists. No
+	 * degenerated dimensions. And explicitly defines aggregation functions.
+	 */
+	public void testExampleSsb001Metadata() {
 		String dsUri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
-		try {
-			olapConnection.setDatabase("http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds");
-		} catch (OlapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		metadataTest(dsUri, 5, 5);
 	}
 
 	/**
-	 * Generic Query
+	 * Do crossjoin over all dimensions on rows and show all measures on
+	 * columns.
 	 */
-	public void testSsb001ExampleOlap() {
+	public void testExampleSsb001OlapFullCrossJoin() {
 
 		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]");
+
+		assertContains(
+				"| revenue   | discount | extendedprice | quantity | supplycost |",
+				result);
 		assertContains(
 				"|  | Customer  1 |  | Date 19940101 |  | Part  1 |  | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
 				result);
@@ -169,49 +194,124 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 
 	/**
-	 * We test the possibility to add measure dices
+	 * Do crossjoin over all dimensions on rows and show all measures on
+	 * columns, but this time with NON EMPTY clause for rows.
 	 */
-	public void testSsb001MeasureDiceExampleOlap() {
+	public void testExampleSsb001OlapFullCrossJoinNotEmpty() {
+
+		String result = executeStatement("SELECT NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]");
+
+		assertContains(
+				"| revenue   | discount | extendedprice | quantity | supplycost |",
+				result);
+		assertContains(
+				"|  | Customer  1 |  | Date 19940101 |  | Part  1 |  | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
+				result);
+
+		// Empty rows are not shown
+		assertEquals(
+				false,
+				result.contains("|  |             |  | Date 19940601 |  | Part  1 |  | Supplier  1 |           |          |               |          |            |"));
+	}
+
+	/**
+	 * We query for customers on rows and parts on columns and explicitly select
+	 * lo_extendedprice as measure per WHERE clause.
+	 */
+	public void testExampleSsb001OlapDiceMeasure() {
 
 		String result = executeStatement("SELECT {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice]}");
+
+		assertContains("| Part  1   | Part  2   |", result);
 		assertContains("| Customer  1 | 2471035.0 | 2471035.0 |", result);
-
 	}
 
 	/**
-	 * Test cik/90983#id COSTCO WHOLESALE CORP /NEW (example form)
+	 * Test Example cik/90983#id COSTCO WHOLESALE CORP /NEW (example form)
+	 * Properties: Here, aggregation function is not explicitly given such that
+	 * AVG and COUNT are automatically added. DS and DSD are located in the same
+	 * file. Dimensions ranges are given in linked files (e.g., for
+	 * http://edgarwrap.ontologycentral.com/vocab/edgar#issuer). All ranges are
+	 * non-skos-concepts, thus, there is not code list.
 	 */
-	public void testEdgarExampleMetadata() {
-		// XXX Does not work, currently, since Edgar loading does not work, yet.
-		 String name =
-		 "http://edgarwrap.ontologycentral.com/archive/909832/0001193125-10-230379#ds";
-		 //name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds";
-		 //name = "http://localhost:8888/archive/909832/0001193125-10-230379#ds";
-		 
-		 metadataTest(name, 6, 1);
+	public void testExampleEdgarCOSTCOMetadata() {
+		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds";
+		metadataTest(name, 6, 2);
 	}
-	
+
 	/**
-	 * Test cik/90983#id COSTCO WHOLESALE CORP /NEW (example form): All subjects in rows.
+	 * Do typical first query: Select certain measure (avg) and first dimension.
 	 */
-	public void testEdgarExampleOlap() {
+	public void testExampleEdgarCOSTCOOlapTypicalCrossjoin1() {
+		String result;
+		result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]");
+		assertContains("| 1997-08-01 |        943000.0 |", result);
+	}
+
+	/**
+	 * This time, do crossjoin on measure, dtstart, dtend on columns, subject on
+	 * rows.
+	 * 
+	 */
+	public void testExampleEdgarCOSTCOOlapLargeDateCrossjoinColumns() {
+		String result;
+		result = executeStatement("	SELECT CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]}, CrossJoin({Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])}, {Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtend])})) ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]");
+		assertContains(
+				"|  | Assets                                                                                                                                                              |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |   1.0341E10 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |      1.09895E10 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |      1.19075E10 |",
+				result);
+	}
+
+	/**
+	 * Same as above but with NON EMPTY on columns.
+	 * 
+	 * XXX: With Non-empty, this does not work, yet
+	 */
+	public void testExampleEdgarCOSTCOOlapLargeDateCrossjoinWithNonEmptyColumns() {
+		// String result;
+		// result =
+		// executeStatement("	SELECT NON EMPTY CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]}, CrossJoin({Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])}, {Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtend])})) ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]");
+		// assertContains(
+		// "|  | Assets                                                                                                                                                              |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |   1.0341E10 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |      1.09895E10 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |      1.19075E10 |",
+		// result);
+		// TEST?
+	}
+
+	/**
+	 * Test cik/90983#id COSTCO WHOLESALE CORP /NEW (example form), this time
+	 * not the example.
+	 */
+	public void testOriginalEdgarCOSTCOMetadata() {
+		String name = "http://edgarwrap.ontologycentral.com/archive/909832/0001193125-10-230379#ds";
+		// name =
+		// "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds";
+		// name =
+		// "http://localhost:8888/archive/909832/0001193125-10-230379#ds";
+
+		metadataTest(name, 6, 2);
+	}
+
+	/**
+	 * Test cik/90983#id COSTCO WHOLESALE CORP /NEW (example form): All subjects
+	 * in rows.
+	 */
+	public void testOriginalEdgarCOSTCOOlapBothMeasuresPlusSubject() {
 		String result;
 		result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F909832XXX2F0001193125ZZZ10ZZZ230379XXX23ds]");
-		assertContains("| Fair value measurement with unobservable inputs reconciliation recurring basis asset value                                                                          |        9777777.78 |         9.0 |", result);
-	}
-	
-	public void testEdgarExampleOlapCrossjoin1() {
-		String result;
-		result = executeStatement("	SELECT CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]}, {Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])}) ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F909832XXX2F0001193125ZZZ10ZZZ230379XXX23ds]");
-		assertContains("|  | Assets                                                                                                                                                              |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |   1.0341E10 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |      1.09895E10 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |      1.19075E10 |", result);
-	}
-	
-	public void testEdgarExampleOlapCrossjoin2() {
-		String result;
-		result = executeStatement("	SELECT CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]}, CrossJoin({Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])}, {Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtend])})) ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F909832XXX2F0001193125ZZZ10ZZZ230379XXX23ds]");
-		assertContains("|  | Assets                                                                                                                                                              |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |   1.0341E10 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |      1.09895E10 |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |                |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |             |      1.19075E10 |", result);
+		assertContains(
+				"| Fair value measurement with unobservable inputs reconciliation recurring basis asset value                                                                          |        9777777.78 |         9.0 |",
+				result);
 	}
 
+	public void testOriginalEurostatGDPpercapitainPPSMetadata() {
+		String name = "http://estatwrap.ontologycentral.com/id/tec00114#ds";
+		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
+		name = "http://localhost:8888/id/tec00114#ds";
+		metadataTest(name, 4, 2);
+	}
+	
+	
+		
+	
 	public void testEurostatEmploymentRateExampleMetadata() {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
@@ -249,8 +349,10 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 		// Query asking for three dimensions at a time.
 		result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23employment_rate]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])})) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		assertContains("| 2005 |  |   F |  |   AT   |             64.9 |", result);
-		assertContains("| 2012 |  |   F |  |   AT   |             70.3 |", result);
+		assertContains("| 2005 |  |   F |  |   AT   |             64.9 |",
+				result);
+		assertContains("| 2012 |  |   F |  |   AT   |             70.3 |",
+				result);
 
 	}
 
@@ -305,11 +407,13 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// "A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one http://smartdbwrap.appspot.com/obsValueAGGFUNCAVG!"
 
 		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FobsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FobsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2Fanalysis_Object])} ON ROWS FROM [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FidXXX2FlocationdatasetXXX2FAD0514XXX2FQ]");
-		assertContains("|   Q |                  3.19 |                    24.0 |", result);
+		assertContains(
+				"|   Q |                  3.19 |                    24.0 |",
+				result);
 	}
 
 	public void testYahooFinanceWrapExampleMetadata() {
-		
+
 		String name = "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
 		metadataTest(name, 5, 2);

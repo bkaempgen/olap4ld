@@ -306,7 +306,7 @@ class Olap4ldStatement implements OlapStatement {
 
 	public CellSet executeOlapQuery(String mdx) throws OlapException {
 
-		Olap4ldUtil._log.info("Parse MDX: " + mdx);
+		Olap4ldUtil._log.config("Parse MDX: " + mdx);
 
 		// TODO: Added in order to generically parse mdx and use for querying
 		// with SPARQL

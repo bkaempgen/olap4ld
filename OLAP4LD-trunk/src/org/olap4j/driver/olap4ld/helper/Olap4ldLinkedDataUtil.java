@@ -478,7 +478,7 @@ public class Olap4ldLinkedDataUtil {
 			StreamSource ssource = new StreamSource(xml);
 			StreamResult sresult = new StreamResult(baos);
 
-			Olap4ldUtil._log.info("...applying xslt to transform xml to nx...");
+			Olap4ldUtil._log.config("...applying xslt to transform xml to nx...");
 
 			t.transform(ssource, sresult);
 
