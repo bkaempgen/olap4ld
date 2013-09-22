@@ -489,7 +489,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		// Log content only if log level accordingly
 		if (Olap4ldUtil._isDebug) {
 
-			String query = "select * where {?s ?p ?o} limit 10";
+			String query = "select * where {?s ?p ?o}";
 			Olap4ldUtil._log.config("Check loaded data (10 triples): " + query);
 			sparql(query, false);
 			// Log size
