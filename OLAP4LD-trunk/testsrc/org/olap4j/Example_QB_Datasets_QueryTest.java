@@ -309,11 +309,37 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 */
 	public void testOriginalEstatwrapGDPpercapitainPPSMetadata() {
 		String name = "http://estatwrap.ontologycentral.com/id/tec00114#ds";
-		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
 		// name = "http://localhost:8888/id/tec00114#ds";
-		name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
+		//name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
 		metadataTest(name, 5, 2);
 	}
+	
+	/**
+	 * Same as above but this time example.
+	 * 
+	 * 
+	 */
+	public void testExampleEstatwrapGDPpercapitainPPSMetadata() {
+		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds"; 
+		metadataTest(name, 5, 2);
+	}
+	
+	/**
+	 * We query for all esa95 aggregates and both measures.
+	 */
+	public void testExampleEstatwrapGDPpercapitainPPSOlapEsaAggregateBothMeasures() {
+		// Example
+		//String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsdYYYrdfXXX23cl_aggreg95])} ON ROWS	FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23ds]");
+		// Localhost
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8888XXX2FdsdXXX2Ftec00114XXX23cl_aggreg95])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8888XXX2FidXXX2Ftec00114XXX23ds]");
+		assertContains(
+				"|  |  00 |       94.49 |       344.0 |",
+				result);
+
+	}
+	
+	
+		
 	
 	// TODO add query test
 	

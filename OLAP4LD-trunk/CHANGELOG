@@ -63,6 +63,10 @@ change their value and depending on their values, execute getCubes() etc. (and a
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
+==22 Sep 2013==
+* Why does Eurostat example agg dimension is not shown? There, we should have a test case. 
+Solution: Had to define range and datatype for measure. Done for example.
+
 ==21 Sep 2013==
 * Problem: Apparently, loading "http://estatwrap.ontologycentral.com/id/../data/tec00114" fails, 
 whereas loading "http://estatwrap.ontologycentral.com/data/tec00114" does not.
