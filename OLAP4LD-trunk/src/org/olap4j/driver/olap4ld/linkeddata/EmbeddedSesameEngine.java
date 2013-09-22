@@ -892,6 +892,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	private void checkIntegrityConstraints() throws OlapException {
 
+		// Logging
+		Olap4ldUtil._log.info("Run integrity constraints...");
+		
 		try {
 			// Now, we check the integrity constraints
 			RepositoryConnection con;
@@ -911,19 +914,16 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// IC-1. Unique DataSet. Every qb:Observation
 			// has exactly one associated qb:DataSet. <=
 			// takes too long since every observation tested
-			// testquery = prefixbindings
-			// +
-			// "ASK {  {        ?obs a qb:Observation .    FILTER NOT EXISTS { ?obs qb:dataSet ?dataset1 . } } UNION {        ?obs a qb:Observation ;       qb:dataSet ?dataset1, ?dataset2 .    FILTER (?dataset1 != ?dataset2)  }}";
-			// BooleanQuery booleanQuery = con.prepareBooleanQuery(
-			// QueryLanguage.SPARQL, testquery);
-			// if (booleanQuery.evaluate() == true) {
-			// error = true;
-			// overview +=
-			// "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet. \n";
-			// } else {
-			// overview +=
-			// "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet. \n";
-			// }
+			testquery = prefixbindings
+					+ "ASK {  {        ?obs a qb:Observation .    FILTER NOT EXISTS { ?obs qb:dataSet ?dataset1 . } } UNION {        ?obs a qb:Observation ;       qb:dataSet ?dataset1, ?dataset2 .    FILTER (?dataset1 != ?dataset2)  }}";
+			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+					testquery);
+			if (booleanQuery.evaluate() == true) {
+				error = true;
+				overview += "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet. \n";
+			} else {
+				overview += "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet. \n";
+			}
 
 			// IC-2. Unique DSD. Every qb:DataSet has
 			// exactly one associated
@@ -1024,7 +1024,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				error = true;
 				overview += "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure.  \n";
 			} else {
-				overview += "Successful specification check: IC-1. IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure.  \n";
+				overview += "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure.  \n";
 			}
 
 			// IC-10. Slice dimensions complete
@@ -1041,35 +1041,29 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// IC-11. All dimensions required <= takes too
 			// long
-			// testquery = prefixbindings
-			// +
-			// "ASK {    ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty;    FILTER NOT EXISTS { ?obs ?dim [] }}";
-			// booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-			// testquery);
-			// if (booleanQuery.evaluate() == true) {
-			// error = true;
-			// overview +=
-			// "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
-			// } else {
-			// overview +=
-			// "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
-			// }
+			testquery = prefixbindings
+					+ "ASK {    ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty;    FILTER NOT EXISTS { ?obs ?dim [] }}";
+			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+					testquery);
+			if (booleanQuery.evaluate() == true) {
+				error = true;
+				overview += "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
+			} else {
+				overview += "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
+			}
 
 			// IC-12. No duplicate observations <= takes too
 			// long
-			// testquery = prefixbindings
-			// +
-			// "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
-			// booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-			// testquery);
-			// if (booleanQuery.evaluate() == true) {
-			// error = true;
-			// overview +=
-			// "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
-			// } else {
-			// overview +=
-			// "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
-			// }
+			testquery = prefixbindings
+					+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
+			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+					testquery);
+			if (booleanQuery.evaluate() == true) {
+				error = true;
+				overview += "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
+			} else {
+				overview += "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
+			}
 
 			// IC-13. Required attributes <= We do not
 			// regard attributes
@@ -1134,17 +1128,81 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				overview += "Successful specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures. \n";
 			}
 
+			// IC-18. Consistent data set links
+			testquery = prefixbindings
+					+ "ASK { ?dataset qb:slice ?slice . ?slice qb:observation ?obs .FILTER NOT EXISTS { ?obs qb:dataSet ?dataset . }}";
+			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+					testquery);
+			if (booleanQuery.evaluate() == true) {
+				error = true;
+				overview += "Failed specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D.  \n";
+			} else {
+				overview += "Successful specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D.  \n";
+			}
+
+			// IC-19. Codes from code list
+			testquery = prefixbindings
+					+ "ASK { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
+			String testquery2 = prefixbindings
+					+ "ASK {   ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:Collection .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept . ?list skos:member+ ?v }}";
+			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+					testquery);
+			BooleanQuery booleanQuery2 = con.prepareBooleanQuery(
+					QueryLanguage.SPARQL, testquery2);
+			if (booleanQuery.evaluate() == true
+					|| booleanQuery2.evaluate() == true) {
+				error = true;
+				overview += "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.   \n";
+			} else {
+				overview += "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.   \n";
+			}
+
+			// For the next two integrity constraints, we need instantiation
+			// queries first.
+			// XXX: Do them later.
+
+			// IC-20. Codes from hierarchy
+			// testquery = prefixbindings
+			// +
+			// "ASK {    ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a qb:HierarchicalCodeList .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?list qb:hierarchyRoot/<$p>* ?v }}";
+			// booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+			// testquery);
+			// if (booleanQuery.evaluate() == true) {
+			// error = true;
+			// overview +=
+			// "Failed specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.   \n";
+			// } else {
+			// overview +=
+			// "Successful specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.   \n";
+			// }
+
+			// IC-21. Codes from hierarchy (inverse)
+			// testquery = prefixbindings
+			// +
+			// "ASK {    ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a qb:HierarchicalCodeList .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?list qb:hierarchyRoot/<$p>* ?v }}";
+			// booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+			// testquery);
+			// if (booleanQuery.evaluate() == true) {
+			// error = true;
+			// overview +=
+			// "Failed specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.   \n";
+			// } else {
+			// overview +=
+			// "Successful specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.   \n";
+			// }
+
 			// Important!
 			con.close();
 
 			if (error) {
 				Olap4ldUtil._log.warning("Integrity constraints overview: "
 						+ overview);
+				// XXX: OlapExceptions possible?
 				throw new UnsupportedOperationException(
 						"Integrity constraints overview: \n" + overview);
 			} else {
 				// Logging
-				Olap4ldUtil._log.config("Integrity constraints overview: "
+				Olap4ldUtil._log.info("Integrity constraints overview: "
 						+ overview);
 			}
 

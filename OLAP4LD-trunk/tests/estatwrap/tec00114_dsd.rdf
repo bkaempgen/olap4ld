@@ -14,7 +14,7 @@
 <rdfs:label xml:lang="en">National accounts indicator (ESA95)</rdfs:label>
 <rdfs:label xml:lang="de">Volkswirtschaftliche Gesamtrechnungen Indikator (ESVG95)</rdfs:label>
 <rdfs:label xml:lang="fr">Indicateur des comptes nationaux (SEC95)</rdfs:label>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/indic_na#VI_PPS_EU28_HAB">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/indic_na#VI_PPS_EU28_HAB">
 <rdfs:label xml:lang="en">Volume indices of real expenditure per capita in PPS (EU28=100)</rdfs:label>
 <rdfs:label xml:lang="de">Volumenindex der realen Pro-Kopf Ausgaben in KKS (EU28=100)</rdfs:label>
 <rdfs:label xml:lang="fr">Indices de volume des dépenses réelles par habitant en SPA (UE28=100)</rdfs:label>
@@ -24,7 +24,7 @@
 <rdfs:label xml:lang="en">Esa95 Aggregate</rdfs:label>
 <rdfs:label xml:lang="de">Aggregate ESVG95</rdfs:label>
 <rdfs:label xml:lang="fr">Agrégat SEC95</rdfs:label>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/aggreg95#00">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/aggreg95#00">
 <rdfs:label xml:lang="en">Gross Domestic Product</rdfs:label>
 <rdfs:label xml:lang="de">Bruttoinlandsprodukt</rdfs:label>
 <rdfs:label xml:lang="fr">Produit intérieur brut</rdfs:label>
@@ -33,116 +33,116 @@
 
 <skos:ConceptScheme rdf:about="#cl_time_format"><skos:notation>cl_time_format</skos:notation>
 <rdfs:label xml:lang="en">Time Format</rdfs:label>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/time_format#P1Y">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/time_format#P1Y">
 <rdfs:label xml:lang="en">Annual</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/time_format#P6M">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/time_format#P6M">
 <rdfs:label xml:lang="en">Semi-annual</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/time_format#P3M">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/time_format#P3M">
 <rdfs:label xml:lang="en">Quarterly</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/time_format#P1M">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/time_format#P1M">
 <rdfs:label xml:lang="en">Monthly</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/time_format#P7D">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/time_format#P7D">
 <rdfs:label xml:lang="en">Weekly</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/time_format#P1D">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/time_format#P1D">
 <rdfs:label xml:lang="en">Daily</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/time_format#PT1M">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/time_format#PT1M">
 <rdfs:label xml:lang="en">Minutely</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
 </skos:ConceptScheme>
 <skos:ConceptScheme rdf:about="#cl_freq"><skos:notation>cl_freq</skos:notation>
 <rdfs:label xml:lang="en">Frequency code list</rdfs:label>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/freq#A">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/freq#A">
 <rdfs:label xml:lang="en">Annual</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/freq#S">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/freq#S">
 <rdfs:label xml:lang="en">Half-yearly, semester</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/freq#Q">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/freq#Q">
 <rdfs:label xml:lang="en">Quarterly</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/freq#M">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/freq#M">
 <rdfs:label xml:lang="en">Monthly</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/freq#W">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/freq#W">
 <rdfs:label xml:lang="en">Weekly</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/freq#B">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/freq#B">
 <rdfs:label xml:lang="en">Business week</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/freq#D">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/freq#D">
 <rdfs:label xml:lang="en">Daily</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/freq#H">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/freq#H">
 <rdfs:label xml:lang="en">Hourly</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/freq#N">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/freq#N">
 <rdfs:label xml:lang="en">Minutely</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
 </skos:ConceptScheme>
 <skos:ConceptScheme rdf:about="#cl_obs_status"><skos:notation>cl_obs_status</skos:notation>
 <rdfs:label xml:lang="en">Observation status code list</rdfs:label>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#d">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#d">
 <rdfs:label xml:lang="en">definition differs, see metadata</rdfs:label>
 <rdfs:label xml:lang="de">abweichende Definition, siehe Metadaten</rdfs:label>
 <rdfs:label xml:lang="fr">définition différente, voir métadonnées</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#b">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#b">
 <rdfs:label xml:lang="en">break in time series</rdfs:label>
 <rdfs:label xml:lang="de">Zeitreihenbruch</rdfs:label>
 <rdfs:label xml:lang="fr">rupture de série</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#c">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#c">
 <rdfs:label xml:lang="en">confidential</rdfs:label>
 <rdfs:label xml:lang="de">vertraulich</rdfs:label>
 <rdfs:label xml:lang="fr">confidentiel</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#e">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#e">
 <rdfs:label xml:lang="en">estimated</rdfs:label>
 <rdfs:label xml:lang="de">geschätzt</rdfs:label>
 <rdfs:label xml:lang="fr">estimé</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#f">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#f">
 <rdfs:label xml:lang="en">forecast</rdfs:label>
 <rdfs:label xml:lang="de">Prognose</rdfs:label>
 <rdfs:label xml:lang="fr">prévision</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#i">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#i">
 <rdfs:label xml:lang="en">see metadata</rdfs:label>
 <rdfs:label xml:lang="de">siehe Metadaten</rdfs:label>
 <rdfs:label xml:lang="fr">voir métadonnées</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#n">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#n">
 <rdfs:label xml:lang="en">not significant</rdfs:label>
 <rdfs:label xml:lang="de">unbedeutend</rdfs:label>
 <rdfs:label xml:lang="fr">non significatif</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#p">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#p">
 <rdfs:label xml:lang="en">provisional</rdfs:label>
 <rdfs:label xml:lang="de">vorläufig</rdfs:label>
 <rdfs:label xml:lang="fr">provisoire</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#r">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#r">
 <rdfs:label xml:lang="en">revised</rdfs:label>
 <rdfs:label xml:lang="de">revidiert</rdfs:label>
 <rdfs:label xml:lang="fr">révisé</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#s">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#s">
 <rdfs:label xml:lang="en">Eurostat estimate</rdfs:label>
 <rdfs:label xml:lang="de">Eurostat Schätzung</rdfs:label>
 <rdfs:label xml:lang="fr">estimation Eurostat</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#u">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#u">
 <rdfs:label xml:lang="en">low reliability</rdfs:label>
 <rdfs:label xml:lang="de">geringe Zuverlässigkeit</rdfs:label>
 <rdfs:label xml:lang="fr">peu fiable</rdfs:label>
 </skos:Concept></skos:hasTopConcept>
-<skos:hasTopConcept><skos:Concept rdf:about="../dic/obs_status#z">
+<skos:hasTopConcept><skos:Concept rdf:about="/dic/obs_status#z">
 <rdfs:label xml:lang="en">not applicable</rdfs:label>
 <rdfs:label xml:lang="de">nicht zutreffend</rdfs:label>
 <rdfs:label xml:lang="fr">non applicable</rdfs:label>

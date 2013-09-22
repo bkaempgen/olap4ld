@@ -67,6 +67,8 @@ directly from getCubes() etc. We would not need to populate a deferred list on g
 * Why does Eurostat example agg dimension is not shown? There, we should have a test case. 
 Solution: Had to define range and datatype for measure. Done for example.
 * For eurostat example, I also had to adapt the dimension names (which were ontologycentral).
+** Also, had to adapt so that codelist and observation coincidate. Why did we not realize that observation values did not align with code list values?
+* Since the error before has not been detected, I added more integrity constraints from spec
 
 ==21 Sep 2013==
 * Problem: Apparently, loading "http://estatwrap.ontologycentral.com/id/../data/tec00114" fails, 
