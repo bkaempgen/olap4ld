@@ -588,14 +588,14 @@ abstract class Olap4ldConnection implements OlapConnection {
 		this.catalogName = catalogName;
 		this.olap4jSchema = null;
 		
-		// Set back
-		try {
-			Olap4ldUtil._log.config("rollback OlapConnection...");
-			rollback();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// We don't do any rollbacks since we assume our LD-Engine dynamically adapts to the queries.
+//		try {
+//			Olap4ldUtil._log.info("rollback OlapConnection...");
+//			rollback();
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	public String getCatalog() throws OlapException {
@@ -650,14 +650,14 @@ abstract class Olap4ldConnection implements OlapConnection {
 		}
 		this.schemaName = schemaName;
 
-		// Set back
-		try {
-			Olap4ldUtil._log.config("rollback OlapConnection...");
-			rollback();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// We do not do rollbacks anymore since we assume the LD-Engine organises updates dynamically
+//		try {
+//			Olap4ldUtil._log.info("rollback OlapConnection...");
+//			rollback();
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	public synchronized Schema getOlapSchema() throws OlapException {

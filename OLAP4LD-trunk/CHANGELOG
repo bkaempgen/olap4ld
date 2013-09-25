@@ -63,13 +63,41 @@ change their value and depending on their values, execute getCubes() etc. (and a
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
+==25 Sep 2013==
+* DONE
+** For XMLA Cube Discovery (and later, Dimension-Discovery...), I want to load in the respective 
+metadata (and, for now, data). For a query, however, I do not necessarily want to load everything
+again.
+*** Caching is done in two cases: 1) By filling the triple store. 2) By populating 
+the metadata object lists.
+**** 1) Currently, a triple store is created when the EmbeddedSesameEngine is created which is
+done when the Driver is loaded which should be only once per XMLA-Connection. The triple store 
+is set back (rollback), when Connection.setCatalog() or Connection.setSchema() are called which is done
+in xmlaserver every time in RowsetDefinition a XmlaResponse is populated (populateImpl()). 
+For instance: populateImpl -> setCatalog() -> getCatalog() -> populateCatalog() -> 
+catalog.getSchemas() -> schema.getCubes() -> populateCube() -> cube.getDimensions() -> 
+populateDimension() -> dimension.getDescription() -> dimension.getHierarchies() -> 
+firstHierarchy.getLevels()... <= TODO: If we assume that Discover.Cubes is called at the very beginning, 
+the triple store should not be rollback for every discover method. It actually should never be
+generally rolled back but dynamically "updated" (there is no open rollback functionality): 
+1) Disable rollback. 2) Populate repository as much as possible and if we cannot populate anymore, 
+give error. For now, lets see when a new repository is created.  
+**** 2) The metadata object lists currently are deferred lists which get populated 1) if they are 
+new. 2) if explicitly a cube is asked for.
+** Test Cases do not work any more with constraints (should I disable them, again?)
+*** Instead of adding new normalization algorithms (first done, but commented for skos), I changed
+the example of ssb001.
+
+* TODO: 
+** Better understanding for users.
+
 ==22 Sep 2013==
 * Why does Eurostat example agg dimension is not shown? There, we should have a test case. 
 Solution: Had to define range and datatype for measure. Done for example.
 * For eurostat example, I also had to adapt the dimension names (which were ontologycentral).
 ** Also, had to adapt so that codelist and observation coincidate. Why did we not realize that observation values did not align with code list values?
 * Since the error before has not been detected, I added more integrity constraints from spec
-** watch out, also inScheme had to be done to fulfil integrity constraint
+** watch out, also inScheme had to be done to fullfil integrity constraint
 
 ==21 Sep 2013==
 * Problem: Apparently, loading "http://estatwrap.ontologycentral.com/id/../data/tec00114" fails, 

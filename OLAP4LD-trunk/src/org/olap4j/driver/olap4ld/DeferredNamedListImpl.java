@@ -133,7 +133,10 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 		if (name != null) {
 
 			try {
-				// Create own restriction for cube
+				/* 
+				 * Create own restriction for cube. 
+				 * If we do MetadataRequest for cubes, we definitely populate, again.
+				 */
 				if (metadataRequest == MetadataRequest.MDSCHEMA_CUBES) {
 					Object[] restrictions = new Object[] { "CUBE_NAME", name };
 					context.olap4jConnection.olap4jDatabaseMetaData
@@ -142,7 +145,10 @@ class DeferredNamedListImpl<T extends Named> extends AbstractList<T> implements
 				}
 				// TODO add other possible Requests.
 				else {
-					// Default
+					/*
+					 * Per default, we just return the current list which is populated, only
+					 * if it is "new". 
+					 */
 					getList();
 				}
 			} catch (OlapException e) {

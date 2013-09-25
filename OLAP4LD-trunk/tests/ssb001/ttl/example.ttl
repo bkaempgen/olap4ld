@@ -134,6 +134,35 @@ eg:lo_suppkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
     skos:hasTopConcept eg:supplier_2;
     .
 
+# -- Concepts -----------------------------------------
+eg:date_19940101 a skos:Concept;
+	skos:inScheme eg:lo_orderdateCodeList
+	.
+eg:date_19940601 a skos:Concept;
+	skos:inScheme eg:lo_orderdateCodeList
+	.
+
+eg:customer_1 a skos:Concept;
+	skos:inScheme eg:lo_custkeyCodeList
+	.
+eg:customer_2 a skos:Concept;
+	skos:inScheme eg:lo_custkeyCodeList
+	.
+
+eg:part_1 a skos:Concept;
+	skos:inScheme eg:lo_partkeyCodeList
+	.
+eg:part_2 a skos:Concept;
+	skos:inScheme eg:lo_partkeyCodeList
+	.
+
+eg:supplier_1 a skos:Concept;
+	skos:inScheme eg:lo_suppkeyCodeList
+	.
+eg:supplier_2 a skos:Concept;
+	skos:inScheme eg:lo_suppkeyCodeList
+	.
+
 # -- Observations -----------------------------------------
 
 eg:lineorder_1_1

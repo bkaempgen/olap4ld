@@ -337,9 +337,6 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 				result);
 	}
 	
-	
-		
-	
 	// TODO add query test
 	
 	public void testExampleEurostatEmploymentRateMetadata() {

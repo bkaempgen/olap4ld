@@ -86,6 +86,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	public String DATASOURCEVERSION;
 
+	// Each typical sparql query assumes the following prefixes.
+	public String TYPICALPREFIXES = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
+
 	// Helper attributes
 
 	/**
@@ -669,12 +672,38 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						// We need to materialise implicit information
 						runNormalizationAlgorithm();
 
+						// Own normalization and inferencing.
+
+						RepositoryConnection con;
+
+						// con = repo.getConnection();
+
+						/*
+						 * SKOS:
+						 * 
+						 * Since 1) skos:topConceptOf is a sub-property of
+						 * skos:inScheme. 2) skos:topConceptOf is owl:inverseOf
+						 * the property skos:hasTopConcept 3) The rdfs:domain of
+						 * skos:hasTopConcept is the class skos:ConceptScheme.:
+						 * ?conceptScheme skos:hasTopConcept ?concept. =>
+						 * ?concept skos:inScheme ?conceptScheme.
+						 */
+						// String updateQuery = TYPICALPREFIXES
+						// +
+						// " INSERT { ?concept skos:inScheme ?codelist.} WHERE { ?codelist skos:hasTopConcept ?concept }; ";
+						// Update updateQueryQuery = con.prepareUpdate(
+						// QueryLanguage.SPARQL, updateQuery);
+						// updateQueryQuery.execute();
+
+						// Important!
+						// con.close();
+
 						// Now that we presumably have loaded all necessary
 						// data, we check integrity constraints
 						checkIntegrityConstraints();
 
 						// Own checks:
-						SailRepositoryConnection con = repo.getConnection();
+						con = repo.getConnection();
 
 						String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
 
@@ -715,7 +744,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		} catch (QueryEvaluationException e) {
 			throw new OlapException("Problem with query evaluation: "
 					+ e.getMessage());
-		}
+		} 
 	}
 
 	/**
@@ -894,7 +923,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		// Logging
 		Olap4ldUtil._log.info("Run integrity constraints...");
-		
+
 		try {
 			// Now, we check the integrity constraints
 			RepositoryConnection con;
@@ -906,15 +935,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			boolean error = false;
 			String overview = "";
 
-			// Each integrity constraint query assumes the following set of
-			// prefix
-			// bindings:
-			String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
-
 			// IC-1. Unique DataSet. Every qb:Observation
 			// has exactly one associated qb:DataSet. <=
 			// takes too long since every observation tested
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {  {        ?obs a qb:Observation .    FILTER NOT EXISTS { ?obs qb:dataSet ?dataset1 . } } UNION {        ?obs a qb:Observation ;       qb:dataSet ?dataset1, ?dataset2 .    FILTER (?dataset1 != ?dataset2)  }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -928,7 +952,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// IC-2. Unique DSD. Every qb:DataSet has
 			// exactly one associated
 			// qb:DataStructureDefinition. <= tested before
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {  {        ?dataset a qb:DataSet .    FILTER NOT EXISTS { ?dataset qb:structure ?dsd . }  } UNION {    ?dataset a qb:DataSet ;       qb:structure ?dsd1, ?dsd2 .    FILTER (?dsd1 != ?dsd2)  }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -941,7 +965,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// IC-3. DSD includes measure
 			// XXX: Not fully like in spec
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {  ?dsd a qb:DataStructureDefinition .  FILTER NOT EXISTS { ?dsd qb:component [qb:componentProperty [a qb:MeasureProperty]] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -953,7 +977,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-4. Dimensions have range
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK { ?dim a qb:DimensionProperty . FILTER NOT EXISTS { ?dim rdfs:range [] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -965,7 +989,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-5. Concept dimensions have code lists
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK { ?dim a qb:DimensionProperty ; rdfs:range skos:Concept . FILTER NOT EXISTS { ?dim qb:codeList [] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -979,7 +1003,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// IC-6. Only attributes may be optional <= not
 			// important right now. We do not regard
 			// attributes.
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {  ?dsd qb:component ?componentSpec .  ?componentSpec qb:componentRequired \"false\"^^xsd:boolean ;                 qb:componentProperty ?component .  FILTER NOT EXISTS { ?component a qb:AttributeProperty }} ";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -992,7 +1016,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// IC-7. Slice Keys must be declared <= not
 			// important right now. We do not regard slices.
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {    ?sliceKey a qb:SliceKey .    FILTER NOT EXISTS { [a qb:DataStructureDefinition] qb:sliceKey ?sliceKey }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1004,7 +1028,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-8. Slice Keys consistent with DSD
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {  ?slicekey a qb:SliceKey;      qb:componentProperty ?prop .  ?dsd qb:sliceKey ?sliceKey .  FILTER NOT EXISTS { ?dsd qb:component [qb:componentProperty ?prop] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1016,7 +1040,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-9. Unique slice structure
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {  {    ?slice a qb:Slice .    FILTER NOT EXISTS { ?slice qb:sliceStructure ?key } } UNION {    ?slice a qb:Slice ;           qb:sliceStructure ?key1, ?key2;    FILTER (?key1 != ?key2)  }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1028,7 +1052,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-10. Slice dimensions complete
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {  ?slice qb:sliceStructure [qb:componentProperty ?dim] .  FILTER NOT EXISTS { ?slice ?dim [] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1041,7 +1065,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// IC-11. All dimensions required <= takes too
 			// long
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {    ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty;    FILTER NOT EXISTS { ?obs ?dim [] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1054,7 +1078,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// IC-12. No duplicate observations <= takes too
 			// long
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1067,7 +1091,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// IC-13. Required attributes <= We do not
 			// regard attributes
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK { ?obs qb:dataSet/qb:structure/qb:component ?component .   ?component qb:componentRequired \"true\"^^xsd:boolean ;               qb:componentProperty ?attr .    FILTER NOT EXISTS { ?obs ?attr [] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1079,7 +1103,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-14. All measures present
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK { ?obs qb:dataSet/qb:structure ?dsd . FILTER NOT EXISTS { ?dsd qb:component/qb:componentProperty qb:measureType } ?dsd qb:component/qb:componentProperty ?measure . ?measure a qb:MeasureProperty; FILTER NOT EXISTS { ?obs ?measure [] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1092,7 +1116,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// IC-15. Measure dimension consistent <= We do
 			// not support measureType, yet.
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {    ?obs qb:dataSet/qb:structure ?dsd ;         qb:measureType ?measure .    ?dsd qb:component/qb:componentProperty qb:measureType .    FILTER NOT EXISTS { ?obs ?measure [] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1105,7 +1129,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// IC-16. Single measure on measure dimension
 			// observation
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK {    ?obs qb:dataSet/qb:structure ?dsd ;         qb:measureType ?measure ;         ?omeasure [] .    ?dsd qb:component/qb:componentProperty qb:measureType ;         qb:component/qb:componentProperty ?omeasure .    ?omeasure a qb:MeasureProperty .        FILTER (?omeasure != ?measure)}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1117,7 +1141,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-17. All measures present in measures dimension cube
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK { {      SELECT ?numMeasures (COUNT(?obs2) AS ?count) WHERE {         {             SELECT ?dsd (COUNT(?m) AS ?numMeasures) WHERE {                 ?dsd qb:component/qb:componentProperty ?m.                  ?m a qb:MeasureProperty .              } GROUP BY ?dsd          }                  ?obs1 qb:dataSet/qb:structure ?dsd;                qb:dataSet ?dataset ;                qb:measureType ?m1 .              ?obs2 qb:dataSet ?dataset ;                qb:measureType ?m2 .          FILTER NOT EXISTS {              ?dsd qb:component/qb:componentProperty ?dim .              FILTER (?dim != qb:measureType)              ?dim a qb:DimensionProperty .              ?obs1 ?dim ?v1 .              ?obs2 ?dim ?v2.              FILTER (?v1 != ?v2)          }                } GROUP BY ?obs1 ?numMeasures        HAVING (?count != ?numMeasures)  }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1129,7 +1153,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-18. Consistent data set links
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK { ?dataset qb:slice ?slice . ?slice qb:observation ?obs .FILTER NOT EXISTS { ?obs qb:dataSet ?dataset . }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1141,9 +1165,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-19. Codes from code list
-			testquery = prefixbindings
+			testquery = TYPICALPREFIXES
 					+ "ASK { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
-			String testquery2 = prefixbindings
+			String testquery2 = TYPICALPREFIXES
 					+ "ASK {   ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:Collection .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept . ?list skos:member+ ?v }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
@@ -1218,7 +1242,17 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		}
 	}
 
+	/**
+	 * According to QB specification, a cube may be provided in abbreviated form
+	 * so that inferences first have to be materialised to properly query a
+	 * cube.
+	 * 
+	 * @throws OlapException
+	 */
 	private void runNormalizationAlgorithm() throws OlapException {
+
+		// Logging
+		Olap4ldUtil._log.info("Run normalization algorithm...");
 
 		try {
 			RepositoryConnection con;
