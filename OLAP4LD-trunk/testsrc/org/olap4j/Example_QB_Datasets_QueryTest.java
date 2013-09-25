@@ -231,6 +231,10 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 * file. Dimensions ranges are given in linked files (e.g., for
 	 * http://edgarwrap.ontologycentral.com/vocab/edgar#issuer). All ranges are
 	 * non-skos-concepts, thus, there is not code list.
+	 * 
+	 * Note, this dataset was not successful in the data cube checker / validator of Dave Reynolds
+	 * (see http://www.w3.org/2011/gld/validator/qb/qb-validator): 1) Since the validator does not
+	 * do resolving of links, it does not find ranges of the dimension properties. 2) 
 	 */
 	public void testExampleEdgarCOSTCOMetadata() {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds";

@@ -87,9 +87,18 @@ new. 2) if explicitly a cube is asked for.
 ** Test Cases do not work any more with constraints (should I disable them, again?)
 *** Instead of adding new normalization algorithms (first done, but commented for skos), I changed
 the example of ssb001.
+** Problem: Some integrity constraints are too complex to be run on larger datasets, esp. those
+which need to touch every observation (e.g., IC-12). 
+*** Possible solutions: 1) For now, we cannot run these integrity constraints and comment them. 2) We only run
+them if the size of the dataset is small and "small" is depending on the size of memory. 
+For instance, if free memory size is twice as big as current load of data. 3) We
+only run them in a specific cube dataset debugging mode.
+*** Current solution: Had to use 3) since 2) did not work.
+*** Planned solution: Maybe own better implementation of integrity checks or use more memory 
 
 * TODO: 
-** Better understanding for users.
+** Better understanding for users. Unfortunately, currently there is a JavaScript error in LDCX.
+** Why does Edgar example dataset does not fulfill constraint 12? [http://www.w3.org/2011/gld/validator/qb/qb-test?upload=upload-2013-09-25T20-51-51-104] 
 
 ==22 Sep 2013==
 * Why does Eurostat example agg dimension is not shown? There, we should have a test case. 

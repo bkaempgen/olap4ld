@@ -208,7 +208,9 @@ public class Olap4ldDriver implements Driver {
 	public Connection connect(String url, Properties info) throws SQLException {
 		
 		// Debugging
-		Olap4ldUtil._isDebug = true;
+		// Runs some more expensive debugging procedures (integrity constraints, showing of loaded triples) 
+		// TODO: Add to documentation
+		Olap4ldUtil._isDebug = false;
 		
 		// Setup logging
 		Olap4ldUtil._log = Logger.getLogger("Olap4ldDriver");

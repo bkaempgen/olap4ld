@@ -106,6 +106,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	private ExecPlan execplan;
 
+	private int LOADED_FILE_SIZE = 0;
+
 	public ExecPlan getExecplan() {
 		return execplan;
 	}
@@ -330,7 +332,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					Olap4ldUtil._log
 							.config("NxParser: Could not parse properly: "
 									+ e.getMessage());
-				}
+				} 
 				;
 			}
 
@@ -377,10 +379,12 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// Check size and set size to have of heap space
 			URLConnection urlConnection = locationurl.openConnection();
 			urlConnection.connect();
-			// assuming both bytes
+			// assuming both bytes: 1) file_size is byte 2) 
 			int file_size = urlConnection.getContentLength();
-			// Apparently file size often wrong?
+			// TODO: Apparently file size often wrong?
 			Olap4ldUtil._log.info("File size: " + file_size);
+			// Track entire file size loaded
+			this.LOADED_FILE_SIZE = +file_size;
 			long memory_size = Olap4ldUtil.getFreeMemory();
 			Olap4ldUtil._log.info("Current memory size: " + memory_size);
 
@@ -744,7 +748,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		} catch (QueryEvaluationException e) {
 			throw new OlapException("Problem with query evaluation: "
 					+ e.getMessage());
-		} 
+		}
 	}
 
 	/**
@@ -921,9 +925,20 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	private void checkIntegrityConstraints() throws OlapException {
 
+		// Check space for more complex integrity constraints
+
+		// Track entire file size loaded
+		long memory_size = Olap4ldUtil.getFreeMemory();
+		Olap4ldUtil._log.info("Current memory size: " + memory_size);
+		Olap4ldUtil._log.info("Current loaded file size: " + this.LOADED_FILE_SIZE);
+		boolean hasEnoughMemory = (memory_size > 2 * this.LOADED_FILE_SIZE);
+		// For now, since we cannot rely on LOADED_FILE_SIZE we only do for debugging
+		hasEnoughMemory = Olap4ldUtil._isDebug;
+
 		// Logging
 		Olap4ldUtil._log.info("Run integrity constraints...");
-
+		Olap4ldUtil._log.info("including complex integrity constraints: "+hasEnoughMemory+"...");
+		
 		try {
 			// Now, we check the integrity constraints
 			RepositoryConnection con;
@@ -964,7 +979,6 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-3. DSD includes measure
-			// XXX: Not fully like in spec
 			testquery = TYPICALPREFIXES
 					+ "ASK {  ?dsd a qb:DataStructureDefinition .  FILTER NOT EXISTS { ?dsd qb:component [qb:componentProperty [a qb:MeasureProperty]] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
@@ -1063,30 +1077,38 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				overview += "Successful specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure. \n";
 			}
 
-			// IC-11. All dimensions required <= takes too
-			// long
-			testquery = TYPICALPREFIXES
-					+ "ASK {    ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty;    FILTER NOT EXISTS { ?obs ?dim [] }}";
-			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-					testquery);
-			if (booleanQuery.evaluate() == true) {
-				error = true;
-				overview += "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
-			} else {
-				overview += "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
-			}
+			// Since needs to go through all observations, only done if enough
+			// memory
+			if (hasEnoughMemory) {
 
-			// IC-12. No duplicate observations <= takes too
-			// long
-			testquery = TYPICALPREFIXES
-					+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
-			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-					testquery);
-			if (booleanQuery.evaluate() == true) {
-				error = true;
-				overview += "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
-			} else {
-				overview += "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
+				// IC-11. All dimensions required <= takes too
+				// long
+				testquery = TYPICALPREFIXES
+						+ "ASK {    ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty;    FILTER NOT EXISTS { ?obs ?dim [] }}";
+				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+						testquery);
+				if (booleanQuery.evaluate() == true) {
+					error = true;
+					overview += "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
+				} else {
+					overview += "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
+				}
+
+				// IC-12. No duplicate observations <= takes especially
+				// long, expensive quadratic check (IC-12) (see
+				// http://lists.w3.org/Archives/Public/public-gld-wg/2013Jul/0017.html)
+				// Dave Reynolds has implemented a linear time version of it
+				testquery = TYPICALPREFIXES
+						+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
+				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+						testquery);
+				if (booleanQuery.evaluate() == true) {
+					error = true;
+					overview += "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
+				} else {
+					overview += "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
+				}
+
 			}
 
 			// IC-13. Required attributes <= We do not
@@ -1164,21 +1186,29 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				overview += "Successful specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D.  \n";
 			}
 
-			// IC-19. Codes from code list
-			testquery = TYPICALPREFIXES
-					+ "ASK { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
-			String testquery2 = TYPICALPREFIXES
-					+ "ASK {   ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:Collection .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept . ?list skos:member+ ?v }}";
-			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-					testquery);
-			BooleanQuery booleanQuery2 = con.prepareBooleanQuery(
-					QueryLanguage.SPARQL, testquery2);
-			if (booleanQuery.evaluate() == true
-					|| booleanQuery2.evaluate() == true) {
-				error = true;
-				overview += "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.   \n";
-			} else {
-				overview += "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.   \n";
+			// Since needs to go through all observations, only done if enough
+			// memory
+			if (hasEnoughMemory) {
+
+				// IC-19. Codes from code list
+				// Probably takes very long since involves property chain and
+				// going through all observations.
+				testquery = TYPICALPREFIXES
+						+ "ASK { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
+				String testquery2 = TYPICALPREFIXES
+						+ "ASK {   ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:Collection .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept . ?list skos:member+ ?v }}";
+				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+						testquery);
+				BooleanQuery booleanQuery2 = con.prepareBooleanQuery(
+						QueryLanguage.SPARQL, testquery2);
+				if (booleanQuery.evaluate() == true
+						|| booleanQuery2.evaluate() == true) {
+					error = true;
+					overview += "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.   \n";
+				} else {
+					overview += "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.   \n";
+				}
+
 			}
 
 			// For the next two integrity constraints, we need instantiation

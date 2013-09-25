@@ -526,6 +526,7 @@ public abstract class Olap4ldUtil {
 	*/
 	public static long getFreeMemory() {
 	         
+			// kilo -> mega byte
 	        int mb = 1024*1024;
 	         
 	        //Getting the runtime reference from system
