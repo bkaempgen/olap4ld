@@ -120,12 +120,14 @@ eg:lo_custkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
 	rdfs:label "custkey"@en ;
     skos:hasTopConcept eg:customer_1;
     skos:hasTopConcept eg:customer_2;
+    skos:hasTopConcept eg:customer_3;    
     .
 
 eg:lo_partkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
 	rdfs:label "partkey"@en ;
     skos:hasTopConcept eg:part_1;
     skos:hasTopConcept eg:part_2;
+    skos:hasTopConcept eg:part_3;
     .
 
 eg:lo_suppkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
@@ -148,11 +150,17 @@ eg:customer_1 a skos:Concept;
 eg:customer_2 a skos:Concept;
 	skos:inScheme eg:lo_custkeyCodeList
 	.
+eg:customer_3 a skos:Concept;
+	skos:inScheme eg:lo_custkeyCodeList
+	.
 
 eg:part_1 a skos:Concept;
 	skos:inScheme eg:lo_partkeyCodeList
 	.
 eg:part_2 a skos:Concept;
+	skos:inScheme eg:lo_partkeyCodeList
+	.
+eg:part_3 a skos:Concept;
 	skos:inScheme eg:lo_partkeyCodeList
 	.
 
@@ -201,7 +209,7 @@ eg:lineorder_1_3
     qb:dataSet eg:ds ;
     eg:lo_orderdate eg:date_19940101 ;
     eg:lo_custkey eg:customer_1 ;
-    eg:lo_partkey eg:part_2 ;
+    eg:lo_partkey eg:part_3 ;
     eg:lo_suppkey eg:supplier_1 ;
     eg:lo_quantity 17 ;
     eg:lo_discount 4e0 ;
@@ -231,7 +239,7 @@ eg:lineorder_1_5
     qb:dataSet eg:ds ;
     eg:lo_orderdate eg:date_19940101 ;
     eg:lo_custkey eg:customer_2 ;
-    eg:lo_partkey eg:part_2 ;
+    eg:lo_partkey eg:part_3 ;
     eg:lo_suppkey eg:supplier_2 ;
     eg:lo_quantity 17 ;
     eg:lo_discount 4e0 ;

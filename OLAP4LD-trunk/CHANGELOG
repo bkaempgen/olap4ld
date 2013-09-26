@@ -63,6 +63,18 @@ change their value and depending on their values, execute getCubes() etc. (and a
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
+==2013-09-26==
+* TODO: 
+** Better understanding for users. Unfortunately, currently there is a JavaScript error in LDCX.
+** Why does Edgar example dataset does not fulfill constraint 12? [http://www.w3.org/2011/gld/validator/qb/qb-test?upload=upload-2013-09-25T20-51-51-104] 
+** The system is still not very robust, since queries may ask for too many columns and rows to be visualized (in JavaScript on client? Or to populate result set on server?). 
+*** One solution might be JSON as described here: http://www.blogger.com/comment.g?blogID=5672165237896126100&postID=9002652898272515547
+*** Another solution would be to properly implement NON EMPTY COLUMNS and NON EMPTY ROWS and to set this up as default in the system. This way, no impossible queries for a non too big file should be possible.
+*** Question: Does olap4ld cope with a big query?
+
+* Properly implement NON EMPTY CLAUSE:
+** Make test case: We extend ssb example. 
+
 ==25 Sep 2013==
 * DONE
 ** For XMLA Cube Discovery (and later, Dimension-Discovery...), I want to load in the respective 
@@ -95,10 +107,6 @@ For instance, if free memory size is twice as big as current load of data. 3) We
 only run them in a specific cube dataset debugging mode.
 *** Current solution: Had to use 3) since 2) did not work.
 *** Planned solution: Maybe own better implementation of integrity checks or use more memory 
-
-* TODO: 
-** Better understanding for users. Unfortunately, currently there is a JavaScript error in LDCX.
-** Why does Edgar example dataset does not fulfill constraint 12? [http://www.w3.org/2011/gld/validator/qb/qb-test?upload=upload-2013-09-25T20-51-51-104] 
 
 ==22 Sep 2013==
 * Why does Eurostat example agg dimension is not shown? There, we should have a test case. 

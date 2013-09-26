@@ -932,8 +932,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		Olap4ldUtil._log.info("Current memory size: " + memory_size);
 		Olap4ldUtil._log.info("Current loaded file size: " + this.LOADED_FILE_SIZE);
 		boolean hasEnoughMemory = (memory_size > 2 * this.LOADED_FILE_SIZE);
-		// For now, since we cannot rely on LOADED_FILE_SIZE we only do for debugging
-		hasEnoughMemory = Olap4ldUtil._isDebug;
+		// For now, since we cannot rely on LOADED_FILE_SIZE we use a threshold of 500 MB
+		hasEnoughMemory = (memory_size > 500000000);
 
 		// Logging
 		Olap4ldUtil._log.info("Run integrity constraints...");

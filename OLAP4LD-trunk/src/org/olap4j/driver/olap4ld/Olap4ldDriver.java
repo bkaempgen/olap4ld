@@ -210,7 +210,7 @@ public class Olap4ldDriver implements Driver {
 		// Debugging
 		// Runs some more expensive debugging procedures (integrity constraints, showing of loaded triples) 
 		// TODO: Add to documentation
-		Olap4ldUtil._isDebug = false;
+		Olap4ldUtil._isDebug = true;
 		
 		// Setup logging
 		Olap4ldUtil._log = Logger.getLogger("Olap4ldDriver");

@@ -76,7 +76,7 @@ public class SparqlSesameExecIterator implements ExecIterator {
 			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(bais);
 
 			// Only log if needed
-			if (Olap4ldUtil._log.getLevel() == java.util.logging.Level.CONFIG) {
+			if (Olap4ldUtil._isDebug) {
 				String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
 				Olap4ldUtil._log.config("NX output: " + test2);
 				nx.reset();

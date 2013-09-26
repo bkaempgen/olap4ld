@@ -456,19 +456,22 @@ abstract class Olap4ldCellSet implements CellSet {
 
 			for (Member member : members) {
 				if (member.getMemberType() != Member.Type.MEASURE) {
-					Olap4ldHierarchy olaphierarchy = (Olap4ldHierarchy) member.getLevel().getHierarchy();
+					Olap4ldHierarchy olaphierarchy = (Olap4ldHierarchy) member
+							.getLevel().getHierarchy();
 					Olap4ldLevel olaplevel = (Olap4ldLevel) member.getLevel();
 					if (first) {
 						first = false;
 						rollups.add(olaplevel.transformMetadataObject2NxNodes(
 								metaData.cube).get(0));
-						rollupssignature.add(olaphierarchy.transformMetadataObject2NxNodes(
-								metaData.cube).get(0));
+						rollupssignature.add(olaphierarchy
+								.transformMetadataObject2NxNodes(metaData.cube)
+								.get(0));
 					}
 					rollups.add(olaplevel.transformMetadataObject2NxNodes(
 							metaData.cube).get(1));
-					rollupssignature.add(olaphierarchy.transformMetadataObject2NxNodes(
-							metaData.cube).get(1));
+					rollupssignature.add(olaphierarchy
+							.transformMetadataObject2NxNodes(metaData.cube)
+							.get(1));
 				}
 			}
 		}
@@ -479,7 +482,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		for (Dimension dimension : dimensions) {
 			boolean contained = false;
 			for (Node[] slicesrollup : rollups) {
-				
+
 				Map<String, Integer> map = Olap4ldLinkedDataUtil
 						.getNodeResultFields(rollups.get(0));
 				// Check whether dimension contained in rollup (dice?).
@@ -494,9 +497,11 @@ abstract class Olap4ldCellSet implements CellSet {
 				Olap4ldDimension olapdimension = (Olap4ldDimension) dimension;
 				if (first1) {
 					first1 = false;
-					slicedDimensions.add(olapdimension.transformMetadataObject2NxNodes().get(0));
+					slicedDimensions.add(olapdimension
+							.transformMetadataObject2NxNodes().get(0));
 				}
-				slicedDimensions.add(olapdimension.transformMetadataObject2NxNodes().get(1));
+				slicedDimensions.add(olapdimension
+						.transformMetadataObject2NxNodes().get(1));
 			}
 		}
 		LogicalOlapOp slice = new SliceOp(dice, slicedDimensions);
@@ -1155,7 +1160,8 @@ abstract class Olap4ldCellSet implements CellSet {
 					.getNodeResultFields(measureList.get(0));
 
 			if (measureList.get(i)[map.get("?MEASURE_UNIQUE_NAME")].toString()
-					.equals(Olap4ldLinkedDataUtil.convertMDXtoURI(measure.getName()))) {
+					.equals(Olap4ldLinkedDataUtil.convertMDXtoURI(measure
+							.getName()))) {
 				// First is header
 				index = i - 1;
 				break;
