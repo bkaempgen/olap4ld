@@ -72,12 +72,17 @@ public class LD_Cubes_Explorer_XmlaTest extends TestCase {
 		String cubename = "[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]";
 		String aMeasurename = "[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount]";
 		String aHierarchyname = "[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList]";
+		String mdx = "SELECT CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}) ON COLUMNS ,CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount] }";
+		String result = "<Cell CellOrdinal=\"0\">          <Value xsi:type=\"xsd:string\">4.0</Value>";
+		String mdx2 = "SELECT NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}) ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount] }";
+		String result2 = "hello";
 		postAndTestXmlaDiscoverDatasources();
 		postAndTestXmlaDbschemaCatalogs();
 		postAndTestXmlaMdschemaCubes(cubename);
 		postAndTestXmlaMdschemaMeasures(cubename, aMeasurename);
 		postAndTestXmlaMdschemaHierarchies(cubename, aHierarchyname);
-
+		postAndTestXmlaOlapQuery(mdx, result);
+		postAndTestXmlaOlapQuery(mdx2, result2);
 	}
 	
 	public void testEurostat() {
@@ -90,6 +95,24 @@ public class LD_Cubes_Explorer_XmlaTest extends TestCase {
 		postAndTestXmlaMdschemaMeasures(cubename, aMeasurename);
 		postAndTestXmlaMdschemaHierarchies(cubename, aHierarchyname);
 
+	}
+	
+	public void testEdgar() {
+		String cubename = uriToMdx("http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds");
+		String aMeasurename = "[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]";
+		String aHierarchyname = "[httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart]";
+		postAndTestXmlaDiscoverDatasources();
+		postAndTestXmlaDbschemaCatalogs();
+		postAndTestXmlaMdschemaCubes(cubename);
+		postAndTestXmlaMdschemaMeasures(cubename, aMeasurename);
+		postAndTestXmlaMdschemaHierarchies(cubename, aHierarchyname);
+		// First edgar query (works)
+		String mdx = "SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]";
+		// Complex edgar query (works actually also, however results in really long xmla result that probably cannot be properly parsed)
+		mdx = " SELECT NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])},{Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23segment])}) ON COLUMNS, NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]";
+		String result = "hello";
+		postAndTestXmlaOlapQuery(mdx, result);
+		
 	}
 	
 	private String uriToMdx(String dsUri) {
@@ -166,6 +189,17 @@ public class LD_Cubes_Explorer_XmlaTest extends TestCase {
 		String response = post(data);
 
 		String seek = "<HIERARCHY_NAME>" + aHierarchyname + "</HIERARCHY_NAME>";
+
+		assertContains(seek, response);
+	}
+	
+	public void postAndTestXmlaOlapQuery(String mdx, String result) {
+		
+		String data = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" SOAP-ENV:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <SOAP-ENV:Body> <Execute xmlns=\"urn:schemas-microsoft-com:xml-analysis\" SOAP-ENV:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <Command> <Statement>"+mdx+"</Statement> </Command> <Properties> <PropertyList> <DataSourceInfo>[LdCatalogSchema]</DataSourceInfo> <Catalog>[LdCatalogSchema]</Catalog> <Format>Multidimensional</Format> <Content>SchemaData</Content> </PropertyList> </Properties> </Execute> </SOAP-ENV:Body> </SOAP-ENV:Envelope>";
+		
+		String response = post(data);
+
+		String seek = result;
 
 		assertContains(seek, response);
 	}

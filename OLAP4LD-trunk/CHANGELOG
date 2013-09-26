@@ -63,17 +63,28 @@ change their value and depending on their values, execute getCubes() etc. (and a
 directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
 * However, for now it works.
 
-==2013-09-26==
+==2013-09-27==
 * TODO: 
 ** Better understanding for users. Unfortunately, currently there is a JavaScript error in LDCX.
-** Why does Edgar example dataset does not fulfill constraint 12? [http://www.w3.org/2011/gld/validator/qb/qb-test?upload=upload-2013-09-25T20-51-51-104] 
+** Even more robustness? 
+*** Currently, if I cannot store any more in the triple store, I just throw an error. After reload, a new triple store should be filled?
+*** If a query is too big, java script LDCX currently does not complain, can be improved?
+
+==2013-09-26==
+* Why does Edgar example dataset does not fulfill constraint 12? [http://www.w3.org/2011/gld/validator/qb/qb-test?upload=upload-2013-09-25T20-51-51-104] 
+** This is in more detail described here: http://linked-data-cubes.org/index.php/Displaying_of_background_information_useful_for_interpretation
+** Edgar would need to be improved
+
+* Robustness
 ** The system is still not very robust, since queries may ask for too many columns and rows to be visualized (in JavaScript on client? Or to populate result set on server?). 
 *** One solution might be JSON as described here: http://www.blogger.com/comment.g?blogID=5672165237896126100&postID=9002652898272515547
 *** Another solution would be to properly implement NON EMPTY COLUMNS and NON EMPTY ROWS and to set this up as default in the system. This way, no impossible queries for a non too big file should be possible.
 *** Question: Does olap4ld cope with a big query?
 
-* Properly implement NON EMPTY CLAUSE:
-** Make test case: We extend ssb example. 
+* For robustness: Properly implement NON EMPTY CLAUSE:
+** Make test case: We extend ssb example. <= result: NON EMPTY works just fine, the problem is rather the huge XMLA result for large queries. Any cell that is visible is mentioned in the xmla result.
+** More info see http://linked-data-cubes.org/index.php/NON_EMPTY_Clause_in_MDX
+** As a result, we should be using NON EMPTY for both rows and columns.
 
 ==25 Sep 2013==
 * DONE
