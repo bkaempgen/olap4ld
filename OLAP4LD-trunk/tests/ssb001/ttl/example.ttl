@@ -25,84 +25,84 @@
 @prefix sdmx-code:       <http://purl.org/linked-data/sdmx/2009/code#> .
 @prefix sdmx-subject:    <http://purl.org/linked-data/sdmx/2009/subject#> .
 
-@prefix eg:       	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#> .
+@prefix :       	<http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#> .
 
 # -- Data Set --------------------------------------------
 
-eg:ds
+:ds
 	a qb:DataSet ;
 	rdfs:label "Example Star Schema Benchmark Dataset"@en ;
-	qb:structure eg:dsd.	
+	qb:structure :dsd.	
 
 # -- Data structure definition ----------------------------
 
-eg:dsd
+:dsd
 	rdfs:label "Example Star Schema Benchmark Datastructuredefinition"@en ;
 	a qb:DataStructureDefinition ;
 	qb:component 
-		[ qb:dimension eg:lo_orderdate ],
-		[ qb:dimension eg:lo_custkey ],
-		[ qb:dimension eg:lo_partkey ],
-		[ qb:dimension eg:lo_suppkey ];
+		[ qb:dimension :lo_orderdate ],
+		[ qb:dimension :lo_custkey ],
+		[ qb:dimension :lo_partkey ],
+		[ qb:dimension :lo_suppkey ];
 	qb:component 
-		[ qb:measure eg:lo_quantity; qb4o:hasAggregateFunction qb4o:sum ],
-		[ qb:measure eg:lo_discount; qb4o:hasAggregateFunction qb4o:avg ],
-		[ qb:measure eg:lo_extendedprice; qb4o:hasAggregateFunction qb4o:sum ],
-		[ qb:measure eg:lo_revenue; qb4o:hasAggregateFunction qb4o:sum ],
-		[ qb:measure eg:lo_supplycost; qb4o:hasAggregateFunction qb4o:sum ];
+		[ qb:measure :lo_quantity; qb4o:hasAggregateFunction qb4o:sum ],
+		[ qb:measure :lo_discount; qb4o:hasAggregateFunction qb4o:avg ],
+		[ qb:measure :lo_extendedprice; qb4o:hasAggregateFunction qb4o:sum ],
+		[ qb:measure :lo_revenue; qb4o:hasAggregateFunction qb4o:sum ],
+		[ qb:measure :lo_supplycost; qb4o:hasAggregateFunction qb4o:sum ];
 	.
 
 # -- Dimensions and measures  -----------------------------
 
-eg:lo_orderdate a rdf:Property, qb:DimensionProperty;
+:lo_orderdate a rdf:Property, qb:DimensionProperty;
     rdfs:label "orderdate"@en ;
     rdfs:range skos:Concept ;
-    qb:codeList eg:lo_orderdateCodeList ;
+    qb:codeList :lo_orderdateCodeList ;
     .
 
-eg:lo_custkey a rdf:Property, qb:DimensionProperty;
+:lo_custkey a rdf:Property, qb:DimensionProperty;
     rdfs:label "custkey"@en ;
     rdfs:range skos:Concept ;
-    qb:codeList eg:lo_custkeyCodeList ;
+    qb:codeList :lo_custkeyCodeList ;
     .
 
-eg:lo_partkey a rdf:Property, qb:DimensionProperty;
+:lo_partkey a rdf:Property, qb:DimensionProperty;
     rdfs:label "partkey"@en ;
     rdfs:range skos:Concept ;
-    qb:codeList eg:lo_partkeyCodeList ;
+    qb:codeList :lo_partkeyCodeList ;
     .
 
-eg:lo_suppkey a rdf:Property, qb:DimensionProperty;
+:lo_suppkey a rdf:Property, qb:DimensionProperty;
     rdfs:label "suppkey"@en ;
     rdfs:range skos:Concept ;
-    qb:codeList eg:lo_suppkeyCodeList ;
+    qb:codeList :lo_suppkeyCodeList ;
     .
 
-eg:lo_quantity  a rdf:Property, qb:MeasureProperty;
+:lo_quantity  a rdf:Property, qb:MeasureProperty;
     rdfs:label "quantity"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
     .
 
-eg:lo_discount  a rdf:Property, qb:MeasureProperty;
+:lo_discount  a rdf:Property, qb:MeasureProperty;
     rdfs:label "discount"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
     .
 
-eg:lo_extendedprice  a rdf:Property, qb:MeasureProperty ;
+:lo_extendedprice  a rdf:Property, qb:MeasureProperty ;
     rdfs:label "extendedprice"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue ;
     rdfs:range xsd:decimal ;
     .
 
-eg:lo_revenue  a rdf:Property, qb:MeasureProperty;
+:lo_revenue  a rdf:Property, qb:MeasureProperty;
     rdfs:label "revenue"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
     .
 
-eg:lo_supplycost  a rdf:Property, qb:MeasureProperty;
+:lo_supplycost  a rdf:Property, qb:MeasureProperty;
     rdfs:label "supplycost"@en ;
     rdfs:subPropertyOf sdmx-measure:obsValue;
     rdfs:range xsd:decimal ;
@@ -110,141 +110,141 @@ eg:lo_supplycost  a rdf:Property, qb:MeasureProperty;
 
 # -- Code lists -------------------------------------------
 
-eg:lo_orderdateCodeList a skos:ConceptScheme, sdmx:CodeList;
+:lo_orderdateCodeList a skos:ConceptScheme, sdmx:CodeList;
 	rdfs:label "orderdate"@en ;
-    skos:hasTopConcept eg:date_19940101;
-    skos:hasTopConcept eg:date_19940601;
+    skos:hasTopConcept :date_19940101;
+    skos:hasTopConcept :date_19940601;
     .
 
-eg:lo_custkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
+:lo_custkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
 	rdfs:label "custkey"@en ;
-    skos:hasTopConcept eg:customer_1;
-    skos:hasTopConcept eg:customer_2;
-    skos:hasTopConcept eg:customer_3;    
+    skos:hasTopConcept :customer_1;
+    skos:hasTopConcept :customer_2;
+    skos:hasTopConcept :customer_3;    
     .
 
-eg:lo_partkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
+:lo_partkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
 	rdfs:label "partkey"@en ;
-    skos:hasTopConcept eg:part_1;
-    skos:hasTopConcept eg:part_2;
-    skos:hasTopConcept eg:part_3;
+    skos:hasTopConcept :part_1;
+    skos:hasTopConcept :part_2;
+    skos:hasTopConcept :part_3;
     .
 
-eg:lo_suppkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
+:lo_suppkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
 	rdfs:label "supplycost"@en ;
-    skos:hasTopConcept eg:supplier_1;
-    skos:hasTopConcept eg:supplier_2;
+    skos:hasTopConcept :supplier_1;
+    skos:hasTopConcept :supplier_2;
     .
 
 # -- Concepts -----------------------------------------
-eg:date_19940101 a skos:Concept;
-	skos:inScheme eg:lo_orderdateCodeList
+:date_19940101 a skos:Concept;
+	skos:inScheme :lo_orderdateCodeList
 	.
-eg:date_19940601 a skos:Concept;
-	skos:inScheme eg:lo_orderdateCodeList
-	.
-
-eg:customer_1 a skos:Concept;
-	skos:inScheme eg:lo_custkeyCodeList
-	.
-eg:customer_2 a skos:Concept;
-	skos:inScheme eg:lo_custkeyCodeList
-	.
-eg:customer_3 a skos:Concept;
-	skos:inScheme eg:lo_custkeyCodeList
+:date_19940601 a skos:Concept;
+	skos:inScheme :lo_orderdateCodeList
 	.
 
-eg:part_1 a skos:Concept;
-	skos:inScheme eg:lo_partkeyCodeList
+:customer_1 a skos:Concept;
+	skos:inScheme :lo_custkeyCodeList
 	.
-eg:part_2 a skos:Concept;
-	skos:inScheme eg:lo_partkeyCodeList
+:customer_2 a skos:Concept;
+	skos:inScheme :lo_custkeyCodeList
 	.
-eg:part_3 a skos:Concept;
-	skos:inScheme eg:lo_partkeyCodeList
+:customer_3 a skos:Concept;
+	skos:inScheme :lo_custkeyCodeList
 	.
 
-eg:supplier_1 a skos:Concept;
-	skos:inScheme eg:lo_suppkeyCodeList
+:part_1 a skos:Concept;
+	skos:inScheme :lo_partkeyCodeList
 	.
-eg:supplier_2 a skos:Concept;
-	skos:inScheme eg:lo_suppkeyCodeList
+:part_2 a skos:Concept;
+	skos:inScheme :lo_partkeyCodeList
+	.
+:part_3 a skos:Concept;
+	skos:inScheme :lo_partkeyCodeList
+	.
+
+:supplier_1 a skos:Concept;
+	skos:inScheme :lo_suppkeyCodeList
+	.
+:supplier_2 a skos:Concept;
+	skos:inScheme :lo_suppkeyCodeList
 	.
 
 # -- Observations -----------------------------------------
 
-eg:lineorder_1_1
-    a eg:lineorder ; 
+:lineorder_1_1
+    a :lineorder ; 
     a qb:Observation ; 
-    qb:dataSet eg:ds ;
-    eg:lo_orderdate eg:date_19940101 ;
-    eg:lo_custkey eg:customer_1 ;
-    eg:lo_partkey eg:part_1 ;
-    eg:lo_suppkey eg:supplier_1 ;
-    eg:lo_quantity 17 ;
-    eg:lo_discount 4e0 ;
-    eg:lo_extendedprice 2471035e0 ;
-    eg:lo_supplycost 87213 ;
-    eg:lo_revenue 2372193 ;
+    qb:dataSet :ds ;
+    :lo_orderdate :date_19940101 ;
+    :lo_custkey :customer_1 ;
+    :lo_partkey :part_1 ;
+    :lo_suppkey :supplier_1 ;
+    :lo_quantity 17 ;
+    :lo_discount 4e0 ;
+    :lo_extendedprice 2471035e0 ;
+    :lo_supplycost 87213 ;
+    :lo_revenue 2372193 ;
     .
 
-eg:lineorder_1_2
-    a eg:lineorder ; 
+:lineorder_1_2
+    a :lineorder ; 
     a qb:Observation ; 
-    qb:dataSet eg:ds ;
-    eg:lo_orderdate eg:date_19940101 ;
-    eg:lo_custkey eg:customer_2 ;
-    eg:lo_partkey eg:part_1 ;
-    eg:lo_suppkey eg:supplier_1 ;
-    eg:lo_quantity 17 ;
-    eg:lo_discount 4e0 ;
-    eg:lo_extendedprice 2471035e0 ;
-    eg:lo_supplycost 87213 ;
-    eg:lo_revenue 2372193 ;
+    qb:dataSet :ds ;
+    :lo_orderdate :date_19940101 ;
+    :lo_custkey :customer_2 ;
+    :lo_partkey :part_1 ;
+    :lo_suppkey :supplier_1 ;
+    :lo_quantity 17 ;
+    :lo_discount 4e0 ;
+    :lo_extendedprice 2471035e0 ;
+    :lo_supplycost 87213 ;
+    :lo_revenue 2372193 ;
     .
 
-eg:lineorder_1_3
-    a eg:lineorder ; 
+:lineorder_1_3
+    a :lineorder ; 
     a qb:Observation ; 
-    qb:dataSet eg:ds ;
-    eg:lo_orderdate eg:date_19940101 ;
-    eg:lo_custkey eg:customer_1 ;
-    eg:lo_partkey eg:part_3 ;
-    eg:lo_suppkey eg:supplier_1 ;
-    eg:lo_quantity 17 ;
-    eg:lo_discount 4e0 ;
-    eg:lo_extendedprice 2471035e0 ;
-    eg:lo_supplycost 87213 ;
-    eg:lo_revenue 2372193 ;
+    qb:dataSet :ds ;
+    :lo_orderdate :date_19940101 ;
+    :lo_custkey :customer_1 ;
+    :lo_partkey :part_3 ;
+    :lo_suppkey :supplier_1 ;
+    :lo_quantity 17 ;
+    :lo_discount 4e0 ;
+    :lo_extendedprice 2471035e0 ;
+    :lo_supplycost 87213 ;
+    :lo_revenue 2372193 ;
     .
 
-eg:lineorder_1_4
-    a eg:lineorder ; 
+:lineorder_1_4
+    a :lineorder ; 
     a qb:Observation ; 
-    qb:dataSet eg:ds ;
-    eg:lo_orderdate eg:date_19940101 ;
-    eg:lo_custkey eg:customer_2 ;
-    eg:lo_partkey eg:part_1 ;
-    eg:lo_suppkey eg:supplier_2 ;
-    eg:lo_quantity 17 ;
-    eg:lo_discount 4e0 ;
-    eg:lo_extendedprice 2471035e0 ;
-    eg:lo_supplycost 87213 ;
-    eg:lo_revenue 2372193 ;
+    qb:dataSet :ds ;
+    :lo_orderdate :date_19940101 ;
+    :lo_custkey :customer_2 ;
+    :lo_partkey :part_1 ;
+    :lo_suppkey :supplier_2 ;
+    :lo_quantity 17 ;
+    :lo_discount 4e0 ;
+    :lo_extendedprice 2471035e0 ;
+    :lo_supplycost 87213 ;
+    :lo_revenue 2372193 ;
     .
 
-eg:lineorder_1_5
-    a eg:lineorder ; 
+:lineorder_1_5
+    a :lineorder ; 
     a qb:Observation ; 
-    qb:dataSet eg:ds ;
-    eg:lo_orderdate eg:date_19940101 ;
-    eg:lo_custkey eg:customer_2 ;
-    eg:lo_partkey eg:part_3 ;
-    eg:lo_suppkey eg:supplier_2 ;
-    eg:lo_quantity 17 ;
-    eg:lo_discount 4e0 ;
-    eg:lo_extendedprice 2471035e0 ;
-    eg:lo_supplycost 87213 ;
-    eg:lo_revenue 2372193 ;
+    qb:dataSet :ds ;
+    :lo_orderdate :date_19940101 ;
+    :lo_custkey :customer_2 ;
+    :lo_partkey :part_3 ;
+    :lo_suppkey :supplier_2 ;
+    :lo_quantity 17 ;
+    :lo_discount 4e0 ;
+    :lo_extendedprice 2471035e0 ;
+    :lo_supplycost 87213 ;
+    :lo_revenue 2372193 ;
     .
 

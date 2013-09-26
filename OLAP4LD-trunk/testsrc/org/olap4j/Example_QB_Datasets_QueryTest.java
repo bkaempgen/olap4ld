@@ -169,6 +169,8 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 */
 	public void testExampleSsb001Metadata() {
 		String dsUri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
+		// localhost
+		// dsUri = "http://localhost:8080/LDCX-trunk/ldcx/tests/ssb001/ttl/example.ttl#ds";
 		metadataTest(dsUri, 5, 5);
 	}
 
@@ -214,11 +216,19 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 	/**
 	 * We query for customers on rows and parts on columns and explicitly select
-	 * lo_extendedprice as measure per WHERE clause.
+	 * lo_extendedprice as measure per WHERE clause. Also, we use NON EMPTY.
 	 */
 	public void testExampleSsb001OlapDiceMeasure() {
 
-		String result = executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice]}");
+		String result = executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice]}");
+
+		assertContains("| Part  1   | Part  3   |", result);
+		assertContains("| Customer  1 | 2471035.0 | 2471035.0 |", result);
+	}
+	
+	public void testExampleSsb001OlapCombinedNONEMPTY() {
+
+		String result = executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
 
 		assertContains("| Part  1   | Part  3   |", result);
 		assertContains("| Customer  1 | 2471035.0 | 2471035.0 |", result);
