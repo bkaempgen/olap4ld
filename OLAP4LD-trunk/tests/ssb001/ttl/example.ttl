@@ -55,25 +55,25 @@
 # -- Dimensions and measures  -----------------------------
 
 :lo_orderdate a rdf:Property, qb:DimensionProperty;
-    rdfs:label "Date"@en ;
+    rdfs:label "Dates"@en ;
     rdfs:range skos:Concept ;
     qb:codeList :lo_orderdateCodeList ;
     .
 
 :lo_custkey a rdf:Property, qb:DimensionProperty;
-    rdfs:label "Customer"@en ;
+    rdfs:label "Customers"@en ;
     rdfs:range skos:Concept ;
     qb:codeList :lo_custkeyCodeList ;
     .
 
 :lo_partkey a rdf:Property, qb:DimensionProperty;
-    rdfs:label "Product"@en ;
+    rdfs:label "Products"@en ;
     rdfs:range skos:Concept ;
     qb:codeList :lo_partkeyCodeList ;
     .
 
 :lo_suppkey a rdf:Property, qb:DimensionProperty;
-    rdfs:label "Supplier"@en ;
+    rdfs:label "Suppliers"@en ;
     rdfs:range skos:Concept ;
     qb:codeList :lo_suppkeyCodeList ;
     .
@@ -111,27 +111,27 @@
 # -- Code lists -------------------------------------------
 
 :lo_orderdateCodeList a skos:ConceptScheme, sdmx:CodeList;
-	rdfs:label "orderdate"@en ;
+	rdfs:label "Dates"@en ;
     skos:hasTopConcept :date_19940101;
     skos:hasTopConcept :date_19940601;
     .
 
 :lo_custkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
-	rdfs:label "custkey"@en ;
+	rdfs:label "Customers"@en ;
     skos:hasTopConcept :customer_1;
     skos:hasTopConcept :customer_2;
     skos:hasTopConcept :customer_3;    
     .
 
 :lo_partkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
-	rdfs:label "partkey"@en ;
+	rdfs:label "Products"@en ;
     skos:hasTopConcept :part_1;
     skos:hasTopConcept :part_2;
     skos:hasTopConcept :part_3;
     .
 
 :lo_suppkeyCodeList a skos:ConceptScheme, sdmx:CodeList;
-	rdfs:label "supplycost"@en ;
+	rdfs:label "Suppliers"@en ;
     skos:hasTopConcept :supplier_1;
     skos:hasTopConcept :supplier_2;
     .
