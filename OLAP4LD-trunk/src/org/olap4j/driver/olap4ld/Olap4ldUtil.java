@@ -8,13 +8,24 @@
  */
 package org.olap4j.driver.olap4ld;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import org.apache.xerces.impl.Constants;
@@ -52,7 +63,7 @@ public abstract class Olap4ldUtil {
 
 	// Debugging ?
 	public static boolean _isDebug;
-	
+
 	// Logging?
 	public static Logger _log;
 
@@ -515,41 +526,176 @@ public abstract class Olap4ldUtil {
 			this.exception = exception;
 		}
 	}
-	
+
 	/**
 	 * 
-	 * Reused from http://viralpatel.net/blogs/getting-jvm-heap-size-used-memory-total-memory-using-java-runtime/
-	 * Class: TestMemory
+	 * Reused from
+	 * http://viralpatel.net/blogs/getting-jvm-heap-size-used-memory-
+	 * total-memory-using-java-runtime/ Class: TestMemory
+	 * 
 	 * @author: Viral Patel
 	 * @description: Prints JVM memory utilization statistics
-	 * @returns memory in mb 
-	*/
+	 * @returns memory in mb
+	 */
 	public static long getFreeMemory() {
-	         
-			// kilo -> mega byte
-	        int mb = 1024*1024;
-	         
-	        //Getting the runtime reference from system
-	        Runtime runtime = Runtime.getRuntime();
-	        
-	        Olap4ldUtil._log.config("##### Heap utilization statistics [MB] #####");
-	         
-	        //Print used memory
-	        Olap4ldUtil._log.config("Used Memory:"
-	            + (runtime.totalMemory() - runtime.freeMemory()) / mb);
-	 
-	        //Print free memory
-	        Olap4ldUtil._log.config("Free Memory:"
-	            + runtime.freeMemory() / mb);
-	         
-	        //Print total available memory
-	        Olap4ldUtil._log.config("Total Memory:" + runtime.totalMemory() / mb);
-	 
-	        //Print Maximum available memory
-	        Olap4ldUtil._log.config("Max Memory:" + runtime.maxMemory() / mb);
-	        
-	        return runtime.freeMemory();
-	    }
+
+		// kilo -> mega byte
+		int mb = 1024 * 1024;
+
+		// Getting the runtime reference from system
+		Runtime runtime = Runtime.getRuntime();
+
+		Olap4ldUtil._log.config("##### Heap utilization statistics [MB] #####");
+
+		// Print used memory
+		Olap4ldUtil._log.config("Used Memory:"
+				+ (runtime.totalMemory() - runtime.freeMemory()) / mb);
+
+		// Print free memory
+		Olap4ldUtil._log.config("Free Memory:" + runtime.freeMemory() / mb);
+
+		// Print total available memory
+		Olap4ldUtil._log.config("Total Memory:" + runtime.totalMemory() / mb);
+
+		// Print Maximum available memory
+		Olap4ldUtil._log.config("Max Memory:" + runtime.maxMemory() / mb);
+
+		return runtime.freeMemory();
+	}
+
+	// this method is invoked in the main method
+	// to initialize the logging.
+	public static void prepareLogging() {
+		File loggingConfigurationFile = new File("logging.properties");
+		
+		System.out.println("Logging properties file absolute path:"+ loggingConfigurationFile.getAbsolutePath());
+		
+		// Setup logging
+		Olap4ldUtil._log = Logger.getLogger("Olap4ldDriver");
+
+		// it only generates the configuration file
+		// if it really doesn't exist.
+		if (!loggingConfigurationFile.exists()) {
+			Writer output = null;
+			try {
+				output = new BufferedWriter(new FileWriter(
+						loggingConfigurationFile));
+
+				// The configuration file is a property file.
+				// The Properties class gives support to
+				// define and persist the logging configuration.
+				Properties logConf = new Properties();
+				logConf.setProperty("handlers",
+						"java.util.logging.FileHandler,"
+								+ "java.util.logging.ConsoleHandler");
+				logConf.setProperty(".level", "INFO");
+				logConf.setProperty("java.util.logging.ConsoleHandler.level",
+						"INFO");
+				logConf.setProperty(
+						"java.util.logging.ConsoleHandler.formatter",
+						"java.util.logging.SimpleFormatter");
+				logConf.setProperty("java.util.logging.FileHandler.level",
+						"INFO");
+				logConf.setProperty("java.util.logging.FileHandler.pattern",
+						"log/olap4ld_%u.log");
+				logConf.setProperty("java.util.logging.FileHandler.limit",
+						"50000");
+				logConf.setProperty("java.util.logging.FileHandler.count", "1");
+				
+				// Maybe better XMLFormatter?
+				logConf.setProperty("java.util.logging.FileHandler.formatter",
+						"java.util.logging.SimpleFormatter");
+				logConf.store(output, "Generated");
+			} catch (IOException ex) {
+				Olap4ldUtil._log.log(Level.WARNING,
+						"Logging configuration file not created", ex);
+			} finally {
+				try {
+					output.close();
+				} catch (IOException ex) {
+					Olap4ldUtil._log.log(Level.WARNING, "Problems to save "
+							+ "the logging configuration file in the disc", ex);
+				}
+			}
+		}
+		// This is the way to define the system
+		// property without changing the command line.
+		// It has the same effect of the parameter
+		// -Djava.util.logging.config.file
+		Properties prop = System.getProperties();
+		prop.setProperty("java.util.logging.config.file", "logging.properties");
+
+		// It creates the log directory if it doesn't exist
+		// In the configuration file above we specify this
+		// folder to store log files:
+		// logConf.setProperty(
+		// "java.util.logging.FileHandler.pattern",
+		// "log/application.log");
+		File logDir = new File("log");
+		if (!logDir.exists()) {
+			Olap4ldUtil._log.info("Creating the logging directory");
+			logDir.mkdir();
+		}
+
+		// It overwrites the current logging configuration
+		// to the one in the configuration file.
+		try {
+			LogManager.getLogManager().readConfiguration();
+		} catch (IOException ex) {
+			Olap4ldUtil._log.log(Level.WARNING, "Problems to load the logging "
+					+ "configuration file", ex);
+		}
+		
+		// More specific loggers
+		Handler handler;
+		try {
+			Date date = new Date();
+			String formattedDate = new SimpleDateFormat("yyyy-MM-dd_hh_mm_ss").format(date);
+			String pattern = "log/olap4ld_connection_"+ formattedDate + ".log";
+			handler = new FileHandler(pattern);
+			handler.setFormatter(new java.util.logging.SimpleFormatter());
+			handler.setLevel(Level.INFO);
+			Olap4ldUtil._log.addHandler(handler);
+			
+			// one file for logging
+			handler = new FileHandler("log/olap4ld_all.log");
+			handler.setLevel(Level.INFO);
+			handler.setFormatter(new java.util.logging.SimpleFormatter());
+			Olap4ldUtil._log.addHandler(handler);
+		} catch (SecurityException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		Olap4ldUtil._log.setLevel(Level.ALL);
+		
+		Olap4ldUtil._log.config("Logging properties file absolute path:"+ loggingConfigurationFile.getAbsolutePath());
+
+		// // We want to log to a file.
+		// try {
+		// Handler handler = new FileHandler("log/olap4ld.log", LOG_SIZE,
+		// LOG_ROTATION_COUNT);
+		// Olap4ldUtil._log.addHandler(handler);
+		// } catch (SecurityException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+
+		// Set the level to that of its parent
+		// LdOlap4jUtil._log.setLevel(null);
+
+		// Turn off all logging
+		// LdOlap4jUtil._log.setLevel(Level.OFF);
+		// System.out.println("Test"); <= We get to this point
+		// Turn on all logging
+		// LdOlap4jUtil._log.setLevel(Level.ALL);
+	}
 
 }
 

@@ -1,67 +1,6 @@
-==Roadmap==
-
-===LDCX Demo===
-* See Beta-Tester.
-
-===Slicer TODO===
-* Tracking usage
-
-* Check howto create all html pages (with links etc.)
-
-===TODO: Add new normalization algorithm part from spec===
-* ...
-
-===TODO: Improve performance by having more directed uniquenames with segments as in mondrian===
-* olap4ld often has to search the entire cube if resolving members, e.g., measures.
-* Here, we can speed up olap4ld by having the dimension mentioned in the uniquename by segments. 
-* However, we need to make sure that this is consistent.
-
-===TODO: Improving catalog, schema handling===
-* How do the different platforms define the data sources?
-
-** Saiku: 1) By the connect string in saiku-datasources, e.g., jdbc:ld://olap4ld;Catalog=
-LdCatalog;JdbcDrivers=com.mysql.jdbc.Driver;Server=http://public.b-kaempgen.de:8890/sparql;Database=
-OPENVIRTUOSO;Datastructuredefinitions=http://fios:saiku,http://fios:saikumanually;Datasets=
-http://fios:saiku,http://fios:saikumanually 2) By asking metadata queries and OLAP queries.
-
-** Example_QB_Datasets_QueryTest.java: org.olap4j.RemoteXmlaTester.JdbcUrl=jdbc:ld://olap4ld;Catalog=
-LdCatalog;JdbcDrivers=com.mysql.jdbc.Driver;Server=http://;Database=
-EMBEDDEDSESAME;Datastructuredefinitions=;Datasets=;
-
-** LDCX (xml-server): OlapDriverConnectionString, e.g., jdbc:ld://olap4ld;Catalog=LdCatalog;JdbcDrivers=
-com.mysql.jdbc.Driver;Server=http://;Database=EMBEDDEDSESAME;Datastructuredefinitions=;Datasets=;
-*** XMLA can restrict discover data sources with DataSourceName.
-
-** Slicer (Linked Data Engine, directly):
-
-How do we design to query linked data?
-* Connect string is supposed to define and to setup (e.g., server url, datasets) the Linked Data Engine.
-* setDatabase(String), setCatalog(String), setSchema(String) should all be doing the same thing, somehow 
-define the datasource to query the metadata and the OLAP data from.
-* I would say, we simply allow to define an arbitrary long, comma-separated string of datasets for setDatabase(String), setCatalog(String), setSchema(String).
-* The good thing about deferrednamedlist would then be that list of cubes, dimensions, etc. are only queried on demand
-but then the metadata objects would be fixed (in olap4j) and no further queries would need to be asked.
-* Problem would be that we do not want the Linked Data Engine to load the entire set of datasets.
-* The current problem is simply that visit(IdentifierNode) looks for cubes and as such tries to load
-to identify nodes as cubes which throws an error. 
-
-* Currently, we always have the same catalog and schema.
-* We query for specific cubes by asking getCubes() from schema and then asking the DefferedList for
-a specific cube .get(cubename). 
-* A better solution would be to take into account cataglogs and schemas. 
-* For that, Olap4ldConnection manages some attributes, schemaName, catalogName, databaseName:
-
-	/**
-	 * Name of the database to which the user wishes to bind this connection.
-	 * This value can be set through the JDBC URL or via
-	 * {@link Olap4ldConnection#setCatalog(String)}
-	 */
-	private String databaseName;
-
-* If we know that XMLA and other clients set this value not only by the connection string, we can
-change their value and depending on their values, execute getCubes() etc. (and also return OlapExceptions 
-directly from getCubes() etc. We would not need to populate a deferred list on get(cubename).
-* However, for now it works.
+==2013-09-28==
+* More detailed logging, per connection. Unfortunately, no session tracking, yet.
+* Better labels for SSB dataset
 
 ==2013-09-27==
 * TODO: 
@@ -69,6 +8,12 @@ directly from getCubes() etc. We would not need to populate a deferred list on g
 ** Even more robustness? 
 *** Currently, if I cannot store any more in the triple store, I just throw an error. After reload, a new triple store should be filled?
 *** If a query is too big, java script LDCX currently does not complain, can be improved?
+*** According to Günter und Daniel, asking for the amount of free memory is not a best practice. 
+Instead 1) I should properly test the system and see whether there are errors 2) I should put user
+restrictions on the system, e.g., you cannot analyze datasets with such and such amount of triples.
+**** Added triple count check and magic number 100,000 triples max.
+
+** LDCX pivot visualisation often wrong (first column, if we use several dimensions on rows?)
 
 ==2013-09-26==
 * Why does Edgar example dataset does not fulfill constraint 12? [http://www.w3.org/2011/gld/validator/qb/qb-test?upload=upload-2013-09-25T20-51-51-104] 

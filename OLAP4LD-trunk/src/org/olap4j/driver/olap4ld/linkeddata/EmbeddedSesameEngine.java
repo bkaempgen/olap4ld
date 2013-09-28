@@ -106,7 +106,11 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	private ExecPlan execplan;
 
-	private int LOADED_FILE_SIZE = 0;
+	private Integer MAX_LOAD_TRIPLE_SIZE = 100000;
+	
+	private Integer MAX_COMPLEX_CONSTRAINTS_TRIPLE_SIZE = 1000;
+
+	private Integer LOADED_TRIPLE_SIZE = 0;
 
 	public ExecPlan getExecplan() {
 		return execplan;
@@ -371,7 +375,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	private void loadInStore(String location) {
 		SailRepositoryConnection con = null;
 		try {
-			Olap4ldUtil._log.info("Load in store: " + location);
+			Olap4ldUtil._log.config("Load in store: " + location);
 
 			con = repo.getConnection();
 			URL locationurl = new URL(location);
@@ -382,19 +386,29 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// assuming both bytes: 1) file_size is byte 2) 
 			int file_size = urlConnection.getContentLength();
 			// TODO: Apparently file size often wrong?
-			Olap4ldUtil._log.info("File size: " + file_size);
-			// Track entire file size loaded
-			this.LOADED_FILE_SIZE = +file_size;
+			Olap4ldUtil._log.config("File size: " + file_size);
 			long memory_size = Olap4ldUtil.getFreeMemory();
-			Olap4ldUtil._log.info("Current memory size: " + memory_size);
+			Olap4ldUtil._log.config("Current memory size: " + memory_size);
 
 			if (file_size > memory_size) {
 				con.close();
 				Olap4ldUtil._log
-						.warning("Warning: Files to load exceed amount of heap space memory!");
-				throw new UnsupportedOperationException("Warning: File ("
+						.warning("Warning: File ("
 						+ location
 						+ ") to load exceeds amount of heap space memory!");
+				throw new UnsupportedOperationException("Warning: Maximum storage capacity reached! Dataset too large.");
+			}
+			
+			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
+			Olap4ldUtil._log.config("Size of loaded data: " + query);
+			List<Node[]> result = sparql(query, false);
+			this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
+			
+			if (this.LOADED_TRIPLE_SIZE > this.MAX_LOAD_TRIPLE_SIZE) {
+				con.close();
+				Olap4ldUtil._log
+						.warning("Warning: We have stored too many triples, already!");
+				throw new UnsupportedOperationException("Warning: Maximum storage capacity reached! Dataset contains too many triples.");
 			}
 
 			if (location.endsWith(".rdf") || location.endsWith(".xml")) {
@@ -493,17 +507,13 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				e.printStackTrace();
 			}
 		}
+		
 		// Log content only if log level accordingly
 		if (Olap4ldUtil._isDebug) {
 
 			String query = "select * where {?s ?p ?o}";
 			Olap4ldUtil._log.config("Check loaded data (10 triples): " + query);
 			sparql(query, false);
-			// Log size
-			query = "select (count(?s) as ?count) where {?s ?p ?o}";
-			Olap4ldUtil._log.config("Size of loaded data: " + query);
-			sparql(query, false);
-
 		}
 	}
 
@@ -621,6 +631,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getCubes(Restrictions restrictions)
 			throws OlapException {
+		
+		Olap4ldUtil._log.info("Linked Data Engine: Get Cubes...");
 
 		checkSufficientInformationGathered(restrictions);
 
@@ -927,17 +939,11 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		// Check space for more complex integrity constraints
 
-		// Track entire file size loaded
-		long memory_size = Olap4ldUtil.getFreeMemory();
-		Olap4ldUtil._log.info("Current memory size: " + memory_size);
-		Olap4ldUtil._log.info("Current loaded file size: " + this.LOADED_FILE_SIZE);
-		boolean hasEnoughMemory = (memory_size > 2 * this.LOADED_FILE_SIZE);
-		// For now, since we cannot rely on LOADED_FILE_SIZE we use a threshold of 500 MB
-		hasEnoughMemory = (memory_size > 500000000);
+		boolean doComplexObservationIntegrityConstraints = (this.LOADED_TRIPLE_SIZE < this.MAX_COMPLEX_CONSTRAINTS_TRIPLE_SIZE);
 
 		// Logging
-		Olap4ldUtil._log.info("Run integrity constraints...");
-		Olap4ldUtil._log.info("including complex integrity constraints: "+hasEnoughMemory+"...");
+		Olap4ldUtil._log.config("Run integrity constraints...");
+		Olap4ldUtil._log.config("including complex integrity constraints: "+doComplexObservationIntegrityConstraints+"...");
 		
 		try {
 			// Now, we check the integrity constraints
@@ -959,9 +965,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet. \n";
+				overview += "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
 			} else {
-				overview += "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet. \n";
+				overview += "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
 			}
 
 			// IC-2. Unique DSD. Every qb:DataSet has
@@ -973,9 +979,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition.  \n";
+				overview += "Failed specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition. <br/>";
 			} else {
-				overview += "Successful specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition. \n";
+				overview += "Successful specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition.<br/>";
 			}
 
 			// IC-3. DSD includes measure
@@ -985,9 +991,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure. \n";
+				overview += "Failed specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
 			} else {
-				overview += "Successful specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure. \n";
+				overview += "Successful specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
 			}
 
 			// IC-4. Dimensions have range
@@ -999,7 +1005,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				error = true;
 				overview += "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
 			} else {
-				overview += "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range. \n";
+				overview += "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.<br/>";
 			}
 
 			// IC-5. Concept dimensions have code lists
@@ -1009,9 +1015,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList.  \n";
+				overview += "Failed specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
 			} else {
-				overview += "Successful specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList.  \n";
+				overview += "Successful specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
 			}
 
 			// IC-6. Only attributes may be optional <= not
@@ -1023,9 +1029,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes.\n";
+				overview += "Failed specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes. <br/>";
 			} else {
-				overview += "Successful specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes. \n";
+				overview += "Successful specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes.<br/>";
 			}
 
 			// IC-7. Slice Keys must be declared <= not
@@ -1036,9 +1042,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition. \n";
+				overview += "Failed specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
 			} else {
-				overview += "Successful specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition. \n";
+				overview += "Successful specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
 			}
 
 			// IC-8. Slice Keys consistent with DSD
@@ -1048,9 +1054,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition. \n";
+				overview += "Failed specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition.<br/>";
 			} else {
-				overview += "Successful specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition.  \n";
+				overview += "Successful specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition. <br/>";
 			}
 
 			// IC-9. Unique slice structure
@@ -1060,9 +1066,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure.  \n";
+				overview += "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
 			} else {
-				overview += "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure.  \n";
+				overview += "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
 			}
 
 			// IC-10. Slice dimensions complete
@@ -1072,14 +1078,14 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure. \n";
+				overview += "Failed specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
 			} else {
-				overview += "Successful specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure. \n";
+				overview += "Successful specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
 			}
 
 			// Since needs to go through all observations, only done if enough
 			// memory
-			if (hasEnoughMemory) {
+			if (doComplexObservationIntegrityConstraints) {
 
 				// IC-11. All dimensions required <= takes too
 				// long
@@ -1089,9 +1095,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						testquery);
 				if (booleanQuery.evaluate() == true) {
 					error = true;
-					overview += "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
+					overview += "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
 				} else {
-					overview += "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition.  \n";
+					overview += "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
 				}
 
 				// IC-12. No duplicate observations <= takes especially
@@ -1104,9 +1110,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						testquery);
 				if (booleanQuery.evaluate() == true) {
 					error = true;
-					overview += "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
+					overview += "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
 				} else {
-					overview += "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions. \n";
+					overview += "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
 				}
 
 			}
@@ -1119,9 +1125,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required. \n";
+				overview += "Failed specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required.<br/>";
 			} else {
-				overview += "Successful specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required.  \n";
+				overview += "Successful specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required. <br/>";
 			}
 
 			// IC-14. All measures present
@@ -1131,9 +1137,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure. \n";
+				overview += "Failed specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
 			} else {
-				overview += "Successful specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure. \n";
+				overview += "Successful specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
 			}
 
 			// IC-15. Measure dimension consistent <= We do
@@ -1144,9 +1150,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType. \n";
+				overview += "Failed specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
 			} else {
-				overview += "Successful specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType. \n";
+				overview += "Successful specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
 			}
 
 			// IC-16. Single measure on measure dimension
@@ -1157,9 +1163,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType). \n";
+				overview += "Failed specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType).<br/>";
 			} else {
-				overview += "Successful specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType).  \n";
+				overview += "Successful specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType). <br/>";
 			}
 
 			// IC-17. All measures present in measures dimension cube
@@ -1169,9 +1175,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures. \n";
+				overview += "Failed specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
 			} else {
-				overview += "Successful specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures. \n";
+				overview += "Successful specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
 			}
 
 			// IC-18. Consistent data set links
@@ -1181,14 +1187,14 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D.  \n";
+				overview += "Failed specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
 			} else {
-				overview += "Successful specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D.  \n";
+				overview += "Successful specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
 			}
 
 			// Since needs to go through all observations, only done if enough
 			// memory
-			if (hasEnoughMemory) {
+			if (doComplexObservationIntegrityConstraints) {
 
 				// IC-19. Codes from code list
 				// Probably takes very long since involves property chain and
@@ -1204,9 +1210,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				if (booleanQuery.evaluate() == true
 						|| booleanQuery2.evaluate() == true) {
 					error = true;
-					overview += "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.   \n";
+					overview += "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
 				} else {
-					overview += "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.   \n";
+					overview += "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
 				}
 
 			}
@@ -1224,10 +1230,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// if (booleanQuery.evaluate() == true) {
 			// error = true;
 			// overview +=
-			// "Failed specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.   \n";
+			// "Failed specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.  <br/>";
 			// } else {
 			// overview +=
-			// "Successful specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.   \n";
+			// "Successful specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.  <br/>";
 			// }
 
 			// IC-21. Codes from hierarchy (inverse)
@@ -1239,10 +1245,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// if (booleanQuery.evaluate() == true) {
 			// error = true;
 			// overview +=
-			// "Failed specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.   \n";
+			// "Failed specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.  <br/>";
 			// } else {
 			// overview +=
-			// "Successful specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.   \n";
+			// "Successful specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.  <br/>";
 			// }
 
 			// Important!
@@ -1253,10 +1259,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						+ overview);
 				// XXX: OlapExceptions possible?
 				throw new UnsupportedOperationException(
-						"Integrity constraints overview: \n" + overview);
+						"Integrity constraints overview:<br/>" + overview);
 			} else {
 				// Logging
-				Olap4ldUtil._log.info("Integrity constraints overview: "
+				Olap4ldUtil._log.config("Integrity constraints overview: "
 						+ overview);
 			}
 
@@ -1282,7 +1288,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	private void runNormalizationAlgorithm() throws OlapException {
 
 		// Logging
-		Olap4ldUtil._log.info("Run normalization algorithm...");
+		Olap4ldUtil._log.config("Run normalization algorithm...");
 
 		try {
 			RepositoryConnection con;
@@ -1344,6 +1350,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getDimensions(Restrictions restrictions)
 			throws OlapException {
+		
+		Olap4ldUtil._log.info("Linked Data Engine: Get Dimensions...");
 
 		checkSufficientInformationGathered(restrictions);
 
@@ -1440,6 +1448,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getMeasures(Restrictions restrictions)
 			throws OlapException {
+		
+		Olap4ldUtil._log.info("Linked Data Engine: Get Measures...");
 
 		checkSufficientInformationGathered(restrictions);
 
@@ -1478,6 +1488,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getHierarchies(Restrictions restrictions)
 			throws OlapException {
+		
+		Olap4ldUtil._log.info("Linked Data Engine: Get Hierarchies...");
 
 		checkSufficientInformationGathered(restrictions);
 
@@ -1609,6 +1621,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getLevels(Restrictions restrictions)
 			throws OlapException {
+		
+		Olap4ldUtil._log.info("Linked Data Engine: Get Levels...");
 
 		checkSufficientInformationGathered(restrictions);
 
@@ -1785,6 +1799,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	public List<Node[]> getMembers(Restrictions restrictions)
 			throws OlapException {
 
+		Olap4ldUtil._log.info("Linked Data Engine: Get Members...");
+		
 		checkSufficientInformationGathered(restrictions);
 
 		List<Node[]> result = new ArrayList<Node[]>();
@@ -2198,6 +2214,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
 			throws OlapException {
 		// Log logical query plan
+		Olap4ldUtil._log.info("Execute OLAP query...");
 		Olap4ldUtil._log.info("Logical query plan: " + queryplan.toString());
 
 		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(

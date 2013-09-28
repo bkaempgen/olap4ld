@@ -55,25 +55,25 @@
 # -- Dimensions and measures  -----------------------------
 
 :lo_orderdate a rdf:Property, qb:DimensionProperty;
-    rdfs:label "orderdate"@en ;
+    rdfs:label "Date"@en ;
     rdfs:range skos:Concept ;
     qb:codeList :lo_orderdateCodeList ;
     .
 
 :lo_custkey a rdf:Property, qb:DimensionProperty;
-    rdfs:label "custkey"@en ;
+    rdfs:label "Customer"@en ;
     rdfs:range skos:Concept ;
     qb:codeList :lo_custkeyCodeList ;
     .
 
 :lo_partkey a rdf:Property, qb:DimensionProperty;
-    rdfs:label "partkey"@en ;
+    rdfs:label "Product"@en ;
     rdfs:range skos:Concept ;
     qb:codeList :lo_partkeyCodeList ;
     .
 
 :lo_suppkey a rdf:Property, qb:DimensionProperty;
-    rdfs:label "suppkey"@en ;
+    rdfs:label "Supplier"@en ;
     rdfs:range skos:Concept ;
     qb:codeList :lo_suppkeyCodeList ;
     .

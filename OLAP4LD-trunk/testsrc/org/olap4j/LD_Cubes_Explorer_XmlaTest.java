@@ -72,17 +72,14 @@ public class LD_Cubes_Explorer_XmlaTest extends TestCase {
 		String cubename = "[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]";
 		String aMeasurename = "[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount]";
 		String aHierarchyname = "[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList]";
-		String mdx = "SELECT CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}) ON COLUMNS ,CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount] }";
-		String result = "<Cell CellOrdinal=\"0\">          <Value xsi:type=\"xsd:string\">4.0</Value>";
-		String mdx2 = "SELECT NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}) ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount] }";
-		String result2 = "hello";
+		String mdx = "SELECT NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]";
+		String result = "Test";
 		postAndTestXmlaDiscoverDatasources();
 		postAndTestXmlaDbschemaCatalogs();
 		postAndTestXmlaMdschemaCubes(cubename);
 		postAndTestXmlaMdschemaMeasures(cubename, aMeasurename);
 		postAndTestXmlaMdschemaHierarchies(cubename, aHierarchyname);
 		postAndTestXmlaOlapQuery(mdx, result);
-		postAndTestXmlaOlapQuery(mdx2, result2);
 	}
 	
 	public void testEurostat() {

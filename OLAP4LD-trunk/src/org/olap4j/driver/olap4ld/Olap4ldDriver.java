@@ -9,13 +9,16 @@
  */
 package org.olap4j.driver.olap4ld;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -25,6 +28,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -139,9 +144,9 @@ public class Olap4ldDriver implements Driver {
 	 */
 	private static final ExecutorService executor;
 
-	//private static final int LOG_SIZE = 100;
+	// private static final int LOG_SIZE = 100;
 
-	//private static final int LOG_ROTATION_COUNT = 10;
+	// private static final int LOG_ROTATION_COUNT = 10;
 
 	static {
 		executor = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -206,46 +211,17 @@ public class Olap4ldDriver implements Driver {
 	}
 
 	public Connection connect(String url, Properties info) throws SQLException {
-		
+
 		// Debugging
-		// Runs some more expensive debugging procedures (integrity constraints, showing of loaded triples) 
+		// Runs some more expensive debugging procedures (integrity constraints,
+		// showing of loaded triples)
 		// TODO: Add to documentation
 		Olap4ldUtil._isDebug = true;
 		
 		// Setup logging
-		Olap4ldUtil._log = Logger.getLogger("Olap4ldDriver");
-		
-		System.setProperty( "java.util.logging.config.file", "logging.properties" );
+		Olap4ldUtil.prepareLogging();
 
-
-		try { LogManager.getLogManager().readConfiguration(); }
-		catch ( Exception e ) { e.printStackTrace(); }
-		
-		Olap4ldUtil._log.setLevel(Level.ALL);
-
-//		// We want to log to a file.
-//		try {
-//			Handler handler = new FileHandler("log/olap4ld.log", LOG_SIZE,
-//					LOG_ROTATION_COUNT);
-//			Olap4ldUtil._log.addHandler(handler);
-//		} catch (SecurityException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-
-		// Set the level to that of its parent
-		// LdOlap4jUtil._log.setLevel(null);
-
-		// Turn off all logging
-		// LdOlap4jUtil._log.setLevel(Level.OFF);
-		// System.out.println("Test"); <= We get to this point
-		// Turn on all logging
-		// LdOlap4jUtil._log.setLevel(Level.ALL);
-
-		Olap4ldUtil._log.info("Olap4LdDriver to connect...");
+		Olap4ldUtil._log.info("Connect Olap4LdDriver.");
 
 		// Checks if this driver handles this connection, exit otherwise.
 		if (!acceptsURL(url)) {

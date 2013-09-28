@@ -381,13 +381,13 @@ public class QcrumbEngine implements LinkedDataEngine {
 							con.add(locationurl, locationurl.toString(),
 									RDFFormat.RDFXML);
 							Olap4ldUtil._log
-									.info("Had to guess format to be RDFXML: "
+									.config("Had to guess format to be RDFXML: "
 											+ location);
 						} else {
 							con.add(locationurl, locationurl.toString(),
 									RDFFormat.TURTLE);
 							Olap4ldUtil._log
-									.info("Had to guess format to be Turtle: "
+									.config("Had to guess format to be Turtle: "
 											+ location);
 						}
 						in.close();
@@ -1063,7 +1063,7 @@ public class QcrumbEngine implements LinkedDataEngine {
 
 			// Logging
 			Olap4ldUtil._log
-					.info("Integrity constraints overview: " + overview);
+					.config("Integrity constraints overview: " + overview);
 
 			if (error) {
 				throw new UnsupportedOperationException(
