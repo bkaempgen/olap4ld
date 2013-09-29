@@ -122,7 +122,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	public EmbeddedSesameEngine(URL serverUrlObject,
 			List<String> datastructuredefinitions, List<String> datasets,
-			String databasename) {
+			String databasename) throws OlapException {
 
 		// We actually do not need that.
 		URL = serverUrlObject.toString();
@@ -371,8 +371,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * Loads location into store and mark it as stored.
 	 * 
 	 * @param location
+	 * @throws OlapException 
 	 */
-	private void loadInStore(String location) {
+	private void loadInStore(String location) throws OlapException {
 		SailRepositoryConnection con = null;
 		try {
 			Olap4ldUtil._log.config("Load in store: " + location);
@@ -396,7 +397,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						.warning("Warning: File ("
 						+ location
 						+ ") to load exceeds amount of heap space memory!");
-				throw new UnsupportedOperationException("Warning: Maximum storage capacity reached! Dataset too large.");
+				throw new OlapException("Warning: Maximum storage capacity reached! Dataset too large.");
 			}
 			
 			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
@@ -408,7 +409,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				con.close();
 				Olap4ldUtil._log
 						.warning("Warning: We have stored too many triples, already!");
-				throw new UnsupportedOperationException("Warning: Maximum storage capacity reached! Dataset contains too many triples.");
+				throw new OlapException("Warning: Maximum storage capacity reached! Dataset contains too many triples.");
 			}
 
 			if (location.endsWith(".rdf") || location.endsWith(".xml")) {
@@ -484,14 +485,15 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 		} catch (RepositoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new OlapException("Problem with repository: "
+					+ e.getMessage());
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
+			// If this happens, it is not so bad.
 			e.printStackTrace();
 		} catch (RDFParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// Since it happens often, we just log it in config
+			Olap4ldUtil._log
+			.config("RDFParseException:"+e.getMessage());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1255,14 +1257,14 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			con.close();
 
 			if (error) {
-				Olap4ldUtil._log.warning("Integrity constraints overview: "
+				Olap4ldUtil._log.warning("Integrity constraints failed: Integrity constraints overview: "
 						+ overview);
 				// XXX: OlapExceptions possible?
-				throw new UnsupportedOperationException(
-						"Integrity constraints overview:<br/>" + overview);
+				throw new OlapException(
+						"Integrity constraints failed: Integrity constraints overview:<br/>" + overview);
 			} else {
 				// Logging
-				Olap4ldUtil._log.config("Integrity constraints overview: "
+				Olap4ldUtil._log.config("Integrity constraints successful: Integrity constraints overview: "
 						+ overview);
 			}
 

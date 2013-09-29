@@ -306,7 +306,8 @@ class Olap4ldStatement implements OlapStatement {
 
 	public CellSet executeOlapQuery(String mdx) throws OlapException {
 
-		Olap4ldUtil._log.config("Parse MDX: " + mdx);
+		// This mdx string includes possible comments
+		Olap4ldUtil._log.info("Parse and execute MDX: " + mdx);
 
 		// TODO: Added in order to generically parse mdx and use for querying
 		// with SPARQL
@@ -333,7 +334,8 @@ class Olap4ldStatement implements OlapStatement {
 	public CellSet executeOlapQuery(SelectNode selectNode) throws OlapException {
 
 		final String mdx = toString(selectNode);
-		Olap4ldUtil._log.info("Execute MDX: " + mdx);
+		// Possibly, a select node representation would be more useful.
+		Olap4ldUtil._log.config("Execute selectNode-parsed MDX: " + mdx);
 
 		// Close the previous open CellSet, if there is one.
 		synchronized (this) {
@@ -354,7 +356,8 @@ class Olap4ldStatement implements OlapStatement {
 			openCellSet = olap4jConnection.factory.newCellSet(this);
 		}
 		
-		openCellSet.populate(selectNode);
+		// We actually only need to populate the cellset once we start asking for content, right?
+		openCellSet.createMetadata(selectNode);
 		
 		// Implement NonEmpty
 		/*

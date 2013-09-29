@@ -350,7 +350,7 @@ abstract class Olap4ldConnection implements OlapConnection {
 		Database pop = olapDatabases.get(0);
 	}
 
-	private void initLinkedDataEngine() {
+	private void initLinkedDataEngine() throws OlapException {
 		// This is the SPARQL engine
 		// Depending on the databaseName, we create a different Linked Data
 		// Engine

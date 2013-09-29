@@ -31,10 +31,6 @@ import junit.framework.TestCase;
 import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
-import org.olap4j.mdx.SelectNode;
-import org.olap4j.mdx.parser.MdxParser;
-import org.olap4j.mdx.parser.MdxParserFactory;
-import org.olap4j.mdx.parser.MdxValidator;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Dimension;
 import org.olap4j.metadata.Measure;
@@ -64,8 +60,6 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	private Connection connection;
 	private OlapConnection olapConnection;
 	private OlapStatement stmt;
-	private MdxParserFactory parserFactory;
-	private MdxParser parser;
 
 	public Example_QB_Datasets_QueryTest() throws SQLException {
 	}
@@ -87,9 +81,6 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 			System.out.println("Validation failed: " + e);
 			return;
 		}
-
-		this.parserFactory = olapconnection.getParserFactory();
-		this.parser = parserFactory.createMdxParser(olapconnection);
 	}
 
 	protected void tearDown() throws Exception {
@@ -170,7 +161,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	public void testExampleSsb001Metadata() {
 		String dsUri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
 		// localhost
-		// dsUri = "http://localhost:8080/LDCX-trunk/ldcx/tests/ssb001/ttl/example.ttl#ds";
+		// dsUri = "http://localhost:8080/ldcx-trunk/ldcx/tests/ssb001/ttl/example.ttl#ds";
 		metadataTest(dsUri, 5, 5);
 	}
 
@@ -227,38 +218,9 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// Localhost
 		// result = executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
 
-		assertContains("| Part  1   | Part  3   |", result);
-		assertContains("| Customer  1 | 2471035.0 | 2471035.0 |", result);
-	}
-	
-	/**
-	 * Here, we test NON EMPTY CLAUSE with two dimensions on both columns and rows.
-	 */
-	public void testExampleSsb001OlapComplexWithEmpty() {
-
-		String result = executeStatement("SELECT CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}) ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
-		
-		// Localhost
-		// result = executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
-
-		assertContains("| Supplier  1 | Supplier  2 | Supplier  1 | Supplier  2 | Supplier  1 | Supplier  2 |", result);
-		assertContains("|  | Customer  1 |  | Date 19940101 |   2471035.0 |             |             |             |   2471035.0 |             |", result);
-	}
-	
-	public void testExampleSsb001OlapComplexNonEmpty() {
-
-		String result = executeStatement("SELECT NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}) ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}) ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
-		
-		// Localhost
-		// result = executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
-
-		assertContains("| Supplier  1 | Supplier  2 | Supplier  1 | Supplier  2 |", result);
-		assertContains("|  | Customer  1 |  | Date 19940101 |   2471035.0 |             |   2471035.0 |             |", result);
-		
-		// Empty rows are not shown
-				assertEquals(
-						false,
-						result.contains("|  | Customer  3 |  | Date 19940101 |             |             |             |             |             |             |"));
+		assertEquals(
+				false,
+				result.contains("| Part  1   | Part  3 |"));
 	}
 
 	/**
@@ -529,12 +491,8 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		String resultString = "";
 		CellSet cset;
 		try {
-
-			SelectNode select = parser.parseSelect(mdxString);
-			MdxValidator validator = parserFactory
-					.createMdxValidator(olapConnection);
-			select = validator.validateSelect(select);
-			cset = stmt.executeOlapQuery(select);
+			
+			cset = stmt.executeOlapQuery(mdxString);
 
 			// String s = TestContext.toString(cset);
 			resultString = toString(cset, Format.RECTANGULAR);

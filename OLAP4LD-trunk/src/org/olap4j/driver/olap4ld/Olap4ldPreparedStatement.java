@@ -57,21 +57,23 @@ abstract class Olap4ldPreparedStatement
         String mdx) throws OlapException
     {
         super(olap4jConnection);
-
+        this.cellSetMetaData = null;
         // Execute a statement and steal its metadata.
-        final OlapStatement statement = olap4jConnection.createStatement();
-        try {
-            final CellSet cellSet = statement.executeOlapQuery(mdx);
-            final Olap4ldCellSetMetaData cellSetMetaData1 =
-                (Olap4ldCellSetMetaData) cellSet.getMetaData();
-            this.cellSetMetaData = cellSetMetaData1.cloneFor(this);
-            cellSet.close();
-            statement.close();
-        } catch (SQLException e) {
-            throw getHelper().createException(
-                "Error while preparing statement '" + mdx + "'",
-                e);
-        }
+        // I do not support this at the moment
+        
+//        final OlapStatement statement = olap4jConnection.createStatement();
+//        try {
+//            final CellSet cellSet = statement.executeOlapQuery(mdx);
+//            final Olap4ldCellSetMetaData cellSetMetaData1 =
+//                (Olap4ldCellSetMetaData) cellSet.getMetaData();
+//            this.cellSetMetaData = cellSetMetaData1.cloneFor(this);
+//            cellSet.close();
+//            statement.close();
+//        } catch (SQLException e) {
+//            throw getHelper().createException(
+//                "Error while preparing statement '" + mdx + "'",
+//                e);
+//        }
 
         this.mdx = mdx;
     }

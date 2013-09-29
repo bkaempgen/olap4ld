@@ -62,7 +62,6 @@ import org.olap4j.CellSetMetaData;
 import org.olap4j.OlapException;
 import org.olap4j.OlapStatement;
 import org.olap4j.Position;
-import org.olap4j.driver.olap4ld.Olap4ldConnection.MetadataColumn;
 import org.olap4j.driver.olap4ld.helper.LdHelper;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.helper.PreprocessMdxVisitor;
@@ -123,6 +122,7 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * measures in string arrays, keyed-off by a hashcode of the concatenation
 	 * of the uniquely identifying list of members.
 	 */
+	private boolean areCellsPopulated = false;
 	private final Map<Integer, String[]> newValueMap = new HashMap<Integer, String[]>();
 	private LogicalOlapQueryPlan queryplan;
 	// The list of measures queried here as part of metadata
@@ -149,10 +149,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		return olap4jStatement.olap4jConnection.helper;
 	}
 
-	public void populate(SelectNode selectNode) throws OlapException {
-
-		// Fill in cellset metadata
-		createMetadata(selectNode);
+	private void populateCells() throws OlapException {
 
 		// Visitor to create: Logical OLAP Operator Query Tree
 
@@ -187,6 +184,8 @@ abstract class Olap4ldCellSet implements CellSet {
 				.executeOlapQuery(queryplan);
 
 		cacheDataFromOlapQuery(olapQueryResult);
+
+		areCellsPopulated = true;
 	}
 
 	/**
@@ -196,8 +195,16 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * = filterCellSetAxis;
 	 * 
 	 * @param selectNode
+	 * @throws OlapException
 	 */
-	private void createMetadata(SelectNode selectNode) {
+	public void createMetadata(SelectNode selectNode) throws OlapException {
+
+		// Any advantage of having a prepared statement? No, since we use NON EMPTY CLAUSE.
+		// if (olap4jStatement instanceof Olap4ldPreparedStatement) {
+		// this.metaData = ((Olap4ldPreparedStatement)
+		// olap4jStatement).cellSetMetaData;
+		// } else {
+
 		// I pre-process the select node
 		// I need to replace Identifier.Members with Members(Identifier)
 		PreprocessMdxVisitor<Object> preprocessMdxVisitor = new PreprocessMdxVisitor<Object>();
@@ -1127,6 +1134,16 @@ abstract class Olap4ldCellSet implements CellSet {
 	}
 
 	public Cell getCell(List<Integer> coordinates) {
+
+		if (!areCellsPopulated) {
+			try {
+				populateCells();
+			} catch (OlapException e) {
+				// TODO It would be nicer to have proper OlapException given.
+				e.printStackTrace();
+			}
+		}
+
 		// We concat the members.
 		String concatNr = "";
 		Measure measure = null;

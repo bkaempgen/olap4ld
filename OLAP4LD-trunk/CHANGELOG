@@ -1,3 +1,15 @@
+==2013-09-29==
+* We now throw more OlapExceptions in Linked Data Engines (Sesame), since we hope that this
+makes the system more robust in case of errors.
+* A prepared olap statement is used by XmlaHandler.java 
+(statement = connection.prepareOlapStatement(mdx);). Afterwards the cellset is 
+created (cellSet = statement.executeQuery();). This means in our implementation, that the cellset
+is populated twice and the linked data engine is queried twice (and logging is done, twice). Thus,
+we have adapted cellset to only populate the cells when actually cells are asked for; otherwise, only
+the metadata is created and can be queried from the prepared olap statement if necessary.
+* Unfortunately, the prepared statement does not help us in any way to save resources. Therefore, we
+have disabled it in Olap4ldPreparedStatement.java. 
+
 ==2013-09-28==
 * More detailed logging, per connection. Unfortunately, no session tracking, yet.
 * Better labels for SSB dataset

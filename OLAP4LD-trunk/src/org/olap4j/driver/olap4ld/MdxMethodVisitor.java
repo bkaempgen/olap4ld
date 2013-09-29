@@ -323,6 +323,8 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 
 	@Override
 	public Object visit(CallNode call) {
+		
+		try {
 		/*
 		 * Crossjoin returns the results in the order of the first set
 		 * expression, then within that, by the second second expression.
@@ -332,7 +334,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		}
 
 		if (call.getOperatorName().toLowerCase().equals("members")) {
-			return callMembers(call);
+				return callMembers(call);
 		}
 
 		/*
@@ -385,6 +387,11 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		if (call.getOperatorName().toLowerCase().equals(":")) {
 			return callColon(call);
 		}
+		
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		throw new UnsupportedOperationException("The "
 				+ call.getOperatorName().toLowerCase()
@@ -418,31 +425,23 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	 */
 	private Object callNumBinOp(CallNode call) {
 
-		try {
-			// If we cannot cast to double, we return null.
-			// Also, we need to decode to uri representation
-			Double one = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call
-					.getArgList().get(0).accept(this).toString()));
-			Double two = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call
-					.getArgList().get(1).accept(this).toString()));
-			if (call.getOperatorName().equals("+")) {
-				return (Object) new Double(one.doubleValue()
-						+ two.doubleValue());
-			}
-			if (call.getOperatorName().equals("-")) {
-				return (Object) new Double(one.doubleValue()
-						- two.doubleValue());
-			}
-			if (call.getOperatorName().equals("*")) {
-				return (Object) new Double(one.doubleValue()
-						* two.doubleValue());
-			}
-			if (call.getOperatorName().equals("/")) {
-				return (Object) new Double(one.doubleValue()
-						/ two.doubleValue());
-			}
-		} catch (Exception e) {
-			return null;
+		// If we cannot cast to double, we return null.
+		// Also, we need to decode to uri representation
+		Double one = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call
+				.getArgList().get(0).accept(this).toString()));
+		Double two = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call
+				.getArgList().get(1).accept(this).toString()));
+		if (call.getOperatorName().equals("+")) {
+			return (Object) new Double(one.doubleValue() + two.doubleValue());
+		}
+		if (call.getOperatorName().equals("-")) {
+			return (Object) new Double(one.doubleValue() - two.doubleValue());
+		}
+		if (call.getOperatorName().equals("*")) {
+			return (Object) new Double(one.doubleValue() * two.doubleValue());
+		}
+		if (call.getOperatorName().equals("/")) {
+			return (Object) new Double(one.doubleValue() / two.doubleValue());
 		}
 
 		throw new UnsupportedOperationException(
@@ -594,32 +593,24 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object callChildren(CallNode call) {
+	private Object callChildren(CallNode call) throws OlapException {
 
 		/*
 		 * Children can only be for a member
 		 */
 		Object object = call.getArgList().get(0).accept(this);
 
-		try {
-			if (object instanceof Member) {
-				Member member = (Member) object;
-				NamedList<? extends Member> children = member.getChildMembers();
-				return (Object) children;
-			} else {
-				throw new UnsupportedOperationException(
-						"Children can only be executed on members!");
-			}
-
-		} catch (OlapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (object instanceof Member) {
+			Member member = (Member) object;
+			NamedList<? extends Member> children = member.getChildMembers();
+			return (Object) children;
+		} else {
+			throw new OlapException("Children can only be executed on members!");
 		}
-		return null;
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object callMembers(CallNode call) {
+	private Object callMembers(CallNode call) throws OlapException {
 
 		/*
 		 * Members can be for a dimension, hierarchy, level
@@ -627,7 +618,6 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		Object object = call.getArgList().get(0).accept(this);
 
 		List<Member> allMembers = new ArrayList<Member>();
-		try {
 			if (object instanceof Dimension) {
 				Dimension dimension = (Dimension) object;
 				// Would return a list of Members
@@ -663,10 +653,6 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 				return (Object) level.getMembers();
 			}
 
-		} catch (OlapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return null;
 	}
 
@@ -767,7 +753,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 						cube1 = this.cube;
 						first = false;
 					} else if (queriedcube != null && !first) {
-						throw new UnsupportedOperationException(
+						throw new OlapException(
 								"If a cube is given, we should find the identifier in there!");
 					}
 
@@ -831,7 +817,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 								segmentName);
 						segmentIndex++;
 						if (hierarchy == null) {
-							throw new UnsupportedOperationException(
+							throw new OlapException(
 									"MDX identifier not properly given:"
 											+ segmentName);
 						} else if (hierarchy != null
@@ -845,7 +831,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 									.get(segmentName);
 							segmentIndex++;
 							if (level == null) {
-								throw new UnsupportedOperationException(
+								throw new OlapException(
 										"MDX identifier not properly given:"
 												+ segmentName);
 							} else if (level != null
@@ -982,19 +968,31 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 		return positions;
 	}
 
-	public List<Position> getColumnPositions() {
+	public List<Position> getColumnPositions() throws OlapException {
+		if (this.columnPositions == null) {
+			throw new OlapException("We do not have column positions!");
+		}
 		return this.columnPositions;
 	}
 
-	public List<Position> getRowPositions() {
+	public List<Position> getRowPositions() throws OlapException {
+		if (this.rowPositions == null) {
+			throw new OlapException("We do not have row positions!");
+		}
 		return this.rowPositions;
 	}
 
-	public List<Position> getFilterPositions() {
+	public List<Position> getFilterPositions() throws OlapException {
+		if (this.filterPositions == null) {
+			throw new OlapException("We do not have filter positions!");
+		}
 		return this.filterPositions;
 	}
 
-	public Cube getCube() {
+	public Cube getCube() throws OlapException {
+		if (this.cube == null) {
+			throw new OlapException("We do not have a cube!");
+		}
 		return this.cube;
 	}
 }
