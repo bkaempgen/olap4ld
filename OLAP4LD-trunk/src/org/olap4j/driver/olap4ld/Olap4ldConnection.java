@@ -499,6 +499,8 @@ abstract class Olap4ldConnection implements OlapConnection {
 
 	public void close() throws SQLException {
 		closed = true;
+		// For me this means we also have to rollback first
+		rollback();
 	}
 
 	public boolean isClosed() throws SQLException {

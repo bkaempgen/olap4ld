@@ -1,3 +1,9 @@
+==2013-10-3==
+* Pooling problem workaround implemented: http://linked-data-cubes.org/index.php/Olap4j-xmlaserver#Problem:_Pooling_of_data_sources
+
+==2013-10-1==
+* Pooling problem investigated, see: http://linked-data-cubes.org/index.php/Olap4j-xmlaserver#Problem:_Pooling_of_data_sources
+
 ==2013-09-29==
 * We now throw more OlapExceptions in Linked Data Engines (Sesame), since we hope that this
 makes the system more robust in case of errors.

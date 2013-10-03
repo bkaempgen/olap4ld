@@ -38,7 +38,8 @@ import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 
 /**
- * Unit test for LD-Cubes Explorer Queries on XMLA.
+ * Unit test for LD-Cubes Explorer Queries on XMLA. As questions, we take the one's from the
+ * small student survey.
  * 
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
@@ -49,11 +50,11 @@ public class LD_Cubes_Explorer_XmlaTest extends TestCase {
 	public LD_Cubes_Explorer_XmlaTest() throws SQLException {
 
 		try {
-
-			// this.tumblrWrite = new URL(
-			// "http://141.52.218.137:8080/xmlaserver-trunk/xmla");
+			
 			this.xmlauri = new URL(
 					"http://localhost:8080/xmlaserver-trunk/xmla");
+//			this.xmlauri = new URL(
+//					"http://141.52.218.137:8000/xmlaserver-trunk/xmla");
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -67,49 +68,131 @@ public class LD_Cubes_Explorer_XmlaTest extends TestCase {
 	protected void tearDown() throws Exception {
 
 	}
-
-	public void testSsb001() {
-		String cubename = "[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]";
+	
+	/**
+	 * Name two measures that the "Example SSB dataset" contains. 
+	 */
+	public void test1() {
+		String cubename = uriToMdx("http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds");
 		String aMeasurename = "[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount]";
 		String aHierarchyname = "[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList]";
-		String mdx = "SELECT NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]";
-		String result = "Test";
 		postAndTestXmlaDiscoverDatasources();
 		postAndTestXmlaDbschemaCatalogs();
 		postAndTestXmlaMdschemaCubes(cubename);
 		postAndTestXmlaMdschemaMeasures(cubename, aMeasurename);
 		postAndTestXmlaMdschemaHierarchies(cubename, aHierarchyname);
-		postAndTestXmlaOlapQuery(mdx, result);
 	}
-	
-	public void testEurostat() {
-		String cubename = uriToMdx("http://estatwrap.ontologycentral.com/id/tec00114");
-		String aMeasurename = "";
-		String aHierarchyname = "";
-		postAndTestXmlaDiscoverDatasources();
-		postAndTestXmlaDbschemaCatalogs();
-		postAndTestXmlaMdschemaCubes(cubename);
-		postAndTestXmlaMdschemaMeasures(cubename, aMeasurename);
-		postAndTestXmlaMdschemaHierarchies(cubename, aHierarchyname);
 
+	/**
+	 * What overall revenue was made by "Customer 2" in the "Example SSB dataset"? 
+	 */
+	public void test2() {
+		String mdx = "SELECT /* $session: b2edaabe-a806-4fec-eba5-ac74b4009f4b */ NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue]} ON COLUMNS , NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]";
+		String seek = "7116579.0";
+		String response = postAndReturnXmlaOlapQuery(mdx);
+		assertContains(seek, response);
 	}
 	
-	public void testEdgar() {
-		String cubename = uriToMdx("http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds");
-		String aMeasurename = "[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]";
-		String aHierarchyname = "[httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart]";
+	/**
+	 * Has there been any revenue from Product "Part 2"?  
+	 */
+	public void test3() {
+		String mdx = "SELECT /* $session: b2edaabe-a806-4fec-eba5-ac74b4009f4b */ NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue]} ON COLUMNS , NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]";
+		String seek = "Part 2";
+		String response = postAndReturnXmlaOlapQuery(mdx);
+		assertEquals(
+				false,
+				response.contains(seek));
+	}
+	
+	/**
+	 *  From what Date is the revenue of Product "Part 1"? 
+	 */
+	public void test4() {
+		String mdx = "SELECT /* $session: b2edaabe-a806-4fec-eba5-ac74b4009f4b */ NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue]} ON COLUMNS , NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]";
+		String seek = "19940101";
+		String response = postAndReturnXmlaOlapQuery(mdx);
+		assertContains(seek, response);
+	}
+	
+	/**
+	 *  What was the average GDP per capita in PPS for Germany? 
+	 */
+	public void test5() {
+		String mdx = "SELECT /* $session: b2edaabe-a806-4fec-eba5-ac74b4009f4b */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]} ON COLUMNS , NON EMPTY {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23ds]";
+		String seek = "117.62";
+		String response = postAndReturnXmlaOlapQuery(mdx);
+		assertContains(seek, response);
+	}
+	
+	/**
+	 *  What was the average GDP per capita in PPS for Germany in 2012? 
+	 */
+	public void test6() {
+		String mdx = "SELECT /* $session: b2edaabe-a806-4fec-eba5-ac74b4009f4b */ NON EMPTY CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]}, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}) ON COLUMNS , NON EMPTY {Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23ds]";
+		String seek = "122.0";
+		String response = postAndReturnXmlaOlapQuery(mdx);
+		assertContains(seek, response);
+	}
+	
+	/**
+	 *  How many values does the dataset for GDP per capita in PPS have for 2012? 
+	 */
+	public void test7() {
+		String mdx = "SELECT /* $session: 0e58c35f-e454-9d78-3dd3-4e495bf41fa6 */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsdYYYrdfXXX23cl_aggreg95])}) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23ds]";
+		String seek = "43.0";
+		String response = postAndReturnXmlaOlapQuery(mdx);
+		assertContains(seek, response);
+	}
+	
+	/**
+	 *  What was the average Stock Market "Adjusted Closing Price" for Bank of America Corporation on 12 December 2012?  
+	 */
+	public void test8() {
+		String mdx = "SELECT /* $session: b2edaabe-a806-4fec-eba5-ac74b4009f4b */ NON EMPTY CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]}, {Members([httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FvocabXXX2FyahooXXX23subject])}) ON COLUMNS , NON EMPTY {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FarchiveXXX2FBACXXX2F2012ZZZ12ZZZ12XXX23ds]";
+		String seek = "10.59";
+		String response = postAndReturnXmlaOlapQuery(mdx);
+		assertContains(seek, response);
+	}
+	
+	/**
+	 *  What is the problem with the HCO3 climate data at location AD0514? 
+	 */
+	public void test9() {
+		String cubename = uriToMdx("http://smartdbwrap.appspot.com/id/locationdataset/AD0514/HCO3");
 		postAndTestXmlaDiscoverDatasources();
 		postAndTestXmlaDbschemaCatalogs();
-		postAndTestXmlaMdschemaCubes(cubename);
-		postAndTestXmlaMdschemaMeasures(cubename, aMeasurename);
-		postAndTestXmlaMdschemaHierarchies(cubename, aHierarchyname);
-		// First edgar query (works)
-		String mdx = "SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]";
-		// Complex edgar query (works actually also, however results in really long xmla result that probably cannot be properly parsed)
-		mdx = " SELECT NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])},{Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23segment])}) ON COLUMNS, NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]";
-		String result = "hello";
-		postAndTestXmlaOlapQuery(mdx, result);
+		String response = postAndReturnXmlaMdschemaCubes(cubename);
+		String seek = "Failed specification check: IC-12. No duplicate observations. ";
+		assertContains(seek, response);
+	}
+	
+	/**
+	 *  What is the overall average "Available for sale securities noncurrent" in Balance Sheet for COSTCO WHOLESALE CORP, published on 2010-08-29? 
+	 */
+	public void test10() {
+		String mdx = "SELECT /* $session: 0e58c35f-e454-9d78-3dd3-4e495bf41fa6 */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]} ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23issuer])}, {Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])}) ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F909832XXX2F0001193125ZZZ10ZZZ230379XXX23ds]";
 		
+		String response = postAndReturnXmlaOlapQuery(mdx);
+		
+		String seek = "3000000.0";
+		assertContains(seek, response);
+		
+		seek = "Available for sale securities noncurrent";
+		assertContains(seek, response);
+	}
+	
+	/**
+	 *  What were the "Available for sale securities gross realized losses" between 2009-08-31 and 2010-08-29 for COSTCO WHOLESALE CORP? 
+	 */
+	public void test11() {
+		String mdx = "SELECT /* $session: 0e58c35f-e454-9d78-3dd3-4e495bf41fa6 */ NON EMPTY CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]}, CrossJoin({Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])}, {Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtend])})) ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23issuer])}, {Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])}) ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F909832XXX2F0001193125ZZZ10ZZZ230379XXX23ds]";
+		
+		String response = postAndReturnXmlaOlapQuery(mdx);
+		String seek = "1000000.0";
+		assertContains(seek, response);
+		seek = "Available for sale securities gross realized losses";
+		assertContains(seek, response);
 	}
 	
 	private String uriToMdx(String dsUri) {
@@ -148,14 +231,18 @@ public class LD_Cubes_Explorer_XmlaTest extends TestCase {
 		assertContains(seek, response);
 
 	}
-
-	public void postAndTestXmlaMdschemaCubes(String cubename) {
-
+	
+	public String postAndReturnXmlaMdschemaCubes(String cubename) {
 		String data = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" SOAP-ENV:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <SOAP-ENV:Body> <Discover xmlns=\"urn:schemas-microsoft-com:xml-analysis\" SOAP-ENV:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <RequestType>MDSCHEMA_CUBES</RequestType> <Restrictions> <RestrictionList> <CATALOG_NAME>[LdCatalogSchema]</CATALOG_NAME> <CUBE_NAME>"
 				+ cubename
 				+ "</CUBE_NAME> </RestrictionList> </Restrictions> <Properties> <PropertyList> <DataSourceInfo>[LdCatalogSchema]</DataSourceInfo> <Catalog>[LdCatalogSchema]</Catalog> </PropertyList> </Properties> </Discover> </SOAP-ENV:Body> </SOAP-ENV:Envelope>";
 
-		String response = post(data);
+		return post(data);
+	}
+
+	public void postAndTestXmlaMdschemaCubes(String cubename) {
+
+		String response = postAndReturnXmlaMdschemaCubes(cubename);
 
 		String seek = "<CUBE_NAME>" + cubename + "</CUBE_NAME>";
 
@@ -190,15 +277,11 @@ public class LD_Cubes_Explorer_XmlaTest extends TestCase {
 		assertContains(seek, response);
 	}
 	
-	public void postAndTestXmlaOlapQuery(String mdx, String result) {
+	public String postAndReturnXmlaOlapQuery(String mdx) {
 		
 		String data = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" SOAP-ENV:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <SOAP-ENV:Body> <Execute xmlns=\"urn:schemas-microsoft-com:xml-analysis\" SOAP-ENV:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <Command> <Statement>"+mdx+"</Statement> </Command> <Properties> <PropertyList> <DataSourceInfo>[LdCatalogSchema]</DataSourceInfo> <Catalog>[LdCatalogSchema]</Catalog> <Format>Multidimensional</Format> <Content>SchemaData</Content> </PropertyList> </Properties> </Execute> </SOAP-ENV:Body> </SOAP-ENV:Envelope>";
 		
-		String response = post(data);
-
-		String seek = result;
-
-		assertContains(seek, response);
+		return post(data);
 	}
 
 	private String post(String data) {

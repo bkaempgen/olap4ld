@@ -401,9 +401,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 			
 			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
-			Olap4ldUtil._log.config("Size of loaded data: " + query);
 			List<Node[]> result = sparql(query, false);
 			this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
+			Olap4ldUtil._log.config("Number of loaded triples: " + this.LOADED_TRIPLE_SIZE);
 			
 			if (this.LOADED_TRIPLE_SIZE > this.MAX_LOAD_TRIPLE_SIZE) {
 				con.close();
