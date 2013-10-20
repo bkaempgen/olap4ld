@@ -1,3 +1,16 @@
+==2013-10-20==
+* More fine granular logging that can be parsed using regex as done in LDCX_Performance_Evaluation_XmlaTest_LogParse_Experiments.
+* LDCX_Performance_Evaluation_XmlaTest with tests for performance evaluation
+* LDCX_Performance_Evaluation_XmlaTest_LogParse_Experiments with experiment using exrunner by
+Günter Ladwig for inserting log parser results into a sqlite dabase for querying and visualising
+using gnuplot.
+* Refined one of the example datasets (Eurostat).
+* Added example for exrunner by Günter Ladwig: SortExperiments.java
+* Exrunner requires (not uploaded)
+** exrunner-0.0.1-SNAPSHOT.jar
+** guava-15.0.jar
+** sqlite-jdbc-3.7.15-SNAPSHOT-2.jar
+
 ==2013-10-3==
 * Pooling problem workaround implemented: http://linked-data-cubes.org/index.php/Olap4j-xmlaserver#Problem:_Pooling_of_data_sources
 
@@ -276,7 +289,30 @@ we do not necessarily need a code list in many cases. But, if we have a code lis
 * "If a dimension property has a qb:codeList, then the value of the dimension property on every 
 qb:Observation must be in the code list."
 
-==2013-07-01 (before)==
+==Status 2013-07-04==
+* Decided for own example based on example in spec:
+** sdmx dimension: http://publishing-statistical-data.googlecode.com/svn/trunk/specs/src/main/vocab/sdmx-dimension.ttl
+** code list sex: http://publishing-statistical-data.googlecode.com/svn/trunk/specs/src/main/vocab/sdmx-code.ttl#sex
+** folder of own online linked data files: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/
+
+==Status 2013-07-03==
+* Note in spec: Every qb:DataSet has exactly one associated qb:DataStructureDefinition. 
+* Note in spec: "Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range."
+* Note in spec: "Every dimension with range skos:Concept must have a qb:codeList." <= This means, 
+we do not necessarily need a code list in many cases. But, if we have a code list, then:
+* "If a dimension property has a qb:codeList, then the value of the dimension property on every 
+qb:Observation must be in the code list."
+* Note in spec: Every qb:Observation has exactly one associated qb:DataSet.
+
+==Status 2013-06-26==
+* Added SSB_001 test data that I simply shortended. Can be looked up via: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/custlevels.ttl#dsd
+* Added [http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/custlevels.ttl#dsd] as prefixes (We need a better solution, here)
+* Worked now further on http://intra.b-kaempgen.de/dawiki/index.php/Creating_an_OLAP4LD_test_environment_and_using_Sesame 
+or now at http://www.linked-data-cubes.org/index.php/EmbeddedSesameEngine 
+* Changed the fact that if specific element of DefferredList is queried, we do not "populate".
+
+
+==2013-06-26 (before)==
 
 * Warum haben die Dimensionen alle zwei Englische rdfs:label? 
 

@@ -16,14 +16,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.text.SimpleDateFormat;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -567,9 +563,10 @@ public abstract class Olap4ldUtil {
 	// to initialize the logging.
 	public static void prepareLogging() {
 		File loggingConfigurationFile = new File("logging.properties");
-		
-		System.out.println("Logging properties file absolute path:"+ loggingConfigurationFile.getAbsolutePath());
-		
+
+		System.out.println("Logging properties file absolute path:"
+				+ loggingConfigurationFile.getAbsolutePath());
+
 		// Setup logging
 		Olap4ldUtil._log = Logger.getLogger("Olap4ldDriver");
 
@@ -594,14 +591,27 @@ public abstract class Olap4ldUtil {
 				logConf.setProperty(
 						"java.util.logging.ConsoleHandler.formatter",
 						"java.util.logging.SimpleFormatter");
+
+				// level
 				logConf.setProperty("java.util.logging.FileHandler.level",
 						"INFO");
+
+				// pattern
 				logConf.setProperty("java.util.logging.FileHandler.pattern",
 						"log/olap4ld_%u.log");
-				logConf.setProperty("java.util.logging.FileHandler.limit",
-						"50000");
-				logConf.setProperty("java.util.logging.FileHandler.count", "1");
-				
+
+				// limit in bytes
+				 logConf.setProperty("java.util.logging.FileHandler.limit",
+				 "10000000");
+
+				// roll
+				// logConf.setProperty("java.util.logging.FileHandler.count",
+				// "0");
+
+				// append
+				 logConf.setProperty("java.util.logging.FileHandler.append",
+				 "1");
+
 				// Maybe better XMLFormatter?
 				logConf.setProperty("java.util.logging.FileHandler.formatter",
 						"java.util.logging.SimpleFormatter");
@@ -645,34 +655,38 @@ public abstract class Olap4ldUtil {
 			Olap4ldUtil._log.log(Level.WARNING, "Problems to load the logging "
 					+ "configuration file", ex);
 		}
-		
+
 		// More specific loggers
-		Handler handler;
-		try {
-			Date date = new Date();
-			String formattedDate = new SimpleDateFormat("yyyy-MM-dd_hh_mm_ss").format(date);
-			String pattern = "log/olap4ld_connection_"+ formattedDate + ".log";
-			handler = new FileHandler(pattern);
-			handler.setFormatter(new java.util.logging.SimpleFormatter());
-			handler.setLevel(Level.INFO);
-			Olap4ldUtil._log.addHandler(handler);
-			
-			// one file for logging
-			handler = new FileHandler("log/olap4ld_all.log");
-			handler.setLevel(Level.INFO);
-			handler.setFormatter(new java.util.logging.SimpleFormatter());
-			Olap4ldUtil._log.addHandler(handler);
-		} catch (SecurityException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		// They do not work, properly. Seem to either not log at all or create
+		// many lck and log files
+		// Handler handler;
+		// try {
+		// Date date = new Date();
+		// String formattedDate = new
+		// SimpleDateFormat("yyyy-MM-dd_hh_mm_ss").format(date);
+		// String pattern = "log/olap4ld_connection_"+ formattedDate + ".log";
+		// handler = new FileHandler(pattern);
+		// handler.setFormatter(new java.util.logging.SimpleFormatter());
+		// handler.setLevel(Level.INFO);
+		// Olap4ldUtil._log.addHandler(handler);
+		//
+		// // one file for logging
+		// handler = new FileHandler("log/olap4ld_all.log");
+		// handler.setLevel(Level.INFO);
+		// handler.setFormatter(new java.util.logging.SimpleFormatter());
+		// Olap4ldUtil._log.addHandler(handler);
+		// } catch (SecurityException e1) {
+		// // TODO Auto-generated catch block
+		// e1.printStackTrace();
+		// } catch (IOException e1) {
+		// // TODO Auto-generated catch block
+		// e1.printStackTrace();
+		// }
 
 		Olap4ldUtil._log.setLevel(Level.ALL);
-		
-		Olap4ldUtil._log.config("Logging properties file absolute path:"+ loggingConfigurationFile.getAbsolutePath());
+
+		Olap4ldUtil._log.config("Logging properties file absolute path:"
+				+ loggingConfigurationFile.getAbsolutePath());
 
 		// // We want to log to a file.
 		// try {

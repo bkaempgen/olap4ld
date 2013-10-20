@@ -183,60 +183,6 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		
 		String[] restrictions = patternValueList.toArray(new String[patternValueList
 		    								.size()]);
-		
-		Olap4ldUtil._log.config("********************************************");
-		Olap4ldUtil._log.config("** SENDING REQUEST :");
-		String restrictionString = "";
-		for (int i = 0; i < restrictions.length; i = i + 2) {
-			if ("CATALOG_NAME".equals((String) restrictions[i])) {
-				restrictionString += "catalog_name = "
-						+ (String) restrictions[i + 1];
-				// we do not consider catalogs for now.
-				continue;
-			}
-			if ("SCHEMA_NAME".equals((String) restrictions[i])) {
-				restrictionString += "schema_name = "
-						+ (String) restrictions[i + 1];
-				// we do not consider schema for now
-				continue;
-			}
-			if ("CUBE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "cube_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("DIMENSION_UNIQUE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "dimension_unique_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("HIERARCHY_UNIQUE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "hierarchy_unique_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("LEVEL_UNIQUE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "level_unique_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("MEMBER_UNIQUE_NAME".equals((String) restrictions[i])) {
-				restrictionString += "member_unique_name = "
-						+ (String) restrictions[i + 1];
-				continue;
-			}
-			if ("TREE_OP".equals((String) restrictions[i])) {
-				restrictionString += "tree_op = "
-						+ new Integer((String) restrictions[i + 1]);
-				// treeOps erstellen wie in OpenVirtuoso
-				continue;
-			}
-
-		}
-
-		Olap4ldUtil._log.config("executeMetadataRequestOnLd("
-				+ metadataRequest.name() + ") with " + restrictionString + ";");
-		Olap4ldUtil._log.config("********************************************");
 
 		/*
 		 * Specification of those metadata requests, see MetaDataRequest,
@@ -1555,65 +1501,72 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	 * @param restrictions
 	 * @return Nodes to work with internally.
 	 */
-	protected List<org.semanticweb.yars.nx.Node[]> executeMetadataRequestOnLd(
+	private List<org.semanticweb.yars.nx.Node[]> executeMetadataRequestOnLd(
 			Context context, MetadataRequest metadataRequest,
 			Restrictions myRestrictionsObject) throws OlapException {
 
+		Olap4ldUtil._log.info("Execute metadata query on Linked Data Engine: "+metadataRequest.toString() + myRestrictionsObject.toString());
+		long time = System.currentTimeMillis();
+		
+		List<org.semanticweb.yars.nx.Node[]> result = null;
 		// Create result
 		switch (metadataRequest) {
 		case DISCOVER_DATASOURCES:
 
-			return olap4jConnection.myLinkedData.getDatabases(myRestrictionsObject);
-
+			result = olap4jConnection.myLinkedData.getDatabases(myRestrictionsObject);
+			break;
 		case DBSCHEMA_CATALOGS:
 
-			return olap4jConnection.myLinkedData.getCatalogs(myRestrictionsObject);
-
+			result =  olap4jConnection.myLinkedData.getCatalogs(myRestrictionsObject);
+			break;
 		case DBSCHEMA_SCHEMATA:
 
-			return olap4jConnection.myLinkedData.getSchemas(myRestrictionsObject);
-
+			result =  olap4jConnection.myLinkedData.getSchemas(myRestrictionsObject);
+			break;
 		case MDSCHEMA_CUBES:
 
-			return olap4jConnection.myLinkedData.getCubes(myRestrictionsObject);
-
+			result =  olap4jConnection.myLinkedData.getCubes(myRestrictionsObject);
+			break;
 		case MDSCHEMA_DIMENSIONS:
 			/*
 			 * Now, we have two possibilities: Either, here, the shared
 			 * dimensions are asked for, or the dimensions of certain cubes.
 			 */
 
-			return olap4jConnection.myLinkedData.getDimensions(myRestrictionsObject);
-
+			result =  olap4jConnection.myLinkedData.getDimensions(myRestrictionsObject);
+			break;
 		case MDSCHEMA_MEASURES:
 
-			return olap4jConnection.myLinkedData.getMeasures(myRestrictionsObject);
-
+			result =  olap4jConnection.myLinkedData.getMeasures(myRestrictionsObject);
+			break;
 		case MDSCHEMA_SETS:
 
-			return olap4jConnection.myLinkedData.getSets(myRestrictionsObject);
-
+			result =  olap4jConnection.myLinkedData.getSets(myRestrictionsObject);
+			break;
 		case MDSCHEMA_HIERARCHIES:
 
-			return olap4jConnection.myLinkedData.getHierarchies(myRestrictionsObject);
-
+			result =  olap4jConnection.myLinkedData.getHierarchies(myRestrictionsObject);
+			break;
 		case MDSCHEMA_LEVELS:
 
-			return olap4jConnection.myLinkedData.getLevels(myRestrictionsObject);
-
+			result =  olap4jConnection.myLinkedData.getLevels(myRestrictionsObject);
+			break;
 		case MDSCHEMA_MEMBERS:
 
-			return olap4jConnection.myLinkedData.getMembers(myRestrictionsObject);
-
+			result =  olap4jConnection.myLinkedData.getMembers(myRestrictionsObject);
+			break;
 		default:
 			/*
 			 * If we haven't implemented it, yet, simply return empty list.
 			 * 
 			 * In this case, an empty ResultSet should be created.
 			 */
-			List<org.semanticweb.yars.nx.Node[]> result = new ArrayList<org.semanticweb.yars.nx.Node[]>();
-			return result;
+			result = new ArrayList<org.semanticweb.yars.nx.Node[]>();
 		}
+		
+		time = System.currentTimeMillis() - time;
+		Olap4ldUtil._log.info("Execute metadata query on Linked Data Engine: finished in " + time + "ms.");
+		return result;
 	}
 }
 

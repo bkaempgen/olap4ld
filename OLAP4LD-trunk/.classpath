@@ -92,5 +92,8 @@
 	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/spring-web-2.5.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/spring-webmvc-2.5.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Sesame Triple Store 2.7.6/lib/standard-1.1.2.jar"/>
+	<classpathentry kind="lib" path="testlib/exrunner-0.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="testlib/guava-15.0.jar"/>
+	<classpathentry kind="lib" path="testlib/sqlite-jdbc-3.7.15-SNAPSHOT-2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
