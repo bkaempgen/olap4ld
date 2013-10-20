@@ -31,6 +31,16 @@ public class Restrictions {
 		;
 	}
 
+	public String toString() {
+		return "(catalog = " + catalog + " schemaPattern = " + schemaPattern
+				+ " cubeNamePattern = " + cubeNamePattern
+				+ " dimensionUniqueName = " + dimensionUniqueName
+				+ " hierarchyUniqueName = " + hierarchyUniqueName
+				+ " levelUniqueName = " + levelUniqueName
+				+ " memberUniqueName = " + memberUniqueName + " treeOps = "
+				+ tree+")";
+	}
+
 	/**
 	 * Restrictions are URI representations of olap metadata objects. This
 	 * constructor creates restrictions from an olap4j restrictions array.
@@ -79,8 +89,7 @@ public class Restrictions {
 			}
 			if ("TREE_OP".equals((String) restrictions[i])) {
 				// Tree OP cannot be transformed into URI representation
-				tree = new Integer(
-						(String) restrictions[i + 1]);
+				tree = new Integer((String) restrictions[i + 1]);
 				// treeOps erstellen wie in OpenVirtuoso
 				continue;
 			}

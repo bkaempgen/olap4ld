@@ -27,7 +27,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +106,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	private ExecPlan execplan;
 
 	private Integer MAX_LOAD_TRIPLE_SIZE = 100000;
-	
+
 	private Integer MAX_COMPLEX_CONSTRAINTS_TRIPLE_SIZE = 1000;
 
 	private Integer LOADED_TRIPLE_SIZE = 0;
@@ -336,7 +335,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					Olap4ldUtil._log
 							.config("NxParser: Could not parse properly: "
 									+ e.getMessage());
-				} 
+				}
 				;
 			}
 
@@ -371,7 +370,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * Loads location into store and mark it as stored.
 	 * 
 	 * @param location
-	 * @throws OlapException 
+	 * @throws OlapException
 	 */
 	private void loadInStore(String location) throws OlapException {
 		SailRepositoryConnection con = null;
@@ -381,36 +380,26 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			con = repo.getConnection();
 			URL locationurl = new URL(location);
 
+			// Would not work since we cannot ask for the file size without downloading the file
 			// Check size and set size to have of heap space
-			URLConnection urlConnection = locationurl.openConnection();
-			urlConnection.connect();
-			// assuming both bytes: 1) file_size is byte 2) 
-			int file_size = urlConnection.getContentLength();
-			// TODO: Apparently file size often wrong?
-			Olap4ldUtil._log.config("File size: " + file_size);
-			long memory_size = Olap4ldUtil.getFreeMemory();
-			Olap4ldUtil._log.config("Current memory size: " + memory_size);
+//			URLConnection urlConnection = locationurl.openConnection();
+//			urlConnection.connect();
+//			// assuming both bytes: 1) file_size is byte 2)
+//			int file_size = urlConnection.getContentLength();
+//			// TODO: Apparently file size often wrong?
+//			Olap4ldUtil._log.config("File size: " + file_size);
+//			long memory_size = Olap4ldUtil.getFreeMemory();
+//			Olap4ldUtil._log.config("Current memory size: " + memory_size);
+//
+//			if (file_size > memory_size) {
+//				con.close();
+//				Olap4ldUtil._log.warning("Warning: File (" + location
+//						+ ") to load exceeds amount of heap space memory!");
+//				throw new OlapException(
+//						"Warning: Maximum storage capacity reached! Dataset too large.");
+//			}
 
-			if (file_size > memory_size) {
-				con.close();
-				Olap4ldUtil._log
-						.warning("Warning: File ("
-						+ location
-						+ ") to load exceeds amount of heap space memory!");
-				throw new OlapException("Warning: Maximum storage capacity reached! Dataset too large.");
-			}
-			
-			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
-			List<Node[]> result = sparql(query, false);
-			this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
-			Olap4ldUtil._log.config("Number of loaded triples: " + this.LOADED_TRIPLE_SIZE);
-			
-			if (this.LOADED_TRIPLE_SIZE > this.MAX_LOAD_TRIPLE_SIZE) {
-				con.close();
-				Olap4ldUtil._log
-						.warning("Warning: We have stored too many triples, already!");
-				throw new OlapException("Warning: Maximum storage capacity reached! Dataset contains too many triples.");
-			}
+
 
 			if (location.endsWith(".rdf") || location.endsWith(".xml")) {
 				con.add(locationurl, locationurl.toString(), RDFFormat.RDFXML);
@@ -483,6 +472,41 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 				}
 			}
+			
+			// Mark as loaded
+			loadedMap.put(location.hashCode(), true);
+			
+			// Check max loaded
+			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
+			List<Node[]> result = sparql(query, false);
+			this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
+			Olap4ldUtil._log.config("Number of loaded triples: "
+					+ this.LOADED_TRIPLE_SIZE);
+
+			if (this.LOADED_TRIPLE_SIZE > this.MAX_LOAD_TRIPLE_SIZE) {
+				con.close();
+				Olap4ldUtil._log
+						.warning("Warning: We have reached the maximum number of triples to load!");
+				throw new OlapException(
+						"Warning: Maximum storage capacity reached! Dataset contains too many triples.");
+			}
+
+			if (con != null) {
+				try {
+					con.close();
+				} catch (RepositoryException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			// Log content only if log level accordingly
+			if (Olap4ldUtil._isDebug) {
+
+				query = "select * where {?s ?p ?o}";
+				Olap4ldUtil._log.config("Check loaded data (10 triples): " + query);
+				sparql(query, false);
+			}
 
 		} catch (RepositoryException e) {
 			throw new OlapException("Problem with repository: "
@@ -492,30 +516,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			e.printStackTrace();
 		} catch (RDFParseException e) {
 			// Since it happens often, we just log it in config
-			Olap4ldUtil._log
-			.config("RDFParseException:"+e.getMessage());
+			Olap4ldUtil._log.config("RDFParseException:" + e.getMessage());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
-		loadedMap.put(location.hashCode(), true);
-
-		if (con != null) {
-			try {
-				con.close();
-			} catch (RepositoryException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		// Log content only if log level accordingly
-		if (Olap4ldUtil._isDebug) {
-
-			String query = "select * where {?s ?p ?o}";
-			Olap4ldUtil._log.config("Check loaded data (10 triples): " + query);
-			sparql(query, false);
 		}
 	}
 
@@ -633,10 +637,14 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getCubes(Restrictions restrictions)
 			throws OlapException {
-		
-		Olap4ldUtil._log.info("Linked Data Engine: Get Cubes...");
 
-		checkSufficientInformationGathered(restrictions);
+		Olap4ldUtil._log.config("Linked Data Engine: Get Cubes...");
+
+		if (restrictions.cubeNamePattern != null) {
+			loadAndValidateDataset(restrictions.cubeNamePattern);			
+		} else {
+			Olap4ldUtil._log.config("In this situation, we cannot load and validate a dataset!");
+		}
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
@@ -666,28 +674,34 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * Depending on the restrictions, we check whether sufficient Linked Data
 	 * has been gathered. If not, we gather more or throw exception.
 	 * 
+	 * Has formerly been called "checkSuffientInformationCrawled"
+	 * 
 	 * @param restrictions
 	 */
-	private void checkSufficientInformationGathered(Restrictions restrictions)
+	private void loadAndValidateDataset(String uri)
 			throws OlapException {
 		// For now, if only cube is asked for, we load ds and dsd and run checks
 		try {
-			if (restrictions.cubeNamePattern != null) {
+
 				// There is no need to translate to URI, since restrictions
 				// already contain URI representation.
-				String uri = restrictions.cubeNamePattern;
 
 				if (!isStored(uri)) {
-					// We also store URI in map
-					String location = askForLocation(uri);
-
-					// Here, we always load, since we want to update.
-					if (!isStored(location)) {
-
+					
+					
 						// We load the entire cube
-						loadCube(uri, location);
+						Olap4ldUtil._log.info("Load dataset: " + uri);
+						long time = System.currentTimeMillis();
+						loadCube(uri);
+						// Load other metadata objects?
+						time = System.currentTimeMillis() - time;
+						Olap4ldUtil._log.info("Load dataset: loading "+this.LOADED_TRIPLE_SIZE+" triples finished in " + time + "ms.");
 
+						
 						// We need to materialise implicit information
+						Olap4ldUtil._log.info("Run normalisation algorithm on dataset: " + uri);
+						
+						time = System.currentTimeMillis();
 						runNormalizationAlgorithm();
 
 						// Own normalization and inferencing.
@@ -716,8 +730,14 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						// Important!
 						// con.close();
 
+						time = System.currentTimeMillis() - time;
+						Olap4ldUtil._log.info("Run normalisation algorithm on dataset: finished in " + time + "ms.");
+						
 						// Now that we presumably have loaded all necessary
-						// data, we check integrity constraints
+						// data, we check integrity constraints				
+						
+						Olap4ldUtil._log.info("Check integrity constraints on dataset: " + uri);
+						time = System.currentTimeMillis();
 						checkIntegrityConstraints();
 
 						// Own checks:
@@ -742,17 +762,14 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						// No aggregation function
 						// Code list empty
 						// No member
+						
+						time = System.currentTimeMillis() - time;
+						Olap4ldUtil._log.info("Check integrity constraints on dataset: finished in " + time + "ms.");
 
 						// Important!
 						con.close();
 
 					}
-				}
-			}
-			// Load other metadata objects?
-		} catch (MalformedURLException e) {
-			throw new OlapException("Problem with malformed url: "
-					+ e.getMessage());
 		} catch (RepositoryException e) {
 			throw new OlapException("Problem with repository: "
 					+ e.getMessage());
@@ -770,8 +787,15 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * 
 	 * @param location
 	 */
-	private void loadCube(String uri, String location) throws OlapException {
+	private void loadCube(String uri) throws OlapException {
 		try {
+						
+			// We also store URI in map
+			String location = askForLocation(uri);
+
+			// If we have cube uri and location is not loaded, yet, we start collecting all information
+			if (!isStored(location)) {
+			
 			loadInStore(location);
 			// For quicker check, also set loaded uri
 			loadedMap.put(uri.hashCode(), true);
@@ -922,6 +946,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 					}
 				}
 			}
+			}
 		} catch (RepositoryException e) {
 			throw new OlapException("Problem with repository: "
 					+ e.getMessage());
@@ -945,8 +970,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 		// Logging
 		Olap4ldUtil._log.config("Run integrity constraints...");
-		Olap4ldUtil._log.config("including complex integrity constraints: "+doComplexObservationIntegrityConstraints+"...");
-		
+		Olap4ldUtil._log.config("including complex integrity constraints: "
+				+ doComplexObservationIntegrityConstraints + "...");
+
 		try {
 			// Now, we check the integrity constraints
 			RepositoryConnection con;
@@ -959,17 +985,23 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			String overview = "";
 
 			// IC-1. Unique DataSet. Every qb:Observation
-			// has exactly one associated qb:DataSet. <=
-			// takes too long since every observation tested
-			testquery = TYPICALPREFIXES
-					+ "ASK {  {        ?obs a qb:Observation .    FILTER NOT EXISTS { ?obs qb:dataSet ?dataset1 . } } UNION {        ?obs a qb:Observation ;       qb:dataSet ?dataset1, ?dataset2 .    FILTER (?dataset1 != ?dataset2)  }}";
-			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-					testquery);
-			if (booleanQuery.evaluate() == true) {
-				error = true;
-				overview += "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
-			} else {
-				overview += "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+			// has exactly one associated qb:DataSet.
+			// TODO: May take long since all observations tested
+
+			// Since needs to go through all observations, only done if enough
+			// memory
+			if (doComplexObservationIntegrityConstraints) {
+
+				testquery = TYPICALPREFIXES
+						+ "ASK {  {        ?obs a qb:Observation .    FILTER NOT EXISTS { ?obs qb:dataSet ?dataset1 . } } UNION {        ?obs a qb:Observation ;       qb:dataSet ?dataset1, ?dataset2 .    FILTER (?dataset1 != ?dataset2)  }}";
+				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+						testquery);
+				if (booleanQuery.evaluate() == true) {
+					error = true;
+					overview += "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+				} else {
+					overview += "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+				}
 			}
 
 			// IC-2. Unique DSD. Every qb:DataSet has
@@ -1257,15 +1289,18 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			con.close();
 
 			if (error) {
-				Olap4ldUtil._log.warning("Integrity constraints failed: Integrity constraints overview: "
-						+ overview);
+				Olap4ldUtil._log
+						.warning("Integrity constraints failed: Integrity constraints overview: "
+								+ overview);
 				// XXX: OlapExceptions possible?
 				throw new OlapException(
-						"Integrity constraints failed: Integrity constraints overview:<br/>" + overview);
+						"Integrity constraints failed: Integrity constraints overview:<br/>"
+								+ overview);
 			} else {
 				// Logging
-				Olap4ldUtil._log.config("Integrity constraints successful: Integrity constraints overview: "
-						+ overview);
+				Olap4ldUtil._log
+						.config("Integrity constraints successful: Integrity constraints overview: "
+								+ overview);
 			}
 
 		} catch (RepositoryException e) {
@@ -1352,10 +1387,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getDimensions(Restrictions restrictions)
 			throws OlapException {
-		
-		Olap4ldUtil._log.info("Linked Data Engine: Get Dimensions...");
 
-		checkSufficientInformationGathered(restrictions);
+		Olap4ldUtil._log.config("Linked Data Engine: Get Dimensions...");
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
@@ -1450,10 +1483,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getMeasures(Restrictions restrictions)
 			throws OlapException {
-		
-		Olap4ldUtil._log.info("Linked Data Engine: Get Measures...");
 
-		checkSufficientInformationGathered(restrictions);
+		Olap4ldUtil._log.config("Linked Data Engine: Get Measures...");
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
@@ -1491,9 +1522,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	public List<Node[]> getHierarchies(Restrictions restrictions)
 			throws OlapException {
 		
-		Olap4ldUtil._log.info("Linked Data Engine: Get Hierarchies...");
-
-		checkSufficientInformationGathered(restrictions);
+		Olap4ldUtil._log.config("Linked Data Engine: Get Hierarchies...");
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
@@ -1623,10 +1652,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getLevels(Restrictions restrictions)
 			throws OlapException {
-		
-		Olap4ldUtil._log.info("Linked Data Engine: Get Levels...");
 
-		checkSufficientInformationGathered(restrictions);
+		Olap4ldUtil._log.config("Linked Data Engine: Get Levels...");
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
@@ -1801,9 +1828,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	public List<Node[]> getMembers(Restrictions restrictions)
 			throws OlapException {
 
-		Olap4ldUtil._log.info("Linked Data Engine: Get Members...");
-		
-		checkSufficientInformationGathered(restrictions);
+		Olap4ldUtil._log.config("Linked Data Engine: Get Members...");
 
 		List<Node[]> result = new ArrayList<Node[]>();
 		List<Node[]> intermediaryresult = null;
@@ -2216,18 +2241,21 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
 			throws OlapException {
 		// Log logical query plan
-		Olap4ldUtil._log.info("Execute OLAP query...");
-		Olap4ldUtil._log.info("Logical query plan: " + queryplan.toString());
+		Olap4ldUtil._log.config("Execute OLAP query...");
+		Olap4ldUtil._log.config("Logical query plan: " + queryplan.toString());
 
 		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(
 				repo);
 
 		ExecIterator newRoot;
 		try {
+			
+			long time = System.currentTimeMillis();
+			
 			// Transform into physical query plan
 			newRoot = (ExecIterator) queryplan.visitAll(r2a);
-
-			Olap4ldUtil._log.info("Physical query plan: " + newRoot);
+			
+			Olap4ldUtil._log.info("Create and execute physical query plan: " + newRoot);
 
 			this.execplan = new ExecPlan(newRoot);
 
@@ -2240,6 +2268,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				Node[] node = (Node[]) nextObject;
 				result.add(node);
 			}
+			
+			time = System.currentTimeMillis() - time;
+			Olap4ldUtil._log.info("Create and execute physical query plan: finished in " + time + "ms.");
+			
 			return result;
 
 		} catch (QueryException e) {

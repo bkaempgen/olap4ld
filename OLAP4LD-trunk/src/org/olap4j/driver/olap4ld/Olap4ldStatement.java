@@ -307,7 +307,8 @@ class Olap4ldStatement implements OlapStatement {
 	public CellSet executeOlapQuery(String mdx) throws OlapException {
 
 		// This mdx string includes possible comments
-		Olap4ldUtil._log.info("Parse and execute MDX: " + mdx);
+		Olap4ldUtil._log.info("Parse MDX: " + mdx);
+		long time = System.currentTimeMillis();
 
 		// TODO: Added in order to generically parse mdx and use for querying
 		// with SPARQL
@@ -317,9 +318,13 @@ class Olap4ldStatement implements OlapStatement {
 		MdxValidator validator = parserFactory
 				.createMdxValidator(olap4jConnection);
 		select = validator.validateSelect(select);
-		// Question is, can we do something with the parsed mdx select?
-
-		return executeOlapQuery(select);
+		
+		time = System.currentTimeMillis() - time;
+		Olap4ldUtil._log.info("Parse MDX: finished in " + time + "ms.");
+		
+		CellSet cellset = executeOlapQuery(select);
+		
+		return cellset;
 
 	}
 
@@ -332,10 +337,6 @@ class Olap4ldStatement implements OlapStatement {
 	 * @throws OlapException
 	 */
 	public CellSet executeOlapQuery(SelectNode selectNode) throws OlapException {
-
-		final String mdx = toString(selectNode);
-		// Possibly, a select node representation would be more useful.
-		Olap4ldUtil._log.config("Execute selectNode-parsed MDX: " + mdx);
 
 		// Close the previous open CellSet, if there is one.
 		synchronized (this) {
@@ -356,8 +357,16 @@ class Olap4ldStatement implements OlapStatement {
 			openCellSet = olap4jConnection.factory.newCellSet(this);
 		}
 		
+		final String mdx = toString(selectNode);
+		
+		Olap4ldUtil._log.info("Transform MDX parse tree: " + mdx);
+		long time = System.currentTimeMillis();
+		
 		// We actually only need to populate the cellset once we start asking for content, right?
 		openCellSet.createMetadata(selectNode);
+		
+		time = System.currentTimeMillis() - time;
+		Olap4ldUtil._log.info("Transform MDX parse tree: finished in " + time + "ms.");
 		
 		// Implement NonEmpty
 		/*
@@ -508,6 +517,11 @@ class Olap4ldStatement implements OlapStatement {
 			List<Position> rowPositions = rowAxis.getPositions();
 			List<Position> newRowPositions = new ArrayList<Position>();
 
+			/* 
+			 * TODO: Problem: The entire query has to be issued since we need to find empty rows
+			 * and columns.
+			 */
+			
 			if (columnAxisNode.isNonEmpty()) {
 
 				// I take one position of that axis.

@@ -106,6 +106,7 @@ abstract class Olap4ldCellSet implements CellSet {
 	// Meta Meta Data
 	final Olap4ldStatement olap4jStatement;
 	protected boolean closed;
+	@SuppressWarnings("unused")
 	private static final List<String> standardProperties = Arrays.asList(
 			"UName", "Caption", "LName", "LNum", "DisplayInfo");
 	// Metadata
@@ -149,43 +150,30 @@ abstract class Olap4ldCellSet implements CellSet {
 		return olap4jStatement.olap4jConnection.helper;
 	}
 
+	/**
+	 * Execute the query plan.
+	 * 
+	 * @throws OlapException
+	 */
 	private void populateCells() throws OlapException {
 
-		// Visitor to create: Logical OLAP Operator Query Tree
-
-		// Before, create OLAP subcube query
-		// olapquery = createOlapQueryFromMetadata();
-
-		/*
-		 * Now, create Logical OLAP Operator Query Tree
-		 */
-
-		this.queryplan = createLogicalOlapQueryPlan();
-
-		// Before, execute OLAP subcube query
-		// /*
-		// * If groupbylist or measurelist is empty, we do not need to proceed.
-		// */
-		// if (olapquery.slicesrollups.isEmpty()
-		// || olapquery.projections.isEmpty()) {
-		// return;
-		// }
-		//
-		// List<Node[]> olapQueryResult =
-		// this.olap4jStatement.olap4jConnection.myLinkedData
-		// .getOlapResult(olapquery.cube, olapquery.slicesrollups,
-		// olapquery.dices, olapquery.projections);
-		// cacheDataFromOlapQuery(olapQueryResult);
-
+		Olap4ldUtil._log.info("Execute logical query plan: "
+				+ queryplan.toString());
+		long time = System.currentTimeMillis();
 		/*
 		 * Now, execute Logical OLAP Operator Query Tree in LinkedDataEngine
 		 */
 		List<Node[]> olapQueryResult = olap4jStatement.olap4jConnection.myLinkedData
 				.executeOlapQuery(queryplan);
 
+		// Important part, we need to allow efficient access to the results
 		cacheDataFromOlapQuery(olapQueryResult);
 
 		areCellsPopulated = true;
+		// We track the time it takes to prepare the query
+		time = System.currentTimeMillis() - time;
+		Olap4ldUtil._log.info("Execute logical query plan: finished in " + time
+				+ "ms.");
 	}
 
 	/**
@@ -199,7 +187,8 @@ abstract class Olap4ldCellSet implements CellSet {
 	 */
 	public void createMetadata(SelectNode selectNode) throws OlapException {
 
-		// Any advantage of having a prepared statement? No, since we use NON EMPTY CLAUSE.
+		// Any advantage of having a prepared statement? No, since we use NON
+		// EMPTY CLAUSE.
 		// if (olap4jStatement instanceof Olap4ldPreparedStatement) {
 		// this.metaData = ((Olap4ldPreparedStatement)
 		// olap4jStatement).cellSetMetaData;
@@ -303,6 +292,14 @@ abstract class Olap4ldCellSet implements CellSet {
 		this.immutableAxisList = Olap4jUtil.cast(Collections
 				.unmodifiableList(axisList));
 		this.filterAxis = filterCellSetAxis;
+
+		/*
+		 * In this implementation, we have not implemented the transformation
+		 * from MDC Parse Tree to Logical Olap Query tree via a visitor pattern
+		 * but via procedural code.
+		 */
+		// Now, we can create the Logical Olap Query Plan
+		this.queryplan = createLogicalOlapQueryPlan();
 	}
 
 	private LogicalOlapQueryPlan createLogicalOlapQueryPlan() {
@@ -1059,6 +1056,7 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * @throws OlapException
 	 *             on error
 	 */
+	@SuppressWarnings("unused")
 	@Deprecated
 	private Olap4ldCube lookupCube(Olap4ldDatabaseMetaData databaseMetaData,
 			String cubeName) throws OlapException {
@@ -1411,6 +1409,7 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * 
 	 * @return ordinal of last cell in cell set
 	 */
+	@SuppressWarnings("unused")
 	private int maxOrdinal() {
 		int modulo = 1;
 		for (CellSetAxis axis : axisList) {
