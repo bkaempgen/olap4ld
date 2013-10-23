@@ -99,8 +99,8 @@ public class SparqlSesameExecIterator implements ExecIterator {
 				;
 			}
 
-			con.close();
 			boas.close();
+			con.close();
 			// do something interesting with the values here...
 			// con.close();
 		} catch (RepositoryException e) {

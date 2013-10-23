@@ -1,0 +1,924 @@
+Oct 19, 2013 9:19:05 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 21ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_SCHEMATA(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_SCHEMATA(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:06 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: loading 175 triples finished in 6758ms.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: finished in 103ms.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: finished in 204ms.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 7120ms.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_SCHEMATA(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:13 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: loading 175 triples finished in 3703ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: finished in 31ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: finished in 133ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 3908ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_DIMENSIONS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 73ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 79ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 108ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 64ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 121ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 57ms.
+Oct 19, 2013 9:19:17 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 89ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 61ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 76ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEASURES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 207ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount treeOps = 8)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 125ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 30ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = Measures levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 19ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice treeOps = 8)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 81ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity treeOps = 8)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 80ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue treeOps = 8)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 98ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost treeOps = 8)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 87ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_SCHEMATA(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:18 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: loading 175 triples finished in 3742ms.
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: finished in 17ms.
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: finished in 89ms.
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 3869ms.
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_DIMENSIONS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 44ms.
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 70ms.
+Oct 19, 2013 9:19:22 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 69ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 82ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 47ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 63ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 90ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 40ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 62ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 75ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 48ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 49ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 82ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 13ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = Measures levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 17ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEASURES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 34ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount treeOps = 8)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 81ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice treeOps = 8)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 52ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity treeOps = 8)
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 70ms.
+Oct 19, 2013 9:19:23 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue treeOps = 8)
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 76ms.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost treeOps = 8)
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 75ms.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_SCHEMATA(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Parse MDX: SELECT /* $session: ldcx_performance_evaluation_testSsbOlapCustomers */ NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Parse MDX: finished in 97ms.
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Transform MDX parse tree: SELECT
+NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,
+NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS
+FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:24 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: loading 175 triples finished in 3933ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: finished in 17ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: finished in 70ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 4038ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 17ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_DIMENSIONS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 28ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 37ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 60ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 87ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 30ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 44ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 58ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 36ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 42ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 61ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 34ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 52ms.
+Oct 19, 2013 9:19:28 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 66ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 9ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = Measures levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 14ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEASURES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 28ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount treeOps = 8)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 59ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice treeOps = 8)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 68ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity treeOps = 8)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 61ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue treeOps = 8)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 70ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost treeOps = 8)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 52ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Transform MDX parse tree: finished in 5131ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldCellSet populateCells
+INFO: Execute logical query plan: Rollup (Slice (Dice (Projection (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds), {http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount}), {}), {null, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME}), {http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList})
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine executeOlapQuery
+INFO: Create and execute physical query plan: SparqlSesame: PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX eus: <http://ontologycentral.com/2009/01/eurostat/ns#> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+select   ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice) (AVG(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount)  where {  ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount.} group by  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  order by  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0 
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine executeOlapQuery
+INFO: Create and execute physical query plan: finished in 65ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldCellSet populateCells
+INFO: Execute logical query plan: finished in 74ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_SCHEMATA(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Parse MDX: SELECT /* $session: ldcx_performance_evaluation_testSsbOlapCustomersDates */ NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Parse MDX: finished in 3ms.
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Transform MDX parse tree: SELECT
+NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,
+NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}) ON ROWS
+FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:29 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: loading 175 triples finished in 3716ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: finished in 18ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: finished in 67ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 3813ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 11ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_DIMENSIONS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 22ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 25ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 37ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 50ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 34ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 52ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 63ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 35ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 41ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 50ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 28ms.
+Oct 19, 2013 9:19:33 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 36ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 48ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 8ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = Measures levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 10ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEASURES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 23ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount treeOps = 8)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 48ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice treeOps = 8)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 52ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity treeOps = 8)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 48ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue treeOps = 8)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 49ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost treeOps = 8)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 56ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Transform MDX parse tree: finished in 4687ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldCellSet populateCells
+INFO: Execute logical query plan: Rollup (Slice (Dice (Projection (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds), {http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount}), {}), {null, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME}), {http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList})
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine executeOlapQuery
+INFO: Create and execute physical query plan: SparqlSesame: PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX eus: <http://ontologycentral.com/2009/01/eurostat/ns#> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+select   ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0  (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice) (AVG(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount)  where {  ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount.} group by  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0  order by  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0 
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine executeOlapQuery
+INFO: Create and execute physical query plan: finished in 17ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldCellSet populateCells
+INFO: Execute logical query plan: finished in 21ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 1ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_SCHEMATA(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Parse MDX: SELECT /* $session: ldcx_performance_evaluation_testSsbOlapCustomersDatesProducts */ NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])})) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Parse MDX: finished in 3ms.
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Transform MDX parse tree: SELECT
+NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,
+NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])})) ON ROWS
+FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:34 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: loading 175 triples finished in 3735ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: finished in 17ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: finished in 56ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 3821ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 12ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_DIMENSIONS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 18ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 33ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 37ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 47ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 35ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 33ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 52ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 26ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 34ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 58ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 22ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 30ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 62ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 18ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = Measures levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 11ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEASURES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 19ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount treeOps = 8)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 38ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice treeOps = 8)
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 45ms.
+Oct 19, 2013 9:19:38 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity treeOps = 8)
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 37ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue treeOps = 8)
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 53ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost treeOps = 8)
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 46ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Transform MDX parse tree: finished in 4660ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldCellSet populateCells
+INFO: Execute logical query plan: Rollup (Slice (Dice (Projection (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds), {http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount}), {}), {null, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME}), {http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList})
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine executeOlapQuery
+INFO: Create and execute physical query plan: SparqlSesame: PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX eus: <http://ontologycentral.com/2009/01/eurostat/ns#> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+select   ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllopartkey0  (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice) (AVG(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount)  where {  ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllopartkey0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount.} group by  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllopartkey0  order by  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllopartkey0 
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine executeOlapQuery
+INFO: Create and execute physical query plan: finished in 18ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldCellSet populateCells
+INFO: Execute logical query plan: finished in 23ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDriver connect
+INFO: Connect Olap4LdDriver.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DISCOVER_DATASOURCES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_CATALOGS(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: DBSCHEMA_SCHEMATA(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 0ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Parse MDX: SELECT /* $session: ldcx_performance_evaluation_testSsbOlapCustomersDatesProductsSuppliers */ NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS, NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Parse MDX: finished in 3ms.
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Transform MDX parse tree: SELECT
+NON EMPTY {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,
+NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS
+FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:39 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:42 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Load dataset: loading 175 triples finished in 3702ms.
+Oct 19, 2013 9:19:42 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:42 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Run normalisation algorithm on dataset: finished in 13ms.
+Oct 19, 2013 9:19:42 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine loadAndValidateDataset
+INFO: Check integrity constraints on dataset: finished in 47ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 3773ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_CUBES(catalog = null schemaPattern = null cubeNamePattern = null dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 10ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_DIMENSIONS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 24ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 23ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 30ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 38ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 20ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 32ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 38ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 21ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 36ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 44ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 25ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 42ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey hierarchyUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList levelUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 55ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_HIERARCHIES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 10ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_LEVELS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = Measures hierarchyUniqueName = Measures levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 11ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEASURES(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = null treeOps = null)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 16ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount treeOps = 8)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 40ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice treeOps = 8)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 46ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity treeOps = 8)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 37ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue treeOps = 8)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 35ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: MDSCHEMA_MEMBERS(catalog = LdCatalogSchema schemaPattern = LdCatalogSchema cubeNamePattern = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds dimensionUniqueName = null hierarchyUniqueName = null levelUniqueName = null memberUniqueName = http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost treeOps = 8)
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldDatabaseMetaData executeMetadataRequestOnLd
+INFO: Execute metadata query on Linked Data Engine: finished in 35ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery
+INFO: Transform MDX parse tree: finished in 4502ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldCellSet populateCells
+INFO: Execute logical query plan: Rollup (Slice (Dice (Projection (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds), {http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount}), {}), {null, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME, 0, DIMENSION_UNIQUE_NAME}), {http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkeyCodeList, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdateCodeList, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkeyCodeList, http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList : http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkeyCodeList})
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine executeOlapQuery
+INFO: Create and execute physical query plan: SparqlSesame: PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#> 
+PREFIX eus: <http://ontologycentral.com/2009/01/eurostat/ns#> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+select   ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllopartkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosuppkey0  (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue) (SUM(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice) (AVG(?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount) as ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount)  where {  ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_custkey> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_orderdate> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_partkey> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllopartkey0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_suppkey> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosuppkey0. ?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_supplycost> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosupplycost.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_quantity> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloquantity.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_revenue> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllorevenue.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_extendedprice> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloextendedprice.?obs <http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#lo_discount> ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllodiscount.} group by  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllopartkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosuppkey0  order by  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllocustkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettlloorderdate0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllopartkey0  ?httpolap4ldgooglecodecomgitOLAP4LDtrunktestsssb001ttlexamplettllosuppkey0 
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine executeOlapQuery
+INFO: Create and execute physical query plan: finished in 16ms.
+Oct 19, 2013 9:19:43 PM org.olap4j.driver.olap4ld.Olap4ldCellSet populateCells
+INFO: Execute logical query plan: finished in 24ms.

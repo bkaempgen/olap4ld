@@ -44,6 +44,8 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 				"generatinglogicalqueryplan");
 		public static final Attribute EXECUTINGLOGICALQUERYPLAN = new IntAttribute(
 				"executinglogicalqueryplan");
+		public static final Attribute TRANSMISSIONTIME = new IntAttribute(
+				"userquerytime");
 	}
 
 	public static class LDCX_ParameterSetProvider extends ParameterSetProvider {
@@ -54,7 +56,8 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 					LDCX_Query_Attributes.TRIPLES,
 					LDCX_Query_Attributes.LOADINGVALIDATINGDATASET,
 					LDCX_Query_Attributes.GENERATINGLOGICALQUERYPLAN,
-					LDCX_Query_Attributes.EXECUTINGLOGICALQUERYPLAN);
+					LDCX_Query_Attributes.EXECUTINGLOGICALQUERYPLAN,
+					LDCX_Query_Attributes.TRANSMISSIONTIME);
 		}
 
 		@Override
@@ -67,13 +70,17 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
 			// Now we have all querylogs
 			System.out
-					.println("Querytime | Query | Triples | Loading and validating dataset | Generating logical query plan | Executing logical query plan");
+					.println("Querytime | Query | Triples | Loading and validating dataset | Generating logical query plan | Executing logical query plan | Transmission");
 			for (QueryLog queryLog : queryloglist) {
 				params.add(new QueryLogParameterSet(queryLog));
 			}
 			return params;
 		}
 
+		/**
+		 * Parses olap4ld logs via regex specified for info logs.
+		 * @return
+		 */
 		public List<QueryLog> parseLogs() {
 
 			List<QueryLog> queryloglist = new ArrayList<QueryLog>();
@@ -88,9 +95,7 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
 			Scanner s;
 			try {
-				s = new Scanner(
-						new File(
-								"/home/benedikt/Programs/eclipse_juno_jdk_20120721/log/olap4ld_0.log"));
+				s = new Scanner(SCANNEDFILE);
 
 				QueryLog query = new QueryLog();
 
@@ -245,13 +250,30 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 							query.executelogicalqueryplan = new Integer(
 									m.group(1));
 						}
-
+						
 						// Now, we can create a new query log
 						queryloglist.add(query);
 						query = new QueryLog();
 
 						continue;
 					}
+					
+//					// This information is not available from olap4ld log directly. Instead, we compute the userquery time by waiting until the next query can be issued.
+//					if (line.contains("Run performance evaluation query: finished")) {
+//
+//						Pattern p = Pattern.compile("^.*finished in (.+)ms.*");
+//						Matcher m = p.matcher(line);
+//
+//						if (m.find()) {
+//							System.out.println(m.group(1));
+//							query.userquerytime = new Integer(
+//									m.group(1));
+//						}
+//
+//						
+//
+//						continue;
+//					}
 
 				}
 
@@ -270,6 +292,9 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
 		public QueryLogParameterSet(QueryLog queryLog) {
 
+			
+			// Computes the necessary metrics
+			
 			m_attrValues.put(LDCX_Query_Attributes.QUERYTIME,
 					queryLog.querytime);
 			m_attrValues.put(LDCX_Query_Attributes.QUERYNAME,
@@ -289,6 +314,10 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 			int executinglogicalqueryplan = queryLog.executelogicalqueryplan;
 			m_attrValues.put(LDCX_Query_Attributes.EXECUTINGLOGICALQUERYPLAN,
 					executinglogicalqueryplan);
+			
+			int transmissiontime = queryLog.userquerytime - loadingandvalidatingdataset - generatinglogicalqueryplan - executinglogicalqueryplan;
+			m_attrValues.put(LDCX_Query_Attributes.TRANSMISSIONTIME,
+					transmissiontime);
 		}
 	}
 
@@ -332,15 +361,22 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 		int transformmdxparsetree = -1;
 		int createandexecutephysicalqueryplan = -1;
 		int executelogicalqueryplan = -1;
-
+		int userquerytime = -1;
 	}
+
+	//private static final File SCANNEDFILE = new File("/home/benedikt/Programs/eclipse_juno_jdk_20120721/log/olap4ld_0.log");
+	private static final File SCANNEDFILE = new File("/media/84F01919F0191352/Projects/2013/paper/paper-olap4ld-demo/Experiments/PerformanceStudy/catalina_bigger_5_runs_test_including_slice_2013-10-22_v2.out");
+	//private static final File SCANNEDFILE = new File("/media/84F01919F0191352/Projects/2013/paper/paper-olap4ld-demo/Experiments/PerformanceStudy/catalina_bigger_5_runs_test_2013-10-20.out");
+			
+	
+	private static final File SQLITEFILE = new File("bottleneck.db");
 
 	public static void main(String argv[]) throws ClassNotFoundException,
 			SQLException, IOException {
 
 		ExperimentRun run1 = new ExperimentRun(
 				new Bottleneck_ExperimentSystem(),
-				new LDCX_ParameterSetProvider(), 1, new File("bottleneck.db"),
+				new LDCX_ParameterSetProvider(), 1, SQLITEFILE,
 				null);
 		run1.run();
 
