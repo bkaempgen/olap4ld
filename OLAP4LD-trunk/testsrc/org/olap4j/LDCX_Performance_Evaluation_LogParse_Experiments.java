@@ -364,12 +364,12 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 		int userquerytime = -1;
 	}
 
-	//private static final File SCANNEDFILE = new File("/home/benedikt/Programs/eclipse_juno_jdk_20120721/log/olap4ld_0.log");
-	private static final File SCANNEDFILE = new File("/media/84F01919F0191352/Projects/2013/paper/paper-olap4ld-demo/Experiments/PerformanceStudy/catalina_bigger_5_runs_test_including_slice_2013-10-22_v2.out");
+	private static final File SCANNEDFILE = new File("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/testresources/olap4ld_0.log");
+	//private static final File SCANNEDFILE = new File("/media/84F01919F0191352/Projects/2013/paper/paper-olap4ld-demo/Experiments/PerformanceStudy/catalina_bigger_5_runs_test_including_slice_2013-10-22_v2.out");
 	//private static final File SCANNEDFILE = new File("/media/84F01919F0191352/Projects/2013/paper/paper-olap4ld-demo/Experiments/PerformanceStudy/catalina_bigger_5_runs_test_2013-10-20.out");
 			
 	
-	private static final File SQLITEFILE = new File("bottleneck.db");
+	private static final File SQLITEFILE = new File("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/testresources/bottleneck.db");
 
 	public static void main(String argv[]) throws ClassNotFoundException,
 			SQLException, IOException {

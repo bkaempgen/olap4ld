@@ -1,0 +1,5 @@
+* bottleneck.db <= SQLite Database with parsed query logs. Parsing done with "LDCX_Performance_Evaluation_LogParse_Experiments"
+* log_result_bottleneck_graph.gp <= Settings file for Gnuplot. Can be used via "gnuplot log_result_bottleneck_graph.gp" in folder
+* log_result_bottleneck_graph.png <= resulting figure
+* example_olap4ld_0.log <= example log file to parse
+* olap4ld_0.log <= real log file

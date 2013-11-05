@@ -732,12 +732,6 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				// QueryLanguage.SPARQL, updateQuery);
 				// updateQueryQuery.execute();
 
-						time = System.currentTimeMillis() - time;
-						Olap4ldUtil._log.info("Run normalisation algorithm on dataset: finished in " + time + "ms.");
-						
-				// Important!
-				// con.close();
-
 				time = System.currentTimeMillis() - time;
 				Olap4ldUtil._log
 						.info("Run normalisation algorithm on dataset: finished in "
@@ -753,9 +747,6 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 				// Own checks:
 				con = repo.getConnection();
-						
-						time = System.currentTimeMillis() - time;
-						Olap4ldUtil._log.info("Check integrity constraints on dataset: finished in " + time + "ms.");
 
 				String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
 
