@@ -160,24 +160,27 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	private void initialize() {
 
+		// This seems to hold up a lot. I hope garbage collector works.
+		// TODO: Hopefully, we do not need to close the repo explicitly.
 		if (this.repo != null) {
 			try {
-				this.repo.shutDown();
+				this.repo.initialize();
+				//this.repo.shutDown();
 			} catch (RepositoryException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-		// Store
-		this.repo = new SailRepository(new MemoryStore());
-		try {
-			repo.initialize();
+		} else {
+			this.repo = new SailRepository(new MemoryStore());
+			try {
+				repo.initialize();
 
-			// do something interesting with the values here...
-			// con.close();
-		} catch (RepositoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+				// do something interesting with the values here...
+				// con.close();
+			} catch (RepositoryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		// LoadedMap
@@ -339,6 +342,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				;
 			}
 
+			boas.close();
 			con.close();
 			// do something interesting with the values here...
 			// con.close();
@@ -379,26 +383,25 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			con = repo.getConnection();
 			URL locationurl = new URL(location);
 
-			// Would not work since we cannot ask for the file size without downloading the file
+			// Would not work since we cannot ask for the file size without
+			// downloading the file
 			// Check size and set size to have of heap space
-//			URLConnection urlConnection = locationurl.openConnection();
-//			urlConnection.connect();
-//			// assuming both bytes: 1) file_size is byte 2)
-//			int file_size = urlConnection.getContentLength();
-//			// TODO: Apparently file size often wrong?
-//			Olap4ldUtil._log.config("File size: " + file_size);
-//			long memory_size = Olap4ldUtil.getFreeMemory();
-//			Olap4ldUtil._log.config("Current memory size: " + memory_size);
-//
-//			if (file_size > memory_size) {
-//				con.close();
-//				Olap4ldUtil._log.warning("Warning: File (" + location
-//						+ ") to load exceeds amount of heap space memory!");
-//				throw new OlapException(
-//						"Warning: Maximum storage capacity reached! Dataset too large.");
-//			}
-
-
+			// URLConnection urlConnection = locationurl.openConnection();
+			// urlConnection.connect();
+			// // assuming both bytes: 1) file_size is byte 2)
+			// int file_size = urlConnection.getContentLength();
+			// // TODO: Apparently file size often wrong?
+			// Olap4ldUtil._log.config("File size: " + file_size);
+			// long memory_size = Olap4ldUtil.getFreeMemory();
+			// Olap4ldUtil._log.config("Current memory size: " + memory_size);
+			//
+			// if (file_size > memory_size) {
+			// con.close();
+			// Olap4ldUtil._log.warning("Warning: File (" + location
+			// + ") to load exceeds amount of heap space memory!");
+			// throw new OlapException(
+			// "Warning: Maximum storage capacity reached! Dataset too large.");
+			// }
 
 			if (location.endsWith(".rdf") || location.endsWith(".xml")) {
 				con.add(locationurl, locationurl.toString(), RDFFormat.RDFXML);
@@ -471,10 +474,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 				}
 			}
-			
+
 			// Mark as loaded
 			loadedMap.put(location.hashCode(), true);
-			
+
 			// Check max loaded
 			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
 			List<Node[]> result = sparql(query, false);
@@ -503,7 +506,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			if (Olap4ldUtil._isDebug) {
 
 				query = "select * where {?s ?p ?o}";
-				Olap4ldUtil._log.config("Check loaded data (10 triples): " + query);
+				Olap4ldUtil._log.config("Check loaded data (10 triples): "
+						+ query);
 				sparql(query, false);
 			}
 
@@ -640,9 +644,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		Olap4ldUtil._log.config("Linked Data Engine: Get Cubes...");
 
 		if (restrictions.cubeNamePattern != null) {
-			loadAndValidateDataset(restrictions.cubeNamePattern);			
+			loadAndValidateDataset(restrictions.cubeNamePattern);
 		} else {
-			Olap4ldUtil._log.config("In this situation, we cannot load and validate a dataset!");
+			Olap4ldUtil._log
+					.config("In this situation, we cannot load and validate a dataset!");
 		}
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
@@ -677,99 +682,110 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 * 
 	 * @param restrictions
 	 */
-	private void loadAndValidateDataset(String uri)
-			throws OlapException {
+	private void loadAndValidateDataset(String uri) throws OlapException {
 		// For now, if only cube is asked for, we load ds and dsd and run checks
 		try {
-			if (restrictions.cubeNamePattern != null) {
-				// There is no need to translate to URI, since restrictions
-				// already contain URI representation.
-				String uri = restrictions.cubeNamePattern;
 
-				if (!isStored(uri)) {
-					
-					
-						// We load the entire cube
-						Olap4ldUtil._log.info("Load dataset: " + uri);
-						long time = System.currentTimeMillis();
-						loadCube(uri);
-						// Load other metadata objects?
-						time = System.currentTimeMillis() - time;
-						Olap4ldUtil._log.info("Load dataset: loading "+this.LOADED_TRIPLE_SIZE+" triples finished in " + time + "ms.");
+			// There is no need to translate to URI, since restrictions
+			// already contain URI representation.
+
+			if (!isStored(uri)) {
+
+				// We load the entire cube
+				Olap4ldUtil._log.info("Load dataset: " + uri);
+				long time = System.currentTimeMillis();
+				loadCube(uri);
+				// Load other metadata objects?
+				time = System.currentTimeMillis() - time;
+				Olap4ldUtil._log.info("Load dataset: loading "
+						+ this.LOADED_TRIPLE_SIZE + " triples finished in "
+						+ time + "ms.");
 
 						
-						// We need to materialise implicit information
-						Olap4ldUtil._log.info("Run normalisation algorithm on dataset: " + uri);
-						
-						time = System.currentTimeMillis();
-						runNormalizationAlgorithm();
+				// We need to materialise implicit information
+				Olap4ldUtil._log
+						.info("Run normalisation algorithm on dataset: " + uri);
 
-						// Own normalization and inferencing.
+				time = System.currentTimeMillis();
+				runNormalizationAlgorithm();
 
-						RepositoryConnection con;
+				// Own normalization and inferencing.
 
-						// con = repo.getConnection();
+				RepositoryConnection con;
 
-						/*
-						 * SKOS:
-						 * 
-						 * Since 1) skos:topConceptOf is a sub-property of
-						 * skos:inScheme. 2) skos:topConceptOf is owl:inverseOf
-						 * the property skos:hasTopConcept 3) The rdfs:domain of
-						 * skos:hasTopConcept is the class skos:ConceptScheme.:
-						 * ?conceptScheme skos:hasTopConcept ?concept. =>
-						 * ?concept skos:inScheme ?conceptScheme.
-						 */
-						// String updateQuery = TYPICALPREFIXES
-						// +
-						// " INSERT { ?concept skos:inScheme ?codelist.} WHERE { ?codelist skos:hasTopConcept ?concept }; ";
-						// Update updateQueryQuery = con.prepareUpdate(
-						// QueryLanguage.SPARQL, updateQuery);
-						// updateQueryQuery.execute();
+				// con = repo.getConnection();
 
-						// Important!
-						// con.close();
+				/*
+				 * SKOS:
+				 * 
+				 * Since 1) skos:topConceptOf is a sub-property of
+				 * skos:inScheme. 2) skos:topConceptOf is owl:inverseOf the
+				 * property skos:hasTopConcept 3) The rdfs:domain of
+				 * skos:hasTopConcept is the class skos:ConceptScheme.:
+				 * ?conceptScheme skos:hasTopConcept ?concept. => ?concept
+				 * skos:inScheme ?conceptScheme.
+				 */
+				// String updateQuery = TYPICALPREFIXES
+				// +
+				// " INSERT { ?concept skos:inScheme ?codelist.} WHERE { ?codelist skos:hasTopConcept ?concept }; ";
+				// Update updateQueryQuery = con.prepareUpdate(
+				// QueryLanguage.SPARQL, updateQuery);
+				// updateQueryQuery.execute();
 
 						time = System.currentTimeMillis() - time;
 						Olap4ldUtil._log.info("Run normalisation algorithm on dataset: finished in " + time + "ms.");
 						
-						// Now that we presumably have loaded all necessary
-						// data, we check integrity constraints				
-						
-						Olap4ldUtil._log.info("Check integrity constraints on dataset: " + uri);
-						time = System.currentTimeMillis();
-						checkIntegrityConstraints();
+				// Important!
+				// con.close();
 
-						// Own checks:
-						con = repo.getConnection();
+				time = System.currentTimeMillis() - time;
+				Olap4ldUtil._log
+						.info("Run normalisation algorithm on dataset: finished in "
+								+ time + "ms.");
 
-						String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
+				// Now that we presumably have loaded all necessary
+				// data, we check integrity constraints
 
-						// Dataset should have at least one
-						// observation
-						String testquery = prefixbindings
-								+ "ASK { ?obs qb:dataSet ?CUBE_NAME FILTER (?CUBE_NAME = <"
-								+ uri + ">)}";
-						BooleanQuery booleanQuery = con.prepareBooleanQuery(
-								QueryLanguage.SPARQL, testquery);
-						if (booleanQuery.evaluate() == false) {
-							throw new OlapException(
-									"Failed own check: Dataset should have at least one observation. ");
-						}
+				Olap4ldUtil._log
+						.info("Check integrity constraints on dataset: " + uri);
+				time = System.currentTimeMillis();
+				checkIntegrityConstraints();
 
-						// XXX Possible other checks
-						// No dimensions
-						// No aggregation function
-						// Code list empty
-						// No member
+				// Own checks:
+				con = repo.getConnection();
 						
 						time = System.currentTimeMillis() - time;
 						Olap4ldUtil._log.info("Check integrity constraints on dataset: finished in " + time + "ms.");
 
-						// Important!
-						con.close();
+				String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
 
-					}
+				// Dataset should have at least one
+				// observation
+				String testquery = prefixbindings
+						+ "ASK { ?obs qb:dataSet ?CUBE_NAME FILTER (?CUBE_NAME = <"
+						+ uri + ">)}";
+				BooleanQuery booleanQuery = con.prepareBooleanQuery(
+						QueryLanguage.SPARQL, testquery);
+				if (booleanQuery.evaluate() == false) {
+					throw new OlapException(
+							"Failed own check: Dataset should have at least one observation. ");
+				}
+
+				// XXX Possible other checks
+				// No dimensions
+				// No aggregation function
+				// Code list empty
+				// No member
+
+				time = System.currentTimeMillis() - time;
+				Olap4ldUtil._log
+						.info("Check integrity constraints on dataset: finished in "
+								+ time + "ms.");
+
+				// Important!
+				con.close();
+
+			}
 		} catch (RepositoryException e) {
 			throw new OlapException("Problem with repository: "
 					+ e.getMessage());
@@ -793,42 +809,46 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			// We also store URI in map
 			String location = askForLocation(uri);
 
-			// If we have cube uri and location is not loaded, yet, we start collecting all information
+			// If we have cube uri and location is not loaded, yet, we start
+			// collecting all information
 			if (!isStored(location)) {
-			
 
-			// For everything else: Check whether really cube
-			RepositoryConnection con;
-			con = repo.getConnection();
+				loadInStore(location);
+				// For quicker check, also set loaded uri
+				loadedMap.put(uri.hashCode(), true);
 
-			// qb:structure is more robust than a qb:DataSet.
-			String testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> ASK { ?CUBE_NAME qb:structure ?dsd. FILTER (?CUBE_NAME = <"
-					+ uri + ">)}";
-			BooleanQuery booleanQuery = con.prepareBooleanQuery(
-					QueryLanguage.SPARQL, testquery);
-			boolean isDataset = booleanQuery.evaluate();
-			con.close();
+				// For everything else: Check whether really cube
+				RepositoryConnection con;
+				con = repo.getConnection();
 
-			if (!isDataset) {
-				throw new OlapException(
-						"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "
-								+ uri + "!");
-			} else {
+				// qb:structure is more robust than a qb:DataSet.
+				String testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> ASK { ?CUBE_NAME qb:structure ?dsd. FILTER (?CUBE_NAME = <"
+						+ uri + ">)}";
+				BooleanQuery booleanQuery = con.prepareBooleanQuery(
+						QueryLanguage.SPARQL, testquery);
+				boolean isDataset = booleanQuery.evaluate();
+				con.close();
 
-				// If loading ds, also load dsd. Ask for DSD URI and
-				// load
-				String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
-						+ uri + "> qb:structure ?dsd}";
-				List<Node[]> dsd = sparql(query, true);
-				// There should be a dsd
-				// Note in spec:
-				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-				if (dsd.size() <= 1) {
+				if (!isDataset) {
 					throw new OlapException(
-							"A cube should serve a data structure definition!");
+							"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "
+									+ uri + "!");
 				} else {
 
-					location = askForLocation(dsduri);
+					// If loading ds, also load dsd. Ask for DSD URI and
+					// load
+					String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
+							+ uri + "> qb:structure ?dsd}";
+					List<Node[]> dsd = sparql(query, true);
+					// There should be a dsd
+					// Note in spec:
+					// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+					if (dsd.size() <= 1) {
+						throw new OlapException(
+								"A cube should serve a data structure definition!");
+					} else {
+						// Get the second
+						String dsduri = dsd.get(1)[0].toString();
 
 						location = askForLocation(dsduri);
 
@@ -945,7 +965,6 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						}
 					}
 				}
-			}
 			}
 		} catch (RepositoryException e) {
 			throw new OlapException("Problem with repository: "
@@ -1521,10 +1540,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	public List<Node[]> getHierarchies(Restrictions restrictions)
 			throws OlapException {
-		
-		Olap4ldUtil._log.info("Linked Data Engine: Get Hierarchies...");
 
-		checkSufficientInformationGathered(restrictions);
+		Olap4ldUtil._log.config("Linked Data Engine: Get Hierarchies...");
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
@@ -2256,6 +2273,8 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 			// Transform into physical query plan
 			newRoot = (ExecIterator) queryplan.visitAll(r2a);
+			
+			Olap4ldUtil._log.info("Create and execute physical query plan: " + newRoot);
 
 			Olap4ldUtil._log.info("Create and execute physical query plan: "
 					+ newRoot);
