@@ -53,26 +53,32 @@ import org.semanticweb.yars.nx.Node;
  * Tests on building a slicer. Input: Arbitrary dataset. Output: For each
  * 1-/2-dimensional slice show output.
  * 
- * Documentation: http://www.linked-data-cubes.org/index.php/Slicer#Problem:_How_to_create_all_1-dimensional_queries
+ * Documentation: http://www.linked-data-cubes.org/index.php/Slicer#Problem:
+ * _How_to_create_all_1-dimensional_queries
  * 
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
 public class Slicer_QueryTest extends TestCase {
 
 	private EmbeddedSesameEngine lde;
+	// Stores members of dimension (dimensionUniquename hash code)
+	private HashMap<Integer, List<Node[]>> membersofdimensions;
+	private List<Node[]> dimensions;
+	private List<Node[]> measures;
+	private List<Node[]> cubes;
 
 	public Slicer_QueryTest() throws SQLException {
 
 		Olap4ldUtil.prepareLogging();
 		// Logging
 		// For debugging purposes
-    	//Olap4ldUtil._log.setLevel(Level.CONFIG);
-    	
-    	// For monitoring usage
-    	Olap4ldUtil._log.setLevel(Level.INFO);
-    	
-    	// For warnings (and errors) only
-    	//Olap4ldUtil._log.setLevel(Level.WARNING);
+		// Olap4ldUtil._log.setLevel(Level.CONFIG);
+
+		// For monitoring usage
+		Olap4ldUtil._log.setLevel(Level.INFO);
+
+		// For warnings (and errors) only
+		// Olap4ldUtil._log.setLevel(Level.WARNING);
 
 		try {
 			// Must have settings without influence on query processing
@@ -94,8 +100,38 @@ public class Slicer_QueryTest extends TestCase {
 	protected void tearDown() throws Exception {
 
 	}
+	
+	public void test_example_ssb001_slicer_certainDim() {
+		
+		/*
+		 * Coordinates
+		 */
+		List<Integer> coordinates = new ArrayList<Integer>();
+		coordinates.add(0, 0);
+		coordinates.add(1, 0);
+		coordinates.add(2, 0);
+		coordinates.add(3, 0);
+		
+		String coordinateString = "(";
+		for (int i = 0; i < coordinates.size(); i++) {
+			coordinateString += coordinates.get(i);
+			if (i != coordinates.size() - 1) {
+				coordinateString += ", ";
+			}
+		}
+		
+		String dsUri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
 
-	public void test_example_ssb001_slicer_oneDim() {
+		System.out.println("Find 1-dim for " + dsUri + coordinateString);
+
+		List<LogicalOlapQueryPlan> logicalqueries = getOneDimSlices(dsUri);
+		
+		LogicalOlapQueryPlan logicalOlapQueryPlan = logicalqueries.get(coordinatesToOrdinal(coordinates));
+		
+		executeStatement(logicalOlapQueryPlan);
+	}
+
+	public void test_example_ssb001_slicer_allOneDim() {
 		String dsUri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
 		List<LogicalOlapQueryPlan> queryplans = getOneDimSlices(dsUri);
 		for (LogicalOlapQueryPlan logicalOlapQueryPlan : queryplans) {
@@ -112,41 +148,133 @@ public class Slicer_QueryTest extends TestCase {
 		}
 	}
 
-	private List<LogicalOlapQueryPlan> getOneDimSlices(String dsUri) {
-		System.out.println("Find 1-dim for "+dsUri+"...");
+	public List<Integer> ordinalToCoordinates(int ordinal) {
+		final List<Integer> list = new ArrayList<Integer>(dimensions.size());
+		int modulo = 1;
 		
-		List<LogicalOlapQueryPlan> output = new ArrayList<LogicalOlapQueryPlan>();
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(dimensions.get(0));
+		
+		boolean first = true;
+		for (Node[] dimension : dimensions) {
+			
+			// No measure dimension
+			if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+					.toString().equals(
+							Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+				continue;
+			}
+			
+			if (first) {
+				first = false;
+				continue;
+			}
+			
+			// Get unique name
+			String dimensionUniqueName = dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")].toString();
+			
+			List<Node[]> members = this.membersofdimensions.get(dimensionUniqueName.hashCode());
+			
+			int prevModulo = modulo;
+			modulo *= members.size() -1;
+			list.add((ordinal % modulo) / prevModulo);
+		}
+		if (ordinal < 0 || ordinal >= modulo) {
+			throw new IndexOutOfBoundsException("Cell ordinal " + ordinal
+					+ ") lies outside CellSet bounds (?" + ")");
+		}
+		return list;
+	}
+
+	/**
+	 * From a list of coordinates that relate to the axes (getAxes),
+	 */
+	public int coordinatesToOrdinal(List<Integer> coordinates) {
+		//List<CellSetAxis> axes = getAxes();
+		// We do not count the measure dimension and the header node.
+		if (coordinates.size() != dimensions.size()-2) {
+			throw new IllegalArgumentException(
+					"Coordinates have different dimensionality "
+							+ coordinates.size() + " than dataset " + dimensions.size());
+		}
+		int modulo = 1;
+		int ordinal = 0;
+		int k = 0;
+		
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(dimensions.get(0));
+		
+		boolean first = true;
+		for (Node[] dimension : dimensions) {
+			
+			// No measure dimension
+			if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+					.toString().equals(
+							Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+				continue;
+			}
+			
+			if (first) {
+				first = false;
+				continue;
+			}
+			
+			final Integer coordinate = coordinates.get(k++);
+			
+			// Get unique name
+			String dimensionUniqueName = dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")].toString();
+			
+			List<Node[]> members = this.membersofdimensions.get(dimensionUniqueName.hashCode());
+			
+			if (coordinate < 0 || coordinate >= members.size()-1) {
+				throw new IndexOutOfBoundsException("Coordinate " + coordinate
+						+ " of axis " + k + " is out of range (?" + ")");
+			}
+			// Add to ordinal the actual coordinate of the axis times the size
+			// of the last axis
+			ordinal += coordinate * modulo;
+			// modulo is the number of positions in this axis
+			modulo *= members.size()-1;
+		}
+		return ordinal;
+	}
+
+	private void populateMetadata(String dsUri) {
 		Restrictions restrictions = new Restrictions();
 		restrictions.cubeNamePattern = dsUri;
+		
 		try {
 			// In order to fill the engine with data
-			List<Node[]> cubes = lde.getCubes(restrictions);
+			this.cubes = lde.getCubes(restrictions);
 			assertEquals(2, cubes.size());
-			Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
-					.getNodeResultFields(cubes.get(0));
-			System.out.println("CUBE_NAME: "+cubes.get(1)[cubemap.get("?CUBE_NAME")]);
+			Map<String, Integer> cubemap = Olap4ldLinkedDataUtil.getNodeResultFields(cubes
+					.get(0));
+			System.out.println("CUBE_NAME: "
+					+ cubes.get(1)[cubemap.get("?CUBE_NAME")]);
 
 			// Get all metadata
-			
-			List<Node[]> measures = lde.getMeasures(restrictions);
+
+			this.measures = lde.getMeasures(restrictions);
 			assertEquals(true, measures.size() > 1);
 			System.out.println("MEASURE_UNIQUE_NAMES:");
 			Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(measures.get(0));
 			for (Node[] nodes : measures) {
-				System.out.println(nodes[measuremap.get("?MEASURE_UNIQUE_NAME")]);
+				System.out
+						.println(nodes[measuremap.get("?MEASURE_UNIQUE_NAME")]);
 			}
-			
-			List<Node[]> dimensions = lde.getDimensions(restrictions);
+
+			this.dimensions = lde.getDimensions(restrictions);
 			assertEquals(true, dimensions.size() > 1);
 			System.out.println("DIMENSION_UNIQUE_NAMES:");
 			Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(dimensions.get(0));
 			for (Node[] nodes : dimensions) {
-				System.out.println(nodes[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]);
+				System.out.println(nodes[dimensionmap
+						.get("?DIMENSION_UNIQUE_NAME")]);
 			}
 			// Collect members
-			HashMap<Integer, List<Node[]>> membersofdimensions = new HashMap<Integer, List<Node[]>>();
+			this.membersofdimensions = new HashMap<Integer, List<Node[]>>();
 			for (int i = 1; i < dimensions.size(); i++) {
 				restrictions = new Restrictions();
 				restrictions.cubeNamePattern = dsUri;
@@ -154,21 +282,42 @@ public class Slicer_QueryTest extends TestCase {
 						.get("?DIMENSION_UNIQUE_NAME")].toString();
 				// Fix all members
 				List<Node[]> members = lde.getMembers(restrictions);
-				membersofdimensions.put(restrictions.dimensionUniqueName.hashCode(), members);
+				membersofdimensions.put(
+						restrictions.dimensionUniqueName.hashCode(), members);
 				assertEquals(true, members.size() > 1);
-				System.out.println("DIMENSION_UNIQUE_NAME:"+restrictions.dimensionUniqueName);
+				System.out.println("DIMENSION_UNIQUE_NAME:"
+						+ restrictions.dimensionUniqueName);
 				System.out.println("MEMBER_UNIQUE_NAMES:");
 				Map<String, Integer> membermap = Olap4ldLinkedDataUtil
 						.getNodeResultFields(members.get(0));
 				for (Node[] nodes : members) {
-					System.out.println(nodes[membermap.get("?MEMBER_UNIQUE_NAME")]);
+					System.out.println(nodes[membermap
+							.get("?MEMBER_UNIQUE_NAME")]);
 				}
 			}
+
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private List<LogicalOlapQueryPlan> getOneDimSlices(String dsUri) {
+		System.out.println("Find 1-dim for " + dsUri + "...");
+
+		populateMetadata(dsUri);
+
+		List<LogicalOlapQueryPlan> output = new ArrayList<LogicalOlapQueryPlan>();
+		try {
 			
+			Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(dimensions.get(0));
+
 			// 1-dim
 			// First is header
 			boolean first = true;
 			for (Node[] dim2rollup : dimensions) {
+				
 				// No measure dimension
 				if (dim2rollup[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
 						.toString().equals(
@@ -199,8 +348,10 @@ public class Slicer_QueryTest extends TestCase {
 										dim2rollup[dimensionmap
 												.get("?DIMENSION_UNIQUE_NAME")]
 												.toString())) {
-							List<Node[]> members = membersofdimensions.get(dim2fix[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-								.toString().hashCode());
+							List<Node[]> members = membersofdimensions
+									.get(dim2fix[dimensionmap
+											.get("?DIMENSION_UNIQUE_NAME")]
+											.toString().hashCode());
 							// After, every List<Node> in membercombinations is
 							// one possible query
 							membercombinations = cartesian_product(
@@ -223,7 +374,7 @@ public class Slicer_QueryTest extends TestCase {
 						first = false;
 						continue;
 					}
-					restrictions = new Restrictions();
+					Restrictions restrictions = new Restrictions();
 					restrictions.cubeNamePattern = dsUri;
 					restrictions.dimensionUniqueName = member[membermap
 							.get("?DIMENSION_UNIQUE_NAME")].toString();
@@ -253,7 +404,7 @@ public class Slicer_QueryTest extends TestCase {
 							new ArrayList<Node[]>());
 
 					// Watch out, should only be one
-					restrictions = new Restrictions();
+					Restrictions restrictions = new Restrictions();
 					restrictions.dimensionUniqueName = dim2rollup[dimensionmap
 							.get("?DIMENSION_UNIQUE_NAME")].toString();
 					List<Node[]> rollupssignature = lde

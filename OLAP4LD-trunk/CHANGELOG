@@ -1,6 +1,7 @@
 ==2013-11-05==
 * Added example performance evaluation files in "testresources"
 * fixed error spelling of integrity check IC-8 of spec and continued working on slicer 
+* slicer can now query for certain slices (see first test)
 
 ==2013-10-23==
 Refined:
