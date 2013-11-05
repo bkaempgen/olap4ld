@@ -1092,8 +1092,9 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 			}
 
 			// IC-8. Slice Keys consistent with DSD
+			// Spelling error in spec fixed
 			testquery = TYPICALPREFIXES
-					+ "ASK {  ?slicekey a qb:SliceKey;      qb:componentProperty ?prop .  ?dsd qb:sliceKey ?sliceKey .  FILTER NOT EXISTS { ?dsd qb:component [qb:componentProperty ?prop] }}";
+					+ "ASK {  ?sliceKey a qb:SliceKey;      qb:componentProperty ?prop .  ?dsd qb:sliceKey ?sliceKey .  FILTER NOT EXISTS { ?dsd qb:component [qb:componentProperty ?prop] }}";
 			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
 					testquery);
 			if (booleanQuery.evaluate() == true) {

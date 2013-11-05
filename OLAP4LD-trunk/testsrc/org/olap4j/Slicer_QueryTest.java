@@ -51,7 +51,9 @@ import org.semanticweb.yars.nx.Node;
 
 /**
  * Tests on building a slicer. Input: Arbitrary dataset. Output: For each
- * 1-/2-dimensional slice a
+ * 1-/2-dimensional slice show output.
+ * 
+ * Documentation: http://www.linked-data-cubes.org/index.php/Slicer#Problem:_How_to_create_all_1-dimensional_queries
  * 
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
@@ -61,12 +63,13 @@ public class Slicer_QueryTest extends TestCase {
 
 	public Slicer_QueryTest() throws SQLException {
 
+		Olap4ldUtil.prepareLogging();
 		// Logging
 		// For debugging purposes
-    	Olap4ldUtil._log.setLevel(Level.CONFIG);
+    	//Olap4ldUtil._log.setLevel(Level.CONFIG);
     	
     	// For monitoring usage
-    	//Olap4ldUtil._log.setLevel(Level.INFO);
+    	Olap4ldUtil._log.setLevel(Level.INFO);
     	
     	// For warnings (and errors) only
     	//Olap4ldUtil._log.setLevel(Level.WARNING);

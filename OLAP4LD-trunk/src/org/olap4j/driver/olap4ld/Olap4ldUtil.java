@@ -597,6 +597,7 @@ public abstract class Olap4ldUtil {
 						"INFO");
 
 				// pattern
+				// Will be for example at /home/benedikt/Programs/eclipse_juno_jdk_20120721/
 				logConf.setProperty("java.util.logging.FileHandler.pattern",
 						"log/olap4ld_%u.log");
 
