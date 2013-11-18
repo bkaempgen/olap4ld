@@ -107,6 +107,8 @@ public class Slicer_QueryTest extends TestCase {
 		 * Coordinates
 		 */
 		List<Integer> coordinates = new ArrayList<Integer>();
+		
+		// We query for the very first slice
 		coordinates.add(0, 0);
 		coordinates.add(1, 0);
 		coordinates.add(2, 0);
@@ -501,7 +503,7 @@ public class Slicer_QueryTest extends TestCase {
 			// Execute query return representation of physical query plan
 			List<Node[]> result = this.lde.executeOlapQuery(queryplan);
 
-			ExecPlan execplan = this.lde.getExecplan();
+			ExecPlan execplan = this.lde.getExecplan(queryplan);
 			System.out.println("Physical plan:" + execplan.toString());
 			System.out.println("Result:");
 			for (Node[] nodes : result) {

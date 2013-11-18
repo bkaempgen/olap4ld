@@ -100,23 +100,34 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	private SailRepository repo;
 
-	/**
-	 * The last executed physical execution plan
-	 */
-	private ExecPlan execplan;
-
 	private Integer MAX_LOAD_TRIPLE_SIZE = 100000;
 
 	private Integer MAX_COMPLEX_CONSTRAINTS_TRIPLE_SIZE = 1000;
 
 	private Integer LOADED_TRIPLE_SIZE = 0;
 
-	public ExecPlan getExecplan() {
-		return execplan;
-	}
+	public ExecPlan getExecplan(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
 
-	public void setExecplan(ExecPlan execplan) {
-		this.execplan = execplan;
+		try {
+
+			LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(
+					repo);
+
+			ExecIterator newRoot;
+			// Transform into physical query plan
+			newRoot = (ExecIterator) queryplan.visitAll(r2a);
+
+			ExecPlan execplan = new ExecPlan(newRoot);
+
+			return execplan;
+
+		} catch (QueryException e) {
+			Olap4ldUtil._log.warning("Olap query execution went wrong: "
+					+ e.getMessage());
+			throw new OlapException("Olap query execution went wrong: "
+					+ e.getMessage());
+		}
 	}
 
 	public EmbeddedSesameEngine(URL serverUrlObject,
@@ -165,7 +176,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		if (this.repo != null) {
 			try {
 				this.repo.initialize();
-				//this.repo.shutDown();
+				// this.repo.shutDown();
 			} catch (RepositoryException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -701,7 +712,6 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 						+ this.LOADED_TRIPLE_SIZE + " triples finished in "
 						+ time + "ms.");
 
-						
 				// We need to materialise implicit information
 				Olap4ldUtil._log
 						.info("Run normalisation algorithm on dataset: " + uri);
@@ -796,7 +806,7 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 	 */
 	private void loadCube(String uri) throws OlapException {
 		try {
-						
+
 			// We also store URI in map
 			String location = askForLocation(uri);
 
@@ -2255,47 +2265,30 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		Olap4ldUtil._log.config("Execute OLAP query...");
 		Olap4ldUtil._log.config("Logical query plan: " + queryplan.toString());
 
-		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(
-				repo);
+		long time = System.currentTimeMillis();
 
-		ExecIterator newRoot;
-		try {
+		// Create physical query plan
+		ExecPlan execplan = getExecplan(queryplan);
 
-			long time = System.currentTimeMillis();
+		Olap4ldUtil._log.info("Create and execute physical query plan: "
+				+ execplan.toString());
 
-			// Transform into physical query plan
-			newRoot = (ExecIterator) queryplan.visitAll(r2a);
-			
-			Olap4ldUtil._log.info("Create and execute physical query plan: " + newRoot);
+		ExecIterator resultIterator = execplan.getIterator();
 
-			Olap4ldUtil._log.info("Create and execute physical query plan: "
-					+ newRoot);
-
-			this.execplan = new ExecPlan(newRoot);
-
-			ExecIterator resultIterator = execplan.getIterator();
-
-			List<Node[]> result = new ArrayList<Node[]>();
-			while (resultIterator.hasNext()) {
-				Object nextObject = resultIterator.next();
-				// Will be Node[]
-				Node[] node = (Node[]) nextObject;
-				result.add(node);
-			}
-
-			time = System.currentTimeMillis() - time;
-			Olap4ldUtil._log
-					.info("Create and execute physical query plan: finished in "
-							+ time + "ms.");
-
-			return result;
-
-		} catch (QueryException e) {
-			Olap4ldUtil._log.warning("Olap query execution went wrong: "
-					+ e.getMessage());
-			throw new OlapException("Olap query execution went wrong: "
-					+ e.getMessage());
+		List<Node[]> result = new ArrayList<Node[]>();
+		while (resultIterator.hasNext()) {
+			Object nextObject = resultIterator.next();
+			// Will be Node[]
+			Node[] node = (Node[]) nextObject;
+			result.add(node);
 		}
+
+		time = System.currentTimeMillis() - time;
+		Olap4ldUtil._log
+				.info("Create and execute physical query plan: finished in "
+						+ time + "ms.");
+
+		return result;
 	}
 
 	@Override
