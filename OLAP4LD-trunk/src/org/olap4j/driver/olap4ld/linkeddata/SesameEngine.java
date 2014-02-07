@@ -49,7 +49,7 @@ import org.semanticweb.yars.nx.parser.NxParser;
  * @author b-kaempgen
  * 
  */
-public class SesameEngine implements LinkedDataEngine {
+public class SesameEngine implements LinkedDataCubesEngine {
 
 	/**
 	 * The type of SPARQL endpoint should be found out automatically and with

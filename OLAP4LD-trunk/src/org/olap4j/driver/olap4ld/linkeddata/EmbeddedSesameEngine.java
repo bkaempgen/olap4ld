@@ -66,7 +66,7 @@ import org.semanticweb.yars.nx.parser.NxParser;
  * @author b-kaempgen
  * 
  */
-public class EmbeddedSesameEngine implements LinkedDataEngine {
+public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	// Meta data attributes
 	private static final String DATASOURCEDESCRIPTION = "OLAP data from the statistical Linked Data cloud.";
@@ -106,19 +106,20 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	private Integer LOADED_TRIPLE_SIZE = 0;
 
-	public ExecPlan getExecplan(LogicalOlapQueryPlan queryplan)
+	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan)
 			throws OlapException {
 
 		try {
 
+			// We create visitor to translate logical into physical
 			LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(
 					repo);
 
-			ExecIterator newRoot;
+			PhysicalOlapIterator newRoot;
 			// Transform into physical query plan
-			newRoot = (ExecIterator) queryplan.visitAll(r2a);
+			newRoot = (PhysicalOlapIterator) queryplan.visitAll(r2a);
 
-			ExecPlan execplan = new ExecPlan(newRoot);
+			PhysicalOlapQueryPlan execplan = new PhysicalOlapQueryPlan(newRoot);
 
 			return execplan;
 
@@ -639,13 +640,11 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 
 	/**
 	 * 
-	 * 
-	 * 
 	 * Get Cubes from the triple store.
 	 * 
 	 * Here, the restrictions are strict restrictions without patterns.
 	 * 
-	 * 
+	 * This is both called for metadata queries and OLAP queries.
 	 * 
 	 * @return Node[]{}
 	 */
@@ -705,7 +704,10 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 				// We load the entire cube
 				Olap4ldUtil._log.info("Load dataset: " + uri);
 				long time = System.currentTimeMillis();
+				
+				// load and validate dataset requires to load cube
 				loadCube(uri);
+				
 				// Load other metadata objects?
 				time = System.currentTimeMillis() - time;
 				Olap4ldUtil._log.info("Load dataset: loading "
@@ -2268,13 +2270,19 @@ public class EmbeddedSesameEngine implements LinkedDataEngine {
 		long time = System.currentTimeMillis();
 
 		// Create physical query plan
-		ExecPlan execplan = getExecplan(queryplan);
+		PhysicalOlapQueryPlan execplan = getExecplan(queryplan);
 
 		Olap4ldUtil._log.info("Create and execute physical query plan: "
 				+ execplan.toString());
 
-		ExecIterator resultIterator = execplan.getIterator();
+		PhysicalOlapIterator resultIterator = execplan.getIterator();
 
+		/* 
+		 * We create our own List<Node[]> result with every item 
+		 * 
+		 * Every Node[] contains for each dimension in the dimension list of the metadata a
+		 * member and for each measure in the measure list a value.
+		 */
 		List<Node[]> result = new ArrayList<Node[]>();
 		while (resultIterator.hasNext()) {
 			Object nextObject = resultIterator.next();

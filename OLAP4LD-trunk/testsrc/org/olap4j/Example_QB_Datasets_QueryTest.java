@@ -372,8 +372,9 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	
 	public void testExampleEurostatEmploymentRateMetadata() {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
+		// GDP
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
-		metadataTest(name, 6, 1);
+		metadataTest(name, 4, 1);
 	}
 
 	/**
@@ -496,7 +497,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 		// Problem:
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testYahooFinanceWrapExampleOlap */ {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FvocabXXX2FyahooXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FarchiveXXX2FBACXXX2F2012ZZZ12ZZZ12XXX23ds]");
-		assertContains("| Adjusted Closing Price |      10.59 |", result);
+		assertContains("| Adjusted Closing Price |      10.58 |", result);
 
 	}
 

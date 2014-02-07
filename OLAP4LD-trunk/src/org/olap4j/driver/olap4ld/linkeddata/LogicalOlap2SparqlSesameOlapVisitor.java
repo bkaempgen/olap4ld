@@ -21,8 +21,6 @@ import org.semanticweb.yars.nx.Node;
  */
 public class LogicalOlap2SparqlSesameOlapVisitor implements
 		LogicalOlapOperatorQueryPlanVisitor {
-	// the new root node
-	ExecIterator _root;
 
 	// We collect necessary parts of the SPARQL query.
 	String selectClause = " ";
@@ -47,33 +45,38 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 		this.repo = repo;
 	}
 
+	@Override
+	public void visit(DrillAcrossOp op) throws QueryException {
+		// not supported in this implementation
+	}
+
 	public void visit(RollupOp o) throws QueryException {
 		// For rollup,
 		RollupOp so = (RollupOp) o;
 
-		List<Node[]> rollups = so.getRollups();
-		List<Node[]> rollupssignature = so.getRollupsSignature();
+		List<Node[]> rollupslevels = so.rollupslevels;
+		List<Node[]> rollupshierarchies = so.rollupshierarchies;
 
 		// HashMaps for level height of dimension
 		this.levelHeightMap = new HashMap<Integer, Integer>();
 
 		// First is header
-		for (int i = 1; i < rollups.size(); i++) {
+		for (int i = 1; i < rollupslevels.size(); i++) {
 
 			Map<String, Integer> map = Olap4ldLinkedDataUtil
-					.getNodeResultFields(rollups.get(0));
+					.getNodeResultFields(rollupslevels.get(0));
 			Map<String, Integer> mapsignature = Olap4ldLinkedDataUtil
-					.getNodeResultFields(rollupssignature.get(0));
+					.getNodeResultFields(rollupshierarchies.get(0));
 
 			// At the moment, we do not support hierarchy/roll-up, but
 			// simply
 			// query for all dimension members
 			// String hierarchyURI = LdOlap4jUtil.decodeUriForMdx(hierarchy
 			// .getUniqueName());
-			String dimensionProperty = rollups.get(i)[map
+			String dimensionProperty = rollupslevels.get(i)[map
 					.get("?DIMENSION_UNIQUE_NAME")].toString();
-			// XXX Why exactly do I include the level?
-			String levelURI = rollups.get(i)[map.get("?LEVEL_UNIQUE_NAME")]
+			// XXX Why exactly do I include the level? Probably, because I need the level depth from the hierarchy.
+			String levelURI = rollupslevels.get(i)[map.get("?LEVEL_UNIQUE_NAME")]
 					.toString();
 
 			/*
@@ -94,9 +97,9 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 			 * access restrictions.
 			 */
 			Integer levelHeight = (new Integer(
-					rollupssignature.get(i)[mapsignature
+					rollupshierarchies.get(i)[mapsignature
 							.get("?HIERARCHY_MAX_LEVEL_NUMBER")].toString()) - new Integer(
-					rollups.get(i)[map.get("?LEVEL_NUMBER")].toString()));
+					rollupslevels.get(i)[map.get("?LEVEL_NUMBER")].toString()));
 
 			// Note as inserted.
 			levelHeightMap.put(dimensionProperty.hashCode(), levelHeight);
@@ -126,8 +129,8 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 	public void visit(DiceOp o) throws QueryException {
 		DiceOp dop = (DiceOp) o;
 
-		List<List<Node[]>> membercombinations = dop.getMemberCombinations();
-		List<Node[]> hierarchysignature = dop.getHierarchySignature();
+		List<List<Node[]>> membercombinations = dop.membercombinations;
+		List<Node[]> hierarchysignature = dop.hierarchysignature;
 
 		// For each filter tuple
 		if (membercombinations != null && !membercombinations.isEmpty()) {
@@ -627,10 +630,16 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 		// }
 	}
 
+	/**
+	 * ProjectionOp is defined to remove all measures
+	 * apart from those mentioned. 
+	 * 
+	 * 
+	 */
 	public void visit(ProjectionOp o) throws QueryException {
 		ProjectionOp po = (ProjectionOp) o;
 
-		List<Node[]> projections = po.getProjectedMeasures();
+		List<Node[]> projections = po.projectedMeasures;
 
 		// Now, for each measure, we create a measure value column.
 		// Any measure should be contained only once, unless calculated
@@ -755,10 +764,10 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 		BaseCubeOp so = (BaseCubeOp) o;
 
 		Map<String, Integer> map = Olap4ldLinkedDataUtil.getNodeResultFields(so
-				.getCube().get(0));
+				.cubes.get(0));
 
 		// Cube gives us the URI of the dataset that we want to resolve
-		String ds = so.getCube().get(1)[map.get("CUBE_NAME")].toString();
+		String ds = so.cubes.get(1)[map.get("CUBE_NAME")].toString();
 
 		whereClause += "?obs qb:dataSet" + ds + ". ";
 
@@ -787,7 +796,7 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 
 		// Currently, we should have retrieved the data, already, therefore, we
 		// only have one node.
-		_root = new SparqlSesameExecIterator(repo, query);
+		PhysicalOlapIterator _root = new SparqlSesameIterator(repo, query);
 
 		return _root;
 	}
@@ -929,5 +938,11 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 					"Qcrumb cannot handle non-rdf files, yet");
 		}
 		return uri;
+	}
+
+	@Override
+	public void visit(Object op) throws QueryException {
+		// TODO Auto-generated method stub
+		
 	}
 }

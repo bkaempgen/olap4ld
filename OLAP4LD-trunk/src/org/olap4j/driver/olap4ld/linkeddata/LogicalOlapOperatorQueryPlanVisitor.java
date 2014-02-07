@@ -6,13 +6,14 @@ package org.olap4j.driver.olap4ld.linkeddata;
  * 
  * @author aharth, bkaempgen
  */
-public interface LogicalOlapOperatorQueryPlanVisitor {
+public interface LogicalOlapOperatorQueryPlanVisitor extends Visitor {
     /**
      * Callback method that is performed on a visit.
      *	
      * @param op usually this
      * @param obj a tree node that is the new tree's parent for op
      */
+	public void visit(DrillAcrossOp op) throws QueryException;
     public void visit(RollupOp op) throws QueryException;
     public void visit(SliceOp op) throws QueryException;
     public void visit(DiceOp op) throws QueryException;

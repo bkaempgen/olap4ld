@@ -91,7 +91,7 @@ import org.olap4j.metadata.NamedList;
  *         hierarchy list and measures
  * 
  */
-public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
+public class MdxMetadataExtractorVisitor<Object> implements ParseTreeVisitor<Object> {
 
 	private Olap4ldStatement olap4jStatement;
 
@@ -103,7 +103,7 @@ public class MdxMethodVisitor<Object> implements ParseTreeVisitor<Object> {
 	private List<Position> rowPositions = new ArrayList<Position>();
 	private List<Position> filterPositions = new ArrayList<Position>();
 
-	public MdxMethodVisitor(Olap4ldStatement olap4jStatement) {
+	public MdxMetadataExtractorVisitor(Olap4ldStatement olap4jStatement) {
 		this.olap4jStatement = olap4jStatement;
 	}
 

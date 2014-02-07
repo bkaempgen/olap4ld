@@ -7,27 +7,20 @@ import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.semanticweb.yars.nx.Node;
 
 /**
- * This operator defines the projected measures.
+ * This operator defines the projected measures. Not mentioned measures in input are removed from
+ * the cube (actually, this is wrong currently, since if we do not call projection, no measure is queried).
  * 
  * @author benedikt
  * 
  */
 public class ProjectionOp implements LogicalOlapOp {
 
-	private List<Node[]> projectedMeasures;
-	private LogicalOlapOp inputOp;
+	public List<Node[]> projectedMeasures;
+	public LogicalOlapOp inputOp;
 
 	public ProjectionOp(LogicalOlapOp inputOp, List<Node[]> projections) {
 		this.inputOp = inputOp;
 		this.projectedMeasures = projections;
-	}
-
-	public List<Node[]> getProjectedMeasures() {
-		return projectedMeasures;
-	}
-
-	public LogicalOlapOp getInputOp() {
-		return this.inputOp;
 	}
 
 	public String toString() {
@@ -53,7 +46,7 @@ public class ProjectionOp implements LogicalOlapOp {
 	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+	public void accept(Visitor v)
 			throws QueryException {
 		v.visit(this);
 		// visit the projection input op

@@ -6,7 +6,7 @@ import java.util.Iterator;
 /**
  * Interface for all Iterators that return byte arrays.
  */
-public interface ExecIterator extends Iterator<Object> {
+public interface PhysicalOlapIterator extends Iterator<Object> {
 	/**
 	 * Initialize iterator.
 	 */

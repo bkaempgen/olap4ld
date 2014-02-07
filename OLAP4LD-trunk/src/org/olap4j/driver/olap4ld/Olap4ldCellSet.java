@@ -177,10 +177,18 @@ abstract class Olap4ldCellSet implements CellSet {
 	}
 
 	/**
+	 * 
+	 * This is the method to map an MDX query to 1) metadata of a pivot table and 2)
+	 * an initial logical olap query plan to populate the pivot table cells.
+	 * 
+	 *  
+	 * 
 	 * We create: this.metaData = metadata; this.axisList = axisList;
 	 * this.immutableAxisList =
 	 * Olap4jUtil.cast(Collections.unmodifiableList(axisList)); this.filterAxis
 	 * = filterCellSetAxis;
+	 * 
+	 * Basically, an OLAP query (cube, SlicesRollups, Dices, Projections) is created.
 	 * 
 	 * @param selectNode
 	 * @throws OlapException
@@ -201,11 +209,10 @@ abstract class Olap4ldCellSet implements CellSet {
 
 		// Visitor to create: metaData, axisList, filterAxis
 
-		MdxMethodVisitor<Object> visitor = new MdxMethodVisitor<Object>(
+		MdxMetadataExtractorVisitor<Object> visitor = new MdxMetadataExtractorVisitor<Object>(
 				olap4jStatement);
 		selectNode.accept(visitor);
 
-		// Cube
 		Cube cube = visitor.getCube();
 
 		// Axes Metadata (create MetaData for one specific axis)
@@ -293,23 +300,77 @@ abstract class Olap4ldCellSet implements CellSet {
 				.unmodifiableList(axisList));
 		this.filterAxis = filterCellSetAxis;
 
-		/*
-		 * In this implementation, we have not implemented the transformation
-		 * from MDC Parse Tree to Logical Olap Query tree via a visitor pattern
-		 * but via procedural code.
-		 */
-		// Now, we can create the Logical Olap Query Plan
-		this.queryplan = createLogicalOlapQueryPlan();
+		// Now that we have retrieved all MDX metadata, we can create the Logical Olap Query Plan
+		this.queryplan = createInitialLogicalOlapQueryPlan();
 	}
 
-	private LogicalOlapQueryPlan createLogicalOlapQueryPlan() {
+	/**
+	 * In this implementation, we have not implemented the transformation from
+	 * MDC Parse Tree to Logical Olap Query tree via a visitor pattern but via
+	 * procedural code.
+	 * 
+	 * Here, we create an initial logical olap query plan from the retrieved metadata.
+	 * 
+	 * @return
+	 */
+	private LogicalOlapQueryPlan createInitialLogicalOlapQueryPlan() {
 
 		// BaseCube operator
-		LogicalOlapOp basecube = new BaseCubeOp(
-				metaData.cube.transformMetadataObject2NxNodes());
+		boolean first;
+		List<Node[]> cube = metaData.cube.transformMetadataObject2NxNodes();
+		List<Node[]> measures = new ArrayList<Node[]>();
 
-		// Projection operator
-		// Prepare measurelist, a ordered set of members
+		List<Node[]> dimensions = new ArrayList<Node[]>();
+		List<Node[]> hierarchies= new ArrayList<Node[]>();
+		List<Node[]> levels= new ArrayList<Node[]>();
+		List<Node[]> members= new ArrayList<Node[]>();
+		
+		try {
+		first = true;
+		for (Olap4ldDimension dimension : metaData.cube.dimensions) {
+			if (first) {
+				dimensions.add(dimension.transformMetadataObject2NxNodes().get(0));
+				first = false;
+			}
+			dimensions.add(dimension.transformMetadataObject2NxNodes().get(1));
+			first = true;
+			
+			for (Hierarchy hierarchy : dimension.getHierarchies()) {
+				Olap4ldHierarchy olap4ldhierarchy = (Olap4ldHierarchy) hierarchy;
+				if (first) {
+					hierarchies.add(olap4ldhierarchy.transformMetadataObject2NxNodes(metaData.cube).get(0));
+					first = false;
+				}
+				hierarchies.add(olap4ldhierarchy.transformMetadataObject2NxNodes(metaData.cube).get(1));
+				
+				for (Level level : hierarchy.getLevels()) {
+					Olap4ldLevel olap4ldlevel = (Olap4ldLevel) level;
+					if (first) {
+						levels.add(olap4ldlevel.transformMetadataObject2NxNodes(metaData.cube).get(0));
+						first = false;
+					}
+					levels.add(olap4ldlevel.transformMetadataObject2NxNodes(metaData.cube).get(1));
+					
+					for (Member member : level.getMembers()) {
+						Olap4ldMember olap4ldmember = (Olap4ldMember) member;
+						if (first) {
+							members.add(olap4ldmember.transformMetadataObject2NxNodes(metaData.cube).get(0));
+							first = false;
+						}
+						members.add(olap4ldmember.transformMetadataObject2NxNodes(metaData.cube).get(1));
+							
+					}
+				}
+			}
+		} 
+		} catch (OlapException exc) {
+			throw new UnsupportedOperationException("While asking for the metadata, there is an OLAP exception!");
+		}
+		
+		// Cube from (cube, SlicesRollups, Dices, Projections)
+		LogicalOlapOp basecube = new BaseCubeOp(cube, measures, dimensions, hierarchies, levels, members);
+
+		// Projections from (cube, SlicesRollups, Dices, Projections)
 		ArrayList<Node[]> projections = new ArrayList<Node[]>();
 
 		// First, we use set to collect the measures
@@ -319,12 +380,12 @@ abstract class Olap4ldCellSet implements CellSet {
 		for (Olap4ldCellSetAxis axis : axisList) {
 			List<Position> positions = axis.positions;
 			for (Position position : positions) {
-				List<Member> members = position.getMembers();
-				for (int i = 0; i < members.size(); i++) {
+				List<Member> positionmembers = position.getMembers();
+				for (int i = 0; i < positionmembers.size(); i++) {
 					// Check whether measure already contained.
-					if ((members.get(i).getMemberType() == Member.Type.MEASURE || members
+					if ((positionmembers.get(i).getMemberType() == Member.Type.MEASURE || positionmembers
 							.get(i).getMemberType() == Member.Type.FORMULA)) {
-						usedMeasureSet.add(members.get(i));
+						usedMeasureSet.add(positionmembers.get(i));
 					}
 				}
 			}
@@ -332,12 +393,12 @@ abstract class Olap4ldCellSet implements CellSet {
 		// In filter axis
 		for (Position list : filterAxis.positions) {
 			// For each position, we get a new member for each restriction set
-			List<Member> members = list.getMembers();
-			for (int i = 0; i < members.size(); i++) {
+			List<Member> filterpositionmembers = list.getMembers();
+			for (int i = 0; i < filterpositionmembers.size(); i++) {
 				// Check whether measure already contained.
-				if ((members.get(i).getMemberType() == Member.Type.MEASURE || members
+				if ((filterpositionmembers.get(i).getMemberType() == Member.Type.MEASURE || filterpositionmembers
 						.get(i).getMemberType() == Member.Type.FORMULA)) {
-					usedMeasureSet.add(members.get(i));
+					usedMeasureSet.add(filterpositionmembers.get(i));
 				}
 			}
 		}
@@ -388,7 +449,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		if (!filterAxis.positions.isEmpty()) {
 			List<Member> signaturemembers = filterAxis.positions.get(0)
 					.getMembers();
-			boolean first = true;
+			first = true;
 			for (Member member : signaturemembers) {
 				Olap4ldMember olapmember = (Olap4ldMember) member;
 				// No measures
@@ -410,9 +471,9 @@ abstract class Olap4ldCellSet implements CellSet {
 		// With all, we create newfilterAxisPositions
 		for (Position position2 : filterAxis.positions) {
 			ArrayList<Node[]> newMembers = new ArrayList<Node[]>();
-			List<Member> members = position2.getMembers();
+			List<Member> filterpositionmembers = position2.getMembers();
 			boolean first1 = true;
-			for (Member member : members) {
+			for (Member member : filterpositionmembers) {
 				Olap4ldMember olapmember = (Olap4ldMember) member;
 				// No measures
 				if (member.getMemberType() != Member.Type.MEASURE) {
@@ -435,6 +496,7 @@ abstract class Olap4ldCellSet implements CellSet {
 			}
 		}
 
+		// Dices from (cube, SlicesRollups, Dices, Projections)
 		LogicalOlapOp dice = new DiceOp(projection, newfilterAxisSignature,
 				newfilterAxisPositions);
 
@@ -443,10 +505,10 @@ abstract class Olap4ldCellSet implements CellSet {
 		// When going through the axes: Prepare groupbylist, a set of levels
 		// Prepare list of levels (excluding Measures!)
 		// Go through tuple get dimensions, if not measure
-		ArrayList<Node[]> rollups = new ArrayList<Node[]>();
-		ArrayList<Node[]> rollupssignature = new ArrayList<Node[]>();
+		ArrayList<Node[]> rollupslevels = new ArrayList<Node[]>();
+		ArrayList<Node[]> rollupshierarchies = new ArrayList<Node[]>();
 
-		boolean first = true;
+		first = true;
 		for (Olap4ldCellSetAxis cellSetAxis : axisList) {
 
 			List<Position> positions = cellSetAxis.positions;
@@ -456,24 +518,25 @@ abstract class Olap4ldCellSet implements CellSet {
 			 */
 			Position position = positions.get(0);
 
-			List<Member> members = position.getMembers();
+			List<Member> positionmembers = position.getMembers();
 
-			for (Member member : members) {
+			for (Member member : positionmembers) {
 				if (member.getMemberType() != Member.Type.MEASURE) {
 					Olap4ldHierarchy olaphierarchy = (Olap4ldHierarchy) member
 							.getLevel().getHierarchy();
 					Olap4ldLevel olaplevel = (Olap4ldLevel) member.getLevel();
 					if (first) {
+						// Add headers
 						first = false;
-						rollups.add(olaplevel.transformMetadataObject2NxNodes(
+						rollupslevels.add(olaplevel.transformMetadataObject2NxNodes(
 								metaData.cube).get(0));
-						rollupssignature.add(olaphierarchy
+						rollupshierarchies.add(olaphierarchy
 								.transformMetadataObject2NxNodes(metaData.cube)
 								.get(0));
 					}
-					rollups.add(olaplevel.transformMetadataObject2NxNodes(
+					rollupslevels.add(olaplevel.transformMetadataObject2NxNodes(
 							metaData.cube).get(1));
-					rollupssignature.add(olaphierarchy
+					rollupshierarchies.add(olaphierarchy
 							.transformMetadataObject2NxNodes(metaData.cube)
 							.get(1));
 				}
@@ -482,13 +545,13 @@ abstract class Olap4ldCellSet implements CellSet {
 
 		// Find out which Dimensions to slice
 		List<Node[]> slicedDimensions = new ArrayList<Node[]>();
-		NamedList<Dimension> dimensions = metaData.cube.getDimensions();
-		for (Dimension dimension : dimensions) {
+		NamedList<Dimension> realdimensions = metaData.cube.getDimensions();
+		for (Dimension dimension : realdimensions) {
 			boolean contained = false;
-			for (Node[] slicesrollup : rollups) {
+			for (Node[] slicesrollup : rollupslevels) {
 
 				Map<String, Integer> map = Olap4ldLinkedDataUtil
-						.getNodeResultFields(rollups.get(0));
+						.getNodeResultFields(rollupslevels.get(0));
 				// Check whether dimension contained in rollup (dice?).
 				// TODO: We would also need to check whether in dice, actually.
 				if (slicesrollup[map.get("?DIMENSION_UNIQUE_NAME")].toString()
@@ -508,31 +571,46 @@ abstract class Olap4ldCellSet implements CellSet {
 						.transformMetadataObject2NxNodes().get(1));
 			}
 		}
+		// Slices part of SlicesRollups from (cube, SlicesRollups, Dices, Projections)
 		LogicalOlapOp slice = new SliceOp(dice, slicedDimensions);
 
-		// Rollup operator
-		LogicalOlapOp rollup = new RollupOp(slice, rollupssignature, rollups);
+		// RollupsPart of SlicesRollups from (cube, SlicesRollups, Dices, Projections)
+		LogicalOlapOp rollup = new RollupOp(slice, rollupshierarchies, rollupslevels);
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(rollup);
 		return myplan;
 	}
 
+	/**
+	 * 
+	 * The purpose of this method is to store the results of an analytical query in a way
+	 * so that getCell(...) can be evaluated.
+	 * 
+	 * Basically, we have a pivot table that describes observations from a multidimensional
+	 * dataset. For each observation, we have a unique ordering of dimensions, and a
+	 * unique combination of members of these dimensions.
+	 * 
+	 * @param olapQueryResult
+	 */
 	private void cacheDataFromOlapQuery(List<Node[]> olapQueryResult) {
 
 		// Now, insert into hash map
 
 		/*
 		 * We cannot directly fill the cellMap, since there is no direct
-		 * correspondence between the sparql result and the "pivot" table.
+		 * correspondence between the result and the "pivot" table: Per result, 
+		 * we may have several measures given. We may have missing results (sparseity).
 		 * 
-		 * Every sparql result gives the measures for a specific cell.
+		 * Every result gives the measures for a specific cell.
 		 * 
 		 * For a sparse result set, it would be best to find out the ordinal
 		 * value for each returned value. How can we find the ordinal value? By
 		 * finding the coordinates. For each axis there is a coordinate. Can we
 		 * find the coordinate by looking at the column values?
+		 * 
 		 */
-
+		
+		
 		boolean first = true;
 		String concatNr;
 		for (Node[] node : olapQueryResult) {
@@ -559,7 +637,7 @@ abstract class Olap4ldCellSet implements CellSet {
 				List<Hierarchy> hierarchies = metadata.getHierarchies();
 				for (Hierarchy hierarchy : hierarchies) {
 					if (hierarchy.getName().equals("Measures")) {
-						// Projection size does not help here
+						// We are only interested in the dimension columns.
 						;
 					} else {
 						slicesRollupsSize++;

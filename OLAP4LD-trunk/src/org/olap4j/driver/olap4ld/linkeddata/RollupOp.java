@@ -8,46 +8,40 @@ import org.semanticweb.yars.nx.Node;
 
 /**
  * This operator rolls up a Dimension of a Cube (the former LogicalOlapOp) to
- * the next higher Level
+ * the next higher Level. Currently, roll-up operator is defined as to set
+ * for each hierarchy a specific level.
+ * 
  * 
  * @author benedikt
  * 
  */
 public class RollupOp implements LogicalOlapOp {
 
-	private LogicalOlapOp inputOp;
-	private List<Node[]> rollups;
-	private List<Node[]> rollupssignature;
+	public LogicalOlapOp inputOp;
+	public List<Node[]> rollupslevels;
+	public List<Node[]> rollupshierarchies;
 
-	public RollupOp(LogicalOlapOp slice, List<Node[]> rollupssignature,
-			List<Node[]> rollups) {
+	public RollupOp(LogicalOlapOp slice, List<Node[]> rollupshierarchies,
+			List<Node[]> rollupslevels) {
 		this.inputOp = slice;
-		this.rollups = rollups;
-		this.rollupssignature = rollupssignature;
-	}
-
-	public List<Node[]> getRollups() {
-		return rollups;
-	}
-
-	public List<Node[]> getRollupsSignature() {
-		return rollupssignature;
+		this.rollupslevels = rollupslevels;
+		this.rollupshierarchies = rollupshierarchies;
 	}
 
 	public String toString() {
-		if (rollups != null && !rollups.isEmpty()) {
-			String levelsStringArray[] = new String[rollups.size() - 1];
+		if (rollupslevels != null && !rollupslevels.isEmpty()) {
+			String levelsStringArray[] = new String[rollupslevels.size() - 1];
 			// First is header
-			for (int i = 1; i < rollups.size(); i++) {
+			for (int i = 1; i < rollupslevels.size(); i++) {
 				Map<String, Integer> map = Olap4ldLinkedDataUtil
-						.getNodeResultFields(rollups.get(0));
+						.getNodeResultFields(rollupslevels.get(0));
 				Map<String, Integer> signaturemap = Olap4ldLinkedDataUtil
-						.getNodeResultFields(rollupssignature.get(0));
+						.getNodeResultFields(rollupshierarchies.get(0));
 
-				levelsStringArray[i - 1] = rollupssignature.get(i)[signaturemap
+				levelsStringArray[i - 1] = rollupshierarchies.get(i)[signaturemap
 						.get("?HIERARCHY_UNIQUE_NAME")].toString()
 						+ " : "
-						+ rollups.get(i)[map.get("?LEVEL_UNIQUE_NAME")]
+						+ rollupslevels.get(i)[map.get("?LEVEL_UNIQUE_NAME")]
 								.toString();
 			}
 
@@ -61,7 +55,7 @@ public class RollupOp implements LogicalOlapOp {
 	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+	public void accept(Visitor v)
 			throws QueryException {
 		v.visit(this);
 		// visit the projection input op

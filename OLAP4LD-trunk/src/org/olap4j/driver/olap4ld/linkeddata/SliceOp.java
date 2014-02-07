@@ -15,8 +15,8 @@ import org.semanticweb.yars.nx.Node;
  */
 public class SliceOp implements LogicalOlapOp {
 
-	private LogicalOlapOp inputOp;
-	private List<Node[]> slicedDimensions;
+	public LogicalOlapOp inputOp;
+	public List<Node[]> slicedDimensions;
 
 	public SliceOp(LogicalOlapOp inputOp, List<Node[]> slicedDimensions2) {
 		this.inputOp = inputOp;
@@ -45,7 +45,7 @@ public class SliceOp implements LogicalOlapOp {
 	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+	public void accept(Visitor v)
 			throws QueryException {
 		v.visit(this);
 		// visit the projection input op

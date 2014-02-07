@@ -57,7 +57,7 @@ import org.semanticweb.yars.nx.parser.NxParser;
  * @author b-kaempgen
  * 
  */
-public class OpenVirtuosoEngine implements LinkedDataEngine {
+public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 	/*
 	 * Open Virtuoso is default triple store
@@ -2488,19 +2488,19 @@ public class OpenVirtuosoEngine implements LinkedDataEngine {
 
 	@Override
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) {
-		// XXX: Will not work.
+		// XXX: Will not work, since OV uses different syntax than Sesame
 		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(
 				null);
 
-		ExecIterator newRoot;
+		PhysicalOlapIterator newRoot;
 		try {
-			newRoot = (ExecIterator) queryplan.visitAll(r2a);
+			newRoot = (PhysicalOlapIterator) queryplan.visitAll(r2a);
 
 			Olap4ldUtil._log.info("Physical query plan: " + newRoot);
 
-			ExecPlan ap = new ExecPlan(newRoot);
+			PhysicalOlapQueryPlan ap = new PhysicalOlapQueryPlan(newRoot);
 
-			ExecIterator resultIterator = ap.getIterator();
+			PhysicalOlapIterator resultIterator = ap.getIterator();
 
 			List<Node[]> result = new ArrayList<Node[]>();
 			while (resultIterator.hasNext()) {

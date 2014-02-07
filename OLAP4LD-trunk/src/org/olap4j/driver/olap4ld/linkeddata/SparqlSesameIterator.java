@@ -23,17 +23,19 @@ import org.openrdf.repository.sail.SailRepository;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.parser.NxParser;
 
-public class SparqlSesameExecIterator implements ExecIterator {
+public class SparqlSesameIterator implements PhysicalOlapIterator {
 
 	private SailRepository repo;
 	private String query;
 	private List<Node[]> result;
 	private Iterator<Node[]> iterator;
 
-	public SparqlSesameExecIterator(SailRepository repo, String query) {
+	public SparqlSesameIterator(SailRepository repo, String query) {
 		this.repo = repo;
 		this.query = query;
 
+		// At initialisation, we execute the sparql query.
+		// XXX: Should we not do this only if next() or hasNext()?
 		this.result = sparql();
 
 		this.iterator = result.iterator();
@@ -131,7 +133,10 @@ public class SparqlSesameExecIterator implements ExecIterator {
 	}
 
 	/**
-	 * Simply use iterator.
+	 * We use the iterator of the sparql query result. 
+	 * 
+	 * The sparql query result returns for each non-empty fact a 
+	 * node array (List<Node[]>) with each   
 	 */
 	public Object next() {
 		return iterator.next();

@@ -15,23 +15,15 @@ import org.semanticweb.yars.nx.Node;
  */
 public class DiceOp implements LogicalOlapOp {
 
-	private LogicalOlapOp inputOp;
-	private List<List<Node[]>> membercombinations;
-	private List<Node[]> hierarchysignature;
+	public LogicalOlapOp inputOp;
+	public List<List<Node[]>> membercombinations;
+	public List<Node[]> hierarchysignature;
 
 	public DiceOp(LogicalOlapOp op, List<Node[]> hierarchysignature,
 			List<List<Node[]>> membercombinations) {
 		this.inputOp = op;
 		this.membercombinations = membercombinations;
 		this.hierarchysignature = hierarchysignature;
-	}
-
-	public List<List<Node[]>> getMemberCombinations() {
-		return membercombinations;
-	}
-
-	public List<Node[]> getHierarchySignature() {
-		return hierarchysignature;
 	}
 
 	public String toString() {
@@ -70,16 +62,11 @@ public class DiceOp implements LogicalOlapOp {
 	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+	public void accept(Visitor v)
 			throws QueryException {
-		// TODO Auto-generated method stub
 		v.visit(this);
 		// visit the projection input op
 		inputOp.accept(v);
-	}
-
-	public LogicalOlapOp getInputOp() {
-			return this.inputOp;
 	}
 
 }

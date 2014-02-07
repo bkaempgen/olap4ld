@@ -45,11 +45,15 @@ import org.semanticweb.yars.nx.Node;
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
 public class GenericCubeReturnMetadataTest extends TestCase {
-	
-	//private static final String TESTURL = "http://localhost/fios_xmla4js/example.ttl#ds";
-	private static final String TESTURL = "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
-	//private static final String TESTURL = "http://data.webfoundation.org/webindex/dataset/ITUA-Imputed";
-	
+
+	// private static final String TESTURL =
+	// "http://localhost/fios_xmla4js/example.ttl#ds";
+	// private static final String TESTURL =
+	// "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
+	private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
+	// private static final String TESTURL =
+	// "http://data.webfoundation.org/webindex/dataset/ITUA-Imputed";
+
 	private static final String NL = System.getProperty("line.separator");
 
 	private final TestContext testContext = TestContext.instance();
@@ -146,17 +150,6 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 		Node node = new Literal(TESTURL);
 		// New Yhf example
 		this.cubeNamePattern = Olap4ldLinkedDataUtil.convertNodeToMDX(node);
-
-		// this.cubeNamePattern =
-		// "httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FedgXXX2FarchiveXXX2F1013237XXX2F0001193125ZZZ11ZZZ089990XXX23dsd";
-
-		// SEC Example
-		// this.cubeNamePattern =
-		// "httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F1141391XXX2F0001193125-09-222058XXX23:dsd";
-
-		// Yahoo Finance Example
-		// this.cubeNamePattern =
-		// "httpXXX3AXXX2FXXX2Fyahoofinancewrap.appspot.comXXX2FarchiveXXX2FMAXXX2F2006-06-01XXX23:dsd";
 	}
 
 	protected void setUp() throws SQLException {
@@ -167,18 +160,20 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 		olapDatabaseMetaData = olapConnection.getMetaData();
 
 		this.resultDecorator = new ResultsDecoratorHTML(null);
-		
-    	// We set the logging level
-    	// Set the level to a particular level
-		
+
+		// We set the logging level
+		// Set the level to a particular level
+
 		// For debugging purposes
-    	Olap4ldUtil._log.setLevel(Level.CONFIG);
-    	
-    	// For monitoring usage
-    	//Olap4ldUtil._log.setLevel(Level.INFO);
-    	
-    	// For warnings (and errors) only
-    	//Olap4ldUtil._log.setLevel(Level.WARNING);
+		// Olap4ldUtil._log.setLevel(Level.CONFIG);
+
+		// For monitoring usage
+		// Olap4ldUtil._log.setLevel(Level.INFO);
+
+		// For warnings (and errors) only
+		Olap4ldUtil._log.setLevel(Level.WARNING);
+
+		// Olap4ldUtil._isDebug = true;
 	}
 
 	protected void tearDown() throws Exception {
@@ -239,6 +234,34 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	}
 
 	// ~ Tests follow -------------
+
+	/**
+	 * Problem is that the Linked Data Cubes Engine EmbeddedSesame (and other
+	 * probably too) for every connection initialises again the triple store.
+	 * Thus, we can only query for all metadata within one "session". Thus, we
+	 * have a test "testDatabaseMetaData()" that runs all tests in one session
+	 * 
+	 * @throws SQLException
+	 */
+	public void testDatabaseMetaData() throws SQLException {
+		testDatabaseMetaDataGetDatasources();
+		testDatabaseMetaDataGetCatalogs();
+		testDatabaseMetaDataGetSchemas();
+		testDatabaseMetaDataGetLiterals();
+		testDatabaseMetaDataGetDatabaseProperties();
+		testDatabaseMetaDataGetMdxKeywords();
+		testDatabaseMetaDataGetCubes();
+		testDatabaseMetaDataGetMeasures();
+		testDatabaseMetaDataGetDimensions();
+		testDatabaseMetaDataGetFunctions();
+		testDatabaseMetaDataGetHierarchies();
+		testDatabaseMetaDataGetLevels();
+		testDatabaseMetaDataGetLiterals2();
+		testDatabaseMetaDataGetMeasureMembers();
+		testDatabaseMetaDataGetMembers();
+		testDatabaseMetaDataGetSets();
+
+	}
 
 	/*
 	 * No tests for
@@ -305,6 +328,13 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 		System.out.println("getCubes(): " + s);
 	}
 
+	public void testDatabaseMetaDataGetMeasures() throws SQLException {
+		String s = checkResultSet(olapDatabaseMetaData.getMeasures(catalogName,
+				null, cubeNamePattern, null, null), MEASURES_COLUMN_NAMES);
+
+		System.out.println("getMeasures(): " + s);
+	}
+
 	/**
 	 * We ask for all dimensions of the cube.
 	 * 
@@ -351,13 +381,6 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 		// System.out.println("getLiterals2(): " + s);
 	}
 
-	public void testDatabaseMetaDataGetMeasures() throws SQLException {
-		String s = checkResultSet(olapDatabaseMetaData.getMeasures(catalogName,
-				null, cubeNamePattern, null, null), MEASURES_COLUMN_NAMES);
-
-		System.out.println("getMeasures(): " + s);
-	}
-
 	/**
 	 * For each measure, find the measure member.
 	 * 
@@ -392,7 +415,7 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 
 		while (levels.next()) {
 			String level = levels.getString(6);
-			
+
 			String s = checkResultSet(olapDatabaseMetaData.getMembers(
 					catalogName, null, cubeNamePattern, null, null, level,
 					null, null), MEMBERS_COLUMN_NAMES);

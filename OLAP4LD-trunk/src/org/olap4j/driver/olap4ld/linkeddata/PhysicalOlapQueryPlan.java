@@ -2,33 +2,35 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
 
+
 /**
  * Encapsulates a physical access plan.
  * 
  * @author aharth
  */
-public class ExecPlan {
+public class PhysicalOlapQueryPlan {
 	// root of the plan
-	ExecIterator _root = null;
+	PhysicalOlapIterator _root = null;
 
 	/**
 	 * Constructor. XXX FIXME lexicon shouldn't be here at all
 	 */
-	public ExecPlan(ExecIterator root) {
+	public PhysicalOlapQueryPlan(PhysicalOlapIterator root) {
 		_root = root;
 	}
 
 	/**
 	 * Add a rule to the program.
 	 */
-	public void setRoot(ExecIterator root) {
+	public void setRoot(PhysicalOlapIterator root) {
 		_root = root;
 	}
 
 	/**
-	 * Get the iterator.
+	 * Get the iterator. This iterator returns query results with byte arrays that
+	 * can be cast to Node[].
 	 */
-	public ExecIterator getIterator() {
+	public PhysicalOlapIterator getIterator() {
 		return _root;
 	}
 

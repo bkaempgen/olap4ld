@@ -34,6 +34,7 @@ import java.sql.SQLException;
 import junit.framework.TestCase;
 
 import org.olap4j.CellSetFormatterTest.Format;
+import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 
@@ -50,9 +51,13 @@ public class LDCX_User_Study_Evaluation_XmlaTest extends TestCase {
 	public LDCX_User_Study_Evaluation_XmlaTest() throws SQLException {
 
 		try {
+			
+			// Prepare logging has to be done
+			Olap4ldUtil.prepareLogging();
 
-//			 this.xmlauri = new URL(
-//			 "http://localhost:8080/xmlaserver-trunk/xmla");
+			// For this test, we need to run a server.
+			 this.xmlauri = new URL(
+			 "http://localhost:8080/xmlaserver-trunk/xmla");
 			// this.xmlauri = new URL(
 			// "http://141.52.218.137:8000/xmlaserver-trunk/xmla");
 			this.xmlauri = new URL(

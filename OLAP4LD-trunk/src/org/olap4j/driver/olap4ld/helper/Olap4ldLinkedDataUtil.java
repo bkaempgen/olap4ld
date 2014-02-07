@@ -10,6 +10,9 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -51,6 +54,74 @@ public class Olap4ldLinkedDataUtil {
 		// ourselves
 		// (which if possible should be always the same):
 		return encodeSpecialMdxCharactersInNames(uri);
+	}
+	
+	/**
+	 * Helper Method for asking for location
+	 * 
+	 * @param uri
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	public static URL askForLocation(URL uri) throws MalformedURLException {
+
+		Olap4ldUtil._log.config("Ask for location: " + uri + "...");
+
+		String returnurlstring = null;
+
+		HttpURLConnection.setFollowRedirects(false);
+		HttpURLConnection connection;
+		try {
+			connection = (HttpURLConnection) uri.openConnection();
+			connection.setRequestProperty("Accept", "application/rdf+xml");
+			String header = connection.getHeaderField("location");
+			String domain = uri.getHost();
+			String protocol = uri.getProtocol();
+			String port = "";
+			if (uri.getPort() != 80 && uri.getPort() != -1) {
+				port = ":"+uri.getPort()+"";
+			}
+			String path = uri.getPath();
+
+			
+			// TODO: Could be that we need to check whether bogus comes out
+			// (e.g., Not found).
+			if (header != null) {
+
+				// Header may be a absolute or relative URL
+				if (header.startsWith("http:") || header.startsWith("https:")) {
+					// absolute URL
+					returnurlstring = header;
+				} else if (header.startsWith("/")) {
+					returnurlstring = protocol + "://" + domain + port
+							+ header;
+				} else {
+					/*
+					 * relative URL May be: Gleiche Domäne, Gleiche Ressource,
+					 * ein Pfad-Segment-Aufwärts, gleiches Pfad-Segment (see
+					 * http://de.wikipedia.org/wiki/Uniform_Resource_Locator#
+					 * Relative_URL)
+					 */
+
+					returnurlstring = protocol + "://" + domain + port
+							+ path + header;
+				}
+			} else {
+				returnurlstring = protocol + "://" + domain + port
+						+ path;
+			}
+			// We should remove # uris
+			if (returnurlstring.contains("#")) {
+				int index = returnurlstring.lastIndexOf("#");
+				returnurlstring = returnurlstring.substring(0, index);
+			}
+		} catch (IOException e) {
+			throw new MalformedURLException(e.getMessage());
+		}
+
+		Olap4ldUtil._log.config("... result: " + returnurlstring);
+		return new URL(returnurlstring);
 	}
 
 	/**

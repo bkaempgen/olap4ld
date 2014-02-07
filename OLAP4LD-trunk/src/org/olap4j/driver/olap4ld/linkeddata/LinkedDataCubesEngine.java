@@ -30,27 +30,31 @@ import org.semanticweb.yars.nx.Node;
 
 /**
  * 
- * An LinkedDataEngine is basically an OLAP Engine on Linked Data. It implements
- * Metadata Queries such as getCubes() and OLAP Queries such as getOlapResult().
+ * An LinkedDataCubesEngine is basically an OLAP Engine on Linked Data. It
+ * implements Metadata Queries such as getCubes() and OLAP Queries such as
+ * getOlapResult().
  * 
  * Implements methods of XmlaOlap4jDatabaseMetadata, returning the specified
- * columns as nodes from a sparql endpoint.
+ * columns as nodes.
  * 
  * @author b-kaempgen
  * 
  */
-public interface LinkedDataEngine {
+public interface LinkedDataCubesEngine {
 
 	/**
 	 * Puts engine to its default init state.
 	 */
 	public void rollback();
 
-	public List<Node[]> getDatabases(Restrictions restrictions) throws OlapException;
+	public List<Node[]> getDatabases(Restrictions restrictions)
+			throws OlapException;
 
-	public List<Node[]> getCatalogs(Restrictions restrictions) throws OlapException;
+	public List<Node[]> getCatalogs(Restrictions restrictions)
+			throws OlapException;
 
-	public List<Node[]> getSchemas(Restrictions restrictions) throws OlapException;
+	public List<Node[]> getSchemas(Restrictions restrictions)
+			throws OlapException;
 
 	/**
 	 * 
@@ -66,7 +70,8 @@ public interface LinkedDataEngine {
 	 * 
 	 * @return Node[]{}
 	 */
-	public List<Node[]> getCubes(Restrictions restrictions) throws OlapException;
+	public List<Node[]> getCubes(Restrictions restrictions)
+			throws OlapException;
 
 	/**
 	 * Get possible dimensions (component properties) for each cube from the
@@ -80,7 +85,8 @@ public interface LinkedDataEngine {
 	 * @return Node[]{?dsd ?dimension ?compPropType ?name}
 	 * @throws MalformedURLException
 	 */
-	public List<Node[]> getDimensions(Restrictions restrictions) throws OlapException;
+	public List<Node[]> getDimensions(Restrictions restrictions)
+			throws OlapException;
 
 	/**
 	 * Every measure also needs to be listed as member. When I create the dsd, I
@@ -100,7 +106,8 @@ public interface LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getMeasures(Restrictions restrictions) throws OlapException;
+	public List<Node[]> getMeasures(Restrictions restrictions)
+			throws OlapException;
 
 	/**
 	 * 
@@ -111,7 +118,8 @@ public interface LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getHierarchies(Restrictions restrictions) throws OlapException;
+	public List<Node[]> getHierarchies(Restrictions restrictions)
+			throws OlapException;
 
 	/**
 	 * 
@@ -120,7 +128,8 @@ public interface LinkedDataEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getLevels(Restrictions restrictions) throws OlapException;
+	public List<Node[]> getLevels(Restrictions restrictions)
+			throws OlapException;
 
 	/**
 	 * Important issues to remember: Every measure also needs to be listed as
@@ -146,7 +155,8 @@ public interface LinkedDataEngine {
 	 * @return Node[]{?memberURI ?name}
 	 * @throws MalformedURLException
 	 */
-	public List<Node[]> getMembers(Restrictions restrictions) throws OlapException;
+	public List<Node[]> getMembers(Restrictions restrictions)
+			throws OlapException;
 
 	public List<Node[]> getSets(Restrictions restrictions) throws OlapException;
 
@@ -160,7 +170,8 @@ public interface LinkedDataEngine {
 	 */
 	@Deprecated
 	public List<Node[]> executeOlapQuery(Cube cube, List<Level> slicesrollups,
-			List<Position> dices, List<Measure> projections) throws OlapException;
+			List<Position> dices, List<Measure> projections)
+			throws OlapException;
 
 	/**
 	 * In the extended olap4ld implementation, an OLAP query is issued from the
@@ -168,10 +179,23 @@ public interface LinkedDataEngine {
 	 * operators that are then translated into a physical OLAP operator query
 	 * plan depending on the implementation.
 	 * 
+	 * The question is, how does the result of executeOlapQuery relate to the
+	 * metadata given by metadata queries? Olap4j/olap4ld have a relational
+	 * metadata schema. At least, the result should map somehow to the queried
+	 * cube(s). Two possibilities
+	 * 
+	 * 1) We assume drill-across and other operators, so that the result may map
+	 * to a metadata result after executing the LogicalOlapQuery plan.
+	 * 
+	 * 2) We assume no drill-across but only virtual cubes, so that the result
+	 * always is mapped to a specific cube.
 	 * 
 	 * @param queryplan
 	 * @return a relational representation of resulting observations in the
-	 *         resulting data cube
+	 *         resulting data cube: List<Node[]>. Every Node[] contains for each
+	 *         dimension in the dimension list of the metadata a member and for
+	 *         each measure in the measure list a value.
 	 */
-	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) throws OlapException;
+	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
+			throws OlapException;
 }
