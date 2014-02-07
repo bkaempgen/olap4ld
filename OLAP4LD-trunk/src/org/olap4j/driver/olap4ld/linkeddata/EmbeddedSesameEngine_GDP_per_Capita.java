@@ -203,19 +203,32 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 			long time = System.currentTimeMillis();
 
 			// load and validate dataset requires to load cube
-
+			URL dataset;
+			
 			// ----------------
 			// Load "GDP per capita - annual Data" ds and dsd
-			URL dataset = new URL(
-					"http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds");
-			Olap4ldUtil._log.info("Load dataset: " + dataset);
-			// loadCube(dataset);
+//			URL dataset = new URL(
+//					"http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds");
+//			Olap4ldUtil._log.info("Load dataset: " + dataset);
+//			loadCube(dataset);
+			// Shortcut
+			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_nama_aux_gph_estatwrap.n3"));
+			
 			// # Gross Domestic Product (GDP) per capita in Purchasing Power
 			// Standards (PPS)
-			dataset = new URL(
-					"http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds");
-			Olap4ldUtil._log.info("Load dataset: " + dataset);
+//			dataset = new URL(
+//					"http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds");
+//			Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
+			
+			// ----------------
+			// Load "GDP and main components - Current prices [nama_gdp_c]" ds and dsd
+//			dataset = new URL(
+//					"http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds");
+//			Olap4ldUtil._log.info("Load dataset: " + dataset);
+//			loadCube(dataset);
+			// Shortcut
+			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_nama_gdp_c_estatwrap.n3"));
 
 			// ----------------
 			// # Regional gross domestic product by NUTS 2 regions [tgs00003]
@@ -268,12 +281,14 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 			// qb:DataSet.
 			
 			// Problem: demo_pjan contains errors
-			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/demo_pjan_ds_v3.rdf"));
-			
-			dataset = new URL(
-					"http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
-			Olap4ldUtil._log.info("Load dataset: " + dataset);
-			loadCube(dataset);
+//			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/demo_pjan_ds_v3.rdf"));
+//			
+//			dataset = new URL(
+//					"http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
+//			Olap4ldUtil._log.info("Load dataset: " + dataset);
+//			loadCube(dataset);
+			// Shortcut
+			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_demo_pjan_estatwrap.n3"));
 
 			// ----------------
 			// # Population on 1 January by age and sex [demo_pjan] (Eurstat LD)
@@ -288,12 +303,12 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 			// <http://worldbank.270a.info/dataset/GDPPCKN> rdf:type qb:DataSet.
 
 			// Problem: this dataset only is available in a GZIP file
-			loadInStore(new URL(
-					"http://localhost:8080/Data-Fu-Engine/datasets/GDPPCKN.rdf"));
-			loadInStore(new URL(
-					"http://worldbank.270a.info/dataset/world-bank-indicators/structure"));
+//			loadInStore(new URL(
+//					"http://localhost:8080/Data-Fu-Engine/datasets/GDPPCKN.rdf"));
+//			loadInStore(new URL(
+//					"http://worldbank.270a.info/dataset/world-bank-indicators/structure"));
 
-			dataset = new URL("http://worldbank.270a.info/dataset/GDPPCKN");
+//			dataset = new URL("http://worldbank.270a.info/dataset/GDPPCKN");
 			Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 
@@ -1040,6 +1055,7 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 
 			boolean error = false;
 			String overview = "";
+			String status = "";
 
 			// IC-1. Unique DataSet. Every qb:Observation
 			// has exactly one associated qb:DataSet.
@@ -1055,9 +1071,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 						testquery);
 				if (booleanQuery.evaluate() == true) {
 					error = true;
-					overview += "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+					status = "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				} else {
-					overview += "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+					status = "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				}
 			}
 
@@ -1070,9 +1090,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition. <br/>";
+				status = "Failed specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition.<br/>";
+				status = "Successful specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-3. DSD includes measure
@@ -1082,9 +1106,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
+				status = "Failed specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
+				status = "Successful specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-4. Dimensions have range
@@ -1094,9 +1122,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
+				status = "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.<br/>";
+				status = "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-5. Concept dimensions have code lists
@@ -1106,9 +1138,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
+				status = "Failed specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
+				status = "Successful specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-6. Only attributes may be optional <= not
@@ -1120,9 +1156,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes. <br/>";
+				status = "Failed specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes.<br/>";
+				status = "Successful specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-7. Slice Keys must be declared <= not
@@ -1133,9 +1173,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
+				status = "Failed specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
+				status = "Successful specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-8. Slice Keys consistent with DSD
@@ -1146,9 +1190,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition.<br/>";
+				status = "Failed specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition. <br/>";
+				status = "Successful specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-9. Unique slice structure
@@ -1158,9 +1206,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+				status = "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+				status = "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-10. Slice dimensions complete
@@ -1170,9 +1222,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
+				status = "Failed specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
+				status = "Successful specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// Since needs to go through all observations, only done if enough
@@ -1187,25 +1243,29 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 						testquery);
 				if (booleanQuery.evaluate() == true) {
 					error = true;
-					overview += "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
+					status = "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				} else {
-					overview += "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
+					status = "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				}
 
 				// IC-12. No duplicate observations <= takes especially
 				// long, expensive quadratic check (IC-12) (see
 				// http://lists.w3.org/Archives/Public/public-gld-wg/2013Jul/0017.html)
 				// Dave Reynolds has implemented a linear time version of it
-				testquery = TYPICALPREFIXES
-						+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
-				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-						testquery);
-				if (booleanQuery.evaluate() == true) {
-					error = true;
-					overview += "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
-				} else {
-					overview += "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
-				}
+//				testquery = TYPICALPREFIXES
+//						+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
+//				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+//						testquery);
+//				if (booleanQuery.evaluate() == true) {
+//					error = true;
+//					status = "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
+//				} else {
+//					status = "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
+//				}
 
 			}
 
@@ -1217,9 +1277,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required.<br/>";
+				status = "Failed specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required. <br/>";
+				status = "Successful specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-14. All measures present
@@ -1229,9 +1293,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
+				status = "Failed specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
+				status = "Successful specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-15. Measure dimension consistent <= We do
@@ -1242,9 +1310,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
+				status = "Failed specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
+				status = "Successful specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-16. Single measure on measure dimension
@@ -1255,9 +1327,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType).<br/>";
+				status = "Failed specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType).<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType). <br/>";
+				status = "Successful specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType). <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-17. All measures present in measures dimension cube
@@ -1267,9 +1343,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
+				status = "Failed specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
+				status = "Successful specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-18. Consistent data set links
@@ -1279,9 +1359,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
+				status = "Failed specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
+				status = "Successful specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// Since needs to go through all observations, only done if enough
@@ -1302,9 +1386,13 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 				if (booleanQuery.evaluate() == true
 						|| booleanQuery2.evaluate() == true) {
 					error = true;
-					overview += "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+					status = "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				} else {
-					overview += "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+					status = "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				}
 
 			}
@@ -1321,11 +1409,15 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 			// testquery);
 			// if (booleanQuery.evaluate() == true) {
 			// error = true;
-			// overview +=
+			// status =
 			// "Failed specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.  <br/>";
+			//	Olap4ldUtil._log.config(status);
+			// overview += status;
 			// } else {
-			// overview +=
+			// status =
 			// "Successful specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.  <br/>";
+			// Olap4ldUtil._log.config(status);
+			// overview += status;
 			// }
 
 			// IC-21. Codes from hierarchy (inverse)
@@ -1336,11 +1428,15 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 			// testquery);
 			// if (booleanQuery.evaluate() == true) {
 			// error = true;
-			// overview +=
+			// status =
 			// "Failed specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.  <br/>";
+			// Olap4ldUtil._log.config(status);
+			// overview += status;
 			// } else {
-			// overview +=
+			// status =
 			// "Successful specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.  <br/>";
+			// Olap4ldUtil._log.config(status);
+			// overview += status;
 			// }
 
 			// Important!
