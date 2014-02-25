@@ -382,6 +382,18 @@ class Olap4ldMember
 				new Variable("?PARENT_LEVEL") };
 		nodes.add(header);
 
+		// See olap4j specification
+		String parentuniquename;
+		String parentlevel;
+		if (this.getParentMember() == null) {
+			parentuniquename = "null";
+			parentlevel = "null";
+		} else {
+			parentuniquename = this.getParentMember().getUniqueName();
+			parentlevel = this.getParentMember().getLevel().getDepth()+"";
+		}
+		
+		
 		Node[] metadatanode = new Node[] {
 				new Literal(Olap4ldLinkedDataUtil
 						.convertMDXtoURI(cube.getSchema().getCatalog().getName())),
@@ -401,8 +413,8 @@ class Olap4ldMember
 						.convertMDXtoURI(this.getUniqueName())),
 				new Literal(this.getCaption()),
 				new Literal(this.getMemberType().ordinal()+""),
-				new Literal(this.getParentMember().getUniqueName()),
-				new Literal(this.getParentMember().getLevel().getDepth()+"")
+				new Literal(parentuniquename),
+				new Literal(parentlevel)
 				};
 		nodes.add(metadatanode);
 

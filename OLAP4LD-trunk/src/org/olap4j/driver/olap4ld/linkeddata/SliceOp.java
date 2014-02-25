@@ -18,20 +18,20 @@ public class SliceOp implements LogicalOlapOp {
 	public LogicalOlapOp inputOp;
 	public List<Node[]> slicedDimensions;
 
-	public SliceOp(LogicalOlapOp inputOp, List<Node[]> slicedDimensions2) {
+	public SliceOp(LogicalOlapOp inputOp, List<Node[]> slicedDimensions) {
 		this.inputOp = inputOp;
-		this.slicedDimensions = slicedDimensions2;
+		this.slicedDimensions = slicedDimensions;
 	}
 
 	public String toString() {
 		if (slicedDimensions != null && !slicedDimensions.isEmpty()) {
 			String dimensionsStringArray[] = new String[slicedDimensions.size() - 1];
 			// First is header
-			for (int i = 1; i < dimensionsStringArray.length; i++) {
+			for (int i = 1; i <= dimensionsStringArray.length; i++) {
 				Map<String, Integer> map = Olap4ldLinkedDataUtil
 						.getNodeResultFields(slicedDimensions.get(0));
 
-				dimensionsStringArray[i] = slicedDimensions.get(i)[map
+				dimensionsStringArray[i-1] = slicedDimensions.get(i)[map
 						.get("?DIMENSION_UNIQUE_NAME")].toString();
 			}
 

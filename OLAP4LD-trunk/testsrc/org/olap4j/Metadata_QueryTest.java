@@ -42,9 +42,10 @@ import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.semanticweb.yars.nx.Node;
 
 /**
- * Tests on executing drill-across.
- * 
- * 
+ * Unit tests for metadata queries directly on an LDCE engine, e.g. 
+ * on "EmbeddedSesameEngine_GDP_per_Capita", an engine that collects
+ * data for Open Government Data. 
+ *  
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
 public class Metadata_QueryTest extends TestCase {
@@ -56,13 +57,13 @@ public class Metadata_QueryTest extends TestCase {
 		Olap4ldUtil.prepareLogging();
 		// Logging
 		// For debugging purposes
-		 Olap4ldUtil._log.setLevel(Level.CONFIG);
+		Olap4ldUtil._log.setLevel(Level.CONFIG);
 
 		// For monitoring usage
-//		 Olap4ldUtil._log.setLevel(Level.INFO);
+		// Olap4ldUtil._log.setLevel(Level.INFO);
 
 		// For warnings (and errors) only
-//		Olap4ldUtil._log.setLevel(Level.WARNING);
+		// Olap4ldUtil._log.setLevel(Level.WARNING);
 
 		try {
 			// Must have settings without influence on query processing
@@ -86,11 +87,13 @@ public class Metadata_QueryTest extends TestCase {
 	}
 
 	public void test_Metadata_Queries() throws OlapException {
-		// First: GDP per capita dataset
-		// String gdpdsuri =
-		// "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
+		// GDP per capita dataset
+//		String gdpdsuri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
+//		Restrictions gdprestrictions = new Restrictions();
+//		gdprestrictions.cubeNamePattern = gdpdsuri;
+		
+		// No specific dataset, if we use GDP-per-Capita LDCE
 		Restrictions gdprestrictions = new Restrictions();
-		// gdprestrictions.cubeNamePattern = gdpdsuri;
 
 		// In order to fill the engine with data
 		List<Node[]> gdpcubes = lde.getCubes(gdprestrictions);

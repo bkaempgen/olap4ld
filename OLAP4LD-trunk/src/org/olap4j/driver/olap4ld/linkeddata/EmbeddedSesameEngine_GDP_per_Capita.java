@@ -212,7 +212,7 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 //			Olap4ldUtil._log.info("Load dataset: " + dataset);
 //			loadCube(dataset);
 			// Shortcut
-			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_nama_aux_gph_estatwrap.n3"));
+//			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_nama_aux_gph_estatwrap.n3"));
 			
 			// # Gross Domestic Product (GDP) per capita in Purchasing Power
 			// Standards (PPS)
@@ -228,7 +228,7 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 //			Olap4ldUtil._log.info("Load dataset: " + dataset);
 //			loadCube(dataset);
 			// Shortcut
-			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_nama_gdp_c_estatwrap.n3"));
+//			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_nama_gdp_c_estatwrap.n3"));
 
 			// ----------------
 			// # Regional gross domestic product by NUTS 2 regions [tgs00003]
@@ -281,14 +281,14 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 			// qb:DataSet.
 			
 			// Problem: demo_pjan contains errors
-//			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/demo_pjan_ds_v3.rdf"));
-//			
-//			dataset = new URL(
-//					"http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
-//			Olap4ldUtil._log.info("Load dataset: " + dataset);
-//			loadCube(dataset);
+			// loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/demo_pjan_ds_v3.rdf"));
+			
+			dataset = new URL(
+					"http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
+			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			loadCube(dataset);
 			// Shortcut
-			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_demo_pjan_estatwrap.n3"));
+//			loadInStore(new URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_demo_pjan_estatwrap.n3"));
 
 			// ----------------
 			// # Population on 1 January by age and sex [demo_pjan] (Eurstat LD)

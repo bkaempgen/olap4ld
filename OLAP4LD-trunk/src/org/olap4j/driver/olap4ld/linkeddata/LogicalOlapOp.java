@@ -4,7 +4,7 @@ package org.olap4j.driver.olap4ld.linkeddata;
 /**
  * This is an operator in the relational plan (sometimes called
  * "logical" plan) that can be translated to an access plan 
- * ("physical" plan) la
+ * ("physical" plan)
  * 
  * @author aharth
  */

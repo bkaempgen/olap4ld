@@ -64,10 +64,12 @@ public class Drill_across_QueryTest extends TestCase {
 		// Olap4ldUtil._log.setLevel(Level.CONFIG);
 
 		// For monitoring usage
-		Olap4ldUtil._log.setLevel(Level.INFO);
+		Olap4ldUtil._log.setLevel(Level.CONFIG);
 
 		// For warnings (and errors) only
 		// Olap4ldUtil._log.setLevel(Level.WARNING);
+		
+		Olap4ldUtil._isDebug = false;
 
 		try {
 			// Must have settings without influence on query processing
@@ -101,7 +103,7 @@ public class Drill_across_QueryTest extends TestCase {
 		// datasets.
 
 		// First: GDP per capita dataset
-		String gdpdsuri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds,";
+		String gdpdsuri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
 		Restrictions gdprestrictions = new Restrictions();
 		gdprestrictions.cubeNamePattern = gdpdsuri;
 
@@ -120,6 +122,7 @@ public class Drill_across_QueryTest extends TestCase {
 		List<Node[]> gdpcubemeasures = lde.getMeasures(gdprestrictions);
 
 		List<Node[]> gdpcubedimensions = lde.getDimensions(gdprestrictions);
+		assertEquals(true, gdpcubedimensions.size() > 1);
 
 		List<Node[]> gdpcubehierarchies = lde.getHierarchies(gdprestrictions);
 
@@ -151,20 +154,16 @@ public class Drill_across_QueryTest extends TestCase {
 
 		List<Node[]> gdpsliceddimensions = new ArrayList<Node[]>();
 
-		gdpsliceddimensions = lde.getDimensions(gdprestrictions);
-		assertEquals(true, gdpsliceddimensions.size() > 1);
 		System.out.println("DIMENSION_UNIQUE_NAMES:");
 		Map<String, Integer> gdpdimensionmap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(gdpsliceddimensions.get(0));
+				.getNodeResultFields(gdpcubedimensions.get(0));
 		// Header
-		gdpsliceddimensions.add(gdpsliceddimensions.get(0));
-		for (Node[] nodes : gdpsliceddimensions) {
+		gdpsliceddimensions.add(gdpcubedimensions.get(0));
+		for (Node[] nodes : gdpcubedimensions) {
 			String dimensionname = nodes[gdpdimensionmap
 					.get("?DIMENSION_UNIQUE_NAME")].toString();
 			System.out.println(dimensionname);
-			if (dimensionname.equals("indic_na") || dimensionname.equals("sex")
-					|| dimensionname.equals("age")
-					|| dimensionname.equals("esa95")) {
+			if (dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#aggreg95") || dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#indic_na")) {
 				gdpsliceddimensions.add(nodes);
 			}
 		}
@@ -177,7 +176,7 @@ public class Drill_across_QueryTest extends TestCase {
 		// XXX: We do not need roll-up
 
 		// Second: Employment rate, by sex dataset
-		String emplratedsuri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds,";
+		String emplratedsuri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
 		Restrictions emplraterestrictions = new Restrictions();
 		emplraterestrictions.cubeNamePattern = emplratedsuri;
 
@@ -198,6 +197,7 @@ public class Drill_across_QueryTest extends TestCase {
 
 		List<Node[]> emplratecubedimensions = lde
 				.getDimensions(emplraterestrictions);
+		assertEquals(true, emplratecubedimensions.size() > 1);
 
 		List<Node[]> emplratecubehierarchies = lde
 				.getHierarchies(emplraterestrictions);
@@ -231,20 +231,16 @@ public class Drill_across_QueryTest extends TestCase {
 
 		List<Node[]> emplratesliceddimensions = new ArrayList<Node[]>();
 
-		emplratesliceddimensions = lde.getDimensions(emplraterestrictions);
-		assertEquals(true, emplratesliceddimensions.size() > 1);
 		System.out.println("DIMENSION_UNIQUE_NAMES:");
 		Map<String, Integer> emplratedimensionmap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(emplratesliceddimensions.get(0));
+				.getNodeResultFields(emplratecubedimensions.get(0));
 		// Header
-		emplratesliceddimensions.add(emplratesliceddimensions.get(0));
-		for (Node[] nodes : emplratesliceddimensions) {
+		emplratesliceddimensions.add(emplratecubedimensions.get(0));
+		for (Node[] nodes : emplratecubedimensions) {
 			String dimensionname = nodes[emplratedimensionmap
 					.get("?DIMENSION_UNIQUE_NAME")].toString();
 			System.out.println(dimensionname);
-			if (dimensionname.equals("indic_na") || dimensionname.equals("sex")
-					|| dimensionname.equals("age")
-					|| dimensionname.equals("esa95")) {
+			if (dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#geo") || dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#sex")) {
 				emplratesliceddimensions.add(nodes);
 			}
 		}
