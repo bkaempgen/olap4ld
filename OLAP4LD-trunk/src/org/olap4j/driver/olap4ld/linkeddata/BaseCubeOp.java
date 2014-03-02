@@ -53,6 +53,7 @@ public class BaseCubeOp implements LogicalOlapOp {
 
 	public void accept(Visitor v)
 			throws QueryException {
+		v.visit(this);
 		// There is nothing more to visit.
 		;
 	}

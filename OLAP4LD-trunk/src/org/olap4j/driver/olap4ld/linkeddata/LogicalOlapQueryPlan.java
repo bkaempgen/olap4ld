@@ -53,7 +53,7 @@ public class LogicalOlapQueryPlan {
 	 * Entry method that visits all nodes recursively and returns the root of
 	 * the transformed tree.
 	 */
-	public Object visitAll(LogicalOlapOperatorQueryPlanVisitor v)
+	public Object visitAll(Visitor v)
 			throws QueryException {
 		_root.accept(v);
 

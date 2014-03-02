@@ -70,6 +70,7 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 		if (op instanceof SliceOp) {
 			SliceOp so = (SliceOp) op;
 
+			so.inputOp.accept(this);
 			PhysicalOlapIterator slicecube = new SliceSparqlIterator(_root,
 					so.slicedDimensions);
 			_root = slicecube;
@@ -92,7 +93,9 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 			// ExecIterator bi = null;
 			// _root = bi;
 
-			PhysicalOlapIterator basecube = new BaseCubeSparqlIterator(
+			// Instead of having repo as parameter one could make the 
+			// iterator start and populate its own repo.
+			PhysicalOlapIterator basecube = new BaseCubeSparqlIterator(repo,
 					so.cubes, so.measures, so.dimensions,
 					so.hierarchies, so.levels, so.members);
 			_root = basecube;
@@ -113,7 +116,7 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 		String orderByClause = " order by ";
 		
 		if (_root instanceof DrillAcrossSparqlIterator) {
-			
+			return _root;
 		} else {
 			List<List<Node[]>> metadata = (ArrayList<List<Node[]>>) _root
 					.next();

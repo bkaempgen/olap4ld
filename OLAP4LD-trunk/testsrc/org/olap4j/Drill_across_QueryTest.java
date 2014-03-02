@@ -37,6 +37,8 @@ import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.DrillAcrossOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
+import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine_GDP_per_Capita;
+import org.olap4j.driver.olap4ld.linkeddata.LinkedDataCubesEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.PhysicalOlapQueryPlan;
@@ -54,7 +56,7 @@ import org.semanticweb.yars.nx.Node;
  */
 public class Drill_across_QueryTest extends TestCase {
 
-	private EmbeddedSesameEngine lde;
+	private LinkedDataCubesEngine lde;
 
 	public Drill_across_QueryTest() throws SQLException {
 

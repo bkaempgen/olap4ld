@@ -119,7 +119,7 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 		try {
 
 			// We create visitor to translate logical into physical
-			LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(
+			LogicalOlap2SparqlSesameDrillAcrossVisitor r2a = new LogicalOlap2SparqlSesameDrillAcrossVisitor(
 					repo);
 
 			PhysicalOlapIterator newRoot;
@@ -150,7 +150,6 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 			DATASOURCEVERSION = "1.0";
 		}
 		initialize();
-		preload();
 	}
 
 	private void initialize() {
@@ -931,8 +930,7 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 	 * 
 	 * @return
 	 */
-	public List<Node[]> getDatabases(Restrictions restrictions) {
-
+	public List<Node[]> getDatabases(Restrictions restrictions) {	
 		/*
 		 * DISCOVER_DATASOURCES(new MetadataColumn("DataSourceName"), new
 		 * MetadataColumn("DataSourceDescription"), new MetadataColumn("URL"),
@@ -1010,6 +1008,27 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 
 		Olap4ldUtil._log.config("Linked Data Engine: Get Cubes...");
 
+		// We now assume that we can also query for a global dataset identified by a 
+		// comma separated list of datasets. For now, since we are interested in all possible
+		// derived datasets from a set of datasets. 
+		// Yet, we probably should either start with an MDX query or an Logical Operator Tree
+		// defining an information need. Although we might also just be interested in all 
+		// possible derived datasets of a set of datasets.
+		try {
+			preload();
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// For now, we simply preload.
+		if (restrictions.cubeNamePattern != null) {
+			//loadCube(restrictions.cubeNamePattern);
+		} else {
+			Olap4ldUtil._log
+					.config("In this situation, we cannot load and validate a dataset!");
+		}
+		
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
 		String querytemplate = Olap4ldLinkedDataUtil

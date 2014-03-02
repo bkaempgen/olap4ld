@@ -259,6 +259,20 @@ public class Olap4ldLinkedDataUtil {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * SPARQL does not allow all characters as parameter names, e.g.,
+	 * ?sdmx-measure:obsValue. Therefore, we transform the URI representation
+	 * into a parameter.
+	 * 
+	 * @param uriRepresentation
+	 * @return
+	 */
+	public static String makeUriToParameter(String uriRepresentation) {
+		// We simply remove all special characters
+		uriRepresentation = uriRepresentation.replaceAll("[^a-zA-Z0-9]+", "");
+		return uriRepresentation;
+	}
 
 	/**
 	 * Regarding prefixes, we use them to store MDX compliant names for

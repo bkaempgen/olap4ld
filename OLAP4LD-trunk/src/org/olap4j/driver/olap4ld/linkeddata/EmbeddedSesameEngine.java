@@ -112,7 +112,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		try {
 
 			// We create visitor to translate logical into physical
-			LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(
+			LogicalOlap2SparqlSesameDrillAcrossVisitor r2a = new LogicalOlap2SparqlSesameDrillAcrossVisitor(
 					repo);
 
 			PhysicalOlapIterator newRoot;

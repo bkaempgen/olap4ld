@@ -27,31 +27,54 @@ public class SliceSparqlIterator implements PhysicalOlapIterator {
 	}
 
 	public Object next() {
-		List<List<Node[]>> metadata = (ArrayList<List<Node[]>>) inputiterator
-				.next();
+		// No metadata is propagated, let us see whether our operators work
+		// still
+		// List<List<Node[]>> metadata = (ArrayList<List<Node[]>>) inputiterator
+		// .next();
+		//
+		// // Remove from dimensions all those that are sliced
+		// Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+		// .getNodeResultFields(slicedDimensions.get(0));
+		// List<Node[]> dimensions = new ArrayList<Node[]>();
+		// List<Node[]> inputdimensions = metadata.get(2);
+		// for (Node[] inputdimension : inputdimensions) {
+		// boolean add = true;
+		// for (Node[] sliceddimension : slicedDimensions) {
+		//
+		// if (inputdimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+		// .equals(sliceddimension[dimensionmap
+		// .get("?DIMENSION_UNIQUE_NAME")])) {
+		// add = false;
+		// }
+		// }
+		// if (add) {
+		// dimensions.add(inputdimension);
+		// }
+		// }
+		// metadata.set(2, dimensions);
+		
+		List<List<Node[]>> results = (List<List<Node[]>>) inputiterator.next();
+		
+		// XXX Bla, for now. Does not work, nothing done.
+		// Check which column to slice
+		 Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+		 .getNodeResultFields(slicedDimensions.get(0));
+		 List<Node[]> dimensions = new ArrayList<Node[]>();
+		 List<Node[]> columns = results.get(0);
+		 for (Node[] column : columns) {
+		 boolean add = true;
+		 for (Node[] sliceddimension : slicedDimensions) {
+		
+		 if (column
+		 .equals(Olap4ldLinkedDataUtil.makeUriToParameter(sliceddimension[dimensionmap
+		 .get("?DIMENSION_UNIQUE_NAME")].toString()))) {
+			 add = false;
+		 }
+		 }
+		 
+		 }
 
-		// Remove from dimensions all those that are sliced
-		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(slicedDimensions.get(0));
-		List<Node[]> dimensions = new ArrayList<Node[]>();
-		List<Node[]> inputdimensions = metadata.get(2);
-		for (Node[] inputdimension : inputdimensions) {
-			boolean add = true;
-			for (Node[] sliceddimension : slicedDimensions) {
-
-				if (inputdimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-						.equals(sliceddimension[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")])) {
-					add = false;
-				}
-			}
-			if (add) {
-				dimensions.add(inputdimension);
-			}
-		}
-		metadata.set(2, dimensions);
-
-		return metadata;
+		return results;
 	}
 
 	@Override

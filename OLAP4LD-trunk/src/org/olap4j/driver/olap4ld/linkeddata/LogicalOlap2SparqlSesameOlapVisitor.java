@@ -108,7 +108,7 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 			whereClause += addLevelPropertyPath(0, levelHeight,
 					dimensionProperty, levelURI);
 
-			String dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
+			String dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToParameter(dimensionProperty);
 			selectClause += " ?" + dimensionPropertyVariable + levelHeight
 					+ " ";
 			groupByClause += " ?" + dimensionPropertyVariable + levelHeight
@@ -200,7 +200,7 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 				for (int i = 1; i < membercombination.size(); i++) {
 					// We need to know the variable to filter
 					// First, we need to convert it to URI representation.
-					String dimensionPropertyVariable = makeUriToParameter(membercombination
+					String dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToParameter(membercombination
 							.get(i)[map1.get("?DIMENSION_UNIQUE_NAME")]
 							.toString());
 
@@ -727,7 +727,7 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 				// We also remove aggregation function from Measure Property
 				// Variable so
 				// that the same property is not selected twice.
-				String measurePropertyVariable = makeUriToParameter(measure[map
+				String measurePropertyVariable = Olap4ldLinkedDataUtil.makeUriToParameter(measure[map
 						.get("?MEASURE_UNIQUE_NAME")].toString().replace(
 						"AGGFUNC"
 								+ measure[map.get("?MEASURE_AGGREGATOR")]
@@ -736,7 +736,7 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 						""));
 				
 				// Unique name for variable
-				String uniqueMeasurePropertyVariable = makeUriToParameter(measure[map
+				String uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil.makeUriToParameter(measure[map
 				                                    						.get("?MEASURE_UNIQUE_NAME")].toString());
 
 				// We take the aggregator from the measure
@@ -817,7 +817,7 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 
 		String whereClause = "";
 
-		String dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
+		String dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToParameter(dimensionProperty);
 
 		if (levelHeight == 0) {
 			/*
@@ -858,20 +858,6 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 
 		return whereClause;
 
-	}
-
-	/**
-	 * SPARQL does not allow all characters as parameter names, e.g.,
-	 * ?sdmx-measure:obsValue. Therefore, we transform the URI representation
-	 * into a parameter.
-	 * 
-	 * @param uriRepresentation
-	 * @return
-	 */
-	private String makeUriToParameter(String uriRepresentation) {
-		// We simply remove all special characters
-		uriRepresentation = uriRepresentation.replaceAll("[^a-zA-Z0-9]+", "");
-		return uriRepresentation;
 	}
 
 	/**

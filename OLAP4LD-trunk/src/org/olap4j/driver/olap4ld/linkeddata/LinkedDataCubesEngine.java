@@ -198,4 +198,6 @@ public interface LinkedDataCubesEngine {
 	 */
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
 			throws OlapException;
+
+	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan) throws OlapException;
 }
