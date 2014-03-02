@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,93 +25,134 @@ import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.parser.NxParser;
 
 public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
-	
-	private List<Node[]> cubes;
-	private List<Node[]> measures;
-	private List<Node[]> dimensions;
-	private List<Node[]> hierarchies;
-	private List<Node[]> levels;
-	private List<Node[]> members;
+
+	public List<Node[]> cubes;
+	public List<Node[]> measures;
+	public List<Node[]> dimensions;
+	public List<Node[]> hierarchies;
+	public List<Node[]> levels;
+	public List<Node[]> members;
+
 	private SailRepository repo;
-	
-	public BaseCubeSparqlIterator(SailRepository repo, List<Node[]> cubes, List<Node[]> measures,
-			List<Node[]> dimensions, List<Node[]> hierarchies,
-			List<Node[]> levels, List<Node[]> members) {
-		// We assume that basecube has a repo with populated according to metadata
+	private Iterator<Node[]> iterator;
+
+	public BaseCubeSparqlIterator(SailRepository repo, List<Node[]> cubes,
+			List<Node[]> measures, List<Node[]> dimensions,
+			List<Node[]> hierarchies, List<Node[]> levels, List<Node[]> members) {
+		// We assume that basecube has a repo with populated according to
+		// metadata
 		this.repo = repo;
-		//We assume that cubes to BaseCubeOp always refer to one single cube
+		// We assume that cubes to BaseCubeOp always refer to one single cube
 		assert cubes.size() <= 2;
+
 		this.cubes = cubes;
 		this.measures = measures;
 		this.dimensions = dimensions;
 		this.hierarchies = hierarchies;
 		this.levels = levels;
 		this.members = members;
-	}
-	
-	/**
-	 * We only return always the same thing.
-	 */
-	public boolean hasNext() {
-		
-		return true;
-	}
 
-	@Override
-	public Object next() {
-		List<List<Node[]>> metadata = new ArrayList<List<Node[]>>();
-		metadata.add(cubes);
-		metadata.add(measures);
-		metadata.add(dimensions);
-		metadata.add(hierarchies);
-		metadata.add(levels);
-		metadata.add(members);
-		
 		// Instead of simply returning the metadata, we can return the
 		// List of List of nodes representing the observations.
-		// We create a SPARQL query asking for all observations 
+		// We create a SPARQL query asking for all observations
 		// with all dimensions and measures.
-		
+
 		// We collect necessary parts of the SPARQL query.
 		String selectClause = " ";
 		String whereClause = " ";
-		String groupByClause = " group by ";
-		String orderByClause = " order by ";
-		
+
 		// 1. Get cube add triple patterns
-		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil.getNodeResultFields(cubes.get(0));
+		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(cubes.get(0));
 
 		// Cube gives us the URI of the dataset that we want to resolve
 		String ds = cubes.get(1)[cubemap.get("?CUBE_NAME")].toString();
 
 		// We could also make obs a variable.
-		whereClause += "?obs qb:dataSet" + ds + ". ";
-		
-		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil.getNodeResultFields(dimensions.get(0));
+		whereClause += "?obs qb:dataSet <" + ds + ">. ";
+
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(dimensions.get(0));
 		for (int i = 1; i < dimensions.size(); i++) {
-			String dimensionProperty = dimensions.get(i)[dimensionmap.get("?DIMENSION_UNIQUE_NAME")].toString();
-			String dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToParameter(dimensionProperty);
-			whereClause += "?obs <"+dimensionProperty+"> ?"+dimensionPropertyVariable;
-			selectClause += " ?"+dimensionPropertyVariable;
+			String dimensionProperty = dimensions.get(i)[dimensionmap
+					.get("?DIMENSION_UNIQUE_NAME")].toString();
+
+			if (dimensionProperty
+					.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+				continue;
+			}
+			String dimensionPropertyVariable = Olap4ldLinkedDataUtil
+					.makeUriToParameter(dimensionProperty);
+			whereClause += " ?obs <" + dimensionProperty + "> ?"
+					+ dimensionPropertyVariable + ". ";
+			selectClause += " ?" + dimensionPropertyVariable;
 		}
-		
-		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil.getNodeResultFields(measures.get(0));
+
+		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(measures.get(0));
 		for (int i = 1; i < measures.size(); i++) {
-			String measureProperty = measures.get(i)[measuremap.get("?MEASURE_UNIQUE_NAME")].toString();
-			String measurePropertyVariable = Olap4ldLinkedDataUtil.makeUriToParameter(measureProperty);
-			whereClause += "?obs <"+measureProperty+"> ?"+measurePropertyVariable;
-			selectClause += " ?"+measurePropertyVariable;
+			Node[] measure = measures.get(i);
+			// As always, remove Aggregation Function from Measure Name
+			String measureProperty = measure[measuremap
+					.get("?MEASURE_UNIQUE_NAME")].toString().replace(
+					"AGGFUNC"
+							+ measure[measuremap.get("?MEASURE_AGGREGATOR")]
+									.toString()
+									.replace("http://purl.org/olap#", "")
+									.toUpperCase(), "");
+
+			// We also remove aggregation function from Measure Property
+			// Variable so
+			// that the same property is not selected twice.
+			String measurePropertyVariable = Olap4ldLinkedDataUtil
+					.makeUriToParameter(measure[measuremap
+							.get("?MEASURE_UNIQUE_NAME")].toString().replace(
+							"AGGFUNC"
+									+ measure[measuremap
+											.get("?MEASURE_AGGREGATOR")]
+											.toString()
+											.replace("http://purl.org/olap#",
+													"").toUpperCase(), ""));
+
+			// Unique name for variable
+			String uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
+					.makeUriToParameter(measure[measuremap
+							.get("?MEASURE_UNIQUE_NAME")].toString());
+
+			// We take the aggregator from the measure
+			// Since we use OPTIONAL, there might be empty columns,
+			// which is why we need
+			// to convert them to decimal.
+			// selectClause += " ("
+			// + measure[measuremap.get("?MEASURE_AGGREGATOR")].toString()
+			// .replace("http://purl.org/olap#", "") + "(?"
+			// + measurePropertyVariable + ") as ?"
+			// + uniqueMeasurePropertyVariable + ")";
+
+			selectClause += "?" + measurePropertyVariable + " ";
+
+			whereClause += "?obs <" + measureProperty + "> ?"
+					+ measurePropertyVariable + ".";
 		}
-		
-		
+
 		String query = Olap4ldLinkedDataUtil.getStandardPrefixes() + "select "
-				+ selectClause + "where { " + whereClause + "}" + groupByClause
-				+ orderByClause;
-		
-		
-		return sparql(query);
+				+ selectClause + " where { " + whereClause + " } ";
+
+		this.iterator = sparql(query).iterator();
 	}
-	
+
+	/**
+	 * We only return always the same thing.
+	 */
+	public boolean hasNext() {
+		return iterator.hasNext();
+	}
+
+	@Override
+	public Object next() {
+		return iterator.next();
+	}
+
 	/**
 	 * Simply copied over from embedded sesame.
 	 * 
@@ -162,7 +204,7 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 					nxx = nxp.next();
 					myBindings.add(nxx);
 				} catch (Exception e) {
-					
+
 					// Might happen often, therefore config only
 					Olap4ldUtil._log
 							.config("NxParser: Could not parse properly: "

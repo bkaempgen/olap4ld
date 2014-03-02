@@ -1519,7 +1519,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// Boolean values need to be returned as "true" or "false".
 		// Get all measures
 		String querytemplate = Olap4ldLinkedDataUtil
-				.readInQueryTemplate("sesame_getMeasures.txt");
+				.readInQueryTemplate("sesame_getMeasures_withoutimplicit.txt");
 		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
 				askForFrom(true));
 		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);

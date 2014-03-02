@@ -37,7 +37,6 @@ import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.DrillAcrossOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
-import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine_GDP_per_Capita;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataCubesEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;

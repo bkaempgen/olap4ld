@@ -20,8 +20,7 @@ import org.semanticweb.yars.nx.Node;
  * 
  * @author benedikt
  */
-public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
-		Visitor {
+public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements Visitor {
 	// the new root node
 	PhysicalOlapIterator _root;
 
@@ -47,19 +46,41 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 		this.repo = repo;
 	}
 
+	/**
+	 * 
+	 * * Design decisions 
+	** The LogicalOperators only get as input a cube and the parameters, but not specifically the metadata of the cube.
+	** The PhysicalIterators get as input another iterator and the parameters, but also the metadata of the iterator.
+	** I create PhysicalIterators for metadata, they get as input the repo and the parameters (restrictions).
+	** Every LogicalOperator could be wrapped, get as input the identifier of a cube and the parameters and return a new identifier.
+	** Mioeur2eur is another LogicalOperator that could get wrapped, get as input the identifier of a cube and the parameters and return a new identifier. Mioeur2eur would also include PhysicalIterators. The Mioeur2eur iteratore would get as input another iterator, BaseCubeIterator, and return the conversion.
+	** Example: http://olap4ld.googlecode.com/dic/aggreg95#00; http://olap4ld.googlecode.com/dic/geo#US; http://olap4ld.googlecode.com/dic/indic_na#VI_PPS_EU28_HAB; 2012; 149; 
+	 * 
+	 */
 	public void visit(Object op) throws QueryException {
 
 		if (op instanceof DrillAcrossOp) {
 			DrillAcrossOp so = (DrillAcrossOp) op;
-			
-			// Most probable, the _root will be null		
+
+			// Most probable, the _root will be null
 			so.inputop1.accept(this);
 			PhysicalOlapIterator root1 = _root;
-			
+
 			so.inputop2.accept(this);
 			PhysicalOlapIterator root2 = _root;
+
+			DrillAcrossSparqlIterator drillacrosscube = new DrillAcrossSparqlIterator(
+					root1, root2, cubes, measures,
+					dimensions, hierarchies, levels,
+					members);
 			
-			PhysicalOlapIterator drillacrosscube = new DrillAcrossSparqlIterator(root1, root2);
+			cubes = drillacrosscube.cubes;
+			measures = drillacrosscube.measures;
+			dimensions = drillacrosscube.dimensions;
+			hierarchies = drillacrosscube.hierarchies;
+			levels = drillacrosscube.levels;
+			members = drillacrosscube.members;
+			
 			_root = drillacrosscube;
 		}
 
@@ -71,8 +92,18 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 			SliceOp so = (SliceOp) op;
 
 			so.inputOp.accept(this);
-			PhysicalOlapIterator slicecube = new SliceSparqlIterator(_root,
-					so.slicedDimensions);
+			
+			SliceSparqlIterator slicecube = new SliceSparqlIterator(_root,
+					cubes, measures, dimensions, hierarchies,
+					levels, members, so.slicedDimensions);
+			
+			cubes = slicecube.cubes;
+			measures = slicecube.measures;
+			dimensions = slicecube.dimensions;
+			hierarchies = slicecube.hierarchies;
+			levels = slicecube.levels;
+			members = slicecube.members;
+			
 			_root = slicecube;
 		}
 
@@ -93,11 +124,18 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 			// ExecIterator bi = null;
 			// _root = bi;
 
-			// Instead of having repo as parameter one could make the 
+			// Instead of having repo as parameter one could make the
 			// iterator start and populate its own repo.
-			PhysicalOlapIterator basecube = new BaseCubeSparqlIterator(repo,
-					so.cubes, so.measures, so.dimensions,
-					so.hierarchies, so.levels, so.members);
+			cubes = so.cubes;
+			measures = so.measures;
+			dimensions = so.dimensions;
+			hierarchies = so.hierarchies;
+			levels = so.levels;
+			members = so.members;
+			// We do not need to change those metadata.
+
+			BaseCubeSparqlIterator basecube = new BaseCubeSparqlIterator(repo,
+					so.cubes, measures, dimensions, hierarchies, levels, members);
 			_root = basecube;
 		}
 
@@ -108,13 +146,13 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 	 * load RDF to store.
 	 */
 	public Object getNewRoot() {
-		
+
 		// We collect necessary parts of the SPARQL query.
 		String selectClause = " ";
 		String whereClause = " ";
 		String groupByClause = " group by ";
 		String orderByClause = " order by ";
-		
+
 		if (_root instanceof DrillAcrossSparqlIterator) {
 			return _root;
 		} else {
@@ -126,16 +164,17 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 			List<Node[]> hierarchies = metadata.get(3);
 			List<Node[]> levels = metadata.get(4);
 			List<Node[]> members = metadata.get(5);
-			
+
 			// BaseCube
-			
-			Map<String, Integer> map = Olap4ldLinkedDataUtil.getNodeResultFields(cubes.get(0));
+
+			Map<String, Integer> map = Olap4ldLinkedDataUtil
+					.getNodeResultFields(cubes.get(0));
 
 			// Cube gives us the URI of the dataset that we want to resolve
 			String ds = cubes.get(1)[map.get("CUBE_NAME")].toString();
 
 			whereClause += "?obs qb:dataSet" + ds + ". ";
-			
+
 			// Projections
 			List<Node[]> projections = measures;
 
@@ -143,8 +182,7 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 			// Any measure should be contained only once, unless calculated
 			// measures
 			HashMap<Integer, Boolean> measureMap = new HashMap<Integer, Boolean>();
-			map = Olap4ldLinkedDataUtil
-					.getNodeResultFields(projections.get(0));
+			map = Olap4ldLinkedDataUtil.getNodeResultFields(projections.get(0));
 			boolean first = true;
 
 			for (Node[] measure : projections) {
@@ -155,7 +193,8 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 				}
 
 				// For formulas, this is different
-				// XXX: Needs to be put before creating the Logical Olap Operator
+				// XXX: Needs to be put before creating the Logical Olap
+				// Operator
 				// Tree
 				// Will probably not work since MEASURE_AGGREGATOR
 				if (measure[map.get("?MEASURE_AGGREGATOR")].toString().equals(
@@ -172,11 +211,13 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 					// measure
 					// .getExpression()).getArgList().get(1)).getMember();
 					//
-					// String operatorName = ((CallNode) measure.getExpression())
+					// String operatorName = ((CallNode)
+					// measure.getExpression())
 					// .getOperatorName();
 
 					// Measure
-					// Measure property has aggregator attached to it at the end,
+					// Measure property has aggregator attached to it at the
+					// end,
 					// e.g., "AVG".
 					// String measureProperty1 = Olap4ldLinkedDataUtil
 					// .convertMDXtoURI(measure1.getUniqueName()).replace(
@@ -184,28 +225,33 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 					// We do not encode the aggregation function in the measure,
 					// any
 					// more.
-					// String measurePropertyVariable1 = makeUriToParameter(measure1
+					// String measurePropertyVariable1 =
+					// makeUriToParameter(measure1
 					// .getUniqueName());
 					//
 					// String measureProperty2 = Olap4ldLinkedDataUtil
 					// .convertMDXtoURI(measure2.getUniqueName()).replace(
 					// "AGGFUNC" + measure.getAggregator().name(), "");
-					// String measurePropertyVariable2 = makeUriToParameter(measure2
+					// String measurePropertyVariable2 =
+					// makeUriToParameter(measure2
 					// .getUniqueName());
 
 					// We take the aggregator from the measure
-					// selectClause += " " + measure1.getAggregator().name() + "(?"
+					// selectClause += " " + measure1.getAggregator().name() +
+					// "(?"
 					// + measurePropertyVariable1 + " " + operatorName + " "
 					// + "?" + measurePropertyVariable2 + ")";
 					//
 					// // I have to select them only, if we haven't inserted any
 					// // before.
-					// if (!measureMap.containsKey(measureProperty1.hashCode())) {
+					// if (!measureMap.containsKey(measureProperty1.hashCode()))
+					// {
 					// whereClause += " ?obs <" + measureProperty1 + "> ?"
 					// + measurePropertyVariable1 + ". ";
 					// measureMap.put(measureProperty1.hashCode(), true);
 					// }
-					// if (!measureMap.containsKey(measureProperty2.hashCode())) {
+					// if (!measureMap.containsKey(measureProperty2.hashCode()))
+					// {
 					// whereClause += " ?obs <" + measureProperty2 + "> ?"
 					// + measurePropertyVariable2 + ". ";
 					// measureMap.put(measureProperty2.hashCode(), true);
@@ -218,9 +264,9 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 							.get("?MEASURE_UNIQUE_NAME")].toString().replace(
 							"AGGFUNC"
 									+ measure[map.get("?MEASURE_AGGREGATOR")]
-											.toString().replace(
-													"http://purl.org/olap#", ""),
-							"");
+											.toString()
+											.replace("http://purl.org/olap#",
+													""), "");
 
 					// We also remove aggregation function from Measure Property
 					// Variable so
@@ -229,25 +275,27 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 							.get("?MEASURE_UNIQUE_NAME")].toString().replace(
 							"AGGFUNC"
 									+ measure[map.get("?MEASURE_AGGREGATOR")]
-											.toString().replace(
-													"http://purl.org/olap#", ""),
-							""));
-					
+											.toString()
+											.replace("http://purl.org/olap#",
+													""), ""));
+
 					// Unique name for variable
 					String uniqueMeasurePropertyVariable = makeUriToParameter(measure[map
-					                                    						.get("?MEASURE_UNIQUE_NAME")].toString());
+							.get("?MEASURE_UNIQUE_NAME")].toString());
 
 					// We take the aggregator from the measure
 					// Since we use OPTIONAL, there might be empty columns,
 					// which is why we need
 					// to convert them to decimal.
 					selectClause += " ("
-							+ measure[map.get("?MEASURE_AGGREGATOR")].toString()
-									.replace("http://purl.org/olap#", "") + "(?"
+							+ measure[map.get("?MEASURE_AGGREGATOR")]
+									.toString().replace(
+											"http://purl.org/olap#", "") + "(?"
 							+ measurePropertyVariable + ") as ?"
 							+ uniqueMeasurePropertyVariable + ")";
 
-					// According to spec, every measure needs to be set for every
+					// According to spec, every measure needs to be set for
+					// every
 					// observation only once
 					if (!measureMap.containsKey(measureProperty.hashCode())) {
 						whereClause += "?obs <" + measureProperty + "> ?"
@@ -256,16 +304,15 @@ public class LogicalOlap2SparqlSesameDrillAcrossVisitor implements
 					}
 				}
 			}
-			
+
 		}
-		
+
 		// Dice
 		// Not possible currently
-		
+
 		// Slice
-		
+
 		// Rollup
-		
 
 		// Initialise triple store with dataset URI
 

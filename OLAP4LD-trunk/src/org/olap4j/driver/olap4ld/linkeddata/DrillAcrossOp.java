@@ -12,17 +12,21 @@ public class DrillAcrossOp implements LogicalOlapOp {
 	}
 
 	public String toString() {
-		return "Drill-across(" + inputop1.toString() + ", " + inputop2.toString()
-				+ ")";
+		return "Drill-across(" + inputop1.toString() + ", "
+				+ inputop2.toString() + ")";
 	}
-	
+
 	@Override
-	public void accept(Visitor v)
-			throws QueryException {
+	public void accept(Visitor v) throws QueryException {
 		v.visit(this);
-		// visit the projection input op
-		inputop1.accept(v);
-		inputop2.accept(v);
+
+		if (v instanceof LogicalOlap2SparqlSesameDrillAcrossVisitor) {
+			// nothing more to visit
+		} else {
+			// visit the projection input op
+			inputop1.accept(v);
+			inputop2.accept(v);
+		}
 	}
 
 }

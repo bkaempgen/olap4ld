@@ -14,6 +14,7 @@ import org.semanticweb.yars.nx.Node;
  */
 public class BaseCubeOp implements LogicalOlapOp {
 
+	// XXX: Should be removed after we have transformed metadata queries to iterators.
 	public List<Node[]> cubes;
 	public List<Node[]> measures;
 	public List<Node[]> dimensions;

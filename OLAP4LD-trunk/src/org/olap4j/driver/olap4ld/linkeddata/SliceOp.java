@@ -15,8 +15,9 @@ import org.semanticweb.yars.nx.Node;
  */
 public class SliceOp implements LogicalOlapOp {
 
-	public LogicalOlapOp inputOp;
+	public LogicalOlapOp inputOp;	
 	public List<Node[]> slicedDimensions;
+	
 
 	public SliceOp(LogicalOlapOp inputOp, List<Node[]> slicedDimensions) {
 		this.inputOp = inputOp;
@@ -31,7 +32,7 @@ public class SliceOp implements LogicalOlapOp {
 				Map<String, Integer> map = Olap4ldLinkedDataUtil
 						.getNodeResultFields(slicedDimensions.get(0));
 
-				dimensionsStringArray[i-1] = slicedDimensions.get(i)[map
+				dimensionsStringArray[i - 1] = slicedDimensions.get(i)[map
 						.get("?DIMENSION_UNIQUE_NAME")].toString();
 			}
 
@@ -45,11 +46,14 @@ public class SliceOp implements LogicalOlapOp {
 	}
 
 	@Override
-	public void accept(Visitor v)
-			throws QueryException {
+	public void accept(Visitor v) throws QueryException {
 		v.visit(this);
-		// visit the projection input op
-		inputOp.accept(v);
-	}
 
+		if (v instanceof LogicalOlap2SparqlSesameDrillAcrossVisitor) {
+			// Nothing more to visit;
+		} else {
+			// visit the projection input op
+			inputOp.accept(v);
+		}
+	}
 }

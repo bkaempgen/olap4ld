@@ -1,26 +1,65 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.semanticweb.yars.nx.Node;
 
 public class DrillAcrossSparqlIterator implements PhysicalOlapIterator {
 	
-	private PhysicalOlapIterator inputiterator1;
-	private PhysicalOlapIterator inputiterator2;
+	// The different metadata parts
+	List<Node[]> cubes;
+	List<Node[]> measures;
+	List<Node[]> dimensions;
+	List<Node[]> hierarchies;
+	List<Node[]> levels;
+	List<Node[]> members;
+	
+	private Iterator<Node[]> iterator;
 
 	public DrillAcrossSparqlIterator(PhysicalOlapIterator inputiterator1,
-			PhysicalOlapIterator inputiterator2) {
-		this.inputiterator1 = inputiterator1;
-		this.inputiterator2 = inputiterator2;
+			PhysicalOlapIterator inputiterator2, List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
+			List<Node[]> hierarchies, List<Node[]> levels,
+			List<Node[]> members) {
+		
+		this.cubes = cubes;
+		this.measures = measures;
+		this.dimensions = dimensions;
+		this.hierarchies = hierarchies;
+		this.levels = levels;
+		this.members = members;
+		
+		/* 
+		 * We create our own List<Node[]> result with every item 
+		 * 
+		 * Every Node[] contains for each dimension in the dimension list of the metadata a
+		 * member and for each measure in the measure list a value.
+		 */
+		List<Node[]> result1 = new ArrayList<Node[]>();
+		while (inputiterator1.hasNext()) {
+			Object nextObject = inputiterator1.next();
+			// Will be Node[]
+			Node[] node = (Node[]) nextObject;
+			result1.add(node);
+		}
+		
+		List<Node[]> result2 = new ArrayList<Node[]>();
+		while (inputiterator2.hasNext()) {
+			Object nextObject = inputiterator2.next();
+			// Will be Node[]
+			Node[] node = (Node[]) nextObject;
+			result2.add(node);
+		}
+		
+		// Two datasets are joined. For now, just return the first
+		
+		this.iterator = result1.iterator();
 	}
 
 	@Override
 	public boolean hasNext() {
-		return true;
+		return iterator.hasNext();
 	}
 
 	/**
@@ -55,13 +94,7 @@ public class DrillAcrossSparqlIterator implements PhysicalOlapIterator {
 //		}
 //		metadata.set(2, dimensions);
 		
-		List<List<Node[]>> results1 = (List<List<Node[]>>) inputiterator1.next();
-		
-		List<List<Node[]>> results2 = (List<List<Node[]>>) inputiterator2.next();
-		
-		// Two datasets are joined. For now, just return the first
-		
-		return results1;
+		return iterator.next();
 	}
 
 	@Override
