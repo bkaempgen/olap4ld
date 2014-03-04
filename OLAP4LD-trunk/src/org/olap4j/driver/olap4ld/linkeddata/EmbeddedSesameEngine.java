@@ -100,7 +100,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 */
 	private SailRepository repo;
 
-	private Integer MAX_LOAD_TRIPLE_SIZE = 100000;
+	private Integer MAX_LOAD_TRIPLE_SIZE = 10000000;
 
 	private Integer MAX_COMPLEX_CONSTRAINTS_TRIPLE_SIZE = 1000;
 
