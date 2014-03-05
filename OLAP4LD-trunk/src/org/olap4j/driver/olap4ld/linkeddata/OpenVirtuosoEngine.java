@@ -36,6 +36,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.olap4j.OlapException;
 import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
@@ -2606,5 +2607,12 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

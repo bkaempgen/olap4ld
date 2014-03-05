@@ -34,7 +34,7 @@ import junit.framework.TestCase;
 import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine_GDP_per_Capita;
+import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataCubesEngine;
 import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.layout.RectangularCellSetFormatter;
@@ -70,7 +70,7 @@ public class Metadata_QueryTest extends TestCase {
 			URL serverUrlObject = new URL("http://example.de");
 			List<String> datastructuredefinitions = new ArrayList<String>();
 			List<String> datasets = new ArrayList<String>();
-			lde = new EmbeddedSesameEngine_GDP_per_Capita(serverUrlObject,
+			lde = new EmbeddedSesameEngine(serverUrlObject,
 					datastructuredefinitions, datasets, "EMBEDDEDSESAME");
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block

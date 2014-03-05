@@ -2065,4 +2065,11 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 		loadedMap.clear();
 	}
 
+	@Override
+	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

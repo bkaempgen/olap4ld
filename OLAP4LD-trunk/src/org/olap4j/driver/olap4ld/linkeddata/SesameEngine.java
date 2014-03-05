@@ -1034,6 +1034,13 @@ public class SesameEngine implements LinkedDataCubesEngine {
 		return null;
 	}
 
+	@Override
+	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	// /**
 	// * Creates a SPARQL result for one specific cell.
 	// *

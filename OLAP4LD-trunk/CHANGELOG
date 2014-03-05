@@ -1,3 +1,24 @@
+==2014-03-05==
+* Refactored LDCEs:
+
+What LogicalOlapOperatorQueryPlanVisitor do we have?
+
+* Olap2SparqlSesameDerivedDatasetVisitor <= Was extended for Drill-across but now is more going towards "deriving datasets". Maybe, only for ConvertContext, we should materialise a new dataset.
+
+* Olap2SparqlSesameVisitor <= Should also for LDCX eventually support Drill-across but for now does not properly define logical operators. Assumes that rollup is executed for all levels, even if not rolled-up.
+
+To have several engines has the disadvantage that they share some functionality/logic, e.g., metadata queries, loading of cubes.
+
+If I see this correctly, we may for now have one engine that uses different "LogicalOlapOperatorQueryPlanVisitors".
+
+This one and only EmbeddedSesame engine includes possible preloads() in Iterators. Preloads() use LoadCube(). LoadCube() is provided as a method. Also provided as methods are Normalise() and IntegrityConstraints(). They should be run, after one or more datasets have been loaded.
+
+LoadCube() can later be better implemented using Data-Fu. I assume that the current loading is better than the old.
+
+We may also add getCubes() as Operators/Iterators.
+
+We now include both "implicit measures" as well as measures without explicit aggregation function. We have also added these measures as members to getMembers().
+
 ==2013-11-05==
 * Added example performance evaluation files in "testresources"
 * fixed error spelling of integrity check IC-8 of spec and continued working on slicer 

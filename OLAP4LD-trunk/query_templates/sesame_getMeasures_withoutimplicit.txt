@@ -19,7 +19,7 @@ WHERE {
 OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:range ?DATA_TYPE. } 
 OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = "en" ) } 
 
-OPTIONAL { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR } 
+FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR }
 OPTIONAL {?compSpec qb:expression ?EXPRESSION }
  
 BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 

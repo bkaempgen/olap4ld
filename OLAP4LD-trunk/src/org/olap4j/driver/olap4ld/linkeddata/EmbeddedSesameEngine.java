@@ -21,9 +21,12 @@ package org.olap4j.driver.olap4ld.linkeddata;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -53,6 +56,8 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.repository.sail.SailRepositoryConnection;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
+import org.openrdf.rio.RDFWriter;
+import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
@@ -66,7 +71,8 @@ import org.semanticweb.yars.nx.parser.NxParser;
  * @author b-kaempgen
  * 
  */
-public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
+public class EmbeddedSesameEngine implements
+		LinkedDataCubesEngine {
 
 	// Meta data attributes
 	private static final String DATASOURCEDESCRIPTION = "OLAP data from the statistical Linked Data cloud.";
@@ -142,31 +148,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			DATASOURCENAME = databasename;
 			DATASOURCEVERSION = "1.0";
 		}
-
-		// Those given URIs we load and add to the location map
-		for (String string : datastructuredefinitions) {
-			try {
-				String location = askForLocation(string);
-				if (!isStored(location)) {
-					loadInStore(location);
-				}
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		for (String string : datasets) {
-			try {
-				String location = askForLocation(string);
-				if (!isStored(location)) {
-					loadInStore(location);
-				}
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
 		initialize();
 	}
 
@@ -200,6 +181,204 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	}
 
 	/**
+	 * We now implement the pre-processing pipeline that shall result in a fully
+	 * integrated database (triple store, data warehouse). (Cal, A., Calvanese,
+	 * D., Giacomo, G. De, & Lenzerini, M. (2002). Data Integration under
+	 * Integrity Constraints, 262–279.)
+	 * 
+	 * @throws
+	 * @throws OlapException
+	 */
+	private void preload() throws OlapException {
+
+		try {
+			// First, we load everything that Data-Fu can create
+			// loadInStore(new URL(
+			// "http://127.0.0.1:8080/Data-Fu-Engine/data-fu/gdp_per_capita_experiment/triples"));
+
+			// Then, we load everything that Data-Fu cannot create
+			// We load all cubes
+			long time = System.currentTimeMillis();
+
+			// load and validate dataset requires to load cube
+			URL dataset;
+
+			// ----------------
+			// Load "GDP per capita - annual Data" ds and dsd
+			// URL dataset = new URL(
+			// "http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds");
+			// Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// loadCube(dataset);
+			// Shortcut
+			// loadInStore(new
+			// URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_nama_aux_gph_estatwrap.n3"));
+
+			// # Gross Domestic Product (GDP) per capita in Purchasing Power
+			// Standards (PPS)
+			// dataset = new URL(
+			// "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds");
+			// Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// loadCube(dataset);
+
+			// ----------------
+			// Load "GDP and main components - Current prices [nama_gdp_c]" ds
+			// and dsd
+			// dataset = new URL(
+			// "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds");
+			// Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// loadCube(dataset);
+			// Shortcut
+			// loadInStore(new
+			// URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_nama_gdp_c_estatwrap.n3"));
+
+			// ----------------
+			// # Regional gross domestic product by NUTS 2 regions [tgs00003]
+			// (Estatwrap)
+			// <http://estatwrap.ontologycentral.com/id/tgs00003#ds> rdf:type
+			// qb:DataSet.
+			dataset = new URL(
+					"http://estatwrap.ontologycentral.com/id/tgs00003#ds");
+			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// loadCube(dataset);
+
+			// ----------------
+			// # Regional gross domestic product by NUTS 2 regions [tgs00003]
+			// (Eurostat LD)
+			// <http://eurostat.linked-statistics.org/data/tgs00003> rdf:type
+			// qb:DataSet.
+
+			// Problem: Eurostat LD provides wrong link between dataset and dsd:
+			// http://eurostat.linked-statistics.org/../dsd/tgs00003. Thus, dsd
+			// and everything else cannot be crawled, properly. Solution: I
+			// manually add the triple beforehand.
+
+			// Problem: dcterms:date could not be resolved.
+
+			String triples = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/dsd/tgs00003>. "
+					+ "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> _:comp. "
+					+ "_:comp <http://purl.org/linked-data/cube#measure> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. "
+					+ "<http://purl.org/dc/terms/date> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2000/01/rdf-schema#Literal>. ";
+
+			insertTriples(triples);
+
+			dataset = new URL(
+					"http://eurostat.linked-statistics.org/data/tgs00003");
+			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// loadCube(dataset);
+
+			// Problem: Wrong dsd has to be removed
+			triples = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/../dsd/tgs00003>. ";
+
+			deleteTriples(triples);
+
+			triples = "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> ?comp. "
+					+ "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
+			String where = "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
+			deleteTriplesWhere(triples, where);
+
+			// ----------------
+			// # Population on 1 January by age and sex [demo_pjan] (Estatwrap)
+			// <http://estatwrap.ontologycentral.com/id/demo_pjan#ds> rdf:type
+			// qb:DataSet.
+
+			// Problem: demo_pjan contains errors
+			// loadInStore(new
+			// URL("http://localhost:8080/Data-Fu-Engine/datasets/demo_pjan_ds_v3.rdf"));
+
+			dataset = new URL(
+					"http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
+			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// loadCube(dataset);
+			// Shortcut
+			// loadInStore(new
+			// URL("http://localhost:8080/Data-Fu-Engine/datasets/gdp_per_capita_experiment_load_cubes_demo_pjan_estatwrap.n3"));
+
+			// ----------------
+			// # Population on 1 January by age and sex [demo_pjan] (Eurstat LD)
+			// <http://eurostat.linked-statistics.org/data/demo_pjan> rdf:type
+			// qb:DataSet.
+			dataset = new URL(
+					"http://eurostat.linked-statistics.org/data/demo_pjan");
+			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// loadCube(dataset);
+			// # Real GDP per Capita (real local currency units, various base
+			// years)
+			// <http://worldbank.270a.info/dataset/GDPPCKN> rdf:type qb:DataSet.
+
+			// Problem: this dataset only is available in a GZIP file
+			// loadInStore(new URL(
+			// "http://localhost:8080/Data-Fu-Engine/datasets/GDPPCKN.rdf"));
+			// loadInStore(new URL(
+			// "http://worldbank.270a.info/dataset/world-bank-indicators/structure"));
+
+			// dataset = new URL("http://worldbank.270a.info/dataset/GDPPCKN");
+			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// loadCube(dataset);
+
+			// Load other metadata objects?
+			time = System.currentTimeMillis() - time;
+			Olap4ldUtil._log.info("Load dataset: loading "
+					+ this.LOADED_TRIPLE_SIZE + " triples finished in " + time
+					+ "ms.");
+
+			// dump the graph in the specified format
+			System.out.println("\n==GRAPH DUMP==\n");
+			FileOutputStream fos = new FileOutputStream(
+					"/media/84F01919F0191352/Projects/2014/paper/Link to paper-drill-across/Link to task-data-fu/drill-across-paper/gdp_per_capita_experiment_load_cubes.n3");
+			dumpRDF(fos, RDFFormat.NTRIPLES);
+
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private void insertTriples(String triples) {
+		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
+				+ triples + " } }";
+		sparqlUpdate(query, false);
+	}
+
+	private void deleteTriples(String triples) {
+		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> DELETE DATA { "
+				+ triples + " }";
+		sparqlUpdate(query, false);
+	}
+
+	private void deleteTriplesWhere(String triples, String where) {
+		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> DELETE { "
+				+ triples + " } where { " + where + "}";
+		sparqlUpdate(query, false);
+	}
+
+	/**
+	 * dump RDF graph
+	 * 
+	 * @param out
+	 *            output stream for the serialization
+	 * @param outform
+	 *            the RDF serialization format for the dump
+	 * @return
+	 */
+	private void dumpRDF(OutputStream out, RDFFormat outform) {
+		try {
+			RepositoryConnection con = repo.getConnection();
+			try {
+				RDFWriter w = Rio.createWriter(outform, out);
+				con.export(w);
+			} finally {
+				con.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * Returns from String in order to retrieve information about these URIs
 	 * 
 	 * 
@@ -214,76 +393,27 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		return "";
 	}
 
-	/**
-	 * Helper Method for asking for location
-	 * 
-	 * @param uri
-	 * @return
-	 * @throws MalformedURLException
-	 * @throws IOException
-	 */
-	private String askForLocation(String uri) throws MalformedURLException {
+	private void sparqlUpdate(String query, boolean caching) {
+		Olap4ldUtil._log.config("SPARQL update query: " + query);
 
-		Olap4ldUtil._log.config("Ask for location: " + uri + "...");
-
-		URL url;
-		url = new URL(uri);
-
-		HttpURLConnection.setFollowRedirects(false);
-		HttpURLConnection connection;
 		try {
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestProperty("Accept", "application/rdf+xml");
-			String header = connection.getHeaderField("location");
-			// TODO: Could be that we need to check whether bogus comes out
-			// (e.g., Not found).
-			if (header != null) {
+			RepositoryConnection con = repo.getConnection();
 
-				// Header may be a absolute or relative URL
-				if (header.startsWith("http:") || header.startsWith("https:")) {
-					// absolute URL
-					uri = header;
-				} else {
-					/*
-					 * relative URL May be: Gleiche Domäne, Gleiche Ressource,
-					 * ein Pfad-Segment-Aufwärts, gleiches Pfad-Segment (see
-					 * http://de.wikipedia.org/wiki/Uniform_Resource_Locator#
-					 * Relative_URL)
-					 */
-					if (header.startsWith("/")) {
-						String domain = url.getHost();
-						String protocol = url.getProtocol();
-						int port = url.getPort();
-						if (port != 80 && port != -1) {
-							uri = protocol + "://" + domain + ":" + port
-									+ header;
-						} else {
-							uri = protocol + "://" + domain + header;
-						}
+			Update tupleQuery = con.prepareUpdate(QueryLanguage.SPARQL, query);
+			tupleQuery.execute();
 
-					} else if (header.startsWith("../")
-							|| header.startsWith("./")) {
-						// Header only contains the local uri
-						// Cut all off until first / from the back
-						int index = uri.lastIndexOf("/");
-						uri = uri.substring(0, index + 1) + header;
-					} else {
-						int index = uri.lastIndexOf("/");
-						uri = uri.substring(0, index + 1) + header;
-					}
-				}
-			}
-			// We should remove # uris
-			if (uri.contains("#")) {
-				int index = uri.lastIndexOf("#");
-				uri = uri.substring(0, index);
-			}
-		} catch (IOException e) {
-			throw new MalformedURLException(e.getMessage());
+			// do something interesting with the values here...
+			// con.close();
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedQueryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UpdateExecutionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-
-		Olap4ldUtil._log.config("... result: " + uri);
-		return uri;
 	}
 
 	/**
@@ -382,18 +512,47 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	}
 
 	/**
-	 * Loads location into store and mark it as stored.
+	 * Loads resource in store if 1) URI and location of resource not already
+	 * loaded 2) number of triples has not reached maximum.
 	 * 
 	 * @param location
 	 * @throws OlapException
 	 */
-	private void loadInStore(String location) throws OlapException {
+	private void loadInStore(URL resource) throws OlapException {
 		SailRepositoryConnection con = null;
+
+		// Check max loaded
+		String query = "select (count(?s) as ?count) where {?s ?p ?o}";
+		List<Node[]> result = sparql(query, false);
+		this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
+		Olap4ldUtil._log.config("Number of loaded triples: "
+				+ this.LOADED_TRIPLE_SIZE);
+
+		if (this.LOADED_TRIPLE_SIZE > this.MAX_LOAD_TRIPLE_SIZE) {
+			Olap4ldUtil._log
+					.warning("Warning: We have reached the maximum number of triples to load!");
+			throw new OlapException(
+					"Warning: Maximum storage capacity reached! Dataset contains too many triples.");
+		}
+
+		if (loadedMap.get(resource.hashCode()) != null
+				&& loadedMap.get(resource.hashCode()) == true) {
+			// Already loaded
+			return;
+		}
+
 		try {
+			URL location = Olap4ldLinkedDataUtil.askForLocation(resource);
+			if (loadedMap.get(location.hashCode()) != null
+					&& loadedMap.get(location.hashCode()) == true) {
+				// Already loaded
+				return;
+			}
+
+			String locationstring = location.toString();
 			Olap4ldUtil._log.config("Load in store: " + location);
 
 			con = repo.getConnection();
-			URL locationurl = new URL(location);
 
 			// Would not work since we cannot ask for the file size without
 			// downloading the file
@@ -415,104 +574,99 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// "Warning: Maximum storage capacity reached! Dataset too large.");
 			// }
 
-			if (location.endsWith(".rdf") || location.endsWith(".xml")) {
-				con.add(locationurl, locationurl.toString(), RDFFormat.RDFXML);
-			} else if (location.endsWith(".ttl")) {
-				con.add(locationurl, locationurl.toString(), RDFFormat.TURTLE);
+			// Guess file format
+			RDFFormat format = RDFFormat.forFileName(locationstring);
+			if (format != null) {
+				con.add(location, locationstring.toString(), format);
 			} else {
+				// Heuristics
 
-				// Guess file format
-				RDFFormat format = RDFFormat.forFileName(location);
-				if (format != null) {
-					con.add(locationurl, locationurl.toString(), format);
-				} else {
-					// Heuristics
-					// Check first line
-					InputStream is;
-					HttpURLConnection connection = (HttpURLConnection) locationurl
-							.openConnection();
+				InputStream is;
+				HttpURLConnection connection = (HttpURLConnection) location
+						.openConnection();
+				// We always try to get rdf/xml
+				connection.setRequestProperty("Accept", "application/rdf+xml");
+				format = RDFFormat.RDFXML;
 
-					// Error
-					if (connection.getResponseCode() >= 400) {
-						is = connection.getErrorStream();
-
-						BufferedReader rd = new BufferedReader(
-								new InputStreamReader(is));
-
-						String response = "";
-						String line;
-						while ((line = rd.readLine()) != null) {
-							response += line;
-						}
-						Olap4ldUtil._log
-								.warning("Warning: URL not possible to load: "
-										+ response);
-						rd.close();
-						is.close();
-					} else {
-						is = connection.getInputStream();
-
-						BufferedReader in = new BufferedReader(
-								new InputStreamReader(
-										connection.getInputStream()));
-
-						String inputLine;
-						// Read first line only.
-						// while ((inputLine = in.readLine()) != null) {
-						// }
-						inputLine = in.readLine();
-						if (inputLine != null
-								&& (inputLine
-										.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-										|| inputLine
-												.startsWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>") || inputLine
-											.startsWith("<"))) {
-							con.add(locationurl, locationurl.toString(),
-									RDFFormat.RDFXML);
-							Olap4ldUtil._log
-									.config("Had to guess format to be RDFXML: "
-											+ location);
-						} else {
-							con.add(locationurl, locationurl.toString(),
-									RDFFormat.TURTLE);
-							Olap4ldUtil._log
-									.config("Had to guess format to be Turtle: "
-											+ location);
-						}
-						in.close();
-						is.close();
-						connection.disconnect();
-					}
-
+				// Not acceptable
+				if (connection.getResponseCode() == 406) {
+					connection.disconnect();
+					connection = (HttpURLConnection) location.openConnection();
+					connection.setRequestProperty("Accept", "text/turtle");
+					format = RDFFormat.TURTLE;
 				}
+
+				// Error
+				if (connection.getResponseCode() >= 400) {
+					is = connection.getErrorStream();
+
+					BufferedReader rd = new BufferedReader(
+							new InputStreamReader(is));
+
+					String response = "";
+					String line;
+					while ((line = rd.readLine()) != null) {
+						response += line;
+					}
+					Olap4ldUtil._log
+							.warning("Warning: URL not possible to load: "
+									+ response);
+					rd.close();
+					is.close();
+				} else {
+					// is = connection.getInputStream();
+					//
+					// BufferedReader in = new BufferedReader(
+					// new InputStreamReader(is));
+					//
+					// // Check first line
+					// String inputLine;
+					// // Read first line only.
+					// // while ((inputLine = in.readLine()) != null) {
+					// // }
+					// inputLine = in.readLine();
+					// if (inputLine != null
+					// && (inputLine
+					// .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+					// || inputLine
+					// .startsWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
+					// || inputLine
+					// .startsWith("<"))) {
+					// Olap4ldUtil._log
+					// .config("Had to guess format to be RDFXML: "
+					// + location);
+					// format = RDFFormat.RDFXML;
+					//
+					// } else if (inputLine != null
+					// && (!inputLine
+					// .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+					// && !inputLine
+					// .startsWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
+					// || inputLine
+					// .startsWith("<"))) {
+					// Olap4ldUtil._log
+					// .config("Had to guess format to be Turtle: "
+					// + location);
+					// format = RDFFormat.TURTLE;
+					// // con.add(location, locationstring,
+					// // RDFFormat.TURTLE);
+					//
+					// } else {
+					// Olap4ldUtil._log
+					// .warning("Warning: URL not possible to load since input line is NULL.");
+					// }
+					// in.close();
+					// is.close();
+					InputStream inputstream = connection.getInputStream();
+					con.add(inputstream, locationstring, format);
+					connection.disconnect();
+				}
+
 			}
 
 			// Mark as loaded
+			loadedMap.put(resource.hashCode(), true);
 			loadedMap.put(location.hashCode(), true);
-
-			// Check max loaded
-			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
-			List<Node[]> result = sparql(query, false);
-			this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
-			Olap4ldUtil._log.config("Number of loaded triples: "
-					+ this.LOADED_TRIPLE_SIZE);
-
-			if (this.LOADED_TRIPLE_SIZE > this.MAX_LOAD_TRIPLE_SIZE) {
-				con.close();
-				Olap4ldUtil._log
-						.warning("Warning: We have reached the maximum number of triples to load!");
-				throw new OlapException(
-						"Warning: Maximum storage capacity reached! Dataset contains too many triples.");
-			}
-
-			if (con != null) {
-				try {
-					con.close();
-				} catch (RepositoryException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
 
 			// Log content only if log level accordingly
 			if (Olap4ldUtil._isDebug) {
@@ -523,6 +677,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				sparql(query, false);
 			}
 
+			con.close();
+
 		} catch (RepositoryException e) {
 			throw new OlapException("Problem with repository: "
 					+ e.getMessage());
@@ -530,6 +686,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// If this happens, it is not so bad.
 			e.printStackTrace();
 		} catch (RDFParseException e) {
+			// Try to continue on next line?
+			// int linenumber = e.getLineNumber();
+
 			// Since it happens often, we just log it in config
 			Olap4ldUtil._log.config("RDFParseException:" + e.getMessage());
 		} catch (IOException e) {
@@ -539,12 +698,200 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	}
 
 	/**
+	 * We load all data for a cube. We also normalise and do integrity checks.
 	 * 
 	 * @param location
-	 * @return boolean value say whether location already loaded
 	 */
-	private boolean isStored(String location) {
-		return this.loadedMap.containsKey(location.hashCode());
+	private void loadCube(URL uri) throws OlapException {
+		try {
+
+			// If we have cube uri and location is not loaded, yet, we start
+			// collecting all information
+
+			loadInStore(uri);
+
+			// For everything else: Check whether really cube
+			RepositoryConnection con;
+			con = repo.getConnection();
+
+			// qb:structure is more robust than a qb:DataSet.
+			String testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> ASK { ?CUBE_NAME qb:structure ?dsd. FILTER (?CUBE_NAME = <"
+					+ uri + ">)}";
+			BooleanQuery booleanQuery = con.prepareBooleanQuery(
+					QueryLanguage.SPARQL, testquery);
+			boolean isDataset = booleanQuery.evaluate();
+			con.close();
+
+			if (!isDataset) {
+				throw new OlapException(
+						"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "
+								+ uri + "!");
+			} else {
+
+				// If loading ds, also load dsd. Ask for DSD URI and
+				// load
+				String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
+						+ uri + "> qb:structure ?dsd}";
+				List<Node[]> dsd = sparql(query, true);
+				// There should be a dsd
+				// Note in spec:
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+				if (dsd.size() <= 1) {
+					throw new OlapException(
+							"A cube should serve a data structure definition!");
+				} else {
+					// Get the second
+					URL dsduri = new URL(dsd.get(1)[0].toString());
+
+					loadInStore(dsduri);
+
+				}
+
+				// If loading ds, also load measures
+				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?measure WHERE {<"
+						+ uri
+						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:measure ?measure}";
+				List<Node[]> measures = sparql(query, true);
+				// There should be a dsd
+				// Note in spec:
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+				boolean first = true;
+				for (Node[] nodes : measures) {
+					if (first) {
+						first = false;
+						continue;
+					}
+					URL measureuri = new URL(nodes[0].toString());
+					loadInStore(measureuri);
+				}
+
+				// If loading ds, also load dimensions
+				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dimension WHERE {<"
+						+ uri
+						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension}";
+				List<Node[]> dimensions = sparql(query, true);
+				// There should be a dsd
+				// Note in spec:
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+				if (dimensions.size() <= 1) {
+					throw new OlapException("A cube should serve a dimension!");
+				} else {
+					first = true;
+					for (Node[] nodes : dimensions) {
+						if (first) {
+							first = false;
+							continue;
+						}
+						URL dimensionuri = new URL(nodes[0].toString());
+
+						loadInStore(dimensionuri);
+					}
+				}
+
+				// If loading ds, also load codelists
+				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?codelist WHERE {<"
+						+ uri
+						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension qb:codeList ?codelist}";
+				List<Node[]> codelists = sparql(query, true);
+				// There should be a dsd
+				// Note in spec:
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+				if (codelists.size() <= 1) {
+					;
+				} else {
+					first = true;
+					// So far, members are not crawled.
+					for (Node[] nodes : codelists) {
+						if (first) {
+							first = false;
+							continue;
+						}
+
+						URL codelisturi = new URL(nodes[0].toString());
+						loadInStore(codelisturi);
+					}
+				}
+			}
+
+			// We need to materialise implicit information
+			Olap4ldUtil._log.info("Run normalisation algorithm on datasets");
+
+			long time = System.currentTimeMillis();
+			runNormalizationAlgorithm();
+
+			// Own normalization and inferencing.
+
+			/*
+			 * SKOS:
+			 * 
+			 * Since 1) skos:topConceptOf is a sub-property of skos:inScheme. 2)
+			 * skos:topConceptOf is owl:inverseOf the property
+			 * skos:hasTopConcept 3) The rdfs:domain of skos:hasTopConcept is
+			 * the class skos:ConceptScheme.: ?conceptScheme skos:hasTopConcept
+			 * ?concept. => ?concept skos:inScheme ?conceptScheme.
+			 */
+			// String updateQuery = TYPICALPREFIXES
+			// +
+			// " INSERT { ?concept skos:inScheme ?codelist.} WHERE { ?codelist skos:hasTopConcept ?concept }; ";
+			// Update updateQueryQuery = con.prepareUpdate(
+			// QueryLanguage.SPARQL, updateQuery);
+			// updateQueryQuery.execute();
+
+			time = System.currentTimeMillis() - time;
+			Olap4ldUtil._log
+					.info("Run normalisation algorithm on dataset: finished in "
+							+ time + "ms.");
+
+			// Now that we presumably have loaded all necessary
+			// data, we check integrity constraints
+
+			Olap4ldUtil._log.info("Check integrity constraints on datasets.");
+			time = System.currentTimeMillis();
+			checkIntegrityConstraints();
+
+			// Own checks:
+			con = repo.getConnection();
+
+			String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
+
+			// Datasets should have at least one
+			// observation
+			testquery = prefixbindings
+					+ "ASK { ?CUBE_NAME a qb:DataSet. FILTER NOT EXISTS { ?obs qb:dataSet ?CUBE_NAME. } }";
+			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+					testquery);
+			if (booleanQuery.evaluate() == true) {
+				throw new OlapException(
+						"Failed own check: Dataset should have at least one observation. ");
+			}
+
+			// XXX Possible other checks
+			// No dimensions
+			// No aggregation function
+			// Code list empty
+			// No member
+
+			time = System.currentTimeMillis() - time;
+			Olap4ldUtil._log
+					.info("Check integrity constraints on dataset: finished in "
+							+ time + "ms.");
+
+			// Important!
+
+			con.close();
+		} catch (RepositoryException e) {
+			throw new OlapException("Problem with repository: "
+					+ e.getMessage());
+		} catch (QueryEvaluationException e) {
+			throw new OlapException("Problem with query evaluation: "
+					+ e.getMessage());
+		} catch (MalformedQueryException e) {
+			throw new OlapException("Problem with malformed query: "
+					+ e.getMessage());
+		} catch (MalformedURLException e) {
+			throw new OlapException("Problem with malformed url: "
+					+ e.getMessage());
+		}
 	}
 
 	/**
@@ -575,7 +922,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 * @return
 	 */
 	public List<Node[]> getDatabases(Restrictions restrictions) {
-
 		/*
 		 * DISCOVER_DATASOURCES(new MetadataColumn("DataSourceName"), new
 		 * MetadataColumn("DataSourceDescription"), new MetadataColumn("URL"),
@@ -653,8 +999,31 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		Olap4ldUtil._log.config("Linked Data Engine: Get Cubes...");
 
+		// We now assume that we can also query for a global dataset identified
+		// by a
+		// comma separated list of datasets. For now, since we are interested in
+		// all possible
+		// derived datasets from a set of datasets.
+		// Yet, we probably should either start with an MDX query or an Logical
+		// Operator Tree
+		// defining an information need. Although we might also just be
+		// interested in all
+		// possible derived datasets of a set of datasets.
+		try {
+			preload();
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// For now, we simply preload.
 		if (restrictions.cubeNamePattern != null) {
-			loadAndValidateDataset(restrictions.cubeNamePattern);
+			try {
+				loadCube(new URL(restrictions.cubeNamePattern));
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else {
 			Olap4ldUtil._log
 					.config("In this situation, we cannot load and validate a dataset!");
@@ -684,306 +1053,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	}
 
-	/**
-	 * Depending on the restrictions, we check whether sufficient Linked Data
-	 * has been gathered. If not, we gather more or throw exception.
-	 * 
-	 * Has formerly been called "checkSuffientInformationCrawled"
-	 * 
-	 * @param restrictions
-	 */
-	private void loadAndValidateDataset(String uri) throws OlapException {
-		// For now, if only cube is asked for, we load ds and dsd and run checks
-		try {
-
-			// There is no need to translate to URI, since restrictions
-			// already contain URI representation.
-
-			if (!isStored(uri)) {
-
-				// We load the entire cube
-				Olap4ldUtil._log.info("Load dataset: " + uri);
-				long time = System.currentTimeMillis();
-				
-				// load and validate dataset requires to load cube
-				loadCube(uri);
-				
-				// Load other metadata objects?
-				time = System.currentTimeMillis() - time;
-				Olap4ldUtil._log.info("Load dataset: loading "
-						+ this.LOADED_TRIPLE_SIZE + " triples finished in "
-						+ time + "ms.");
-
-				// We need to materialise implicit information
-				Olap4ldUtil._log
-						.info("Run normalisation algorithm on dataset: " + uri);
-
-				time = System.currentTimeMillis();
-				runNormalizationAlgorithm();
-
-				// Own normalization and inferencing.
-
-				RepositoryConnection con;
-
-				// con = repo.getConnection();
-
-				/*
-				 * SKOS:
-				 * 
-				 * Since 1) skos:topConceptOf is a sub-property of
-				 * skos:inScheme. 2) skos:topConceptOf is owl:inverseOf the
-				 * property skos:hasTopConcept 3) The rdfs:domain of
-				 * skos:hasTopConcept is the class skos:ConceptScheme.:
-				 * ?conceptScheme skos:hasTopConcept ?concept. => ?concept
-				 * skos:inScheme ?conceptScheme.
-				 */
-				// String updateQuery = TYPICALPREFIXES
-				// +
-				// " INSERT { ?concept skos:inScheme ?codelist.} WHERE { ?codelist skos:hasTopConcept ?concept }; ";
-				// Update updateQueryQuery = con.prepareUpdate(
-				// QueryLanguage.SPARQL, updateQuery);
-				// updateQueryQuery.execute();
-
-				time = System.currentTimeMillis() - time;
-				Olap4ldUtil._log
-						.info("Run normalisation algorithm on dataset: finished in "
-								+ time + "ms.");
-
-				// Now that we presumably have loaded all necessary
-				// data, we check integrity constraints
-
-				Olap4ldUtil._log
-						.info("Check integrity constraints on dataset: " + uri);
-				time = System.currentTimeMillis();
-				checkIntegrityConstraints();
-
-				// Own checks:
-				con = repo.getConnection();
-
-				String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
-
-				// Dataset should have at least one
-				// observation
-				String testquery = prefixbindings
-						+ "ASK { ?obs qb:dataSet ?CUBE_NAME FILTER (?CUBE_NAME = <"
-						+ uri + ">)}";
-				BooleanQuery booleanQuery = con.prepareBooleanQuery(
-						QueryLanguage.SPARQL, testquery);
-				if (booleanQuery.evaluate() == false) {
-					throw new OlapException(
-							"Failed own check: Dataset should have at least one observation. ");
-				}
-
-				// XXX Possible other checks
-				// No dimensions
-				// No aggregation function
-				// Code list empty
-				// No member
-
-				time = System.currentTimeMillis() - time;
-				Olap4ldUtil._log
-						.info("Check integrity constraints on dataset: finished in "
-								+ time + "ms.");
-
-				// Important!
-				con.close();
-
-			}
-		} catch (RepositoryException e) {
-			throw new OlapException("Problem with repository: "
-					+ e.getMessage());
-		} catch (MalformedQueryException e) {
-			throw new OlapException("Problem with malformed query: "
-					+ e.getMessage());
-		} catch (QueryEvaluationException e) {
-			throw new OlapException("Problem with query evaluation: "
-					+ e.getMessage());
-		}
-	}
-
-	/**
-	 * We load all data for a cube.
-	 * 
-	 * @param location
-	 */
-	private void loadCube(String uri) throws OlapException {
-		try {
-
-			// We also store URI in map
-			String location = askForLocation(uri);
-
-			// If we have cube uri and location is not loaded, yet, we start
-			// collecting all information
-			if (!isStored(location)) {
-
-				loadInStore(location);
-				// For quicker check, also set loaded uri
-				loadedMap.put(uri.hashCode(), true);
-
-				// For everything else: Check whether really cube
-				RepositoryConnection con;
-				con = repo.getConnection();
-
-				// qb:structure is more robust than a qb:DataSet.
-				String testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> ASK { ?CUBE_NAME qb:structure ?dsd. FILTER (?CUBE_NAME = <"
-						+ uri + ">)}";
-				BooleanQuery booleanQuery = con.prepareBooleanQuery(
-						QueryLanguage.SPARQL, testquery);
-				boolean isDataset = booleanQuery.evaluate();
-				con.close();
-
-				if (!isDataset) {
-					throw new OlapException(
-							"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "
-									+ uri + "!");
-				} else {
-
-					// If loading ds, also load dsd. Ask for DSD URI and
-					// load
-					String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
-							+ uri + "> qb:structure ?dsd}";
-					List<Node[]> dsd = sparql(query, true);
-					// There should be a dsd
-					// Note in spec:
-					// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-					if (dsd.size() <= 1) {
-						throw new OlapException(
-								"A cube should serve a data structure definition!");
-					} else {
-						// Get the second
-						String dsduri = dsd.get(1)[0].toString();
-
-						location = askForLocation(dsduri);
-
-						// Since ds and dsd location can be the same,
-						// check
-						// whether loaded already
-						if (!isStored(location)) {
-							loadInStore(location);
-							// For quicker check, also add dsduri
-							loadedMap.put(dsduri.hashCode(), true);
-						}
-					}
-
-					// If loading ds, also load measures
-					query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?measure WHERE {<"
-							+ uri
-							+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:measure ?measure}";
-					List<Node[]> measures = sparql(query, true);
-					// There should be a dsd
-					// Note in spec:
-					// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-					if (measures.size() <= 1) {
-						throw new OlapException(
-								"A cube should serve a measure!");
-					} else {
-						boolean first = true;
-						for (Node[] nodes : measures) {
-							if (first) {
-								first = false;
-								continue;
-							}
-							String measureuri = nodes[0].toString();
-
-							location = askForLocation(measureuri);
-
-							// Since ds and dsd location can be the
-							// same,
-							// check
-							// whether loaded already
-							if (!isStored(location)) {
-								loadInStore(location);
-								// For quicker check, also add dsduri
-								loadedMap.put(measureuri.hashCode(), true);
-							}
-						}
-					}
-
-					// If loading ds, also load dimensions
-					query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dimension WHERE {<"
-							+ uri
-							+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension}";
-					List<Node[]> dimensions = sparql(query, true);
-					// There should be a dsd
-					// Note in spec:
-					// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-					if (dimensions.size() <= 1) {
-						throw new OlapException(
-								"A cube should serve a dimension!");
-					} else {
-						boolean first = true;
-						for (Node[] nodes : dimensions) {
-							if (first) {
-								first = false;
-								continue;
-							}
-							String dimensionuri = nodes[0].toString();
-
-							location = askForLocation(dimensionuri);
-
-							// Since ds and dsd location can be the
-							// same,
-							// check
-							// whether loaded already
-							if (!isStored(location)) {
-								loadInStore(location);
-								// For quicker check, also add dsduri
-								loadedMap.put(dimensionuri.hashCode(), true);
-							}
-						}
-					}
-
-					// If loading ds, also load codelists
-					query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?codelist WHERE {<"
-							+ uri
-							+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension qb:codeList ?codelist}";
-					List<Node[]> codelists = sparql(query, true);
-					// There should be a dsd
-					// Note in spec:
-					// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-					if (codelists.size() <= 1) {
-						;
-					} else {
-						boolean first = true;
-						// So far, members are not crawled.
-						for (Node[] nodes : codelists) {
-							if (first) {
-								first = false;
-								continue;
-							}
-
-							String codelisturi = nodes[0].toString();
-
-							location = askForLocation(codelisturi);
-
-							// Since ds and dsd location can be the
-							// same,
-							// check
-							// whether loaded already
-							if (!isStored(location)) {
-								loadInStore(location);
-								// For quicker check, also add dsduri
-								loadedMap.put(codelisturi.hashCode(), true);
-							}
-						}
-					}
-				}
-			}
-		} catch (RepositoryException e) {
-			throw new OlapException("Problem with repository: "
-					+ e.getMessage());
-		} catch (QueryEvaluationException e) {
-			throw new OlapException("Problem with query evaluation: "
-					+ e.getMessage());
-		} catch (MalformedQueryException e) {
-			throw new OlapException("Problem with malformed query: "
-					+ e.getMessage());
-		} catch (MalformedURLException e) {
-			throw new OlapException("Problem with malformed url: "
-					+ e.getMessage());
-		}
-	}
-
 	private void checkIntegrityConstraints() throws OlapException {
 
 		// Check space for more complex integrity constraints
@@ -1005,6 +1074,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			boolean error = false;
 			String overview = "";
+			String status = "";
 
 			// IC-1. Unique DataSet. Every qb:Observation
 			// has exactly one associated qb:DataSet.
@@ -1020,9 +1090,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						testquery);
 				if (booleanQuery.evaluate() == true) {
 					error = true;
-					overview += "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+					status = "Failed specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				} else {
-					overview += "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+					status = "Successful specification check: IC-1. Unique DataSet. Every qb:Observation has exactly one associated qb:DataSet.<br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				}
 			}
 
@@ -1035,9 +1109,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition. <br/>";
+				status = "Failed specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition.<br/>";
+				status = "Successful specification check: IC-2. Unique DSD. Every qb:DataSet has exactly one associated qb:DataStructureDefinition.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-3. DSD includes measure
@@ -1047,9 +1125,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
+				status = "Failed specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
+				status = "Successful specification check: IC-3. DSD includes measure. Every qb:DataStructureDefinition must include at least one declared measure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-4. Dimensions have range
@@ -1059,9 +1141,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
+				status = "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.<br/>";
+				status = "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-5. Concept dimensions have code lists
@@ -1071,9 +1157,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
+				status = "Failed specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
+				status = "Successful specification check: IC-5. Concept dimensions have code lists. Every dimension with range skos:Concept must have a qb:codeList. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-6. Only attributes may be optional <= not
@@ -1085,9 +1175,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes. <br/>";
+				status = "Failed specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes.<br/>";
+				status = "Successful specification check: IC-6. Only attributes may be optional. The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-7. Slice Keys must be declared <= not
@@ -1098,9 +1192,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
+				status = "Failed specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
+				status = "Successful specification check: IC-7. Slice Keys must be declared. Every qb:SliceKey must be associated with a qb:DataStructureDefinition.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-8. Slice Keys consistent with DSD
@@ -1111,9 +1209,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition.<br/>";
+				status = "Failed specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition. <br/>";
+				status = "Successful specification check: IC-8. Slice Keys consistent with DSD. Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-9. Unique slice structure
@@ -1123,9 +1225,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+				status = "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+				status = "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-10. Slice dimensions complete
@@ -1135,9 +1241,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
+				status = "Failed specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
+				status = "Successful specification check: IC-10. Slice dimensions complete. Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// Since needs to go through all observations, only done if enough
@@ -1152,25 +1262,32 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						testquery);
 				if (booleanQuery.evaluate() == true) {
 					error = true;
-					overview += "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
+					status = "Failed specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				} else {
-					overview += "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
+					status = "Successful specification check: IC-11. All dimensions required. Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition. <br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				}
 
 				// IC-12. No duplicate observations <= takes especially
 				// long, expensive quadratic check (IC-12) (see
 				// http://lists.w3.org/Archives/Public/public-gld-wg/2013Jul/0017.html)
 				// Dave Reynolds has implemented a linear time version of it
-				testquery = TYPICALPREFIXES
-						+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
-				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-						testquery);
-				if (booleanQuery.evaluate() == true) {
-					error = true;
-					overview += "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
-				} else {
-					overview += "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
-				}
+				// testquery = TYPICALPREFIXES
+				// +
+				// "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
+				// booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+				// testquery);
+				// if (booleanQuery.evaluate() == true) {
+				// error = true;
+				// status =
+				// "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
+				// } else {
+				// status =
+				// "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
+				// }
 
 			}
 
@@ -1182,9 +1299,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required.<br/>";
+				status = "Failed specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required. <br/>";
+				status = "Successful specification check: IC-13. Required attributes. Every qb:Observation has a value for each declared attribute that is marked as required. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-14. All measures present
@@ -1194,9 +1315,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
+				status = "Failed specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
+				status = "Successful specification check: IC-14. All measures present. In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-15. Measure dimension consistent <= We do
@@ -1207,9 +1332,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
+				status = "Failed specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
+				status = "Successful specification check: IC-15. Measure dimension consistent. In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-16. Single measure on measure dimension
@@ -1220,9 +1349,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType).<br/>";
+				status = "Failed specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType).<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType). <br/>";
+				status = "Successful specification check: IC-16. Single measure on measure dimension observation. In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType). <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-17. All measures present in measures dimension cube
@@ -1232,9 +1365,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
+				status = "Failed specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
+				status = "Successful specification check: IC-17. All measures present in measures dimension cube. In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// IC-18. Consistent data set links
@@ -1244,9 +1381,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					testquery);
 			if (booleanQuery.evaluate() == true) {
 				error = true;
-				overview += "Failed specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
+				status = "Failed specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			} else {
-				overview += "Successful specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
+				status = "Successful specification check: IC-18. If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D. <br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
 			}
 
 			// Since needs to go through all observations, only done if enough
@@ -1267,9 +1408,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				if (booleanQuery.evaluate() == true
 						|| booleanQuery2.evaluate() == true) {
 					error = true;
-					overview += "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+					status = "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				} else {
-					overview += "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+					status = "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
 				}
 
 			}
@@ -1286,11 +1431,15 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// testquery);
 			// if (booleanQuery.evaluate() == true) {
 			// error = true;
-			// overview +=
+			// status =
 			// "Failed specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.  <br/>";
+			// Olap4ldUtil._log.config(status);
+			// overview += status;
 			// } else {
-			// overview +=
+			// status =
 			// "Successful specification check: IC-20. If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links.  <br/>";
+			// Olap4ldUtil._log.config(status);
+			// overview += status;
 			// }
 
 			// IC-21. Codes from hierarchy (inverse)
@@ -1301,11 +1450,15 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// testquery);
 			// if (booleanQuery.evaluate() == true) {
 			// error = true;
-			// overview +=
+			// status =
 			// "Failed specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.  <br/>";
+			// Olap4ldUtil._log.config(status);
+			// overview += status;
 			// } else {
-			// overview +=
+			// status =
 			// "Successful specification check: IC-21. If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links.  <br/>";
+			// Olap4ldUtil._log.config(status);
+			// overview += status;
 			// }
 
 			// Important!
@@ -1519,7 +1672,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// Boolean values need to be returned as "true" or "false".
 		// Get all measures
 		String querytemplate = Olap4ldLinkedDataUtil
-				.readInQueryTemplate("sesame_getMeasures_withoutimplicit.txt");
+				.readInQueryTemplate("sesame_getMeasures.txt");
 		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
 				askForFrom(true));
 		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
@@ -1529,7 +1682,32 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		List<Node[]> result = sparql(querytemplate, true);
 
+
+		// Here, we also include measures without aggregation function. 
+		// We have also added these measures as members to getMembers().
+		querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getMeasures_withoutimplicit.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
+
+		List<Node[]> result2 = sparql(querytemplate, true);
+
 		// List<Node[]> result = applyRestrictions(measureUris, restrictions);
+
+		// Add all of result2 to result
+		boolean first = true;
+		for (Node[] nodes : result2) {
+			if (first) {
+				first = false;
+				continue;
+			}
+			result.add(nodes);
+		}
+
 		return result;
 	}
 
@@ -2277,11 +2455,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		PhysicalOlapIterator resultIterator = execplan.getIterator();
 
-		/* 
-		 * We create our own List<Node[]> result with every item 
+		/*
+		 * We create our own List<Node[]> result with every item
 		 * 
-		 * Every Node[] contains for each dimension in the dimension list of the metadata a
-		 * member and for each measure in the measure list a value.
+		 * Every Node[] contains for each dimension in the dimension list of the
+		 * metadata a member and for each measure in the measure list a value.
 		 */
 		List<Node[]> result = new ArrayList<Node[]>();
 		while (resultIterator.hasNext()) {

@@ -76,6 +76,28 @@ BIND('null' as ?PARENT_LEVEL).
 {{{FILTERS}}}
 
 
+} UNION {
+
+?CUBE_NAME qb:structure ?dsd. 
+?dsd qb:component ?compSpec. 
+?compSpec qb:measure ?MEMBER_UNIQUE_NAME.  
+OPTIONAL {?MEMBER_UNIQUE_NAME_PREFIX rdfs:label ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = "en" ) } 
+
+FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR }
+
+BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 
+BIND('{{{TABLE_SCHEM}}}' as ?SCHEMA_NAME). 
+BIND('Measures' as ?DIMENSION_UNIQUE_NAME). 
+BIND('Measures' as ?HIERARCHY_UNIQUE_NAME). 
+BIND('Measures' as ?LEVEL_UNIQUE_NAME). 
+BIND(?MEMBER_UNIQUE_NAME_PREFIX as ?MEMBER_NAME). 
+BIND('0' as ?LEVEL_NUMBER). 
+BIND('3' as ?MEMBER_TYPE). 
+BIND('null' as ?PARENT_UNIQUE_NAME). 
+BIND('null' as ?PARENT_LEVEL). 
+{{{FILTERS}}}
+
+
 }
  
 } ORDER BY ?CUBE_NAME ?MEMBER_UNIQUE_NAME 
