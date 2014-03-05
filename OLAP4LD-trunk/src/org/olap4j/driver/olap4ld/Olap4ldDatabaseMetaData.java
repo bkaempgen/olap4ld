@@ -202,7 +202,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		Restrictions myRestrictionsObject = new Restrictions(restrictions);
 
 		// Request was created before, here, it is generated and then executed.
-		List<Node[]> root = executeMetadataRequestOnLd(context, metadataRequest, myRestrictionsObject);
+		List<Node[]> root = executeMetadataRequestOnLdce(context, metadataRequest, myRestrictionsObject);
 
 		// String request = olap4jConnection.generateRequest(context,
 		// metadataRequest,
@@ -1446,7 +1446,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 		// Here, we now query Linked Data
 		// Here, the context helps, since deferred lists are filled with
 		// contexts.
-		List<org.semanticweb.yars.nx.Node[]> root = executeMetadataRequestOnLd(
+		List<org.semanticweb.yars.nx.Node[]> root = executeMetadataRequestOnLdce(
 				context, metadataRequest, myRestrictionsObject);
 
 		// Go through Nodes and change handlers to do so, as well.
@@ -1501,7 +1501,7 @@ abstract class Olap4ldDatabaseMetaData implements OlapDatabaseMetaData {
 	 * @param restrictions
 	 * @return Nodes to work with internally.
 	 */
-	private List<org.semanticweb.yars.nx.Node[]> executeMetadataRequestOnLd(
+	private List<org.semanticweb.yars.nx.Node[]> executeMetadataRequestOnLdce(
 			Context context, MetadataRequest metadataRequest,
 			Restrictions myRestrictionsObject) throws OlapException {
 

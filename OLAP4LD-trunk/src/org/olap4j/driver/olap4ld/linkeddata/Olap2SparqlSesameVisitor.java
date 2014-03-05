@@ -19,7 +19,7 @@ import org.semanticweb.yars.nx.Node;
  * 
  * @author benedikt
  */
-public class LogicalOlap2SparqlSesameOlapVisitor implements
+public class Olap2SparqlSesameVisitor implements
 		LogicalOlapOperatorQueryPlanVisitor {
 
 	// We collect necessary parts of the SPARQL query.
@@ -41,7 +41,7 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 	 * 
 	 * @param ds
 	 */
-	public LogicalOlap2SparqlSesameOlapVisitor(SailRepository repo) {
+	public Olap2SparqlSesameVisitor(SailRepository repo) {
 		this.repo = repo;
 	}
 
@@ -929,6 +929,12 @@ public class LogicalOlap2SparqlSesameOlapVisitor implements
 	@Override
 	public void visit(Object op) throws QueryException {
 		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException("visit(Object op) not implemented!");
+	}
+
+	@Override
+	public void visit(ConvertContextOp op) throws QueryException {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("visit(ConvertContextOp op) not implemented!");
 	}
 }

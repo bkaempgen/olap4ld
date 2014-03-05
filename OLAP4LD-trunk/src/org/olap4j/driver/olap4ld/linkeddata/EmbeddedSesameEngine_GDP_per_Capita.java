@@ -119,7 +119,7 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 		try {
 
 			// We create visitor to translate logical into physical
-			LogicalOlap2SparqlSesameDrillAcrossVisitor r2a = new LogicalOlap2SparqlSesameDrillAcrossVisitor(
+			Olap2SparqlSesameDerivedDatasetVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(
 					repo);
 
 			PhysicalOlapIterator newRoot;
@@ -440,7 +440,7 @@ public class EmbeddedSesameEngine_GDP_per_Capita implements
 	 *            the RDF serialization format for the dump
 	 * @return
 	 */
-	public void dumpRDF(OutputStream out, RDFFormat outform) {
+	private void dumpRDF(OutputStream out, RDFFormat outform) {
 		try {
 			RepositoryConnection con = repo.getConnection();
 			try {

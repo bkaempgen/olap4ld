@@ -49,7 +49,7 @@ public class SliceOp implements LogicalOlapOp {
 	public void accept(Visitor v) throws QueryException {
 		v.visit(this);
 
-		if (v instanceof LogicalOlap2SparqlSesameDrillAcrossVisitor) {
+		if (v instanceof Olap2SparqlSesameDerivedDatasetVisitor) {
 			// Nothing more to visit;
 		} else {
 			// visit the projection input op

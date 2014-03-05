@@ -2489,7 +2489,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	@Override
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) {
 		// XXX: Will not work, since OV uses different syntax than Sesame
-		LogicalOlap2SparqlSesameOlapVisitor r2a = new LogicalOlap2SparqlSesameOlapVisitor(
+		Olap2SparqlSesameVisitor r2a = new Olap2SparqlSesameVisitor(
 				null);
 
 		PhysicalOlapIterator newRoot;
