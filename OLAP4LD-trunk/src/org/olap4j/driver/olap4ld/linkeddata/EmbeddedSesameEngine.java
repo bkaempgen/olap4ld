@@ -117,8 +117,11 @@ public class EmbeddedSesameEngine implements
 
 		try {
 
+//			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameVisitor(
+//					repo);
+			
 			// We create visitor to translate logical into physical
-			Olap2SparqlSesameDerivedDatasetVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(
+			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(
 					repo);
 
 			PhysicalOlapIterator newRoot;

@@ -36,12 +36,15 @@ import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.ConvertContextOp;
+import org.olap4j.driver.olap4ld.linkeddata.DiceOp;
+import org.olap4j.driver.olap4ld.linkeddata.DrillAcrossOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataCubesEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.PhysicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
+import org.olap4j.driver.olap4ld.linkeddata.SliceOp;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.semanticweb.yars.nx.Node;
@@ -68,7 +71,7 @@ public class Convert_Context_QueryTest extends TestCase {
 
 		// For warnings (and errors) only
 		// Olap4ldUtil._log.setLevel(Level.WARNING);
-		
+
 		Olap4ldUtil._isDebug = false;
 
 		try {
@@ -92,8 +95,7 @@ public class Convert_Context_QueryTest extends TestCase {
 
 	}
 
-	public void test_GDP_Mioeur2eur()
-			throws OlapException {
+	public void test_GDP_Mioeur2eur() throws OlapException {
 
 		// First: GDP per capita dataset
 		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds";
@@ -145,12 +147,157 @@ public class Convert_Context_QueryTest extends TestCase {
 		// for specific cubes
 		// {indic_na, sex, age, esa95}
 
-			// Roll-up
+		// Roll-up
 		// XXX: We do not need roll-up
 
-		// Convert-context		LogicalOlapOp convertgdp = new ConvertContextOp(gdpbasecube, 1);
-		
+		// Convert-context
+		LogicalOlapOp convertgdp = new ConvertContextOp(gdpbasecube, 1);
+
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(convertgdp);
+
+		executeStatement(myplan);
+	}
+
+	public void test_GDP_per_Capita_Calculation() throws OlapException {
+
+		// First: GDP dataset
+		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds";
+		Restrictions gdprestrictions = new Restrictions();
+		gdprestrictions.cubeNamePattern = gdpdsuri;
+
+		// Base-cube
+		// XXX: We need to make sure that only the lowest members are queried
+		// from each cube.
+
+		// In order to fill the engine with data
+		List<Node[]> gdpcube = lde.getCubes(gdprestrictions);
+		assertEquals(2, gdpcube.size());
+		Map<String, Integer> gdpcubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(gdpcube.get(0));
+		System.out.println("CUBE_NAME: "
+				+ gdpcube.get(1)[gdpcubemap.get("?CUBE_NAME")]);
+
+		List<Node[]> gdpcubemeasures = lde.getMeasures(gdprestrictions);
+
+		List<Node[]> gdpcubedimensions = lde.getDimensions(gdprestrictions);
+		assertEquals(true, gdpcubedimensions.size() > 1);
+
+		List<Node[]> gdpcubehierarchies = lde.getHierarchies(gdprestrictions);
+
+		List<Node[]> gdpcubelevels = lde.getLevels(gdprestrictions);
+
+		List<Node[]> gdpcubemembers = lde.getMembers(gdprestrictions);
+
+		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpcube, gdpcubemeasures,
+				gdpcubedimensions, gdpcubehierarchies, gdpcubelevels,
+				gdpcubemembers);
+
+		// Projection
+		// Since we do not remove any measure from the cubes, we do not need
+		// projection.
+		// XXX: We will see how the query processor handles it if no projection
+		// is called.
+
+		// Dice
+		// For now, we do not do any dice since we slice over most dimensions
+		// XXX: However, the results may be wrong, if we do not ensure the
+		// constraint
+		// that base cube only queries for those members that are on the lowest
+		// level.
+
+		// Slice
+		// XXX: Since in MDX, we probably cannot distinguish between dimensions
+		// for specific cubes
+		// {indic_na, sex, age, esa95}
+
+		// Roll-up
+		// XXX: We do not need roll-up
+
+		// Mioeur2eur(dataset): Converting MIO_EUR to EUR in GDP dataset
+		LogicalOlapOp mioeur2eur = new ConvertContextOp(gdpbasecube, 1);
+
+		// Dice mioeur2eur for B1G.
+		List<Node[]> dicehierarchysignatureB1G = null;
+		List<List<Node[]>> dicemembercombinationsB1G = null;
+		LogicalOlapOp b1g = new DiceOp(mioeur2eur, dicehierarchysignatureB1G,
+				dicemembercombinationsB1G);
+
+		// Slice indic_na.
+		List<Node[]> sliceB1G = null;
+		LogicalOlapOp slicedb1g = new SliceOp(b1g, sliceB1G);
+
+		// Dice mioeur2eur for D21_M_D31.
+		List<Node[]> dicehierarchysignatureD21_M_D31 = null;
+		List<List<Node[]>> dicemembercombinationsD21_M_D31 = null;
+		LogicalOlapOp d21_m_d31 = new DiceOp(mioeur2eur,
+				dicehierarchysignatureD21_M_D31,
+				dicemembercombinationsD21_M_D31);
+
+		// Slice indic_na.
+		List<Node[]> sliceD21_M_D31 = null;
+		LogicalOlapOp slicedd21_m_d31 = new SliceOp(b1g, sliceD21_M_D31);
+
+		// Drill-across B1G and D21...
+		LogicalOlapOp drillacross = new DrillAcrossOp(slicedb1g,
+				slicedd21_m_d31);
+
+		// Computing Nominal GDP from single parts in new EUR dataset.
+		LogicalOlapOp computegdp = new ComplexMeasureOp(drillacross, 1);
+		
+		// XXX Would I need to add: eurostat:indic_na dic_indic_na:NGDP; ?
+
+		// Second: Population dataset
+		String populationuri = "http://estatwrap.ontologycentral.com/id/demo_pjan#ds";
+		Restrictions populationrestrictions = new Restrictions();
+		gdprestrictions.cubeNamePattern = gdpdsuri;
+
+		// Base-cube
+		// XXX: We need to make sure that only the lowest members are queried
+		// from each cube.
+
+		// In order to fill the engine with data
+		List<Node[]> populationcube = lde.getCubes(populationrestrictions);
+		assertEquals(2, gdpcube.size());
+		Map<String, Integer> populationcubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(gdpcube.get(0));
+		System.out.println("CUBE_NAME: "
+				+ gdpcube.get(1)[gdpcubemap.get("?CUBE_NAME")]);
+
+		List<Node[]> populationcubemeasures = lde
+				.getMeasures(populationrestrictions);
+
+		List<Node[]> populationcubedimensions = lde
+				.getDimensions(populationrestrictions);
+		assertEquals(true, gdpcubedimensions.size() > 1);
+
+		List<Node[]> populationcubehierarchies = lde
+				.getHierarchies(populationrestrictions);
+
+		List<Node[]> populationcubelevels = lde
+				.getLevels(populationrestrictions);
+
+		List<Node[]> populationcubemembers = lde
+				.getMembers(populationrestrictions);
+
+		BaseCubeOp populationbasecube = new BaseCubeOp(populationcube,
+				populationcubemeasures, populationcubedimensions, populationcubehierarchies,
+				populationcubelevels, populationcubemembers);
+
+		// XXX Would I need to add: Add indicator and unit to population dataset
+		
+		// Compute "slice" of population that does not use sex and age dimensions
+		List<Node[]> slicesexage = null;
+		LogicalOlapOp slicedsexage = new SliceOp(populationbasecube, slicesexage);
+		
+		// Drill-across gdp and population dataset
+		LogicalOlapOp drillacrossgdppopulation = new DrillAcrossOp(slicedsexage,
+				slicedd21_m_d31);
+		
+		// Compute GDP per Capita from GDP and Population
+		LogicalOlapOp computegdppercapita = new ComplexMeasureOp(drillacrossgdppopulation, 2);
+		
+		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
+				computegdppercapita);
 
 		executeStatement(myplan);
 	}

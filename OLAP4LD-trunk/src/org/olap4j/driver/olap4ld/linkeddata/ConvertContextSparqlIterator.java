@@ -19,14 +19,13 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.Update;
-import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.Rio;
 import org.semanticweb.yars.nx.Node;
@@ -129,21 +128,29 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 				GraphQuery graphquery = con.prepareGraphQuery(
 						org.openrdf.query.QueryLanguage.SPARQL, constructquery);
 				StringWriter stringout = new StringWriter();
-				RDFWriter w = Rio.createWriter(RDFFormat.NTRIPLES, stringout);
+				RDFWriter w = Rio.createWriter(RDFFormat.RDFXML, stringout);
 				graphquery.evaluate(w);
 
 				String triples = stringout.toString();
 			
-				
+				Olap4ldUtil._log.config("Loaded triples: " + triples);
 				// Insert query to load triples 
-				String insertquery = "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
-						+ triples + " } }";
+//				String insertquery = "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
+//						+ triples + " } }";
+//				
+//				Olap4ldUtil._log.config("SPARQL query: " + insertquery);
+//				
+//				Update updateQuery = con.prepareUpdate(QueryLanguage.SPARQL,
+//						insertquery);
+//				updateQuery.execute();
+
+				// Would not work: prolog error
+				//ByteArrayInputStream inputstream = new ByteArrayInputStream(w.toString().getBytes());
 				
-				Olap4ldUtil._log.config("SPARQL query: " + insertquery);
+				// UTF-8 encoding seems important
+				InputStream stream = new ByteArrayInputStream(triples.getBytes("UTF-8"));
 				
-				Update updateQuery = con.prepareUpdate(QueryLanguage.SPARQL,
-						insertquery);
-				updateQuery.execute();
+				con.add(stream, "", RDFFormat.RDFXML);
 				
 				// Select query for the output
 				prefixes = "PREFIX qb:<http://purl.org/linked-data/cube#> "
@@ -230,10 +237,10 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 			} catch (TupleQueryResultHandlerException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} catch (UpdateExecutionException e1) {
+			} catch (RDFHandlerException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} catch (RDFHandlerException e1) {
+			} catch (RDFParseException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}

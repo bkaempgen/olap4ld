@@ -46,7 +46,7 @@ public class ProjectionOp implements LogicalOlapOp {
 	}
 
 	@Override
-	public void accept(Visitor v)
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
 			throws QueryException {
 		v.visit(this);
 		// visit the projection input op

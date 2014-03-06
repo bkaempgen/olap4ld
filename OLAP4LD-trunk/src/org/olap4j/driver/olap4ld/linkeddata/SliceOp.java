@@ -46,7 +46,7 @@ public class SliceOp implements LogicalOlapOp {
 	}
 
 	@Override
-	public void accept(Visitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
 		v.visit(this);
 
 		if (v instanceof Olap2SparqlSesameDerivedDatasetVisitor) {
