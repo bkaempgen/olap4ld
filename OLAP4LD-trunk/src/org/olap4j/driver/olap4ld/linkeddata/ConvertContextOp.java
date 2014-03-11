@@ -11,12 +11,14 @@ package org.olap4j.driver.olap4ld.linkeddata;
 public class ConvertContextOp implements LogicalOlapOp {
 
 	public LogicalOlapOp inputOp;
-	public int conversionfunction;	
+	public int conversionfunction;
+	public String domainuri;	
 	
 
-	public ConvertContextOp(LogicalOlapOp inputOp, int conversionfunction) {
+	public ConvertContextOp(LogicalOlapOp inputOp, int conversionfunction, String domainuri) {
 		this.inputOp = inputOp;
 		this.conversionfunction = conversionfunction;
+		this.domainuri = domainuri;
 	}
 
 	public String toString() {

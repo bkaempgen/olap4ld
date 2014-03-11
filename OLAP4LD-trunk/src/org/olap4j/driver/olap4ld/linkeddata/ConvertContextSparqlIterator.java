@@ -5,7 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -50,9 +52,10 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 	private Iterator<Node[]> iterator;
 	private int conversionfunction;
 
-	final int mioeur2eur = 1;
+	public static final int MIOEUR2EUR = 1;
 	
 	private SailRepository repo;
+	private String triples;
 	
 	
 
@@ -60,7 +63,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 			PhysicalOlapIterator root, List<Node[]> cubes,
 			List<Node[]> measures, List<Node[]> dimensions,
 			List<Node[]> hierarchies, List<Node[]> levels,
-			List<Node[]> members, int conversionfunction) {
+			List<Node[]> members, int conversionfunction, String domainuri) {
 
 		this.repo = repo;
 		
@@ -76,7 +79,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 		List<Node[]> myBindings = new ArrayList<Node[]>();
 
 		switch (this.conversionfunction) {
-		case mioeur2eur:
+		case ConvertContextSparqlIterator.MIOEUR2EUR:
 
 			Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(cubes.get(0));
@@ -84,7 +87,13 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 			String dataset = cubes.get(1)[cubemap.get("?CUBE_NAME")].toString();
 
 			// How to decide for the uri?
-			String newdataset = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds_eur";
+			String newdataset = null;
+			try {
+				newdataset = domainuri+URLEncoder.encode(dataset,"UTF-8");
+			} catch (UnsupportedEncodingException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
 
 			// We need two queries, one for the metadata and one for the data.
 
@@ -131,7 +140,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 				RDFWriter w = Rio.createWriter(RDFFormat.RDFXML, stringout);
 				graphquery.evaluate(w);
 
-				String triples = stringout.toString();
+				this.triples = stringout.toString();
 			
 				Olap4ldUtil._log.config("Loaded triples: " + triples);
 				// Insert query to load triples 
@@ -252,6 +261,10 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 		}
 
 		this.iterator = myBindings.iterator();
+	}
+	
+	public String dumpRDF() {
+		return this.triples;
 	}
 
 	/**

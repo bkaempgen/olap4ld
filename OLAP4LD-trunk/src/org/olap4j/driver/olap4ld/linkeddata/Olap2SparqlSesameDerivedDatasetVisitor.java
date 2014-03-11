@@ -283,7 +283,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 
 		so.inputOp.accept(this);
 
-		SliceSparqlIterator slicecube = new SliceSparqlIterator(_root, cubes,
+		SliceSparqlIterator slicecube = new SliceSparqlIterator(repo, _root, cubes,
 				measures, dimensions, hierarchies, levels, members,
 				so.slicedDimensions);
 
@@ -350,7 +350,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 
 		ConvertContextSparqlIterator convertcontextcube = new ConvertContextSparqlIterator(
 				repo, cubes, root, cubes, measures, dimensions, hierarchies,
-				levels, members, so.conversionfunction);
+				levels, members, so.conversionfunction, so.domainuri);
 
 		cubes = convertcontextcube.cubes;
 		measures = convertcontextcube.measures;

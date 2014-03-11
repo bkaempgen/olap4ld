@@ -74,6 +74,8 @@ public class Olap4ldLinkedDataUtil {
 		HttpURLConnection connection;
 		try {
 			connection = (HttpURLConnection) uri.openConnection();
+			connection.setConnectTimeout(5000);
+			//int responsecode = connection.getResponseCode();
 			connection.setRequestProperty("Accept", "application/rdf+xml");
 			String header = connection.getHeaderField("location");
 			String domain = uri.getHost();

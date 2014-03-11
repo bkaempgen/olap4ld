@@ -36,6 +36,7 @@ import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.ConvertContextOp;
+import org.olap4j.driver.olap4ld.linkeddata.ConvertContextSparqlIterator;
 import org.olap4j.driver.olap4ld.linkeddata.DiceOp;
 import org.olap4j.driver.olap4ld.linkeddata.DrillAcrossOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
@@ -96,6 +97,8 @@ public class Convert_Context_QueryTest extends TestCase {
 	}
 
 	public void test_GDP_Mioeur2eur() throws OlapException {
+		
+		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri";
 
 		// First: GDP per capita dataset
 		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds";
@@ -151,7 +154,7 @@ public class Convert_Context_QueryTest extends TestCase {
 		// XXX: We do not need roll-up
 
 		// Convert-context
-		LogicalOlapOp convertgdp = new ConvertContextOp(gdpbasecube, 1);
+		LogicalOlapOp convertgdp = new ConvertContextOp(gdpbasecube, ConvertContextSparqlIterator.MIOEUR2EUR, domainUri);
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(convertgdp);
 
@@ -159,6 +162,8 @@ public class Convert_Context_QueryTest extends TestCase {
 	}
 
 	public void test_GDP_per_Capita_Calculation() throws OlapException {
+		
+		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
 		// First: GDP dataset
 		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds";
@@ -214,7 +219,7 @@ public class Convert_Context_QueryTest extends TestCase {
 		// XXX: We do not need roll-up
 
 		// Mioeur2eur(dataset): Converting MIO_EUR to EUR in GDP dataset
-		LogicalOlapOp mioeur2eur = new ConvertContextOp(gdpbasecube, 1);
+		LogicalOlapOp mioeur2eur = new ConvertContextOp(gdpbasecube, ConvertContextSparqlIterator.MIOEUR2EUR, domainUri);
 
 		// Dice mioeur2eur for B1G.
 		List<Node[]> dicehierarchysignatureB1G = null;
@@ -233,23 +238,24 @@ public class Convert_Context_QueryTest extends TestCase {
 				dicehierarchysignatureD21_M_D31,
 				dicemembercombinationsD21_M_D31);
 
-		// Slice indic_na.
+		// Slice indic_na. 
 		List<Node[]> sliceD21_M_D31 = null;
-		LogicalOlapOp slicedd21_m_d31 = new SliceOp(b1g, sliceD21_M_D31);
+		LogicalOlapOp slicedd21_m_d31 = new SliceOp(d21_m_d31, sliceD21_M_D31);
 
 		// Drill-across B1G and D21...
 		LogicalOlapOp drillacross = new DrillAcrossOp(slicedb1g,
 				slicedd21_m_d31);
 
 		// Computing Nominal GDP from single parts in new EUR dataset.
-		LogicalOlapOp computegdp = new ComplexMeasureOp(drillacross, 1);
+		// XXX: ComplexMeasureOp
+		LogicalOlapOp computegdp = new ConvertContextOp(drillacross, 1, domainUri);
 		
 		// XXX Would I need to add: eurostat:indic_na dic_indic_na:NGDP; ?
 
 		// Second: Population dataset
 		String populationuri = "http://estatwrap.ontologycentral.com/id/demo_pjan#ds";
 		Restrictions populationrestrictions = new Restrictions();
-		gdprestrictions.cubeNamePattern = gdpdsuri;
+		gdprestrictions.cubeNamePattern = populationuri;
 
 		// Base-cube
 		// XXX: We need to make sure that only the lowest members are queried
@@ -261,7 +267,7 @@ public class Convert_Context_QueryTest extends TestCase {
 		Map<String, Integer> populationcubemap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(gdpcube.get(0));
 		System.out.println("CUBE_NAME: "
-				+ gdpcube.get(1)[gdpcubemap.get("?CUBE_NAME")]);
+				+ gdpcube.get(1)[populationcubemap.get("?CUBE_NAME")]);
 
 		List<Node[]> populationcubemeasures = lde
 				.getMeasures(populationrestrictions);
@@ -285,16 +291,17 @@ public class Convert_Context_QueryTest extends TestCase {
 
 		// XXX Would I need to add: Add indicator and unit to population dataset
 		
-		// Compute "slice" of population that does not use sex and age dimensions
+		// Compute "slice" of population that does not use sex and age dimensions 
 		List<Node[]> slicesexage = null;
 		LogicalOlapOp slicedsexage = new SliceOp(populationbasecube, slicesexage);
 		
 		// Drill-across gdp and population dataset
 		LogicalOlapOp drillacrossgdppopulation = new DrillAcrossOp(slicedsexage,
-				slicedd21_m_d31);
+				computegdp);
 		
 		// Compute GDP per Capita from GDP and Population
-		LogicalOlapOp computegdppercapita = new ComplexMeasureOp(drillacrossgdppopulation, 2);
+		// XXX: ComplexMeasureOp
+		LogicalOlapOp computegdppercapita = new ConvertContextOp(drillacrossgdppopulation, 2, domainUri);
 		
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 				computegdppercapita);

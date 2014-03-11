@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -591,8 +592,12 @@ public class EmbeddedSesameEngine implements
 				connection.setRequestProperty("Accept", "application/rdf+xml");
 				format = RDFFormat.RDFXML;
 
-				// Not acceptable
-				if (connection.getResponseCode() == 406) {
+				// Not acceptable time
+				connection.setConnectTimeout(5000);
+				int responsecode = connection.getResponseCode();
+				
+				// Not acceptable?
+				if (responsecode == 406) {
 					connection.disconnect();
 					connection = (HttpURLConnection) location.openConnection();
 					connection.setRequestProperty("Accept", "text/turtle");
@@ -600,7 +605,7 @@ public class EmbeddedSesameEngine implements
 				}
 
 				// Error
-				if (connection.getResponseCode() >= 400) {
+				if (responsecode >= 400) {
 					is = connection.getErrorStream();
 
 					BufferedReader rd = new BufferedReader(
@@ -695,9 +700,9 @@ public class EmbeddedSesameEngine implements
 			// Since it happens often, we just log it in config
 			Olap4ldUtil._log.config("RDFParseException:" + e.getMessage());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			Olap4ldUtil._log.config("ConnectException:" + e.getMessage());
 			e.printStackTrace();
-		}
+		} 
 	}
 
 	/**
