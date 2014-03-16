@@ -42,10 +42,10 @@ import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.semanticweb.yars.nx.Node;
 
 /**
- * Unit tests for metadata queries directly on an LDCE engine, e.g. 
- * on "EmbeddedSesameEngine_GDP_per_Capita", an engine that collects
- * data for Open Government Data. 
- *  
+ * Unit tests for metadata queries directly on an LDCE engine, e.g. on
+ * "EmbeddedSesameEngine_GDP_per_Capita", an engine that collects data for Open
+ * Government Data.
+ * 
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
 public class Metadata_QueryTest extends TestCase {
@@ -87,17 +87,20 @@ public class Metadata_QueryTest extends TestCase {
 	}
 
 	public void test_Metadata_Queries() throws OlapException {
-		// GDP per capita dataset
-//		String gdpdsuri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
-//		Restrictions gdprestrictions = new Restrictions();
-//		gdprestrictions.cubeNamePattern = gdpdsuri;
-		
-		// No specific dataset, if we use GDP-per-Capita LDCE
+		// Available datasets: GDP indicators, population, GDP per capita
+		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds,http://estatwrap.ontologycentral.com/id/demo_pjan#ds,http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds";
 		Restrictions gdprestrictions = new Restrictions();
+		gdprestrictions.cubeNamePattern = gdpdsuri;
+
+		// No specific dataset, if we use GDP-per-Capita LDCE <= Does not exist,
+		// anymore. We
+		// define the term "available dataset" that we can define when asking
+		// for cubes.
+		// Restrictions gdprestrictions = new Restrictions();
 
 		// In order to fill the engine with data
 		List<Node[]> gdpcubes = lde.getCubes(gdprestrictions);
-		assertEquals(2, gdpcubes.size());
+		//assertEquals(2, gdpcubes.size());
 		Map<String, Integer> gdpcubemap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(gdpcubes.get(0));
 		System.out.println("CUBE_NAME: "

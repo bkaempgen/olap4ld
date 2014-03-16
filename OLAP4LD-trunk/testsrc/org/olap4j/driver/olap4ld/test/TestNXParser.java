@@ -1,19 +1,27 @@
 package org.olap4j.driver.olap4ld.test;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
+import junit.framework.TestCase;
+
+import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Nodes;
 import org.semanticweb.yars.nx.parser.NxParser;
 
-import junit.framework.TestCase;
-
-
 public class TestNXParser extends TestCase {
 	public void testParseNX() throws Exception {
 		String myqcrumburl = "http://qcrumb.com/sparql";
-		String querysuffix = "?query=" + URLEncoder.encode("select * FROM <http://estatwrap.ontologycentral.com/dic/geo> where {?s ?p ?o} limit 10", "UTF-8");
+		String querysuffix = "?query="
+				+ URLEncoder
+						.encode("select * FROM <http://estatwrap.ontologycentral.com/dic/geo> where {?s ?p ?o} limit 10",
+								"UTF-8");
 		String rulesuffix = "&rules=";
 		String acceptsuffix = "&accept=text%2Fnx";
 
@@ -34,8 +42,8 @@ public class TestNXParser extends TestCase {
 		}
 
 		System.out.println(fullurl);
-		
-		//String test = convertStreamToString(con.getInputStream());
+
+		// String test = convertStreamToString(con.getInputStream());
 
 		NxParser nxp = new NxParser(con.getInputStream());
 
@@ -43,6 +51,56 @@ public class TestNXParser extends TestCase {
 		while (nxp.hasNext()) {
 			nxx = nxp.next();
 			System.out.println(Nodes.toN3(nxx));
-		} 
+		}
+	}
+
+
+	/**
+	 * An n3 rule should only have one head triple so that after parsing one can distinguish the head from the body?
+	 * @throws Exception
+	 */
+	public void testParseLinkedDataFuProgram() throws Exception {
+		String mio_eur2eur = "{"
+				+ "?obs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR> .\n"
+				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value .\n"
+				+ "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1,000,000 * ?value)\" ."
+				+ "} <http://www.w3.org/2000/10/swap/log#implies> {"
+				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> .\n"
+				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue"
+				+ "} .";
+
+		InputStream stream = new ByteArrayInputStream(mio_eur2eur.getBytes("UTF-8"));
+		NxParser nxp = new NxParser(stream);
+
+		List<Node[]> mio_eur2eur_nodes = new ArrayList<Node[]>();
+
+		Node[] nxx;
+		while (nxp.hasNext()) {
+			nxx = nxp.next();
+			mio_eur2eur_nodes.add(nxx);
+			for (Node node : nxx) {
+				System.out.print(node.toN3()+ " ");
+			}
+			System.out.println();
+		}
+		stream.close();
+	}
+
+	/**
+	 * Note, Nxparser is picky about having empty space before dot.
+	 * @throws Exception
+	 */
+	public void testParseLinkedDataFuProgramSplit() throws Exception {
+		
+		String mio_eur2eur = "{"
+				+ "?obs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR> .\n"
+				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value .\n"
+				+ "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1,000,000 * ?value)\" ."
+				+ "} => {"
+				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> .\n"
+				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue"
+				+ "} .";
+		
+		Olap4ldLinkedDataUtil.splitandparseN3rule(mio_eur2eur);
 	}
 }

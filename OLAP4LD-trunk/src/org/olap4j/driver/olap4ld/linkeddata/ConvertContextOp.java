@@ -10,32 +10,50 @@ package org.olap4j.driver.olap4ld.linkeddata;
  */
 public class ConvertContextOp implements LogicalOlapOp {
 
-	public LogicalOlapOp inputOp;
-	public int conversionfunction;
-	public String domainuri;	
-	
+	public LogicalOlapOp inputOp1;
+	public LogicalOlapOp inputOp2;
+	public String conversionfunction;
+	public String domainUri;
 
-	public ConvertContextOp(LogicalOlapOp inputOp, int conversionfunction, String domainuri) {
-		this.inputOp = inputOp;
+	public ConvertContextOp(LogicalOlapOp inputOp,
+			String conversionfunction, String domainUri) {
+		this.inputOp1 = inputOp;
 		this.conversionfunction = conversionfunction;
-		this.domainuri = domainuri;
+		this.domainUri = domainUri;
+	}
+
+	public ConvertContextOp(LogicalOlapOp inputOp1, LogicalOlapOp inputOp2,
+			String conversionfunction, String domainUri) {
+		this.inputOp1 = inputOp1;
+		this.inputOp2 = inputOp2;
+		this.conversionfunction = conversionfunction;
+		this.domainUri = domainUri;
 	}
 
 	public String toString() {
-			return "Convert-context ("
-					+ inputOp.toString()
-					+ ", "+conversionfunction+")";
+		if (inputOp2 == null) {
+			return "Convert-context (" + inputOp1.toString() + ", "
+					+ conversionfunction + ")";
+		} else {
+			return "Convert-context (" + inputOp1.toString() + ", " + inputOp2.toString() + ", "
+					+ conversionfunction + ")";
+		}
 	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+			throws QueryException {
 		v.visit(this);
 
 		if (v instanceof Olap2SparqlSesameDerivedDatasetVisitor) {
 			// Nothing more to visit;
 		} else {
-			// visit the projection input op
-			inputOp.accept(v);
+			// visit the input op
+			inputOp1.accept(v);
+			
+			if (inputOp2 != null) {
+				inputOp2.accept(v);
+			}
 		}
 	}
 }

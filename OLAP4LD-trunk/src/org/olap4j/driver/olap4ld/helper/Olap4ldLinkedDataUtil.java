@@ -15,8 +15,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.Transformer;
@@ -25,6 +27,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
+import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.parser.NxParser;
 
 public class Olap4ldLinkedDataUtil {
 
@@ -270,7 +274,7 @@ public class Olap4ldLinkedDataUtil {
 	 * @param uriRepresentation
 	 * @return
 	 */
-	public static String makeUriToParameter(String uriRepresentation) {
+	public static String makeUriToVariable(String uriRepresentation) {
 		// We simply remove all special characters
 		uriRepresentation = uriRepresentation.replaceAll("[^a-zA-Z0-9]+", "");
 		return uriRepresentation;
@@ -537,6 +541,57 @@ public class Olap4ldLinkedDataUtil {
 			mapFields.put("?" + nodeString, i);
 		}
 		return mapFields;
+	}
+	
+	public static List<List<Node[]>> splitandparseN3rule(String n3rule) throws IOException {
+		// Remove {, }
+		
+		n3rule = n3rule.replace("{", "");
+		n3rule = n3rule.replace("}", "");
+				
+		// Take => as split.
+		
+		int n3ruleindex = n3rule.indexOf("=>");
+		
+		String n3rule_body = n3rule.substring(0, n3ruleindex);
+		String n3rule_head = n3rule.substring(n3ruleindex+2, n3rule.length());
+		
+		InputStream stream = new ByteArrayInputStream(n3rule_body.getBytes("UTF-8"));
+		NxParser nxp = new NxParser(stream);
+
+		List<Node[]> n3rule_nodes_body = new ArrayList<Node[]>();
+
+		Node[] nxx;
+		while (nxp.hasNext()) {
+			nxx = nxp.next();
+			n3rule_nodes_body.add(nxx);
+			for (Node node : nxx) {
+				System.out.print(node.toN3()+ " ");
+			}
+			System.out.println();
+		}
+		stream.close();
+			
+		stream = new ByteArrayInputStream(n3rule_head.getBytes("UTF-8"));
+		nxp = new NxParser(stream);
+
+		List<Node[]> n3rule_nodes_head = new ArrayList<Node[]>();
+
+		while (nxp.hasNext()) {
+			nxx = nxp.next();
+			n3rule_nodes_head.add(nxx);
+			for (Node node : nxx) {
+				System.out.print(node.toN3()+" ");
+			}
+			System.out.println();
+		}
+		stream.close();
+		
+		List<List<Node[]>> result = new ArrayList<List<Node[]>>();
+		result.add(n3rule_nodes_body);
+		result.add(n3rule_nodes_head);
+		
+		return result;
 	}
 
 	public static InputStream transformSparqlXmlToNx(InputStream xml) {

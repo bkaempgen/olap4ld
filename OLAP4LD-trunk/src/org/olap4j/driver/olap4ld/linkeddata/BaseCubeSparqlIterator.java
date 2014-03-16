@@ -82,7 +82,7 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 				continue;
 			}
 			String dimensionPropertyVariable = Olap4ldLinkedDataUtil
-					.makeUriToParameter(dimensionProperty);
+					.makeUriToVariable(dimensionProperty);
 			whereClause += " ?obs <" + dimensionProperty + "> ?"
 					+ dimensionPropertyVariable + ". ";
 			selectClause += " ?" + dimensionPropertyVariable;
@@ -105,7 +105,7 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 			// Variable so
 			// that the same property is not selected twice.
 			String measurePropertyVariable = Olap4ldLinkedDataUtil
-					.makeUriToParameter(measure[measuremap
+					.makeUriToVariable(measure[measuremap
 							.get("?MEASURE_UNIQUE_NAME")].toString().replace(
 							"AGGFUNC"
 									+ measure[measuremap
@@ -116,7 +116,7 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 
 			// Unique name for variable
 			String uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
-					.makeUriToParameter(measure[measuremap
+					.makeUriToVariable(measure[measuremap
 							.get("?MEASURE_UNIQUE_NAME")].toString());
 
 			// We take the aggregator from the measure
