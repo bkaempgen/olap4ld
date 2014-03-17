@@ -60,6 +60,9 @@ public interface LinkedDataCubesEngine {
 	 * 
 	 * Get Cubes from the triple store.
 	 * 
+	 * Schema: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
+	 * ?DESCRIPTION
+	 * 
 	 * Here, the restrictions are strict restrictions without patterns.
 	 * 
 	 * ==Task: Show proper captions== Problem: Where to take captions from?
@@ -77,6 +80,10 @@ public interface LinkedDataCubesEngine {
 	 * Get possible dimensions (component properties) for each cube from the
 	 * triple store.
 	 * 
+	 * Schema: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_NAME
+	 * ?DIMENSION_UNIQUE_NAME ?DIMENSION_CAPTION ?DIMENSION_ORDINAL
+	 * ?DIMENSION_TYPE ?DESCRIPTION
+	 * 
 	 * Approach: I create the output from Linked Data, and then I filter it
 	 * using the restrictions.
 	 * 
@@ -89,6 +96,11 @@ public interface LinkedDataCubesEngine {
 			throws OlapException;
 
 	/**
+	 * 
+	 * Measures: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME
+	 * ?MEASURE_NAME ?MEASURE_CAPTION ?DATA_TYPE ?MEASURE_IS_VISIBLE
+	 * ?MEASURE_AGGREGATOR ?EXPRESSION
+	 * 
 	 * Every measure also needs to be listed as member. When I create the dsd, I
 	 * add obsValue as a dimension, but also as a measure. However, members of
 	 * the measure dimension would typically all be named differently from the
@@ -111,6 +123,10 @@ public interface LinkedDataCubesEngine {
 
 	/**
 	 * 
+	 * Hierarchies: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME
+	 * ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_NAME ?HIERARCHY_CAPTION ?DESCRIPTION
+	 * ?HIERARCHY_MAX_LEVEL_NUMBER
+	 * 
 	 * Return hierarchies
 	 * 
 	 * @param context
@@ -123,6 +139,10 @@ public interface LinkedDataCubesEngine {
 
 	/**
 	 * 
+	 * Levels: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME
+	 * ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_CAPTION ?LEVEL_NAME
+	 * ?DESCRIPTION ?LEVEL_NUMBER ?LEVEL_CARDINALITY ?LEVEL_TYPE
+	 * 
 	 * @param context
 	 * @param metadataRequest
 	 * @param restrictions
@@ -132,6 +152,12 @@ public interface LinkedDataCubesEngine {
 			throws OlapException;
 
 	/**
+	 * 
+	 * Members: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME
+	 * ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER
+	 * ?MEMBER_UNIQUE_NAME ?MEMBER_NAME ?MEMBER_CAPTION ?MEMBER_TYPE
+	 * ?PARENT_UNIQUE_NAME ?PARENT_LEVEL
+	 * 
 	 * Important issues to remember: Every measure also needs to be listed as
 	 * member. When I create the dsd, I add obsValue as a dimension, but also as
 	 * a measure. However, members of the measure dimension would typically all
@@ -199,5 +225,6 @@ public interface LinkedDataCubesEngine {
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
 			throws OlapException;
 
-	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan) throws OlapException;
+	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan)
+			throws OlapException;
 }

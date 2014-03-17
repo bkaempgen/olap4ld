@@ -127,7 +127,6 @@ public class EmbeddedSesameEngine implements
 			PhysicalOlapIterator newRoot;
 			// Transform into physical query plan
 			newRoot = (PhysicalOlapIterator) queryplan.visitAll(r2a);
-
 			PhysicalOlapQueryPlan execplan = new PhysicalOlapQueryPlan(newRoot);
 
 			return execplan;

@@ -247,7 +247,7 @@ public class Convert_Context_QueryTest extends TestCase {
 
 		// Slice indic_na.
 		// No slice necessary, directly possible with convert-context
-		// List<Node[]> sliceB1G = null;
+		// List<Node[]> sliceB1G = null; 
 		// LogicalOlapOp slicedb1g = new SliceOp(b1g, sliceB1G);
 
 		// Dice mioeur2eur for D21_M_D31.
@@ -273,18 +273,32 @@ public class Convert_Context_QueryTest extends TestCase {
 		// domainUri);
 		
 		String computegdp = "{" +
-				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#B1G> ." +
-				"?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value1 ." +
-				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31> ." +
-				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 ." +
+				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#B1G> .\n" +
+				"?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value1 .\n" +
+				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31> .\n" +
+				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 .\n" +
 				"?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(?value1 + ?value2)\" ." +
 				"} => {" +
-				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> ." +
+				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> .\n" +
 				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue ." +
-				"}. ";
+				"} . ";
 		
 		// Computing Nominal GDP from single parts in new EUR dataset.
 		LogicalOlapOp computegdp_op = new ConvertContextOp(mio_eur2eur_op, mio_eur2eur_op, computegdp, domainUri);
+		
+		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
+				computegdp_op);
+
+		executeStatement(myplan);
+		
+		/*
+		 * Should contain:
+		 * http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDP; http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR; 2010; 1731809.0; 
+		 */
+		
+		if (true) {
+			return;
+		}
 		
 		// XXX Would I need to add to DSD: eurostat:indic_na dic_indic_na:NGDP; ?
 
@@ -340,17 +354,17 @@ public class Convert_Context_QueryTest extends TestCase {
 //				slicedsexage, computegdp);
 
 		String computegdppercapita = "{" +
-				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> ." +
-				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> ." +
-				"?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value1 ." +
-				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#sex> <http://estatwrap.ontologycentral.com/dic/sex#T> ." +
-				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#age> <http://estatwrap.ontologycentral.com/dic/age#TOTAL> ." +
-				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 ." +
-				"?newvalue qrl:bindas \"(?value1 / ?value2)\" ." +
+				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> .\n" +
+				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> .\n" +
+				"?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value1 .\n" +
+				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#sex> <http://estatwrap.ontologycentral.com/dic/sex#T> .\n" +
+				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#age> <http://estatwrap.ontologycentral.com/dic/age#TOTAL> .\n" +
+				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 .\n" +
+				"?newvalue qrl:bindas \"(?value1 / ?value2)\" .\n" +
 				"} => {" +
-				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH> ." +
-				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB> ." +
-				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue ." +
+				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH> .\n" +
+				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB> .\n" +
+				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue .\n" +
 				"}. ";
 		
 		// Compute GDP per Capita from GDP and Population
@@ -358,7 +372,7 @@ public class Convert_Context_QueryTest extends TestCase {
 		LogicalOlapOp computegdppercapita_op = new ConvertContextOp(
 				computegdp_op, populationbasecube, computegdppercapita, domainUri);
 
-		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
+		myplan = new LogicalOlapQueryPlan(
 				computegdppercapita_op);
 
 		executeStatement(myplan);

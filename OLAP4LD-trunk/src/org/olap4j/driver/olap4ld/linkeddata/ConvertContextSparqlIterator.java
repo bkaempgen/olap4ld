@@ -65,21 +65,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 
 		this.repo = repo;
 
-		// We assume that convert context does not change the metadata and thus
-		// root1 returns the metadata.
-
-		try {
-			Restrictions restriction = new Restrictions();
-			this.cubes = inputiterator1.getCubes(restriction);
-			this.measures = inputiterator1.getMeasures(restriction);
-			this.dimensions = inputiterator1.getDimensions(restriction);
-			this.hierarchies = inputiterator1.getHierarchies(restriction);
-			this.levels = inputiterator1.getLevels(restriction);
-			this.members = inputiterator1.getMembers(restriction);
-		} catch (OlapException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
+		// Prepare conversion function
 
 		this.conversionfunction = conversionfunction;
 
@@ -96,35 +82,306 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 		List<Node[]> bodypatterns = conversionfunction_body_head.get(0);
 		List<Node[]> headpatterns = conversionfunction_body_head.get(1);
 
-		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(cubes.get(0));
-		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(dimensions.get(0));
-		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(measures.get(0));
-
-		// First dataset to convert
-
-		String datasetcombination = "";
-		for (Node[] cube : cubes) {
-			datasetcombination += cube[cubemap.get("?CUBE_NAME")].toString();
-		}
-
-		// How to decide for the uri?
-		String newdataset = null;
-		// We use hash of combination conversionfunction + datasets
-		newdataset = domainuri + "dataset" + datasetcombination.hashCode()
-				+ "/conversionfunction" + conversionfunction.hashCode();
-
 		// We need two queries, one for the metadata and one for the data.
 
+		// We assume that convert context does not change the metadata and thus
+		// root1 returns the metadata.
+
+		/*
+		 * However, this is not enough, we need to at least change the cube
+		 * name. I.e., we go through all those lists copy everything apart from
+		 * cube name.
+		 * 
+		 * Thus, right at the beginning, we create the new ds name and adapt the
+		 * metadata.
+		 * 
+		 * For now, we assume that the cube has the same metadata as the
+		 * previous (first) cube.
+		 */
+
 		// Metadata
+		Restrictions restrictions = new Restrictions();
+
+		Map<String, Integer> cubemap = null;
+		Map<String, Integer> dimensionmap = null;
+		Map<String, Integer> measuremap = null;
+		Map<String, Integer> hierarchymap = null;
+		Map<String, Integer> levelmap = null;
+		Map<String, Integer> membermap = null;
+
+		String dataset1 = null;
+		String dataset2 = null;
+		// How to decide for the uri?
+		String newdataset = null;
+		
+		try {
+			Restrictions restriction = new Restrictions();
+
+			// First dataset(s) to convert
+			cubemap = Olap4ldLinkedDataUtil.getNodeResultFields(inputiterator1
+					.getCubes(restrictions).get(0));
+
+			try {
+				dataset1 = inputiterator1.getCubes(restrictions).get(1)[cubemap
+						.get("?CUBE_NAME")].toString();
+				if (inputiterator2 != null) {
+					dataset2 = inputiterator2.getCubes(restrictions).get(1)[cubemap
+							.get("?CUBE_NAME")].toString();
+				}
+			} catch (OlapException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}		
+
+			// We use hash of combination conversionfunction + datasets
+			newdataset = domainuri + "dataset"
+					+ (dataset1 + dataset2).hashCode() + "/conversionfunction"
+					+ conversionfunction.hashCode();
+
+			this.cubes = new ArrayList<Node[]>();
+			boolean first = true;
+			for (Node[] cube : inputiterator1.getCubes(restriction)) {
+				if (first) {
+					first = false;
+					this.cubes.add(cube);
+					continue;
+				}
+				// ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE
+				// ?CUBE_CAPTION ?DESCRIPTION
+
+				Node[] newCube = new Node[6];
+				newCube[cubemap.get("?CATALOG_NAME")] = cube[cubemap
+						.get("?CATALOG_NAME")];
+				newCube[cubemap.get("?SCHEMA_NAME")] = cube[cubemap
+						.get("?SCHEMA_NAME")];
+				newCube[cubemap.get("?CUBE_NAME")] = new Resource(newdataset);
+				newCube[cubemap.get("?CUBE_TYPE")] = cube[cubemap
+						.get("?CUBE_TYPE")];
+				newCube[cubemap.get("?CUBE_CAPTION")] = cube[cubemap
+						.get("?CUBE_CAPTION")];
+				newCube[cubemap.get("?DESCRIPTION")] = cube[cubemap
+						.get("?DESCRIPTION")];
+
+				this.cubes.add(newCube);
+
+			}
+			this.measures = new ArrayList<Node[]>();
+			measuremap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(inputiterator1.getMeasures(
+							restrictions).get(0));
+			first = true;
+			for (Node[] node : inputiterator1.getMeasures(restriction)) {
+				if (first) {
+					first = false;
+					this.measures.add(node);
+					continue;
+				}
+
+				// Schema: (From XMLA/Linked Data Engine)
+				// Measures: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME
+				// ?MEASURE_UNIQUE_NAME ?MEASURE_NAME ?MEASURE_CAPTION
+				// ?DATA_TYPE ?MEASURE_IS_VISIBLE ?MEASURE_AGGREGATOR
+				// ?EXPRESSION
+
+				Node[] newnode = new Node[10];
+				newnode[measuremap.get("?CATALOG_NAME")] = node[measuremap
+						.get("?CATALOG_NAME")];
+				newnode[measuremap.get("?SCHEMA_NAME")] = node[measuremap
+						.get("?SCHEMA_NAME")];
+				newnode[measuremap.get("?CUBE_NAME")] = new Resource(newdataset);
+				newnode[measuremap.get("?MEASURE_UNIQUE_NAME")] = node[measuremap
+						.get("?MEASURE_UNIQUE_NAME")];
+				newnode[measuremap.get("?MEASURE_NAME")] = node[measuremap
+						.get("?MEASURE_NAME")];
+				newnode[measuremap.get("?MEASURE_CAPTION")] = node[measuremap
+						.get("?MEASURE_CAPTION")];
+				newnode[measuremap.get("?DATA_TYPE")] = node[measuremap
+						.get("?DATA_TYPE")];
+				newnode[measuremap.get("?MEASURE_IS_VISIBLE")] = node[measuremap
+						.get("?MEASURE_IS_VISIBLE")];
+				newnode[measuremap.get("?MEASURE_AGGREGATOR")] = node[measuremap
+						.get("?MEASURE_AGGREGATOR")];
+				newnode[measuremap.get("?EXPRESSION")] = node[measuremap
+						.get("?EXPRESSION")];
+
+				this.measures.add(newnode);
+			}
+			this.dimensions = new ArrayList<Node[]>();
+			dimensionmap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(inputiterator1.getDimensions(
+							restrictions).get(0));
+			first = true;
+			for (Node[] node : inputiterator1.getDimensions(restriction)) {
+				if (first) {
+					first = false;
+					this.dimensions.add(node);
+					continue;
+				}
+				// Schema: (From XMLA/Linked Data Engine)
+				// Dimensions: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME
+				// ?DIMENSION_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_CAPTION
+				// ?DIMENSION_ORDINAL ?DIMENSION_TYPE ?DESCRIPTION
+
+				Node[] newnode = new Node[9];
+				newnode[dimensionmap.get("?CATALOG_NAME")] = node[dimensionmap
+						.get("?CATALOG_NAME")];
+				newnode[dimensionmap.get("?SCHEMA_NAME")] = node[dimensionmap
+						.get("?SCHEMA_NAME")];
+				newnode[dimensionmap.get("?CUBE_NAME")] = new Resource(
+						newdataset);
+				newnode[dimensionmap.get("?DIMENSION_NAME")] = node[dimensionmap
+						.get("?DIMENSION_NAME")];
+				newnode[dimensionmap.get("?DIMENSION_UNIQUE_NAME")] = node[dimensionmap
+						.get("?DIMENSION_UNIQUE_NAME")];
+				newnode[dimensionmap.get("?DIMENSION_CAPTION")] = node[dimensionmap
+						.get("?DIMENSION_CAPTION")];
+				newnode[dimensionmap.get("?DIMENSION_ORDINAL")] = node[dimensionmap
+						.get("?DIMENSION_ORDINAL")];
+				newnode[dimensionmap.get("?DIMENSION_TYPE")] = node[dimensionmap
+						.get("?DIMENSION_TYPE")];
+				newnode[dimensionmap.get("?DESCRIPTION")] = node[dimensionmap
+						.get("?DESCRIPTION")];
+
+				this.dimensions.add(newnode);
+			}
+			hierarchymap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(inputiterator1.getHierarchies(
+							restrictions).get(0));
+			this.hierarchies = new ArrayList<Node[]>();
+			first = true;
+			for (Node[] node : inputiterator1.getHierarchies(restriction)) {
+				if (first) {
+					first = false;
+					this.hierarchies.add(node);
+					continue;
+				}
+				Node[] newnode = new Node[9];
+				// Schema: (From XMLA/Linked Data Engine)
+				// Hierarchies: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME
+				// ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_NAME
+				// ?HIERARCHY_CAPTION ?DESCRIPTION ?HIERARCHY_MAX_LEVEL_NUMBER
+
+				newnode[hierarchymap.get("?CATALOG_NAME")] = node[hierarchymap
+						.get("?CATALOG_NAME")];
+				newnode[hierarchymap.get("?SCHEMA_NAME")] = node[hierarchymap
+						.get("?SCHEMA_NAME")];
+				newnode[hierarchymap.get("?CUBE_NAME")] = new Resource(
+						newdataset);
+				newnode[hierarchymap.get("?DIMENSION_UNIQUE_NAME")] = node[hierarchymap
+						.get("?DIMENSION_UNIQUE_NAME")];
+				newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")] = node[hierarchymap
+						.get("?HIERARCHY_UNIQUE_NAME")];
+				newnode[hierarchymap.get("?HIERARCHY_NAME")] = node[hierarchymap
+						.get("?HIERARCHY_NAME")];
+				newnode[hierarchymap.get("?HIERARCHY_CAPTION")] = node[hierarchymap
+						.get("?HIERARCHY_CAPTION")];
+				newnode[hierarchymap.get("?DESCRIPTION")] = node[hierarchymap
+						.get("?DESCRIPTION")];
+				newnode[hierarchymap.get("?HIERARCHY_MAX_LEVEL_NUMBER")] = node[hierarchymap
+						.get("?HIERARCHY_MAX_LEVEL_NUMBER")];
+
+				this.hierarchies.add(newnode);
+			}
+			levelmap = Olap4ldLinkedDataUtil.getNodeResultFields(inputiterator1
+					.getLevels(restrictions).get(0));
+
+			this.levels = new ArrayList<Node[]>();
+			first = true;
+			for (Node[] node : inputiterator1.getLevels(restriction)) {
+				if (first) {
+					first = false;
+					this.levels.add(node);
+					continue;
+				}
+				// Schema: (From XMLA/Linked Data Engine)
+				// Levels: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME
+				// ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME
+				// ?LEVEL_UNIQUE_NAME ?LEVEL_CAPTION ?LEVEL_NAME ?DESCRIPTION
+				// ?LEVEL_NUMBER ?LEVEL_CARDINALITY ?LEVEL_TYPE
+
+				Node[] newnode = new Node[12];
+				newnode[levelmap.get("?CATALOG_NAME")] = node[levelmap
+						.get("?CATALOG_NAME")];
+				newnode[levelmap.get("?SCHEMA_NAME")] = node[levelmap
+						.get("?SCHEMA_NAME")];
+				newnode[levelmap.get("?CUBE_NAME")] = new Resource(newdataset);
+				newnode[levelmap.get("?DIMENSION_UNIQUE_NAME")] = node[levelmap
+						.get("?DIMENSION_UNIQUE_NAME")];
+				newnode[levelmap.get("?HIERARCHY_UNIQUE_NAME")] = node[levelmap
+						.get("?HIERARCHY_UNIQUE_NAME")];
+				newnode[levelmap.get("?LEVEL_UNIQUE_NAME")] = node[levelmap
+						.get("?LEVEL_UNIQUE_NAME")];
+				newnode[levelmap.get("?LEVEL_CAPTION")] = node[levelmap
+						.get("?LEVEL_CAPTION")];
+				newnode[levelmap.get("?LEVEL_NAME")] = node[levelmap
+						.get("?LEVEL_NAME")];
+				newnode[levelmap.get("?DESCRIPTION")] = node[levelmap
+						.get("?DESCRIPTION")];
+				newnode[levelmap.get("?LEVEL_NUMBER")] = node[levelmap
+						.get("?LEVEL_NUMBER")];
+				newnode[levelmap.get("?LEVEL_CARDINALITY")] = node[levelmap
+						.get("?LEVEL_CARDINALITY")];
+				newnode[levelmap.get("?LEVEL_TYPE")] = node[levelmap
+						.get("?LEVEL_TYPE")];
+				this.levels.add(newnode);
+			}
+			membermap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(inputiterator1.getMembers(
+							restrictions).get(0));
+			this.members = new ArrayList<Node[]>();
+			first = true;
+			for (Node[] node : inputiterator1.getMembers(restriction)) {
+				if (first) {
+					first = false;
+					this.members.add(node);
+					continue;
+				}
+				// Schema: (From XMLA/Linked Data Engine)
+				// Members: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME
+				// ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME
+				// ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME
+				// ?MEMBER_NAME ?MEMBER_CAPTION ?MEMBER_TYPE ?PARENT_UNIQUE_NAME
+				// ?PARENT_LEVEL
+
+				Node[] newnode = new Node[13];
+				newnode[membermap.get("?CATALOG_NAME")] = node[membermap
+						.get("?CATALOG_NAME")];
+				newnode[membermap.get("?SCHEMA_NAME")] = node[membermap
+						.get("?SCHEMA_NAME")];
+				newnode[membermap.get("?CUBE_NAME")] = new Resource(newdataset);
+				newnode[membermap.get("?DIMENSION_UNIQUE_NAME")] = node[membermap
+						.get("?DIMENSION_UNIQUE_NAME")];
+				newnode[membermap.get("?HIERARCHY_UNIQUE_NAME")] = node[membermap
+						.get("?HIERARCHY_UNIQUE_NAME")];
+				newnode[membermap.get("?LEVEL_UNIQUE_NAME")] = node[membermap
+						.get("?LEVEL_UNIQUE_NAME")];
+				newnode[membermap.get("?LEVEL_NUMBER")] = node[membermap
+						.get("?LEVEL_NUMBER")];
+				newnode[membermap.get("?MEMBER_UNIQUE_NAME")] = node[membermap
+						.get("?MEMBER_UNIQUE_NAME")];
+				newnode[membermap.get("?MEMBER_NAME")] = node[membermap
+						.get("?MEMBER_NAME")];
+				newnode[membermap.get("?MEMBER_CAPTION")] = node[membermap
+						.get("?MEMBER_CAPTION")];
+				newnode[membermap.get("?MEMBER_TYPE")] = node[membermap
+						.get("?MEMBER_TYPE")];
+				newnode[membermap.get("?PARENT_UNIQUE_NAME")] = node[membermap
+						.get("?PARENT_UNIQUE_NAME")];
+				newnode[membermap.get("?PARENT_LEVEL")] = node[membermap
+						.get("?PARENT_LEVEL")];
+
+				this.members.add(newnode);
+			}
+		} catch (OlapException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 
 		// Data
 
 		try {
 
-			// First try: We assume one cube, only.
+			// We assume one or two cubes, only.
 
 			RepositoryConnection con = this.repo.getConnection();
 
@@ -160,16 +417,15 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 			// ** For output cube, add dataset graph patterns (_:obs qb:dataSet
 			// <newdataset>.)
 
-			// ** For each input cube add dataset graph patterns.
-			Node[] cube = cubes.get(1);
+			// We assume that always only one new dataset is created
 
-			// Heuristically, the variable we get from the first pattern
-			// subject.
-			// For now, we assume only one cube
-			// XXX: and use index if there are several.
-			String obsvariable = headpatterns.get(0)[0].toN3();
+			// Heuristically, the variables for the cubes, we get from the
+			// pattern
+			// subject. The first from the first, the second by going through
+			// (apart from qrl:bindas)
+			Node obsvariable = headpatterns.get(0)[0];
 
-			head += obsvariable + " qb:dataSet <" + newdataset + ">. \n";
+			head += obsvariable.toN3() + " qb:dataSet <" + newdataset + ">. \n";
 
 			// DSD. For now, assume same dsd as other dataset.
 			head += "<" + newdataset + ">" + " qb:structure ?dsd. \n";
@@ -192,7 +448,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 				if (!isPatternContained(bodypatterns, null,
 						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
 						null)) {
-					head += obsvariable
+					head += obsvariable.toN3()
 							+ " "
 							+ dimension[dimensionmap
 									.get("?DIMENSION_UNIQUE_NAME")].toN3()
@@ -219,7 +475,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 
 				if (!isPatternContained(bodypatterns, null,
 						measure[measuremap.get("?MEASURE_UNIQUE_NAME")], null)) {
-					head += obsvariable
+					head += obsvariable.toN3()
 							+ " "
 							+ measure[measuremap.get("?MEASURE_UNIQUE_NAME")]
 									.toN3()
@@ -342,6 +598,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 			// +
 			// "FILTER (?unit1 = <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR>)";
 			String body = "";
+
 			// ** Add body from Data-Fu program apart from "bindas"
 			for (Node[] bodypattern : bodypatterns) {
 				// Have to check on prefixed version, also?
@@ -356,21 +613,37 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 				body += bodygraphpattern;
 			}
 
-			// ** For each input cube add dataset graph patterns.
-			cube = cubes.get(1);
-
 			// Heuristically, the variable we get from the first pattern
 			// subject.
 			// For now, we assume only one cube
 			// XXX: and use index if there are several.
-			obsvariable = bodypatterns.get(0)[0].toN3();
+			obsvariable = bodypatterns.get(0)[0];
 
-			body += obsvariable + " qb:dataSet <"
-					+ cube[cubemap.get("?CUBE_NAME")].toString() + ">. \n";
+			Node obsvariable2 = null;
+			if (dataset2 != null) {
+				// Then we should find one
+				for (Node[] bodypattern : bodypatterns) {
+					if (!bodypattern[1]
+							.toN3()
+							.equals("<http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas>")
+							&& !bodypattern[0].equals(bodypatterns.get(0)[0])) {
+						obsvariable2 = bodypattern[0];
+					}
+				}
+			}
+
+			body += obsvariable.toN3() + " qb:dataSet <" + dataset1 + ">. \n";
 
 			// DSD.
-			body += "<" + cube[cubemap.get("?CUBE_NAME")].toString() + ">"
-					+ " qb:structure ?dsd. \n";
+			body += "<" + dataset1 + ">" + " qb:structure ?dsd. \n";
+
+			if (dataset2 != null) {
+				body += obsvariable2.toN3() + " qb:dataSet <" + dataset2
+						+ ">. \n";
+
+				// DSD.
+				body += "<" + dataset2 + ">" + " qb:structure ?dsd. \n";
+			}
 
 			// ** For each dimension add dataset graph pattern if of
 			// specific dataset and not already contained in Data-Fu program
@@ -389,7 +662,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 				if (!isPatternContained(bodypatterns, null,
 						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
 						null)) {
-					body += obsvariable
+					body += obsvariable.toN3()
 							+ " "
 							+ dimension[dimensionmap
 									.get("?DIMENSION_UNIQUE_NAME")].toN3()
@@ -398,7 +671,17 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 									dimension[dimensionmap
 											.get("?DIMENSION_UNIQUE_NAME")]
 											.toString()).toN3() + ". \n";
-
+					if (dataset2 != null) {
+						body += obsvariable2.toN3()
+								+ " "
+								+ dimension[dimensionmap
+										.get("?DIMENSION_UNIQUE_NAME")].toN3()
+								+ " "
+								+ Olap4ldLinkedDataUtil.makeUriToVariable(
+										dimension[dimensionmap
+												.get("?DIMENSION_UNIQUE_NAME")]
+												.toString()).toN3() + ". \n";
+					}
 				}
 			}
 			// ** For each measure add dataset graph pattern if not already
@@ -416,7 +699,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 
 				if (!isPatternContained(bodypatterns, null,
 						measure[measuremap.get("?MEASURE_UNIQUE_NAME")], null)) {
-					body += obsvariable
+					body += obsvariable.toN3()
 							+ " "
 							+ measure[measuremap.get("?MEASURE_UNIQUE_NAME")]
 									.toN3()
@@ -425,6 +708,17 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 									measure[measuremap
 											.get("?MEASURE_UNIQUE_NAME")]
 											.toString()).toN3() + ". \n";
+					if (dataset2 != null) {
+						body += obsvariable2.toN3()
+								+ " "
+								+ measure[measuremap
+										.get("?MEASURE_UNIQUE_NAME")].toN3()
+								+ " "
+								+ Olap4ldLinkedDataUtil.makeUriToVariable(
+										measure[measuremap
+												.get("?MEASURE_UNIQUE_NAME")]
+												.toString()).toN3() + ". \n";
+					}
 				}
 			}
 			// ** } } }
@@ -434,8 +728,10 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 					+ " } } }";
 
 			Olap4ldUtil._log.config("SPARQL query: " + constructquery);
+			
 			GraphQuery graphquery = con.prepareGraphQuery(
 					org.openrdf.query.QueryLanguage.SPARQL, constructquery);
+			
 			StringWriter stringout = new StringWriter();
 			RDFWriter w = Rio.createWriter(RDFFormat.RDFXML, stringout);
 			graphquery.evaluate(w);
@@ -467,7 +763,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 
 			// Select query for the output
 
-			obsvariable = bodypatterns.get(0)[0].toN3();
+			Node newobsvariable = bodypatterns.get(0)[0];
 
 			/*
 			 * Select: 1) Add variables for each dimension and measure. Where:
@@ -536,7 +832,8 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 
 			// * 1) Add graph pattern for specific new dataset.
 
-			where += obsvariable + " qb:dataSet <" + newdataset + ">. \n";
+			where += newobsvariable.toN3() + " qb:dataSet <" + newdataset
+					+ ">. \n";
 
 			// * 2) Add graph patterns for each dimension and measure
 
@@ -560,8 +857,8 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 				Resource dimensionresource = new Resource(
 						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
 								.toString());
-				where += obsvariable + " " + dimensionresource.toN3() + " "
-						+ dimensionvariable.toN3() + ". \n";
+				where += newobsvariable.toN3() + " " + dimensionresource.toN3()
+						+ " " + dimensionvariable.toN3() + ". \n";
 			}
 			// ** For each measure add dataset graph pattern if not already
 			// contained in Data-Fu program
@@ -584,8 +881,8 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 				Resource measureresource = new Resource(
 						measure[measuremap.get("?MEASURE_UNIQUE_NAME")]
 								.toString());
-				where += obsvariable + " " + measureresource.toN3() + " "
-						+ measurevariable.toN3() + ". \n";
+				where += newobsvariable.toN3() + " " + measureresource.toN3()
+						+ " " + measurevariable.toN3() + ". \n";
 
 			}
 
