@@ -19,7 +19,6 @@
  */
 package org.olap4j;
 
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
@@ -32,27 +31,20 @@ import java.util.logging.Level;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.io.IOUtils;
 import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.ConvertContextOp;
-import org.olap4j.driver.olap4ld.linkeddata.ConvertContextSparqlIterator;
-import org.olap4j.driver.olap4ld.linkeddata.DiceOp;
-import org.olap4j.driver.olap4ld.linkeddata.DrillAcrossOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataCubesEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.PhysicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
-import org.olap4j.driver.olap4ld.linkeddata.SliceOp;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.semanticweb.yars.nx.Node;
-import org.semanticweb.yars.nx.parser.NxParser;
-import org.semanticweb.yars.util.Array;
 
 /**
  * Tests on executing drill-across.
@@ -157,9 +149,18 @@ public class Convert_Context_QueryTest extends TestCase {
 		// Roll-up
 		// XXX: We do not need roll-up
 
+		String mio_eur2eur = "{"
+				+ "?obs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR> .\n"
+				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value .\n"
+				+ "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?value)\" ."
+				+ "} => {"
+				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> .\n"
+				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue"
+				+ "} .";
+		
 		// Convert-context
 		LogicalOlapOp convertgdp = new ConvertContextOp(gdpbasecube,
-				ConvertContextSparqlIterator.MIOEUR2EUR, domainUri);
+				mio_eur2eur, domainUri);
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(convertgdp);
 
@@ -227,14 +228,14 @@ public class Convert_Context_QueryTest extends TestCase {
 		String mio_eur2eur = "{"
 				+ "?obs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR> .\n"
 				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value .\n"
-				+ "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1,000,000 * ?value)\" ."
+				+ "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?value)\" ."
 				+ "} => {"
 				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> .\n"
 				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue"
 				+ "} .";
 
 		// Mioeur2eur(dataset): Converting MIO_EUR to EUR in GDP dataset
-		LogicalOlapOp mioeur2eur = new ConvertContextOp(gdpbasecube,
+		LogicalOlapOp mio_eur2eur_op = new ConvertContextOp(gdpbasecube,
 				mio_eur2eur, domainUri);
 
 		// Dice mioeur2eur for B1G.
@@ -271,8 +272,19 @@ public class Convert_Context_QueryTest extends TestCase {
 		// LogicalOlapOp computegdp = new ConvertContextOp(drillacross, 1,
 		// domainUri);
 		
+		String computegdp = "{" +
+				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#B1G> ." +
+				"?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value1 ." +
+				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31> ." +
+				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 ." +
+				"?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(?value1 + ?value2)\" ." +
+				"} => {" +
+				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> ." +
+				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue ." +
+				"}. ";
+		
 		// Computing Nominal GDP from single parts in new EUR dataset.
-		LogicalOlapOp computegdp = new ConvertContextOp(mioeur2eur, mioeur2eur, mio_eur2eur_nodes, domainUri);
+		LogicalOlapOp computegdp_op = new ConvertContextOp(mio_eur2eur_op, mio_eur2eur_op, computegdp, domainUri);
 		
 		// XXX Would I need to add to DSD: eurostat:indic_na dic_indic_na:NGDP; ?
 
@@ -327,13 +339,27 @@ public class Convert_Context_QueryTest extends TestCase {
 //		LogicalOlapOp drillacrossgdppopulation = new DrillAcrossOp(
 //				slicedsexage, computegdp);
 
+		String computegdppercapita = "{" +
+				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> ." +
+				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> ." +
+				"?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value1 ." +
+				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#sex> <http://estatwrap.ontologycentral.com/dic/sex#T> ." +
+				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#age> <http://estatwrap.ontologycentral.com/dic/age#TOTAL> ." +
+				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 ." +
+				"?newvalue qrl:bindas \"(?value1 / ?value2)\" ." +
+				"} => {" +
+				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH> ." +
+				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB> ." +
+				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue ." +
+				"}. ";
+		
 		// Compute GDP per Capita from GDP and Population
 		// XXX: ComplexMeasureOp
-		LogicalOlapOp computegdppercapita = new ConvertContextOp(
-				computegdp, populationbasecube, 2, domainUri);
+		LogicalOlapOp computegdppercapita_op = new ConvertContextOp(
+				computegdp_op, populationbasecube, computegdppercapita, domainUri);
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
-				computegdppercapita);
+				computegdppercapita_op);
 
 		executeStatement(myplan);
 	}

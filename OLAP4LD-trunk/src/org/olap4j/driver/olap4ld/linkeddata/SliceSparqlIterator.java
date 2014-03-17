@@ -1,12 +1,11 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.openrdf.repository.sail.SailRepository;
 import org.semanticweb.yars.nx.Node;
@@ -20,29 +19,33 @@ import org.semanticweb.yars.nx.Node;
 public class SliceSparqlIterator implements PhysicalOlapIterator {
 
 	// The different metadata parts
-	List<Node[]> cubes;
-	List<Node[]> measures;
-	List<Node[]> dimensions;
-	List<Node[]> hierarchies;
-	List<Node[]> levels;
-	List<Node[]> members;
+	private List<Node[]> cubes;
+	private List<Node[]> measures;
+	private List<Node[]> dimensions;
+	private List<Node[]> hierarchies;
+	private List<Node[]> levels;
+	private List<Node[]> members;
 
 	private Iterator<Node[]> iterator;
 	private SailRepository repo;
 
 	public SliceSparqlIterator(SailRepository repo, PhysicalOlapIterator inputiterator,
-			List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
-			List<Node[]> hierarchies, List<Node[]> levels,
-			List<Node[]> members, List<Node[]> slicedDimensions) {
+			List<Node[]> slicedDimensions) {
 		
 		this.repo = repo;
 		
-		this.cubes = cubes;
-		this.measures = measures;
-		this.dimensions = dimensions;
-		this.hierarchies = hierarchies;
-		this.levels = levels;
-		this.members = members;
+		try {
+			Restrictions restriction = new Restrictions();
+			this.cubes = inputiterator.getCubes(restriction);
+			this.measures = inputiterator.getMeasures(restriction);
+			this.dimensions = inputiterator.getDimensions(restriction);
+			this.hierarchies = inputiterator.getHierarchies(restriction);
+			this.levels = inputiterator.getLevels(restriction);
+			this.members = inputiterator.getMembers(restriction);
+		} catch (OlapException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		
 		// measure dimension
 		// header
@@ -249,5 +252,39 @@ public class SliceSparqlIterator implements PhysicalOlapIterator {
 		// TODO Auto-generated method stub
 
 	}
+	@Override
+	public List<Node[]> getCubes(Restrictions restrictions)
+			throws OlapException {
+		return cubes;
+	}
 
+	@Override
+	public List<Node[]> getDimensions(Restrictions restrictions)
+			throws OlapException {
+		return dimensions;
+	}
+
+	@Override
+	public List<Node[]> getMeasures(Restrictions restrictions)
+			throws OlapException {
+		return measures;
+	}
+
+	@Override
+	public List<Node[]> getHierarchies(Restrictions restrictions)
+			throws OlapException {
+		return hierarchies;
+	}
+
+	@Override
+	public List<Node[]> getLevels(Restrictions restrictions)
+			throws OlapException {
+		return levels;
+	}
+
+	@Override
+	public List<Node[]> getMembers(Restrictions restrictions)
+			throws OlapException {
+		return members;
+	}
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.openrdf.query.MalformedQueryException;
@@ -169,6 +170,48 @@ public class SparqlSesameIterator implements PhysicalOlapIterator {
 	 */
 	public String toString() {
 		return "SparqlSesame: " + query;
+	}
+
+	@Override
+	public List<Node[]> getCubes(Restrictions restrictions)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node[]> getDimensions(Restrictions restrictions)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node[]> getMeasures(Restrictions restrictions)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node[]> getHierarchies(Restrictions restrictions)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node[]> getLevels(Restrictions restrictions)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node[]> getMembers(Restrictions restrictions)
+			throws OlapException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

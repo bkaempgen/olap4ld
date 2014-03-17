@@ -28,6 +28,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Variable;
 import org.semanticweb.yars.nx.parser.NxParser;
 
 public class Olap4ldLinkedDataUtil {
@@ -274,10 +275,10 @@ public class Olap4ldLinkedDataUtil {
 	 * @param uriRepresentation
 	 * @return
 	 */
-	public static String makeUriToVariable(String uriRepresentation) {
+	public static Variable makeUriToVariable(String uriRepresentation) {
 		// We simply remove all special characters
 		uriRepresentation = uriRepresentation.replaceAll("[^a-zA-Z0-9]+", "");
-		return uriRepresentation;
+		return new Variable("?"+uriRepresentation);
 	}
 
 	/**

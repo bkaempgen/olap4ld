@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.openrdf.query.MalformedQueryException;
@@ -81,10 +82,10 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 					.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
 				continue;
 			}
-			String dimensionPropertyVariable = Olap4ldLinkedDataUtil
+			Node dimensionPropertyVariable = Olap4ldLinkedDataUtil
 					.makeUriToVariable(dimensionProperty);
-			whereClause += " ?obs <" + dimensionProperty + "> ?"
-					+ dimensionPropertyVariable + ". ";
+			whereClause += " ?obs <" + dimensionProperty + "> "
+					+ dimensionPropertyVariable.toN3() + ". ";
 			selectClause += " ?" + dimensionPropertyVariable;
 		}
 
@@ -104,7 +105,7 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 			// We also remove aggregation function from Measure Property
 			// Variable so
 			// that the same property is not selected twice.
-			String measurePropertyVariable = Olap4ldLinkedDataUtil
+			Node measurePropertyVariable = Olap4ldLinkedDataUtil
 					.makeUriToVariable(measure[measuremap
 							.get("?MEASURE_UNIQUE_NAME")].toString().replace(
 							"AGGFUNC"
@@ -115,9 +116,9 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 													"").toUpperCase(), ""));
 
 			// Unique name for variable
-			String uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
-					.makeUriToVariable(measure[measuremap
-							.get("?MEASURE_UNIQUE_NAME")].toString());
+//			Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
+//					.makeUriToVariable(measure[measuremap
+//							.get("?MEASURE_UNIQUE_NAME")].toString());
 
 			// We take the aggregator from the measure
 			// Since we use OPTIONAL, there might be empty columns,
@@ -129,10 +130,10 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 			// + measurePropertyVariable + ") as ?"
 			// + uniqueMeasurePropertyVariable + ")";
 
-			selectClause += "?" + measurePropertyVariable + " ";
+			selectClause += measurePropertyVariable.toN3() + " ";
 
-			whereClause += "?obs <" + measureProperty + "> ?"
-					+ measurePropertyVariable + ".";
+			whereClause += "?obs <" + measureProperty + "> "
+					+ measurePropertyVariable.toN3() + ".";
 		}
 
 		String query = Olap4ldLinkedDataUtil.getStandardPrefixes() + "select "
@@ -263,6 +264,42 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 			throws QueryException {
 		// TODO Auto-generated method stub
 
+	}
+	
+	@Override
+	public List<Node[]> getCubes(Restrictions restrictions)
+			throws OlapException {
+		return cubes;
+	}
+
+	@Override
+	public List<Node[]> getDimensions(Restrictions restrictions)
+			throws OlapException {
+		return dimensions;
+	}
+
+	@Override
+	public List<Node[]> getMeasures(Restrictions restrictions)
+			throws OlapException {
+		return measures;
+	}
+
+	@Override
+	public List<Node[]> getHierarchies(Restrictions restrictions)
+			throws OlapException {
+		return hierarchies;
+	}
+
+	@Override
+	public List<Node[]> getLevels(Restrictions restrictions)
+			throws OlapException {
+		return levels;
+	}
+
+	@Override
+	public List<Node[]> getMembers(Restrictions restrictions)
+			throws OlapException {
+		return members;
 	}
 
 }

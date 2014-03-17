@@ -1,9 +1,6 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.util.List;
-
 import org.openrdf.repository.sail.SailRepository;
-import org.semanticweb.yars.nx.Node;
 
 /**
  * Converts from logical olap query plan including drill-across operator to
@@ -16,14 +13,6 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 		LogicalOlapOperatorQueryPlanVisitor {
 	// the new root node
 	PhysicalOlapIterator _root;
-
-	// The different metadata parts
-	List<Node[]> cubes;
-	List<Node[]> measures;
-	List<Node[]> dimensions;
-	List<Node[]> hierarchies;
-	List<Node[]> levels;
-	List<Node[]> members;
 
 	// For the moment, we know the repo (we could wrap it also)
 	private SailRepository repo;
@@ -257,18 +246,10 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 		so.inputop2.accept(this);
 		PhysicalOlapIterator root2 = _root;
 
-		DrillAcrossSparqlIterator drillacrosscube = new DrillAcrossSparqlIterator(
-				root1, root2, cubes, measures, dimensions, hierarchies, levels,
-				members);
+		DrillAcrossSparqlIterator resultiterator = new DrillAcrossSparqlIterator(
+				root1, root2);
 
-		cubes = drillacrosscube.cubes;
-		measures = drillacrosscube.measures;
-		dimensions = drillacrosscube.dimensions;
-		hierarchies = drillacrosscube.hierarchies;
-		levels = drillacrosscube.levels;
-		members = drillacrosscube.members;
-
-		_root = drillacrosscube;
+		_root = resultiterator;
 	}
 
 	@Override
@@ -283,16 +264,8 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 
 		so.inputOp.accept(this);
 
-		SliceSparqlIterator slicecube = new SliceSparqlIterator(repo, _root, cubes,
-				measures, dimensions, hierarchies, levels, members,
+		SliceSparqlIterator slicecube = new SliceSparqlIterator(repo, _root,
 				so.slicedDimensions);
-
-		cubes = slicecube.cubes;
-		measures = slicecube.measures;
-		dimensions = slicecube.dimensions;
-		hierarchies = slicecube.hierarchies;
-		levels = slicecube.levels;
-		members = slicecube.members;
 
 		_root = slicecube;
 	}
@@ -319,45 +292,32 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 		// ExecIterator bi = null;
 		// _root = bi;
 
-		// Instead of having repo as parameter one could make the
-		// iterator start and populate its own repo.
-		cubes = so.cubes;
-		measures = so.measures;
-		dimensions = so.dimensions;
-		hierarchies = so.hierarchies;
-		levels = so.levels;
-		members = so.members;
 		// We do not need to change those metadata.
 
 		BaseCubeSparqlIterator basecube = new BaseCubeSparqlIterator(repo,
-				so.cubes, measures, dimensions, hierarchies, levels, members);
+				so.cubes, so.measures, so.dimensions, so.hierarchies, so.levels, so.members);
 		_root = basecube;
-
-		cubes = basecube.cubes;
-		measures = basecube.measures;
-		dimensions = basecube.dimensions;
-		hierarchies = basecube.hierarchies;
-		levels = basecube.levels;
-		members = basecube.members;
 	}
 
 	@Override
 	public void visit(ConvertContextOp op) throws QueryException {
 		ConvertContextOp so = (ConvertContextOp) op;
 
-		so.inputOp.accept(this);
-		PhysicalOlapIterator root = _root;
-
-		ConvertContextSparqlIterator convertcontextcube = new ConvertContextSparqlIterator(
-				repo, cubes, root, cubes, measures, dimensions, hierarchies,
-				levels, members, so.conversionfunction, so.domainuri);
-
-		cubes = convertcontextcube.cubes;
-		measures = convertcontextcube.measures;
-		dimensions = convertcontextcube.dimensions;
-		hierarchies = convertcontextcube.hierarchies;
-		levels = convertcontextcube.levels;
-		members = convertcontextcube.members;
+		ConvertContextSparqlIterator convertcontextcube;
+		if (so.inputOp2 == null) {
+			so.inputOp1.accept(this);
+			PhysicalOlapIterator root = _root;
+			convertcontextcube = new ConvertContextSparqlIterator(
+					repo, root, null, so.conversionfunction, so.domainUri);	
+		} else {
+			so.inputOp1.accept(this);
+			PhysicalOlapIterator root1 = _root;
+			so.inputOp2.accept(this);
+			PhysicalOlapIterator root2 = _root;
+			
+			convertcontextcube = new ConvertContextSparqlIterator(
+					repo, root1, root2, so.conversionfunction, so.domainUri);	
+		}
 
 		_root = convertcontextcube;
 	}

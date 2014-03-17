@@ -108,7 +108,7 @@ public class Olap2SparqlSesameVisitor implements
 			whereClause += addLevelPropertyPath(0, levelHeight,
 					dimensionProperty, levelURI);
 
-			String dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(dimensionProperty);
+			Node dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(dimensionProperty);
 			selectClause += " ?" + dimensionPropertyVariable + levelHeight
 					+ " ";
 			groupByClause += " ?" + dimensionPropertyVariable + levelHeight
@@ -200,7 +200,7 @@ public class Olap2SparqlSesameVisitor implements
 				for (int i = 1; i < membercombination.size(); i++) {
 					// We need to know the variable to filter
 					// First, we need to convert it to URI representation.
-					String dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(membercombination
+					Node dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(membercombination
 							.get(i)[map1.get("?DIMENSION_UNIQUE_NAME")]
 							.toString());
 
@@ -727,7 +727,7 @@ public class Olap2SparqlSesameVisitor implements
 				// We also remove aggregation function from Measure Property
 				// Variable so
 				// that the same property is not selected twice.
-				String measurePropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(measure[map
+				Node measurePropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(measure[map
 						.get("?MEASURE_UNIQUE_NAME")].toString().replace(
 						"AGGFUNC"
 								+ measure[map.get("?MEASURE_AGGREGATOR")]
@@ -736,7 +736,7 @@ public class Olap2SparqlSesameVisitor implements
 						""));
 				
 				// Unique name for variable
-				String uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(measure[map
+				Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(measure[map
 				                                    						.get("?MEASURE_UNIQUE_NAME")].toString());
 
 				// We take the aggregator from the measure
@@ -817,7 +817,7 @@ public class Olap2SparqlSesameVisitor implements
 
 		String whereClause = "";
 
-		String dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(dimensionProperty);
+		Node dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(dimensionProperty);
 
 		if (levelHeight == 0) {
 			/*
