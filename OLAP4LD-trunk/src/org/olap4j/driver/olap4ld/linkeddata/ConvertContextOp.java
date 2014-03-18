@@ -18,6 +18,7 @@ public class ConvertContextOp implements LogicalOlapOp {
 	public ConvertContextOp(LogicalOlapOp inputOp,
 			String conversionfunction, String domainUri) {
 		this.inputOp1 = inputOp;
+		this.inputOp2 = null;
 		this.conversionfunction = conversionfunction;
 		this.domainUri = domainUri;
 	}
@@ -43,6 +44,7 @@ public class ConvertContextOp implements LogicalOlapOp {
 	@Override
 	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
 			throws QueryException {
+
 		v.visit(this);
 
 		if (v instanceof Olap2SparqlSesameDerivedDatasetVisitor) {

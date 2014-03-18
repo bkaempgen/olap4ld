@@ -61,10 +61,10 @@ public class Convert_Context_QueryTest extends TestCase {
 		Olap4ldUtil.prepareLogging();
 		// Logging
 		// For debugging purposes
-		// Olap4ldUtil._log.setLevel(Level.CONFIG);
+		Olap4ldUtil._log.setLevel(Level.INFO);
 
 		// For monitoring usage
-		Olap4ldUtil._log.setLevel(Level.CONFIG);
+		//Olap4ldUtil._log.setLevel(Level.CONFIG);
 
 		// For warnings (and errors) only
 		// Olap4ldUtil._log.setLevel(Level.WARNING);
@@ -231,7 +231,7 @@ public class Convert_Context_QueryTest extends TestCase {
 				+ "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?value)\" ."
 				+ "} => {"
 				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> .\n"
-				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue"
+				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue "
 				+ "} .";
 
 		// Mioeur2eur(dataset): Converting MIO_EUR to EUR in GDP dataset
@@ -280,32 +280,23 @@ public class Convert_Context_QueryTest extends TestCase {
 				"?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(?value1 + ?value2)\" ." +
 				"} => {" +
 				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> .\n" +
-				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue ." +
+				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue " +
 				"} . ";
 		
 		// Computing Nominal GDP from single parts in new EUR dataset.
 		LogicalOlapOp computegdp_op = new ConvertContextOp(mio_eur2eur_op, mio_eur2eur_op, computegdp, domainUri);
-		
-		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
-				computegdp_op);
-
-		executeStatement(myplan);
 		
 		/*
 		 * Should contain:
 		 * http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDP; http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR; 2010; 1731809.0; 
 		 */
 		
-		if (true) {
-			return;
-		}
-		
 		// XXX Would I need to add to DSD: eurostat:indic_na dic_indic_na:NGDP; ?
 
 		// Second: Population dataset
 		String populationuri = "http://estatwrap.ontologycentral.com/id/demo_pjan#ds";
 		Restrictions populationrestrictions = new Restrictions();
-		gdprestrictions.cubeNamePattern = populationuri;
+		populationrestrictions.cubeNamePattern = populationuri;
 
 		// Base-cube
 		// XXX: We need to make sure that only the lowest members are queried
@@ -314,18 +305,18 @@ public class Convert_Context_QueryTest extends TestCase {
 		// In order to fill the engine with data
 		// XXX: Should be part of base-cube operator
 		List<Node[]> populationcube = lde.getCubes(populationrestrictions);
-		assertEquals(2, gdpcube.size());
+		assertEquals(2, populationcube.size());
 		Map<String, Integer> populationcubemap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(gdpcube.get(0));
+				.getNodeResultFields(populationcube.get(0));
 		System.out.println("CUBE_NAME: "
-				+ gdpcube.get(1)[populationcubemap.get("?CUBE_NAME")]);
+				+ populationcube.get(1)[populationcubemap.get("?CUBE_NAME")]);
 
 		List<Node[]> populationcubemeasures = lde
 				.getMeasures(populationrestrictions);
 
 		List<Node[]> populationcubedimensions = lde
 				.getDimensions(populationrestrictions);
-		assertEquals(true, gdpcubedimensions.size() > 1);
+		assertEquals(true, populationcubedimensions.size() > 1);
 
 		List<Node[]> populationcubehierarchies = lde
 				.getHierarchies(populationrestrictions);
@@ -360,19 +351,19 @@ public class Convert_Context_QueryTest extends TestCase {
 				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#sex> <http://estatwrap.ontologycentral.com/dic/sex#T> .\n" +
 				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#age> <http://estatwrap.ontologycentral.com/dic/age#TOTAL> .\n" +
 				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 .\n" +
-				"?newvalue qrl:bindas \"(?value1 / ?value2)\" .\n" +
+				"?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(?value1 / ?value2)\" .\n" +
 				"} => {" +
 				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH> .\n" +
 				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB> .\n" +
-				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue .\n" +
+				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue " +
 				"}. ";
 		
 		// Compute GDP per Capita from GDP and Population
 		// XXX: ComplexMeasureOp
 		LogicalOlapOp computegdppercapita_op = new ConvertContextOp(
 				computegdp_op, populationbasecube, computegdppercapita, domainUri);
-
-		myplan = new LogicalOlapQueryPlan(
+		
+		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 				computegdppercapita_op);
 
 		executeStatement(myplan);
@@ -393,7 +384,7 @@ public class Convert_Context_QueryTest extends TestCase {
 			// Execute query return representation of physical query plan
 			List<Node[]> result = this.lde.executeOlapQuery(queryplan);
 
-			PhysicalOlapQueryPlan execplan = this.lde.getExecplan(queryplan);
+			PhysicalOlapQueryPlan execplan = this.lde.getExecplan();
 			System.out.println("Physical plan:" + execplan.toString());
 			System.out.println("Result:");
 			for (Node[] nodes : result) {

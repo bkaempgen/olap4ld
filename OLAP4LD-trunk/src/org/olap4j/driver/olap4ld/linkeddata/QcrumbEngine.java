@@ -2066,7 +2066,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 	}
 
 	@Override
-	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan)
+	public PhysicalOlapQueryPlan getExecplan()
 			throws OlapException {
 		// TODO Auto-generated method stub
 		return null;

@@ -309,6 +309,16 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 			PhysicalOlapIterator root = _root;
 			convertcontextcube = new ConvertContextSparqlIterator(
 					repo, root, null, so.conversionfunction, so.domainUri);	
+		} else if (so.inputOp1 == so.inputOp2) { 
+			// If both operators are the same, we can reuse the iterator. 
+			// Unfortunately, this does not work for further nested equal operators. 
+			// If inside a logical olap query plan the same function is run on the same dataset, we 
+			// still have a problem that it is run twice. we could have a hashmap storing
+			// previous operators and reusing them if needed. 
+			so.inputOp1.accept(this);
+			PhysicalOlapIterator root = _root;
+			convertcontextcube = new ConvertContextSparqlIterator(
+					repo, root, root, so.conversionfunction, so.domainUri);
 		} else {
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root1 = _root;

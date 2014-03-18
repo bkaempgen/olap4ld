@@ -18,8 +18,6 @@
  */
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -30,11 +28,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.olap4j.OlapException;
 import org.olap4j.Position;
@@ -2610,7 +2603,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	}
 
 	@Override
-	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan)
+	public PhysicalOlapQueryPlan getExecplan()
 			throws OlapException {
 		// TODO Auto-generated method stub
 		return null;

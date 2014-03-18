@@ -21,7 +21,6 @@ package org.olap4j.driver.olap4ld.linkeddata;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,8 +53,6 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.repository.sail.SailRepositoryConnection;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
@@ -110,32 +107,7 @@ public class EmbeddedSesameEngine implements
 
 	private Integer LOADED_TRIPLE_SIZE = 0;
 
-	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan)
-			throws OlapException {
-
-		try {
-
-//			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameVisitor(
-//					repo);
-			
-			// We create visitor to translate logical into physical
-			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(
-					repo);
-
-			PhysicalOlapIterator newRoot;
-			// Transform into physical query plan
-			newRoot = (PhysicalOlapIterator) queryplan.visitAll(r2a);
-			PhysicalOlapQueryPlan execplan = new PhysicalOlapQueryPlan(newRoot);
-
-			return execplan;
-
-		} catch (QueryException e) {
-			Olap4ldUtil._log.warning("Olap query execution went wrong: "
-					+ e.getMessage());
-			throw new OlapException("Olap query execution went wrong: "
-					+ e.getMessage());
-		}
-	}
+	private PhysicalOlapQueryPlan execplan;
 
 	public EmbeddedSesameEngine(URL serverUrlObject,
 			List<String> datastructuredefinitions, List<String> datasets,
@@ -151,6 +123,37 @@ public class EmbeddedSesameEngine implements
 		initialize();
 	}
 
+	private void createExecplan(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
+
+		try {
+
+//			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameVisitor(
+//					repo);
+			
+			// We create visitor to translate logical into physical
+			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(
+					repo);
+
+			PhysicalOlapIterator newRoot;
+			// Transform into physical query plan
+			newRoot = (PhysicalOlapIterator) queryplan.visitAll(r2a);
+			PhysicalOlapQueryPlan execplan = new PhysicalOlapQueryPlan(newRoot);
+			
+			this.execplan = execplan;
+
+		} catch (QueryException e) {
+			Olap4ldUtil._log.warning("Olap query execution went wrong: "
+					+ e.getMessage());
+			throw new OlapException("Olap query execution went wrong: "
+					+ e.getMessage());
+		}
+	}
+	
+	public PhysicalOlapQueryPlan getExecplan() {
+		return this.execplan;
+	}
+	
 	private void initialize() {
 
 		// This seems to hold up a lot. I hope garbage collector works.
@@ -189,6 +192,7 @@ public class EmbeddedSesameEngine implements
 	 * @throws
 	 * @throws OlapException
 	 */
+	@SuppressWarnings("unused")
 	private void preload() throws OlapException {
 
 		try {
@@ -330,18 +334,21 @@ public class EmbeddedSesameEngine implements
 
 	}
 
+	@SuppressWarnings("unused")
 	private void insertTriples(String triples) {
 		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
 				+ triples + " } }";
 		Olap4ldLinkedDataUtil.sparqlRepoUpdate(repo, query, false);
 	}
 
+	@SuppressWarnings("unused")
 	private void deleteTriples(String triples) {
 		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> DELETE DATA { "
 				+ triples + " }";
 		Olap4ldLinkedDataUtil.sparqlRepoUpdate(repo, query, false);
 	}
 
+	@SuppressWarnings("unused")
 	private void deleteTriplesWhere(String triples, String where) {
 		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> DELETE { "
 				+ triples + " } where { " + where + "}";
@@ -2399,12 +2406,12 @@ public class EmbeddedSesameEngine implements
 		long time = System.currentTimeMillis();
 
 		// Create physical query plan
-		PhysicalOlapQueryPlan execplan = getExecplan(queryplan);
+		createExecplan(queryplan);
 
 		Olap4ldUtil._log.info("Create and execute physical query plan: "
 				+ execplan.toString());
 
-		PhysicalOlapIterator resultIterator = execplan.getIterator();
+		PhysicalOlapIterator resultIterator = this.execplan.getIterator();
 
 		/*
 		 * We create our own List<Node[]> result with every item

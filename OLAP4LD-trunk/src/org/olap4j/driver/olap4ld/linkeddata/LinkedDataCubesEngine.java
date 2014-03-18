@@ -20,7 +20,6 @@ package org.olap4j.driver.olap4ld.linkeddata;
 
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.Map;
 
 import org.olap4j.OlapException;
 import org.olap4j.Position;
@@ -226,6 +225,6 @@ public interface LinkedDataCubesEngine {
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
 			throws OlapException;
 
-	public PhysicalOlapQueryPlan getExecplan(LogicalOlapQueryPlan queryplan)
+	public PhysicalOlapQueryPlan getExecplan()
 			throws OlapException;
 }

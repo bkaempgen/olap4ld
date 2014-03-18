@@ -530,7 +530,7 @@ public class Slicer_QueryTest extends TestCase {
 			// Execute query return representation of physical query plan
 			List<Node[]> result = this.lde.executeOlapQuery(queryplan);
 
-			PhysicalOlapQueryPlan execplan = this.lde.getExecplan(queryplan);
+			PhysicalOlapQueryPlan execplan = this.lde.getExecplan();
 			System.out.println("Physical plan:" + execplan.toString());
 			System.out.println("Result:");
 			for (Node[] nodes : result) {
