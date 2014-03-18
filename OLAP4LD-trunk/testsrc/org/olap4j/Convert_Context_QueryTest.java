@@ -61,10 +61,10 @@ public class Convert_Context_QueryTest extends TestCase {
 		Olap4ldUtil.prepareLogging();
 		// Logging
 		// For debugging purposes
-		Olap4ldUtil._log.setLevel(Level.INFO);
+		//Olap4ldUtil._log.setLevel(Level.INFO);
 
 		// For monitoring usage
-		//Olap4ldUtil._log.setLevel(Level.CONFIG);
+		Olap4ldUtil._log.setLevel(Level.CONFIG);
 
 		// For warnings (and errors) only
 		// Olap4ldUtil._log.setLevel(Level.WARNING);
@@ -167,6 +167,10 @@ public class Convert_Context_QueryTest extends TestCase {
 		executeStatement(myplan);
 	}
 
+	/**
+	 * First try of a pipeline. Using Estatwrap data. Computes GDP per capita.
+	 * @throws OlapException
+	 */
 	public void test_GDP_per_Capita_Calculation() throws OlapException {
 
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
@@ -365,6 +369,53 @@ public class Convert_Context_QueryTest extends TestCase {
 		
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 				computegdppercapita_op);
+
+		executeStatement(myplan);
+	}
+	
+	/**
+	 * Tries to get worldbank data from Sarven.
+	 * @throws OlapException
+	 */
+	public void test_GDP_per_Capita_Worldbank() throws OlapException {
+
+		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
+
+		// First: GDP current dataset
+		String gdpdsuri = "http://worldbank.270a.info/dataset/NY.GDP.MKTP.CD";
+		Restrictions gdprestrictions = new Restrictions();
+		gdprestrictions.cubeNamePattern = gdpdsuri;
+
+		// Base-cube
+		// XXX: We need to make sure that only the lowest members are queried
+		// from each cube.
+
+		// In order to fill the engine with data
+		List<Node[]> gdpcube = lde.getCubes(gdprestrictions);
+		assertEquals(2, gdpcube.size());
+		Map<String, Integer> gdpcubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(gdpcube.get(0));
+		System.out.println("CUBE_NAME: "
+				+ gdpcube.get(1)[gdpcubemap.get("?CUBE_NAME")]);
+
+		List<Node[]> gdpcubemeasures = lde.getMeasures(gdprestrictions);
+
+		List<Node[]> gdpcubedimensions = lde.getDimensions(gdprestrictions);
+		assertEquals(true, gdpcubedimensions.size() > 1);
+
+		List<Node[]> gdpcubehierarchies = lde.getHierarchies(gdprestrictions);
+
+		List<Node[]> gdpcubelevels = lde.getLevels(gdprestrictions);
+
+		List<Node[]> gdpcubemembers = lde.getMembers(gdprestrictions);
+
+		// Base-cube
+		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpcube, gdpcubemeasures,
+				gdpcubedimensions, gdpcubehierarchies, gdpcubelevels,
+				gdpcubemembers);
+		
+		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
+				gdpbasecube);
 
 		executeStatement(myplan);
 	}

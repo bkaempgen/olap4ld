@@ -528,10 +528,16 @@ public class EmbeddedSesameEngine implements
 			// "Warning: Maximum storage capacity reached! Dataset too large.");
 			// }
 
+			// Workaround certain files are not loadable
+			
+			if (locationstring.equals("http://worldbank.270a.info/property/indicator.rdf")) {
+				return;
+			}
+			
 			// Guess file format
 			RDFFormat format = RDFFormat.forFileName(locationstring);
 			if (format != null) {
-				con.add(location, locationstring.toString(), format);
+				con.add(location, locationstring, format);
 			} else {
 				// Heuristics
 
