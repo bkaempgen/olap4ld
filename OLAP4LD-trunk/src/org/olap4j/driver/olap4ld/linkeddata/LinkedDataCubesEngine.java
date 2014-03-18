@@ -20,6 +20,7 @@ package org.olap4j.driver.olap4ld.linkeddata;
 
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 
 import org.olap4j.OlapException;
 import org.olap4j.Position;
@@ -41,7 +42,7 @@ import org.semanticweb.yars.nx.Node;
  * 
  */
 public interface LinkedDataCubesEngine {
-
+	
 	/**
 	 * Puts engine to its default init state.
 	 */

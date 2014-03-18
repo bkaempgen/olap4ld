@@ -3,6 +3,7 @@ package org.olap4j.driver.olap4ld.helper;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,6 +28,16 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.Update;
+import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFWriter;
+import org.openrdf.rio.Rio;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Variable;
 import org.semanticweb.yars.nx.parser.NxParser;
@@ -635,4 +646,59 @@ public class Olap4ldLinkedDataUtil {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
+	/**
+	 * dump RDF graph
+	 * 
+	 * @param out
+	 *            output stream for the serialization
+	 * @param outform
+	 *            the RDF serialization format for the dump
+	 * @return
+	 */
+	public static void dumpRDF(SailRepository repo, String file, RDFFormat outform) {
+		try {
+			// dump the graph in the specified format
+			System.out.println("\n==GRAPH DUMP==\n");
+			FileOutputStream fos = new FileOutputStream(file);
+			RepositoryConnection con = repo.getConnection();
+			try {
+				RDFWriter w = Rio.createWriter(outform, fos);
+				con.export(w);
+			} finally {
+				con.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param repo
+	 * @param query
+	 * @param caching
+	 */
+	public static void sparqlRepoUpdate(SailRepository repo, String query, boolean caching) {
+		Olap4ldUtil._log.config("SPARQL update query: " + query);
+
+		try {
+			RepositoryConnection con = repo.getConnection();
+
+			Update tupleQuery = con.prepareUpdate(QueryLanguage.SPARQL, query);
+			tupleQuery.execute();
+
+			// do something interesting with the values here...
+			// con.close();
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedQueryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UpdateExecutionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
 }

@@ -21,12 +21,10 @@ package org.olap4j.driver.olap4ld.linkeddata;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -261,7 +259,7 @@ public class EmbeddedSesameEngine implements
 					+ "_:comp <http://purl.org/linked-data/cube#measure> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. "
 					+ "<http://purl.org/dc/terms/date> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2000/01/rdf-schema#Literal>. ";
 
-			insertTriples(triples);
+			//insertTriples(triples);
 
 			dataset = new URL(
 					"http://eurostat.linked-statistics.org/data/tgs00003");
@@ -271,12 +269,12 @@ public class EmbeddedSesameEngine implements
 			// Problem: Wrong dsd has to be removed
 			triples = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/../dsd/tgs00003>. ";
 
-			deleteTriples(triples);
+			//deleteTriples(triples);
 
 			triples = "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> ?comp. "
 					+ "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
 			String where = "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
-			deleteTriplesWhere(triples, where);
+			//deleteTriplesWhere(triples, where);
 
 			// ----------------
 			// # Population on 1 January by age and sex [demo_pjan] (Estatwrap)
@@ -323,63 +321,33 @@ public class EmbeddedSesameEngine implements
 					+ this.LOADED_TRIPLE_SIZE + " triples finished in " + time
 					+ "ms.");
 
-			// dump the graph in the specified format
-			System.out.println("\n==GRAPH DUMP==\n");
-			FileOutputStream fos = new FileOutputStream(
-					"/media/84F01919F0191352/Projects/2014/paper/Link to paper-drill-across/Link to task-data-fu/drill-across-paper/gdp_per_capita_experiment_load_cubes.n3");
-			dumpRDF(fos, RDFFormat.NTRIPLES);
+			//Olap4ldLinkedDataUtil.dumpRDF(repo, "/media/84F01919F0191352/Projects/2014/paper/Link to paper-drill-across/Link to task-data-fu/drill-across-paper/gdp_per_capita_experiment_load_cubes.n3", RDFFormat.NTRIPLES);
 
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 
 	}
 
 	private void insertTriples(String triples) {
 		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
 				+ triples + " } }";
-		sparqlUpdate(query, false);
+		Olap4ldLinkedDataUtil.sparqlRepoUpdate(repo, query, false);
 	}
 
 	private void deleteTriples(String triples) {
 		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> DELETE DATA { "
 				+ triples + " }";
-		sparqlUpdate(query, false);
+		Olap4ldLinkedDataUtil.sparqlRepoUpdate(repo, query, false);
 	}
 
 	private void deleteTriplesWhere(String triples, String where) {
 		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> DELETE { "
 				+ triples + " } where { " + where + "}";
-		sparqlUpdate(query, false);
+		Olap4ldLinkedDataUtil.sparqlRepoUpdate(repo, query, false);
 	}
-
-	/**
-	 * dump RDF graph
-	 * 
-	 * @param out
-	 *            output stream for the serialization
-	 * @param outform
-	 *            the RDF serialization format for the dump
-	 * @return
-	 */
-	private void dumpRDF(OutputStream out, RDFFormat outform) {
-		try {
-			RepositoryConnection con = repo.getConnection();
-			try {
-				RDFWriter w = Rio.createWriter(outform, out);
-				con.export(w);
-			} finally {
-				con.close();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
+	
 	/**
 	 * Returns from String in order to retrieve information about these URIs
 	 * 
@@ -393,29 +361,6 @@ public class EmbeddedSesameEngine implements
 	@Deprecated
 	private String askForFrom(boolean isDsdQuery) {
 		return "";
-	}
-
-	private void sparqlUpdate(String query, boolean caching) {
-		Olap4ldUtil._log.config("SPARQL update query: " + query);
-
-		try {
-			RepositoryConnection con = repo.getConnection();
-
-			Update tupleQuery = con.prepareUpdate(QueryLanguage.SPARQL, query);
-			tupleQuery.execute();
-
-			// do something interesting with the values here...
-			// con.close();
-		} catch (RepositoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedQueryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UpdateExecutionException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 	}
 
 	/**
