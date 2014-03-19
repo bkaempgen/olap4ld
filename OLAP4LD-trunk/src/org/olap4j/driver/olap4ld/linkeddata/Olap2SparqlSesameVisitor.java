@@ -25,30 +25,36 @@ public class Olap2SparqlSesameVisitor implements
 	// We collect necessary parts of the SPARQL query.
 	String selectClause = " ";
 	String whereClause = " ";
-	String groupByClause = " group by ";
-	String orderByClause = " order by ";
-	
+	String groupByClause = " ";
+	String orderByClause = " ";
+
 	// Lists that OLAP-2-SPARQL algorithm works on
 	private List<Node[]> cubes;
+	// private List<Node[]> measures;
+	private List<Node[]> dimensions;
+	// private List<Node[]> hierarchies;
+	private List<Node[]> levels;
+	// private List<Node[]> members;
+
+	private List<Node[]> slicedDimensions;
 	private List<Node[]> rollupslevels;
 	private List<Node[]> rollupshierarchies;
 	private List<List<Node[]>> membercombinations;
 	private List<Node[]> hierarchysignature;
 	private List<Node[]> projections;
-	
+
 	// Helper attributes
 	private HashMap<Integer, Integer> levelHeightMap;
 
 	// For the moment, we know the repo (we could wrap it also)
 	private SailRepository repo;
 
-
 	/**
 	 * Constructor.
 	 * 
 	 * @param repo
+	 *            A repository filled with all available cubes.
 	 * 
-	 * @param ds
 	 */
 	public Olap2SparqlSesameVisitor(SailRepository repo) {
 		this.repo = repo;
@@ -63,32 +69,33 @@ public class Olap2SparqlSesameVisitor implements
 		// For rollup,
 		RollupOp so = (RollupOp) o;
 
-		// Question is, are there sliced dimensions contained, already? No. Only rolled-up dimensions.
-		// Are there dimensions mentioned, that are not roll-up but stay on the lowest level? Should be.
+		// Question is, are there sliced dimensions contained, already? No. Only
+		// rolled-up dimensions.
+		// Are there dimensions mentioned, that are not roll-up but stay on the
+		// lowest level? Should be.
 		this.rollupslevels = so.rollupslevels;
 		this.rollupshierarchies = so.rollupshierarchies;
 	}
 
 	public void visit(SliceOp o) throws QueryException {
-		@SuppressWarnings("unused")
 		SliceOp so = (SliceOp) o;
 
 		// we do not need to do anything with SliceOp
-		;
+		this.slicedDimensions = so.slicedDimensions;
 	}
 
 	public void visit(DiceOp o) throws QueryException {
 		DiceOp dop = (DiceOp) o;
 
-		// Question: Is that corresponding to OLAP-2-SPARQL algorithm? Yes. 
+		// Question: Is that corresponding to OLAP-2-SPARQL algorithm? Yes.
 		this.membercombinations = dop.membercombinations;
 		// Hierarchy signature needed for max_level_height
 		this.hierarchysignature = dop.hierarchysignature;
 	}
 
 	/**
-	 * ProjectionOp is defined to remove all measures
-	 * apart from those mentioned. 
+	 * ProjectionOp is defined to remove all measures apart from those
+	 * mentioned.
 	 * 
 	 * 
 	 */
@@ -103,18 +110,26 @@ public class Olap2SparqlSesameVisitor implements
 
 		// Cube gives us the URI of the dataset that we want to resolve
 		this.cubes = so.cubes;
+		// this.measures = so.measures;
+		this.dimensions = so.dimensions;
+		// this.hierarchies = so.hierarchies;
+		this.levels = so.levels;
+		// One problem could be that this may be a huge number of members.
+		// this.members = so.members;
 	}
-	
+
 	@Override
 	public void visit(ConvertContextOp op) throws QueryException {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("visit(ConvertContextOp op) not implemented!");
+		throw new UnsupportedOperationException(
+				"visit(ConvertContextOp op) not implemented!");
 	}
-	
+
 	@Override
 	public void visit(Object op) throws QueryException {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("visit(Object op) not implemented!");
+		throw new UnsupportedOperationException(
+				"visit(Object op) not implemented!");
 	}
 
 	/**
@@ -124,27 +139,40 @@ public class Olap2SparqlSesameVisitor implements
 	public Object getNewRoot() {
 
 		// Initialise triple store with dataset URI
-		
+
 		// Evaluate cube
 		evaluateCube();
-		
+
 		// Evaluate SlicesRollups
 		/*
-		 * At Roll-up, all dimensions are mentioned which are not sliced.
-		 * At Slice, all sliced dimensions are mentioned. 
-		 * Thus, we assume SlicesRollups to contain all dimensions that are not sliced (even if no actual roll-up is done).
+		 * At Roll-up, all dimensions are mentioned which are not sliced. At
+		 * Slice, all sliced dimensions are mentioned. Thus, we assume
+		 * SlicesRollups to contain all dimensions that are not sliced (even if
+		 * no actual roll-up is done).
 		 */
 		evaluateSlicesRollups();
-		
+
 		// Evaluate Dices
 		evaluateDices();
-		
+
 		// Evaluate Projections
 		evaluateProjections();
 
 		// Query triple store with SPARQL query
 		// Now that we consider DSD in queries, we need to consider DSD
 		// locations
+		if (groupByClause.equals(" ")) {
+			groupByClause = "";
+		} else {
+			groupByClause = " group by " + groupByClause;
+		}
+
+		if (orderByClause.equals(" ")) {
+			orderByClause = "";
+		} else {
+			orderByClause = " order by " + groupByClause;
+		}
+
 		String query = Olap4ldLinkedDataUtil.getStandardPrefixes() + "select "
 				+ selectClause + askForFrom(false) + askForFrom(true)
 				+ "where { " + whereClause + "}" + groupByClause
@@ -158,13 +186,14 @@ public class Olap2SparqlSesameVisitor implements
 	}
 
 	/**
-	 * Should correspond to OLAP-2-SPARQL algorithm. 
+	 * Should correspond to OLAP-2-SPARQL algorithm.
 	 * 
 	 * 1) Add named measures.
 	 * 
 	 * We use aggregation functions as defined by QB4OLAP.
 	 * 
-	 * Different from original OLAP-2-SPARQL algorithm, we also create implicit measures.
+	 * Different from original OLAP-2-SPARQL algorithm, we also create implicit
+	 * measures.
 	 * 
 	 */
 	private void evaluateProjections() {
@@ -254,17 +283,23 @@ public class Olap2SparqlSesameVisitor implements
 				// We also remove aggregation function from Measure Property
 				// Variable so
 				// that the same property is not selected twice.
-				Node measurePropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(measure[map
-						.get("?MEASURE_UNIQUE_NAME")].toString().replace(
-						"AGGFUNC"
-								+ measure[map.get("?MEASURE_AGGREGATOR")]
-										.toString().replace(
-												"http://purl.org/olap#", ""),
-						""));
-				
+				Node measurePropertyVariable = Olap4ldLinkedDataUtil
+						.makeUriToVariable(measure[map
+								.get("?MEASURE_UNIQUE_NAME")]
+								.toString()
+								.replace(
+										"AGGFUNC"
+												+ measure[map
+														.get("?MEASURE_AGGREGATOR")]
+														.toString()
+														.replace(
+																"http://purl.org/olap#",
+																""), ""));
+
 				// Unique name for variable
-				Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(measure[map
-				                                    						.get("?MEASURE_UNIQUE_NAME")].toString());
+				Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
+						.makeUriToVariable(measure[map
+								.get("?MEASURE_UNIQUE_NAME")].toString());
 
 				// We take the aggregator from the measure
 				// Since we use OPTIONAL, there might be empty columns,
@@ -274,7 +309,7 @@ public class Olap2SparqlSesameVisitor implements
 						+ measure[map.get("?MEASURE_AGGREGATOR")].toString()
 								.replace("http://purl.org/olap#", "") + "(?"
 						+ measurePropertyVariable + ") as ?"
-						+ uniqueMeasurePropertyVariable + ")";
+						+ uniqueMeasurePropertyVariable + "_new )";
 
 				// According to spec, every measure needs to be set for every
 				// observation only once
@@ -290,8 +325,9 @@ public class Olap2SparqlSesameVisitor implements
 	/**
 	 * Should correspond to OLAP-to-SPARQL algorithm in SSB paper. There:
 	 * 
-	 * 1) We take the first position as a template of what hierarchies / dimensions are 
-	 * filtered for. (XXX: Properly align that with description of CellSet in olap4ld paper)
+	 * 1) We take the first position as a template of what hierarchies /
+	 * dimensions are filtered for. (XXX: Properly align that with description
+	 * of CellSet in olap4ld paper)
 	 * 
 	 * 2) Check whether new graph patterns needed
 	 * 
@@ -301,7 +337,7 @@ public class Olap2SparqlSesameVisitor implements
 	private void evaluateDices() {
 		// For each filter tuple
 		if (membercombinations != null && !membercombinations.isEmpty()) {
-			
+
 			// We assume that each position has the same metadata (i.e.,
 			// Levels)
 			// so that we only need to add graph patterns for the first
@@ -322,7 +358,8 @@ public class Olap2SparqlSesameVisitor implements
 								.get("?HIERARCHY_MAX_LEVEL_NUMBER")].toString());
 				// We should be testing whether diceslevelHeight higher than
 				// slicesRollupsLevelHeight
-				// To compute Dices Level Height, we need the levelmaxnumber of the hierarchy. Thus, we also have the hierarchysignature. 
+				// To compute Dices Level Height, we need the levelmaxnumber of
+				// the hierarchy. Thus, we also have the hierarchysignature.
 				Integer diceslevelHeight = levelmaxnumber - levelnumber;
 				String dimensionProperty = membercombinations.get(0).get(i)[map
 						.get("?DIMENSION_UNIQUE_NAME")].toString();
@@ -371,9 +408,9 @@ public class Olap2SparqlSesameVisitor implements
 				for (int i = 1; i < membercombination.size(); i++) {
 					// We need to know the variable to filter
 					// First, we need to convert it to URI representation.
-					Node dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(membercombination
-							.get(i)[map1.get("?DIMENSION_UNIQUE_NAME")]
-							.toString());
+					Node dimensionPropertyVariable = Olap4ldLinkedDataUtil
+							.makeUriToVariable(membercombination.get(i)[map1
+									.get("?DIMENSION_UNIQUE_NAME")].toString());
 
 					// We need to know the member to filter
 					String memberResource = membercombination.get(i)[map1
@@ -802,27 +839,116 @@ public class Olap2SparqlSesameVisitor implements
 	}
 
 	private void evaluateSlicesRollups() {
+
+		Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(levels.get(0));
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(dimensions.get(0));
+		Map<String, Integer> rollupshierarchiesmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(rollupshierarchies.get(0));
+
 		// HashMaps for level height of dimension
 		this.levelHeightMap = new HashMap<Integer, Integer>();
 
+		// First, we have to create slicesrollups
+		List<Node[]> slicesrollups = new ArrayList<Node[]>();
+		// Header
+		slicesrollups.add(rollupslevels.get(0));
+		
+		List<Integer> levelheights = new ArrayList<Integer>();
+
+		// Find dimensions not in sliced and not in rolluplevel.
+		List<Node[]> basedimensions = new ArrayList<Node[]>();
+		for (Node[] dimension : dimensions) {
+
+			// If in rollupslevels, add and continue.
+			boolean contained = false;
+			for (int i = 1; i < rollupslevels.size(); i++) {
+				Node[] rolluplevel = rollupslevels.get(i);
+				Node[] rollupshierarchy = rollupshierarchies.get(i);
+				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								rolluplevel[levelmap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString())) {
+					slicesrollups.add(dimension);
+					Integer levelHeight = (new Integer(
+							rollupshierarchy[rollupshierarchiesmap
+									.get("?HIERARCHY_MAX_LEVEL_NUMBER")]
+									.toString()) - new Integer(
+							rolluplevel[levelmap.get("?LEVEL_NUMBER")]
+									.toString()));
+					levelheights.add(levelHeight);
+					continue;
+				}
+			}
+			for (Node[] sliceddimension : slicedDimensions) {
+				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								sliceddimension[dimensionmap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString())) {
+					contained = true;
+				}
+			}
+			if (!contained) {
+				basedimensions.add(dimension);
+			}
+		}
+
+		// Find lowest level of basedimensions and add
+		boolean first = true;
+		for (Node[] basedimension : basedimensions) {
+			if (first) {
+				first = false;
+				continue;
+			}
+			// Seach for lowest level
+			Node[] baselevel = null;
+			first = true;
+			for (Node[] level : levels) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				if (basedimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								level[levelmap.get("?DIMENSION_UNIQUE_NAME")]
+										.toString())) {
+					if (baselevel == null) {
+						baselevel = level;
+					}
+					int baselevelnumber = new Integer(
+							baselevel[levelmap.get("?LEVEL_NUMBER")].toString());
+					int levelnumber = new Integer(
+							level[levelmap.get("?LEVEL_NUMBER")].toString());
+
+					if (baselevelnumber < levelnumber) {
+						baselevel = level;
+					}
+				}
+			}
+			slicesrollups.add(baselevel);
+			levelheights.add(0);
+		}
+
 		// First is header
-		for (int i = 1; i < rollupslevels.size(); i++) {
+		for (int i = 1; i < slicesrollups.size(); i++) {
 
 			Map<String, Integer> map = Olap4ldLinkedDataUtil
-					.getNodeResultFields(rollupslevels.get(0));
-			Map<String, Integer> mapsignature = Olap4ldLinkedDataUtil
-					.getNodeResultFields(rollupshierarchies.get(0));
+					.getNodeResultFields(slicesrollups.get(0));
 
 			// At the moment, we do not support hierarchy/roll-up, but
 			// simply
 			// query for all dimension members
 			// String hierarchyURI = LdOlap4jUtil.decodeUriForMdx(hierarchy
 			// .getUniqueName());
-			String dimensionProperty = rollupslevels.get(i)[map
+			String dimensionProperty = slicesrollups.get(i)[map
 					.get("?DIMENSION_UNIQUE_NAME")].toString();
-			// XXX Why exactly do I include the level? Probably, because I need the level depth from the hierarchy.
-			String levelURI = rollupslevels.get(i)[map.get("?LEVEL_UNIQUE_NAME")]
-					.toString();
+			// XXX Why exactly do I include the level? Probably, because I need
+			// the level depth from the hierarchy.
+			String levelURI = slicesrollups.get(i)[map
+					.get("?LEVEL_UNIQUE_NAME")].toString();
 
 			/*
 			 * Now, depending on level depth we need to behave differently
@@ -841,11 +967,9 @@ public class Olap2SparqlSesameVisitor implements
 			 * TODO: THis is quite a simple approach, does not consider possible
 			 * access restrictions.
 			 */
-			Integer levelHeight = (new Integer(
-					rollupshierarchies.get(i)[mapsignature
-							.get("?HIERARCHY_MAX_LEVEL_NUMBER")].toString()) - new Integer(
-					rollupslevels.get(i)[map.get("?LEVEL_NUMBER")].toString()));
 
+			// No header
+			int levelHeight = levelheights.get(i - 1);
 			// Note as inserted.
 			levelHeightMap.put(dimensionProperty.hashCode(), levelHeight);
 
@@ -853,7 +977,8 @@ public class Olap2SparqlSesameVisitor implements
 			whereClause += addLevelPropertyPath(0, levelHeight,
 					dimensionProperty, levelURI);
 
-			Node dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(dimensionProperty);
+			Node dimensionPropertyVariable = Olap4ldLinkedDataUtil
+					.makeUriToVariable(dimensionProperty);
 			selectClause += " ?" + dimensionPropertyVariable + levelHeight
 					+ " ";
 			groupByClause += " ?" + dimensionPropertyVariable + levelHeight
@@ -864,10 +989,10 @@ public class Olap2SparqlSesameVisitor implements
 	}
 
 	private void evaluateCube() {
-		
-		Map<String, Integer> map = Olap4ldLinkedDataUtil.getNodeResultFields(this
-				.cubes.get(0));
-		
+
+		Map<String, Integer> map = Olap4ldLinkedDataUtil
+				.getNodeResultFields(this.cubes.get(0));
+
 		String ds = this.cubes.get(1)[map.get("?CUBE_NAME")].toString();
 
 		whereClause += "?obs qb:dataSet <" + ds + ">. ";
@@ -895,7 +1020,8 @@ public class Olap2SparqlSesameVisitor implements
 
 		String whereClause = "";
 
-		Node dimensionPropertyVariable = Olap4ldLinkedDataUtil.makeUriToVariable(dimensionProperty);
+		Node dimensionPropertyVariable = Olap4ldLinkedDataUtil
+				.makeUriToVariable(dimensionProperty);
 
 		if (levelHeight == 0) {
 			/*

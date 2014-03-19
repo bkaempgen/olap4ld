@@ -123,7 +123,11 @@ class Olap4ldDimension extends Olap4ldElement implements Dimension, Named {
 				new Literal(Olap4ldLinkedDataUtil
 						.convertMDXtoURI(this.olap4jCube.getSchema().getName())),
 				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getUniqueName())), new Literal(this.getCaption()),
+								.convertMDXtoURI(this.olap4jCube.getName())),
+								new Literal(Olap4ldLinkedDataUtil
+										.convertMDXtoURI(this.getUniqueName())),
+				new Literal(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getName())), new Literal(this.getCaption()),
 				new Literal(this.getOrdinal()+""),
 				new Literal(this.type.toString()),
 				new Literal(this.getDescription()) };
