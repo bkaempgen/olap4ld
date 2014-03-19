@@ -60,8 +60,8 @@ public class LDCX_User_Study_Evaluation_XmlaTest extends TestCase {
 			 "http://localhost:8080/xmlaserver-trunk/xmla");
 			// this.xmlauri = new URL(
 			// "http://141.52.218.137:8000/xmlaserver-trunk/xmla");
-			this.xmlauri = new URL(
-					"http://www.ldcx.linked-data-cubes.org:8000/xmlaserver-trunk/xmla");
+//			this.xmlauri = new URL(
+//					"http://www.ldcx.linked-data-cubes.org:8000/xmlaserver-trunk/xmla");
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

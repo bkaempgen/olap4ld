@@ -183,6 +183,29 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 				"|  | Customer  2 |  | Date 19940101 |  | Part  1 |  | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
 				result);
 	}
+	
+	/**
+	 * Do crossjoin over all dimensions on rows and show all measures on
+	 * columns.
+	 */
+	public void testExampleSsb001Lineorder_QB_OlapFullCrossJoin() {
+		
+		
+
+		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleSsb001OlapFullCrossJoin */ {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]");
+
+		assertContains(
+				"| revenue   | discount | extendedprice | quantity | supplycost |",
+				result);
+		assertContains(
+				"|  | Customer  1 |  | Date 19940101 |  | Part  1 |  | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
+				result);
+		assertContains(
+				"|  | Customer  2 |  | Date 19940101 |  | Part  1 |  | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
+				result);
+	}
+	
+	
 
 	/**
 	 * Do crossjoin over all dimensions on rows and show all measures on
@@ -257,7 +280,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 */
 	public void testExampleEdgarCOSTCOMetadata() {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds";
-		metadataTest(name, 6, 2);
+		metadataTest(name, 6, 3);
 	}
 
 	/**
@@ -340,7 +363,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 */
 	public void testOriginalEstatwrapGDPpercapitainPPSMetadata() {
 		String name = "http://estatwrap.ontologycentral.com/id/tec00114#ds";
-		metadataTest(name, 5, 2);
+		metadataTest(name, 5, 3);
 	}
 	
 	/**
@@ -352,7 +375,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
 		// Localhost
 		// name = "http://localhost:8888/id/tec00114#ds";
-		metadataTest(name, 5, 2);
+		metadataTest(name, 5, 3);
 	}
 	
 	/**
@@ -449,7 +472,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	public void testExampleSmartDbWrapMetadata() {
 
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/smartdbwrap/AD0514-Q.rdf#ds";
-		metadataTest(name, 7, 2);
+		metadataTest(name, 7, 3);
 	}
 
 	// TODO: olap query test
@@ -461,7 +484,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 		String name = "http://smartdbwrap.appspot.com/id/locationdataset/AD0514/Q";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
-		metadataTest(name, 7, 2);
+		metadataTest(name, 7, 3);
 	}
 
 	/**
@@ -487,7 +510,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	public void testYahooFinanceWrapExampleMetadata() {
 		String name = "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
 		// name = "http://estatwrap.ontologycentral.com/id/tec00114";
-		metadataTest(name, 5, 2);
+		metadataTest(name, 5, 3);
 	}
 
 	/**
@@ -497,7 +520,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 		// Problem:
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testYahooFinanceWrapExampleOlap */ {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FvocabXXX2FyahooXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FarchiveXXX2FBACXXX2F2012ZZZ12ZZZ12XXX23ds]");
-		assertContains("| Adjusted Closing Price |      10.58 |", result);
+		assertContains("| Adjusted Closing Price |      10.57 |", result);
 
 	}
 

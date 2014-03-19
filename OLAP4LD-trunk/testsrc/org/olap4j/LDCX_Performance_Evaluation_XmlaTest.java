@@ -80,7 +80,7 @@ public class LDCX_Performance_Evaluation_XmlaTest extends TestCase {
 	 */
 	public void testFullDrillDown() {
 
-		int testsize = 5;
+		int testsize = 1;
 
 		for (int i = 0; i < testsize; i++) {
 			testYahooFinance_Slice();

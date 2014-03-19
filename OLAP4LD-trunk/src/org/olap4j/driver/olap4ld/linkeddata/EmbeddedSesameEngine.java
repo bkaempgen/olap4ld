@@ -66,8 +66,7 @@ import org.semanticweb.yars.nx.parser.NxParser;
  * @author b-kaempgen
  * 
  */
-public class EmbeddedSesameEngine implements
-		LinkedDataCubesEngine {
+public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	// Meta data attributes
 	private static final String DATASOURCEDESCRIPTION = "OLAP data from the statistical Linked Data cloud.";
@@ -103,7 +102,7 @@ public class EmbeddedSesameEngine implements
 
 	private Integer MAX_LOAD_TRIPLE_SIZE = 10000000;
 
-	private Integer MAX_COMPLEX_CONSTRAINTS_TRIPLE_SIZE = 1000;
+	private Integer MAX_COMPLEX_CONSTRAINTS_TRIPLE_SIZE = 5000;
 
 	private Integer LOADED_TRIPLE_SIZE = 0;
 
@@ -130,16 +129,17 @@ public class EmbeddedSesameEngine implements
 
 			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameVisitor(
 					repo);
-			
+
 			// We create visitor to translate logical into physical
-//			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(
-//					repo);
+			// LogicalOlapOperatorQueryPlanVisitor r2a = new
+			// Olap2SparqlSesameDerivedDatasetVisitor(
+			// repo);
 
 			PhysicalOlapIterator newRoot;
 			// Transform into physical query plan
 			newRoot = (PhysicalOlapIterator) queryplan.visitAll(r2a);
 			PhysicalOlapQueryPlan execplan = new PhysicalOlapQueryPlan(newRoot);
-			
+
 			this.execplan = execplan;
 
 		} catch (QueryException e) {
@@ -149,11 +149,11 @@ public class EmbeddedSesameEngine implements
 					+ e.getMessage());
 		}
 	}
-	
+
 	public PhysicalOlapQueryPlan getExecplan() {
 		return this.execplan;
 	}
-	
+
 	private void initialize() {
 
 		// This seems to hold up a lot. I hope garbage collector works.
@@ -263,7 +263,7 @@ public class EmbeddedSesameEngine implements
 					+ "_:comp <http://purl.org/linked-data/cube#measure> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. "
 					+ "<http://purl.org/dc/terms/date> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2000/01/rdf-schema#Literal>. ";
 
-			//insertTriples(triples);
+			// insertTriples(triples);
 
 			dataset = new URL(
 					"http://eurostat.linked-statistics.org/data/tgs00003");
@@ -273,12 +273,12 @@ public class EmbeddedSesameEngine implements
 			// Problem: Wrong dsd has to be removed
 			triples = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/../dsd/tgs00003>. ";
 
-			//deleteTriples(triples);
+			// deleteTriples(triples);
 
 			triples = "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> ?comp. "
 					+ "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
 			String where = "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
-			//deleteTriplesWhere(triples, where);
+			// deleteTriplesWhere(triples, where);
 
 			// ----------------
 			// # Population on 1 January by age and sex [demo_pjan] (Estatwrap)
@@ -325,12 +325,14 @@ public class EmbeddedSesameEngine implements
 					+ this.LOADED_TRIPLE_SIZE + " triples finished in " + time
 					+ "ms.");
 
-			//Olap4ldLinkedDataUtil.dumpRDF(repo, "/media/84F01919F0191352/Projects/2014/paper/Link to paper-drill-across/Link to task-data-fu/drill-across-paper/gdp_per_capita_experiment_load_cubes.n3", RDFFormat.NTRIPLES);
+			// Olap4ldLinkedDataUtil.dumpRDF(repo,
+			// "/media/84F01919F0191352/Projects/2014/paper/Link to paper-drill-across/Link to task-data-fu/drill-across-paper/gdp_per_capita_experiment_load_cubes.n3",
+			// RDFFormat.NTRIPLES);
 
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		}
 
 	}
 
@@ -354,7 +356,7 @@ public class EmbeddedSesameEngine implements
 				+ triples + " } where { " + where + "}";
 		Olap4ldLinkedDataUtil.sparqlRepoUpdate(repo, query, false);
 	}
-	
+
 	/**
 	 * Returns from String in order to retrieve information about these URIs
 	 * 
@@ -529,11 +531,12 @@ public class EmbeddedSesameEngine implements
 			// }
 
 			// Workaround certain files are not loadable
-			
-			if (locationstring.equals("http://worldbank.270a.info/property/indicator.rdf")) {
+
+			if (locationstring
+					.equals("http://worldbank.270a.info/property/indicator.rdf")) {
 				return;
 			}
-			
+
 			// Guess file format
 			RDFFormat format = RDFFormat.forFileName(locationstring);
 			if (format != null) {
@@ -551,7 +554,7 @@ public class EmbeddedSesameEngine implements
 				// Not acceptable time
 				connection.setConnectTimeout(5000);
 				int responsecode = connection.getResponseCode();
-				
+
 				// Not acceptable?
 				if (responsecode == 406) {
 					connection.disconnect();
@@ -658,7 +661,7 @@ public class EmbeddedSesameEngine implements
 		} catch (IOException e) {
 			Olap4ldUtil._log.config("ConnectException:" + e.getMessage());
 			e.printStackTrace();
-		} 
+		}
 	}
 
 	/**
@@ -828,6 +831,7 @@ public class EmbeddedSesameEngine implements
 				throw new OlapException(
 						"Failed own check: Dataset should have at least one observation. ");
 			}
+			
 
 			// XXX Possible other checks
 			// No dimensions
@@ -1101,18 +1105,18 @@ public class EmbeddedSesameEngine implements
 			// IC-4. Dimensions have range
 			testquery = TYPICALPREFIXES
 					+ "ASK { ?dim a qb:DimensionProperty . FILTER NOT EXISTS { ?dim rdfs:range [] }}";
-//			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-//					testquery);
-//			if (booleanQuery.evaluate() == true) {
-//				error = true;
-//				status = "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
-//				Olap4ldUtil._log.config(status);
-//				overview += status;
-//			} else {
-//				status = "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.<br/>";
-//				Olap4ldUtil._log.config(status);
-//				overview += status;
-//			}
+			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+					testquery);
+			if (booleanQuery.evaluate() == true) {
+				error = true;
+				status = "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
+				Olap4ldUtil._log.config(status);
+				overview += status;
+			} else {
+				status = "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.<br/>";
+				Olap4ldUtil._log.config(status);
+				overview += status;
+			}
 
 			// IC-5. Concept dimensions have code lists
 			testquery = TYPICALPREFIXES
@@ -1183,20 +1187,23 @@ public class EmbeddedSesameEngine implements
 			}
 
 			// IC-9. Unique slice structure
-			testquery = TYPICALPREFIXES
-					+ "ASK {  {    ?slice a qb:Slice .    FILTER NOT EXISTS { ?slice qb:sliceStructure ?key } } UNION {    ?slice a qb:Slice ;           qb:sliceStructure ?key1, ?key2;    FILTER (?key1 != ?key2)  }}";
-			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-					testquery);
-			if (booleanQuery.evaluate() == true) {
-				error = true;
-				status = "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
-				Olap4ldUtil._log.config(status);
-				overview += status;
-			} else {
-				status = "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
-				Olap4ldUtil._log.config(status);
-				overview += status;
-			}
+			// Does not seem to work. Returns all slices. Therefore disabled.
+//			String query = "PREFIX qb: <http://purl.org/linked-data/cube#> select * where {  {    ?slice a qb:Slice .    FILTER NOT EXISTS { ?slice qb:sliceStructure ?key } } UNION {    ?slice a qb:Slice ;           qb:sliceStructure ?key1, ?key2;    FILTER (?key1 != ?key2)  }}";
+//			List<Node[]> result = sparql(query, false);
+//			testquery = TYPICALPREFIXES
+//					+ "ASK {  {    ?slice a qb:Slice .    FILTER NOT EXISTS { ?slice qb:sliceStructure ?key } } UNION {    ?slice a qb:Slice ;           qb:sliceStructure ?key1, ?key2;    FILTER (?key1 != ?key2)  }}";
+//			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+//					testquery);
+//			if (booleanQuery.evaluate() == true) {
+//				error = true;
+//				status = "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+//				Olap4ldUtil._log.config(status);
+//				overview += status;
+//			} else {
+//				status = "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+//				Olap4ldUtil._log.config(status);
+//				overview += status;
+//			}
 
 			// IC-10. Slice dimensions complete
 			testquery = TYPICALPREFIXES
@@ -1239,19 +1246,20 @@ public class EmbeddedSesameEngine implements
 				// long, expensive quadratic check (IC-12) (see
 				// http://lists.w3.org/Archives/Public/public-gld-wg/2013Jul/0017.html)
 				// Dave Reynolds has implemented a linear time version of it
-				// testquery = TYPICALPREFIXES
-				// +
-				// "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
-				// booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-				// testquery);
-				// if (booleanQuery.evaluate() == true) {
-				// error = true;
-				// status =
-				// "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
-				// } else {
-				// status =
-				// "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
-				// }
+				testquery = TYPICALPREFIXES
+						+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
+				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+						testquery);
+				if (booleanQuery.evaluate() == true) {
+					error = true;
+					status = "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
+				} else {
+					status = "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
+					Olap4ldUtil._log.config(status);
+					overview += status;
+				}
 
 			}
 
@@ -1646,8 +1654,7 @@ public class EmbeddedSesameEngine implements
 
 		List<Node[]> result = sparql(querytemplate, true);
 
-
-		// Here, we also include measures without aggregation function. 
+		// Here, we also include measures without aggregation function.
 		// We have also added these measures as members to getMembers().
 		querytemplate = Olap4ldLinkedDataUtil
 				.readInQueryTemplate("sesame_getMeasures_withoutimplicit.txt");
