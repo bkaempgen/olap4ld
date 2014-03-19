@@ -128,12 +128,12 @@ public class EmbeddedSesameEngine implements
 
 		try {
 
-//			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameVisitor(
-//					repo);
+			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameVisitor(
+					repo);
 			
 			// We create visitor to translate logical into physical
-			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(
-					repo);
+//			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(
+//					repo);
 
 			PhysicalOlapIterator newRoot;
 			// Transform into physical query plan
@@ -1101,18 +1101,18 @@ public class EmbeddedSesameEngine implements
 			// IC-4. Dimensions have range
 			testquery = TYPICALPREFIXES
 					+ "ASK { ?dim a qb:DimensionProperty . FILTER NOT EXISTS { ?dim rdfs:range [] }}";
-			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-					testquery);
-			if (booleanQuery.evaluate() == true) {
-				error = true;
-				status = "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
-				Olap4ldUtil._log.config(status);
-				overview += status;
-			} else {
-				status = "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.<br/>";
-				Olap4ldUtil._log.config(status);
-				overview += status;
-			}
+//			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+//					testquery);
+//			if (booleanQuery.evaluate() == true) {
+//				error = true;
+//				status = "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
+//				Olap4ldUtil._log.config(status);
+//				overview += status;
+//			} else {
+//				status = "Successful specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.<br/>";
+//				Olap4ldUtil._log.config(status);
+//				overview += status;
+//			}
 
 			// IC-5. Concept dimensions have code lists
 			testquery = TYPICALPREFIXES

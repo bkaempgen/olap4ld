@@ -377,6 +377,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		HashSet<Member> usedMeasureSet = new HashSet<Member>();
 
 		// In axis list
+		// We could also explicitly as for COLUMN and ROW axis list.
 		for (Olap4ldCellSetAxis axis : axisList) {
 			List<Position> positions = axis.positions;
 			for (Position position : positions) {
