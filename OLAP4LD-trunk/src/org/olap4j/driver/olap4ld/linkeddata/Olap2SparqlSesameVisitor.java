@@ -28,7 +28,7 @@ public class Olap2SparqlSesameVisitor implements
 	String groupByClause = " ";
 	String orderByClause = " ";
 
-	// Lists that OLAP-2-SPARQL algorithm works on
+	// Input to OLAP operators
 	private List<Node[]> cubes;
 	// private List<Node[]> measures;
 	private List<Node[]> dimensions;
@@ -137,6 +137,11 @@ public class Olap2SparqlSesameVisitor implements
 	 * load RDF to store.
 	 */
 	public Object getNewRoot() {
+		
+		// Maybe first check that every metadata element at least has one header?
+		
+		
+		// Prepare inputs
 
 		// Initialise triple store with dataset URI
 
@@ -144,13 +149,121 @@ public class Olap2SparqlSesameVisitor implements
 		evaluateCube();
 
 		// Evaluate SlicesRollups
+		
+		Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(levels.get(0));
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(dimensions.get(0));
+		Map<String, Integer> rollupshierarchiesmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(rollupshierarchies.get(0));
+
+		// HashMaps for level height of dimension
+		this.levelHeightMap = new HashMap<Integer, Integer>();
+
+		// First, we have to create slicesrollups
+		List<Node[]> slicesrollups = new ArrayList<Node[]>();
+		// Header
+		slicesrollups.add(rollupslevels.get(0));
+		
+		List<Integer> levelheights = new ArrayList<Integer>();
+		// Header
+		levelheights.add(-1);
+
+		// Find dimensions not in sliced and not in rolluplevel.
+		List<Node[]> basedimensions = new ArrayList<Node[]>();
+		// Header
+		basedimensions.add(dimensions.get(0));
+		for (Node[] dimension : dimensions) {
+
+			// If in rollupslevels, add and continue.
+			boolean contained = false;
+			for (int i = 1; i < rollupslevels.size(); i++) {
+				Node[] rolluplevel = rollupslevels.get(i);
+				Node[] rollupshierarchy = rollupshierarchies.get(i);
+				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								rolluplevel[levelmap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString())) {
+					slicesrollups.add(dimension);
+					Integer levelHeight = (new Integer(
+							rollupshierarchy[rollupshierarchiesmap
+									.get("?HIERARCHY_MAX_LEVEL_NUMBER")]
+									.toString()) - new Integer(
+							rolluplevel[levelmap.get("?LEVEL_NUMBER")]
+									.toString()));
+					levelheights.add(levelHeight);
+					continue;
+				}
+			}
+			for (Node[] sliceddimension : slicedDimensions) {
+				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								sliceddimension[dimensionmap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString())) {
+					contained = true;
+				}
+			}
+			// As usual also check whether Measure dimension.
+			if (!contained && !dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+					.toString().equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+				basedimensions.add(dimension);
+			}
+		}
+
+		// Find lowest level of basedimensions and add
+		boolean first = true;
+		for (Node[] basedimension : basedimensions) {
+			if (first) {
+				first = false;
+				continue;
+			}
+			// Seach for lowest level
+			Node[] baselevel = null;
+			first = true;
+			for (Node[] level : levels) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				if (basedimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								level[levelmap.get("?DIMENSION_UNIQUE_NAME")]
+										.toString())) {
+					if (baselevel == null) {
+						baselevel = level;
+					}
+					int baselevelnumber = new Integer(
+							baselevel[levelmap.get("?LEVEL_NUMBER")].toString());
+					int levelnumber = new Integer(
+							level[levelmap.get("?LEVEL_NUMBER")].toString());
+
+					if (baselevelnumber < levelnumber) {
+						baselevel = level;
+					}
+				}
+			}
+			slicesrollups.add(baselevel);
+			levelheights.add(0);
+		}
+		
+		// Tests?
+		// slicesrollups should contain a dimension for each apart from slices.
+		// Remember measure dimension that never gets sliced or rolled-up
+		int slicesrollupsshouldbesize = (dimensions.size()-2)-(slicedDimensions.size()-1);
+		
+		if (slicesrollups.size()-1 != slicesrollupsshouldbesize) {
+			throw new UnsupportedOperationException("Slicesrollups not properly created!");
+		}
+		
 		/*
 		 * At Roll-up, all dimensions are mentioned which are not sliced. At
 		 * Slice, all sliced dimensions are mentioned. Thus, we assume
 		 * SlicesRollups to contain all dimensions that are not sliced (even if
 		 * no actual roll-up is done).
 		 */
-		evaluateSlicesRollups();
+		evaluateSlicesRollups(slicesrollups, levelheights);
 
 		// Evaluate Dices
 		evaluateDices();
@@ -170,7 +283,7 @@ public class Olap2SparqlSesameVisitor implements
 		if (orderByClause.equals(" ")) {
 			orderByClause = "";
 		} else {
-			orderByClause = " order by " + groupByClause;
+			orderByClause = " order by " + orderByClause;
 		}
 
 		String query = Olap4ldLinkedDataUtil.getStandardPrefixes() + "select "
@@ -838,99 +951,7 @@ public class Olap2SparqlSesameVisitor implements
 		// }
 	}
 
-	private void evaluateSlicesRollups() {
-
-		Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(levels.get(0));
-		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(dimensions.get(0));
-		Map<String, Integer> rollupshierarchiesmap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(rollupshierarchies.get(0));
-
-		// HashMaps for level height of dimension
-		this.levelHeightMap = new HashMap<Integer, Integer>();
-
-		// First, we have to create slicesrollups
-		List<Node[]> slicesrollups = new ArrayList<Node[]>();
-		// Header
-		slicesrollups.add(rollupslevels.get(0));
-		
-		List<Integer> levelheights = new ArrayList<Integer>();
-
-		// Find dimensions not in sliced and not in rolluplevel.
-		List<Node[]> basedimensions = new ArrayList<Node[]>();
-		for (Node[] dimension : dimensions) {
-
-			// If in rollupslevels, add and continue.
-			boolean contained = false;
-			for (int i = 1; i < rollupslevels.size(); i++) {
-				Node[] rolluplevel = rollupslevels.get(i);
-				Node[] rollupshierarchy = rollupshierarchies.get(i);
-				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-						.toString().equals(
-								rolluplevel[levelmap
-										.get("?DIMENSION_UNIQUE_NAME")]
-										.toString())) {
-					slicesrollups.add(dimension);
-					Integer levelHeight = (new Integer(
-							rollupshierarchy[rollupshierarchiesmap
-									.get("?HIERARCHY_MAX_LEVEL_NUMBER")]
-									.toString()) - new Integer(
-							rolluplevel[levelmap.get("?LEVEL_NUMBER")]
-									.toString()));
-					levelheights.add(levelHeight);
-					continue;
-				}
-			}
-			for (Node[] sliceddimension : slicedDimensions) {
-				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-						.toString().equals(
-								sliceddimension[dimensionmap
-										.get("?DIMENSION_UNIQUE_NAME")]
-										.toString())) {
-					contained = true;
-				}
-			}
-			if (!contained) {
-				basedimensions.add(dimension);
-			}
-		}
-
-		// Find lowest level of basedimensions and add
-		boolean first = true;
-		for (Node[] basedimension : basedimensions) {
-			if (first) {
-				first = false;
-				continue;
-			}
-			// Seach for lowest level
-			Node[] baselevel = null;
-			first = true;
-			for (Node[] level : levels) {
-				if (first) {
-					first = false;
-					continue;
-				}
-				if (basedimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-						.toString().equals(
-								level[levelmap.get("?DIMENSION_UNIQUE_NAME")]
-										.toString())) {
-					if (baselevel == null) {
-						baselevel = level;
-					}
-					int baselevelnumber = new Integer(
-							baselevel[levelmap.get("?LEVEL_NUMBER")].toString());
-					int levelnumber = new Integer(
-							level[levelmap.get("?LEVEL_NUMBER")].toString());
-
-					if (baselevelnumber < levelnumber) {
-						baselevel = level;
-					}
-				}
-			}
-			slicesrollups.add(baselevel);
-			levelheights.add(0);
-		}
+	private void evaluateSlicesRollups(List<Node[]> slicesrollups, List<Integer> levelheights) {
 
 		// First is header
 		for (int i = 1; i < slicesrollups.size(); i++) {
@@ -968,8 +989,8 @@ public class Olap2SparqlSesameVisitor implements
 			 * access restrictions.
 			 */
 
-			// No header
-			int levelHeight = levelheights.get(i - 1);
+			// Header
+			int levelHeight = levelheights.get(i);
 			// Note as inserted.
 			levelHeightMap.put(dimensionProperty.hashCode(), levelHeight);
 

@@ -588,38 +588,43 @@ abstract class Olap4ldCellSet implements CellSet {
 		// Those that are not mentioned in the axes.
 		List<Node[]> slicedDimensions = new ArrayList<Node[]>();
 		NamedList<Dimension> realdimensions = metaData.cube.getDimensions();
+		
+		// No first necessary since we go through realdimensions
+		// Just take first.
+		slicedDimensions.add(((Olap4ldDimension) realdimensions.get(0))
+				.transformMetadataObject2NxNodes().get(0));
 		for (Dimension realdimension : realdimensions) {
 			Olap4ldDimension olapdimension = (Olap4ldDimension) realdimension;
 			Node[] dimension = olapdimension.transformMetadataObject2NxNodes()
 					.get(1);
-			Map<String, Integer> map = Olap4ldLinkedDataUtil
-					.getNodeResultFields(notslicedhierarchies.get(0));
+			Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(olapdimension.transformMetadataObject2NxNodes()
+							.get(0));
 
 			boolean contained = false;
-
+			// For every dimension, check whether in not sliced.
 			for (Node[] notslicedhierarchy : notslicedhierarchies) {
+				
+				Map<String, Integer> notslicedhierarchymap = Olap4ldLinkedDataUtil
+						.getNodeResultFields(notslicedhierarchies.get(0));
 
-				if (notslicedhierarchy[map.get("?DIMENSION_UNIQUE_NAME")]
+				if (notslicedhierarchy[notslicedhierarchymap.get("?DIMENSION_UNIQUE_NAME")]
 						.toString().equals(
-								dimension[map.get("?DIMENSION_UNIQUE_NAME")]
+								dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
 										.toString())) {
 					contained = true;
 				}
 			}
-			boolean first1 = true;
 			if (!contained
-					&& !(dimension[map.get("?DIMENSION_UNIQUE_NAME")]
+					&& !(dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
 							.toString()
 							.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))) {
-
-				if (first1) {
-					first1 = false;
-					slicedDimensions.add(olapdimension
-							.transformMetadataObject2NxNodes().get(0));
-				}
 				slicedDimensions.add(dimension);
 			}
 		}
+		
+		// Test, slicedDimensions and 
+		
 		// Slices part of SlicesRollups from (cube, SlicesRollups, Dices,
 		// Projections)
 		LogicalOlapOp slice = new SliceOp(dice, slicedDimensions);
