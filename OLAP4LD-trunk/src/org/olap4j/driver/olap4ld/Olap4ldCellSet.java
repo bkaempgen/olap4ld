@@ -70,6 +70,7 @@ import org.olap4j.driver.olap4ld.linkeddata.DiceOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.ProjectionOp;
+import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.driver.olap4ld.linkeddata.RollupOp;
 import org.olap4j.driver.olap4ld.linkeddata.SliceOp;
 import org.olap4j.impl.Olap4jUtil;
@@ -128,6 +129,7 @@ abstract class Olap4ldCellSet implements CellSet {
 	private LogicalOlapQueryPlan queryplan;
 	// The list of measures queried here as part of metadata
 	private ArrayList<Node[]> measureList;
+	private ArrayList<Integer> dimensionindicesList;
 
 	/**
 	 * Creates an XmlaOlap4jCellSet.
@@ -588,7 +590,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		// Those that are not mentioned in the axes.
 		List<Node[]> slicedDimensions = new ArrayList<Node[]>();
 		NamedList<Dimension> realdimensions = metaData.cube.getDimensions();
-		
+
 		// No first necessary since we go through realdimensions
 		// Just take first.
 		slicedDimensions.add(((Olap4ldDimension) realdimensions.get(0))
@@ -598,20 +600,20 @@ abstract class Olap4ldCellSet implements CellSet {
 			Node[] dimension = olapdimension.transformMetadataObject2NxNodes()
 					.get(1);
 			Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
-					.getNodeResultFields(olapdimension.transformMetadataObject2NxNodes()
-							.get(0));
+					.getNodeResultFields(olapdimension
+							.transformMetadataObject2NxNodes().get(0));
 
 			boolean contained = false;
 			// For every dimension, check whether in not sliced.
 			for (Node[] notslicedhierarchy : notslicedhierarchies) {
-				
+
 				Map<String, Integer> notslicedhierarchymap = Olap4ldLinkedDataUtil
 						.getNodeResultFields(notslicedhierarchies.get(0));
 
-				if (notslicedhierarchy[notslicedhierarchymap.get("?DIMENSION_UNIQUE_NAME")]
-						.toString().equals(
-								dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-										.toString())) {
+				if (notslicedhierarchy[notslicedhierarchymap
+						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
+						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+								.toString())) {
 					contained = true;
 				}
 			}
@@ -622,9 +624,9 @@ abstract class Olap4ldCellSet implements CellSet {
 				slicedDimensions.add(dimension);
 			}
 		}
-		
-		// Test, slicedDimensions and 
-		
+
+		// Test, slicedDimensions and
+
 		// Slices part of SlicesRollups from (cube, SlicesRollups, Dices,
 		// Projections)
 		LogicalOlapOp slice = new SliceOp(dice, slicedDimensions);
@@ -633,6 +635,52 @@ abstract class Olap4ldCellSet implements CellSet {
 		// Projections)
 		LogicalOlapOp rollup = new RollupOp(slice, rollupshierarchies,
 				rollupslevels);
+
+		// Create indices for dimensions
+		
+		dimensionindicesList = new ArrayList<Integer>();
+		
+		Restrictions restrictions = new Restrictions();
+		restrictions.cubeNamePattern = Olap4ldLinkedDataUtil
+				.convertMDXtoURI(this.metaData.cube.getUniqueName());
+
+		for (Node[] dimension : dimensions) {
+			// Check what number
+			Measure measure = null;
+			int index = 0;
+			for (int i = 0; i < getAxes().size(); i++) {
+				// Assume that first position tells us everything
+				Position position = getAxes().get(i).getPositions().get(0);
+				for (Member member : position.getMembers()) {
+					if (member.getMemberType() == Member.Type.MEASURE
+							|| member.getMemberType() == Member.Type.FORMULA) {
+						if (measure != null) {
+							// There should not be several measures per cell
+							throw new UnsupportedOperationException(
+									"There should not be used several measures per cell!");
+						}
+						measure = (Measure) member;
+					} else {
+
+						Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+								.getNodeResultFields(dimensions.get(0));
+
+						// If dimension == member.dimension then store
+						// Add index in correct ordering.
+						String memberdimension = Olap4ldLinkedDataUtil
+								.convertMDXtoURI(member.getDimension()
+										.getUniqueName());
+						if (memberdimension.equals(dimension[dimensionmap
+								.get("?DIMENSION_UNIQUE_NAME")].toString())) {
+							dimensionindicesList.add(index);
+						}
+						// Count index
+						index++;
+					}
+				}
+			}
+
+		}
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(rollup);
 		return myplan;
@@ -1277,8 +1325,8 @@ abstract class Olap4ldCellSet implements CellSet {
 			}
 		}
 
-		// We concat the members.
-		String concatNr = "";
+		// We collect the members in an ArrayList
+		List<String> concatNrs = new ArrayList<String>();
 		Measure measure = null;
 		for (int i = 0; i < coordinates.size(); i++) {
 			Position position = getAxes().get(i).getPositions()
@@ -1293,9 +1341,19 @@ abstract class Olap4ldCellSet implements CellSet {
 					}
 					measure = (Measure) member;
 				} else {
-					concatNr += Olap4ldLinkedDataUtil.convertMDXtoURI(member
-							.getUniqueName());
+					concatNrs.add(Olap4ldLinkedDataUtil.convertMDXtoURI(member
+							.getUniqueName()));
 				}
+			}
+		}
+
+		/*
+		 * We need to know the index of each dimension
+		 */
+		String concatNr = "";
+		for (int i = 0; i < dimensionindicesList.size(); i++) {
+			if (dimensionindicesList.get(i) != null) {
+				concatNr += concatNrs.get(dimensionindicesList.get(i));
 			}
 		}
 

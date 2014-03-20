@@ -18,211 +18,253 @@
 <rdfs:label xml:lang="en">European Union (27 countries)</rdfs:label>
 <rdfs:label xml:lang="de">Europäische Union (27 Länder)</rdfs:label>
 <rdfs:label xml:lang="fr">Union européenne (27 pays)</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#EU25">
 <rdfs:label xml:lang="en">European Union (25 countries)</rdfs:label>
 <rdfs:label xml:lang="de">Europäische Union (25 Länder)</rdfs:label>
 <rdfs:label xml:lang="fr">Union européenne (25 pays)</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#EU15">
 <rdfs:label xml:lang="en">European Union (15 countries)</rdfs:label>
 <rdfs:label xml:lang="de">Europäische Union (15 Länder)</rdfs:label>
 <rdfs:label xml:lang="fr">Union européenne (15 pays)</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#EA17">
 <rdfs:label xml:lang="en">Euro area (17 countries)</rdfs:label>
 <rdfs:label xml:lang="de">Euroraum (17 Länder)</rdfs:label>
 <rdfs:label xml:lang="fr">Zone euro (17 pays)</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#EA16">
 <rdfs:label xml:lang="en">Euro area (16 countries)</rdfs:label>
 <rdfs:label xml:lang="de">Euroraum (16 Länder)</rdfs:label>
 <rdfs:label xml:lang="fr">Zone euro (16 pays)</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#BE">
 <rdfs:label xml:lang="en">Belgium</rdfs:label>
 <rdfs:label xml:lang="de">Belgien</rdfs:label>
 <rdfs:label xml:lang="fr">Belgique</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#BG">
 <rdfs:label xml:lang="en">Bulgaria</rdfs:label>
 <rdfs:label xml:lang="de">Bulgarien</rdfs:label>
 <rdfs:label xml:lang="fr">Bulgarie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#CZ">
 <rdfs:label xml:lang="en">Czech Republic</rdfs:label>
 <rdfs:label xml:lang="de">Tschechische Republik</rdfs:label>
 <rdfs:label xml:lang="fr">République tchèque</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#DK">
 <rdfs:label xml:lang="en">Denmark</rdfs:label>
 <rdfs:label xml:lang="de">Dänemark</rdfs:label>
 <rdfs:label xml:lang="fr">Danemark</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#DE">
 <rdfs:label xml:lang="en">Germany (including  former GDR from 1991)</rdfs:label>
 <rdfs:label xml:lang="de">Deutschland (einschließlich der ehemaligen DDR seit 1991)</rdfs:label>
 <rdfs:label xml:lang="fr">Allemagne (incluant l'ancienne RDA à partir de 1991)</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#EE">
 <rdfs:label xml:lang="en">Estonia</rdfs:label>
 <rdfs:label xml:lang="de">Estland</rdfs:label>
 <rdfs:label xml:lang="fr">Estonie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#IE">
 <rdfs:label xml:lang="en">Ireland</rdfs:label>
 <rdfs:label xml:lang="de">Irland</rdfs:label>
 <rdfs:label xml:lang="fr">Irlande</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#GR">
 <rdfs:label xml:lang="en">Greece</rdfs:label>
 <rdfs:label xml:lang="de">Griechenland</rdfs:label>
 <rdfs:label xml:lang="fr">Grèce</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#ES">
 <rdfs:label xml:lang="en">Spain</rdfs:label>
 <rdfs:label xml:lang="de">Spanien</rdfs:label>
 <rdfs:label xml:lang="fr">Espagne</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#FR">
 <rdfs:label xml:lang="en">France</rdfs:label>
 <rdfs:label xml:lang="de">Frankreich</rdfs:label>
 <rdfs:label xml:lang="fr">France</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#IT">
 <rdfs:label xml:lang="en">Italy</rdfs:label>
 <rdfs:label xml:lang="de">Italien</rdfs:label>
 <rdfs:label xml:lang="fr">Italie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#CY">
 <rdfs:label xml:lang="en">Cyprus</rdfs:label>
 <rdfs:label xml:lang="de">Zypern</rdfs:label>
 <rdfs:label xml:lang="fr">Chypre</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#LV">
 <rdfs:label xml:lang="en">Latvia</rdfs:label>
 <rdfs:label xml:lang="de">Lettland</rdfs:label>
 <rdfs:label xml:lang="fr">Lettonie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#LT">
 <rdfs:label xml:lang="en">Lithuania</rdfs:label>
 <rdfs:label xml:lang="de">Litauen</rdfs:label>
 <rdfs:label xml:lang="fr">Lituanie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#LU">
 <rdfs:label xml:lang="en">Luxembourg</rdfs:label>
 <rdfs:label xml:lang="de">Luxemburg</rdfs:label>
 <rdfs:label xml:lang="fr">Luxembourg</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#HU">
 <rdfs:label xml:lang="en">Hungary</rdfs:label>
 <rdfs:label xml:lang="de">Ungarn</rdfs:label>
 <rdfs:label xml:lang="fr">Hongrie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#MT">
 <rdfs:label xml:lang="en">Malta</rdfs:label>
 <rdfs:label xml:lang="de">Malta</rdfs:label>
 <rdfs:label xml:lang="fr">Malte</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#NL">
 <rdfs:label xml:lang="en">Netherlands</rdfs:label>
 <rdfs:label xml:lang="de">Niederlande</rdfs:label>
 <rdfs:label xml:lang="fr">Pays-Bas</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#AT">
 <rdfs:label xml:lang="en">Austria</rdfs:label>
 <rdfs:label xml:lang="de">Österreich</rdfs:label>
 <rdfs:label xml:lang="fr">Autriche</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#PL">
 <rdfs:label xml:lang="en">Poland</rdfs:label>
 <rdfs:label xml:lang="de">Polen</rdfs:label>
 <rdfs:label xml:lang="fr">Pologne</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#PT">
 <rdfs:label xml:lang="en">Portugal</rdfs:label>
 <rdfs:label xml:lang="de">Portugal</rdfs:label>
 <rdfs:label xml:lang="fr">Portugal</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#RO">
 <rdfs:label xml:lang="en">Romania</rdfs:label>
 <rdfs:label xml:lang="de">Rumänien</rdfs:label>
 <rdfs:label xml:lang="fr">Roumanie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#SI">
 <rdfs:label xml:lang="en">Slovenia</rdfs:label>
 <rdfs:label xml:lang="de">Slowenien</rdfs:label>
 <rdfs:label xml:lang="fr">Slovénie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#SK">
 <rdfs:label xml:lang="en">Slovakia</rdfs:label>
 <rdfs:label xml:lang="de">Slowakei</rdfs:label>
 <rdfs:label xml:lang="fr">Slovaquie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#FI">
 <rdfs:label xml:lang="en">Finland</rdfs:label>
 <rdfs:label xml:lang="de">Finnland</rdfs:label>
 <rdfs:label xml:lang="fr">Finlande</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#SE">
 <rdfs:label xml:lang="en">Sweden</rdfs:label>
 <rdfs:label xml:lang="de">Schweden</rdfs:label>
 <rdfs:label xml:lang="fr">Suède</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#UK">
 <rdfs:label xml:lang="en">United Kingdom</rdfs:label>
 <rdfs:label xml:lang="de">Vereinigtes Königreich</rdfs:label>
 <rdfs:label xml:lang="fr">Royaume-Uni</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#IS">
 <rdfs:label xml:lang="en">Iceland</rdfs:label>
 <rdfs:label xml:lang="de">Island</rdfs:label>
 <rdfs:label xml:lang="fr">Islande</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#LI">
 <rdfs:label xml:lang="en">Liechtenstein</rdfs:label>
 <rdfs:label xml:lang="de">Liechtenstein</rdfs:label>
 <rdfs:label xml:lang="fr">Liechtenstein</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#NO">
 <rdfs:label xml:lang="en">Norway</rdfs:label>
 <rdfs:label xml:lang="de">Norwegen</rdfs:label>
 <rdfs:label xml:lang="fr">Norvège</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#CH">
 <rdfs:label xml:lang="en">Switzerland</rdfs:label>
 <rdfs:label xml:lang="de">Schweiz</rdfs:label>
 <rdfs:label xml:lang="fr">Suisse</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#ME">
 <rdfs:label xml:lang="en">Montenegro</rdfs:label>
 <rdfs:label xml:lang="de">Montenegro</rdfs:label>
 <rdfs:label xml:lang="fr">Monténégro</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#HR">
 <rdfs:label xml:lang="en">Croatia</rdfs:label>
 <rdfs:label xml:lang="de">Kroatien</rdfs:label>
 <rdfs:label xml:lang="fr">Croatie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#MK">
 <rdfs:label xml:lang="en">Former Yugoslav Republic of Macedonia, the</rdfs:label>
 <rdfs:label xml:lang="de">Die ehemalige jugoslawische Republik Mazedonien</rdfs:label>
 <rdfs:label xml:lang="fr">Ancienne République yougoslave de Macédoine</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#TR">
 <rdfs:label xml:lang="en">Turkey</rdfs:label>
 <rdfs:label xml:lang="de">Türkei</rdfs:label>
 <rdfs:label xml:lang="fr">Turquie</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#US">
 <rdfs:label xml:lang="en">United States</rdfs:label>
 <rdfs:label xml:lang="de">Vereinigte Staaten</rdfs:label>
 <rdfs:label xml:lang="fr">États-Unis</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 <skos:hasTopConcept><skos:Concept rdf:about="/dic/geo#JP">
 <rdfs:label xml:lang="en">Japan</rdfs:label>
 <rdfs:label xml:lang="de">Japan</rdfs:label>
 <rdfs:label xml:lang="fr">Japon</rdfs:label>
+<skos:inScheme rdf:resource="#CL_geo"/>
 </skos:Concept></skos:hasTopConcept>
 </skos:ConceptScheme>
 <skos:ConceptScheme rdf:about="#CL_TIME_FORMAT"><skos:notation>CL_TIME_FORMAT</skos:notation>

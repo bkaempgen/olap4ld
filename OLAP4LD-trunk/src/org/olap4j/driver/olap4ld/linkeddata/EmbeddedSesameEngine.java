@@ -1365,6 +1365,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Since needs to go through all observations, only done if enough
 			// memory
 			if (doComplexObservationIntegrityConstraints) {
+				
+				String query = TYPICALPREFIXES+" select * { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
+				List<Node[]> result = sparql(query, false);
 
 				// IC-19. Codes from code list
 				// Probably takes very long since involves property chain and

@@ -169,6 +169,11 @@ public class Olap2SparqlSesameVisitor implements
 		// Header
 		levelheights.add(-1);
 
+		/*
+		 * Note, since we start from the list of dimensions of the cube, the result dimensions
+		 * will be in the ordering of the cube (and not the MDX query).
+		 */
+		
 		// Find dimensions not in sliced and not in rolluplevel.
 		List<Node[]> basedimensions = new ArrayList<Node[]>();
 		// Header
