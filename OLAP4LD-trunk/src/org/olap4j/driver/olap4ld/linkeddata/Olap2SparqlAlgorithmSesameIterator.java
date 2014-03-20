@@ -33,12 +33,11 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 	private List<Node[]> cubes = new ArrayList<Node[]>();
 	private List<Node[]> measures = new ArrayList<Node[]>();
-	@SuppressWarnings("unused")
 	private List<Node[]> dimensions = new ArrayList<Node[]>();
-	// private List<Node[]> hierarchies;
-	@SuppressWarnings("unused")
+	private List<Node[]> newdimensions;
+	private List<Node[]> hierarchies;
 	private List<Node[]> levels = new ArrayList<Node[]>();
-	// private List<Node[]> members;
+	private List<Node[]> members;
 
 	// We collect necessary parts of the SPARQL query.
 	String selectClause = " ";
@@ -51,10 +50,11 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	private List<Node[]> result;
 	private Iterator<Node[]> iterator;
 	private HashMap<Integer, Integer> levelHeightMap;
-	
+
 	public Olap2SparqlAlgorithmSesameIterator(SailRepository repo,
 			List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
-			List<Node[]> levels, List<Node[]> slicesrollups,
+			List<Node[]> hierarchies, List<Node[]> levels,
+			List<Node[]> members, List<Node[]> slicesrollups,
 			List<Integer> levelheights, List<Node[]> projections,
 			List<List<Node[]>> membercombinations,
 			List<Node[]> hierarchysignature) {
@@ -63,10 +63,10 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		this.cubes = cubes;
 		this.measures = measures;
 		this.dimensions = dimensions;
-		// this.hierarchies = so.hierarchies;
+		this.hierarchies = hierarchies;
 		this.levels = levels;
 		// One problem could be that this may be a huge number of members.
-		// this.members = so.members;
+		this.members = members;
 
 		// Maybe first check that every metadata element at least has one
 		// header?
@@ -90,6 +90,34 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		 * no actual roll-up is done).
 		 */
 		evaluateSlicesRollups(slicesrollups, levelheights);
+
+		// Since we do a slice here, we should change the metadata.
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(dimensions.get(0));
+		Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(levels.get(0));
+
+		newdimensions = new ArrayList<Node[]>();
+
+		boolean first = true;
+		for (Node[] dimension : this.dimensions) {
+			// Only if a level is contained in slicesrollups add
+			// Is header added automatically?
+			if (first) {
+				newdimensions.add(dimensions.get(0));
+				first = false;
+				continue;
+			}
+			for (Node[] slicesrollup : slicesrollups) {
+				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								slicesrollup[levelmap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString())) {
+					newdimensions.add(dimension);
+				}
+			}
+		}
 
 		// Evaluate Dices
 		evaluateDices(membercombinations, hierarchysignature);
@@ -1058,43 +1086,37 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	@Override
 	public List<Node[]> getCubes(Restrictions restrictions)
 			throws OlapException {
-		// TODO Auto-generated method stub
-		return null;
+		return cubes;
 	}
 
 	@Override
 	public List<Node[]> getDimensions(Restrictions restrictions)
 			throws OlapException {
-		// TODO Auto-generated method stub
-		return null;
+		return newdimensions;
 	}
 
 	@Override
 	public List<Node[]> getMeasures(Restrictions restrictions)
 			throws OlapException {
-		// TODO Auto-generated method stub
-		return null;
+		return measures;
 	}
 
 	@Override
 	public List<Node[]> getHierarchies(Restrictions restrictions)
 			throws OlapException {
-		// TODO Auto-generated method stub
-		return null;
+		return hierarchies;
 	}
 
 	@Override
 	public List<Node[]> getLevels(Restrictions restrictions)
 			throws OlapException {
-		// TODO Auto-generated method stub
-		return null;
+		return levels;
 	}
 
 	@Override
 	public List<Node[]> getMembers(Restrictions restrictions)
 			throws OlapException {
-		// TODO Auto-generated method stub
-		return null;
+		return members;
 	}
 
 	/**

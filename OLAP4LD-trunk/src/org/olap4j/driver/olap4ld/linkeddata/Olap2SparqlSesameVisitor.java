@@ -20,9 +20,9 @@ public class Olap2SparqlSesameVisitor implements
 	private List<Node[]> cubes = new ArrayList<Node[]>();
 	private List<Node[]> measures = new ArrayList<Node[]>();
 	private List<Node[]> dimensions = new ArrayList<Node[]>();
-	// private List<Node[]> hierarchies;
+	private List<Node[]> hierarchies;
 	private List<Node[]> levels = new ArrayList<Node[]>();
-	// private List<Node[]> members;
+	private List<Node[]> members;
 
 	private List<Node[]> slicedDimensions = new ArrayList<Node[]>();
 	private List<Node[]> rollupslevels = new ArrayList<Node[]>();
@@ -99,10 +99,10 @@ public class Olap2SparqlSesameVisitor implements
 		this.cubes = so.cubes;
 		this.measures = so.measures;
 		this.dimensions = so.dimensions;
-		// this.hierarchies = so.hierarchies;
+		this.hierarchies = so.hierarchies;
 		this.levels = so.levels;
 		// One problem could be that this may be a huge number of members.
-		// this.members = so.members;
+		this.members = so.members;
 	}
 
 	@Override
@@ -253,7 +253,7 @@ public class Olap2SparqlSesameVisitor implements
 		// Currently, we should have retrieved the data, already, therefore, we
 		// only have one node.
 		PhysicalOlapIterator _root = new Olap2SparqlAlgorithmSesameIterator(
-				repo, cubes, measures, dimensions, levels, slicesrollups,
+				repo, cubes, measures, dimensions, hierarchies, levels, members, slicesrollups,
 				levelheights, projections, membercombinations,
 				hierarchysignature);
 
