@@ -332,6 +332,19 @@ abstract class Olap4ldCellSet implements CellSet {
 		List<Node[]> members = new ArrayList<Node[]>();
 
 		try {
+			
+			first = true;
+			for (Olap4ldMeasure measure : metaData.cube.measures) {
+				if (first) {
+					measures.add(measure.transformMetadataObject2NxNodes(metaData.cube)
+							.get(0));
+					first = false;
+				}
+				measures.add(measure.transformMetadataObject2NxNodes(metaData.cube).get(
+						1));
+			}
+			
+			
 			first = true;
 			for (Olap4ldDimension dimension : metaData.cube.dimensions) {
 				if (first) {

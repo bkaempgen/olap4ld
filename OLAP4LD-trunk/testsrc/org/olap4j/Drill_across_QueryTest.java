@@ -241,7 +241,7 @@ public class Drill_across_QueryTest extends TestCase {
 			String dimensionname = nodes[emplratedimensionmap
 					.get("?DIMENSION_UNIQUE_NAME")].toString();
 			System.out.println(dimensionname);
-			if (dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#geo") || dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#sex")) {
+			if (dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#sex")) {
 				emplratesliceddimensions.add(nodes);
 			}
 		}

@@ -126,10 +126,15 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			throws OlapException {
 
 		try {
-
-			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameVisitor(
-					repo);
-
+			LogicalOlapOperatorQueryPlanVisitor r2a;
+			if (queryplan._root instanceof DrillAcrossOp) {
+				r2a = new OlapDrillAcross2SparqlSesameVisitor(
+						repo);
+			} else {
+				r2a = new Olap2SparqlSesameVisitor(
+						repo);
+			}
+				
 			// We create visitor to translate logical into physical
 			// LogicalOlapOperatorQueryPlanVisitor r2a = new
 			// Olap2SparqlSesameDerivedDatasetVisitor(
@@ -831,7 +836,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				throw new OlapException(
 						"Failed own check: Dataset should have at least one observation. ");
 			}
-			
 
 			// XXX Possible other checks
 			// No dimensions
@@ -1188,22 +1192,26 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// IC-9. Unique slice structure
 			// Does not seem to work. Returns all slices. Therefore disabled.
-//			String query = "PREFIX qb: <http://purl.org/linked-data/cube#> select * where {  {    ?slice a qb:Slice .    FILTER NOT EXISTS { ?slice qb:sliceStructure ?key } } UNION {    ?slice a qb:Slice ;           qb:sliceStructure ?key1, ?key2;    FILTER (?key1 != ?key2)  }}";
-//			List<Node[]> result = sparql(query, false);
-//			testquery = TYPICALPREFIXES
-//					+ "ASK {  {    ?slice a qb:Slice .    FILTER NOT EXISTS { ?slice qb:sliceStructure ?key } } UNION {    ?slice a qb:Slice ;           qb:sliceStructure ?key1, ?key2;    FILTER (?key1 != ?key2)  }}";
-//			booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-//					testquery);
-//			if (booleanQuery.evaluate() == true) {
-//				error = true;
-//				status = "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
-//				Olap4ldUtil._log.config(status);
-//				overview += status;
-//			} else {
-//				status = "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
-//				Olap4ldUtil._log.config(status);
-//				overview += status;
-//			}
+			// String query =
+			// "PREFIX qb: <http://purl.org/linked-data/cube#> select * where {  {    ?slice a qb:Slice .    FILTER NOT EXISTS { ?slice qb:sliceStructure ?key } } UNION {    ?slice a qb:Slice ;           qb:sliceStructure ?key1, ?key2;    FILTER (?key1 != ?key2)  }}";
+			// List<Node[]> result = sparql(query, false);
+			// testquery = TYPICALPREFIXES
+			// +
+			// "ASK {  {    ?slice a qb:Slice .    FILTER NOT EXISTS { ?slice qb:sliceStructure ?key } } UNION {    ?slice a qb:Slice ;           qb:sliceStructure ?key1, ?key2;    FILTER (?key1 != ?key2)  }}";
+			// booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+			// testquery);
+			// if (booleanQuery.evaluate() == true) {
+			// error = true;
+			// status =
+			// "Failed specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+			// Olap4ldUtil._log.config(status);
+			// overview += status;
+			// } else {
+			// status =
+			// "Successful specification check: IC-9. Unique slice structure. Each qb:Slice must have exactly one associated qb:sliceStructure. <br/>";
+			// Olap4ldUtil._log.config(status);
+			// overview += status;
+			// }
 
 			// IC-10. Slice dimensions complete
 			testquery = TYPICALPREFIXES
@@ -1365,9 +1373,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Since needs to go through all observations, only done if enough
 			// memory
 			if (doComplexObservationIntegrityConstraints) {
-				
-				String query = TYPICALPREFIXES+" select * { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
-				List<Node[]> result = sparql(query, false);
+
+				// Watch out: skos:inScheme has to be used.
+				// String query =
+				// TYPICALPREFIXES+" select * { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
+				// List<Node[]> result = sparql(query, false);
 
 				// IC-19. Codes from code list
 				// Probably takes very long since involves property chain and
