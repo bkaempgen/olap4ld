@@ -526,6 +526,21 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		assertContains("| Adjusted Closing Price |      10.57 |", result);
 
 	}
+	
+	
+	/**
+	 * Generic Query
+	 */
+	public void testDrillAcrossEstatwrapGDPpercapitainPPS_EurostatEmploymentRate() {
+
+		// Problem:
+		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleEstatwrapGDPpercapitainPPSOlapEsaAggregateBothMeasures */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS	FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23ds,httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
+		
+		assertContains("| Adjusted Closing Price |      10.57 |", result);
+
+	}
+	
+	
 
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
