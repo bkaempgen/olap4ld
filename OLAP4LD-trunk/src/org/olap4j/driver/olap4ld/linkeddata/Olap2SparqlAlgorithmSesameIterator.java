@@ -108,6 +108,11 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				first = false;
 				continue;
 			}
+			// Measure dimension should also be added.
+			if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+					.toString().equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+				newdimensions.add(dimension);
+			}
 			for (Node[] slicesrollup : slicesrollups) {
 				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
 						.toString().equals(
@@ -1061,7 +1066,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 	@Override
 	public void init() throws Exception {
-		;
+		this.iterator = this.result.iterator();
 	}
 
 	@Override
