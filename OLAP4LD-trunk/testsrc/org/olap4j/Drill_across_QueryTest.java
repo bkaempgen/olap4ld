@@ -259,19 +259,18 @@ public class Drill_across_QueryTest extends TestCase {
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(drillacross);
 
-		executeStatement(myplan);
+		String result = executeStatement(myplan);
+		assertContains("http://olap4ld.googlecode.com/dic/geo#US; 2011; 148.0; 1; 148; 70.433333333333333333333333;", result);
 	}
 
-
-
-	@SuppressWarnings("unused")
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
 			fail("expected to find '" + seek + "' in '" + s + "'");
 		}
 	}
-
-	private void executeStatement(LogicalOlapQueryPlan queryplan) {
+	
+	private String executeStatement(LogicalOlapQueryPlan queryplan) {
+		String resultString = "";
 		try {
 			// For now, we simply return plan
 			System.out.println("--------------");
@@ -282,10 +281,13 @@ public class Drill_across_QueryTest extends TestCase {
 			PhysicalOlapQueryPlan execplan = this.lde.getExecplan();
 			System.out.println("Physical plan:" + execplan.toString());
 			System.out.println("Result:");
+			
 			for (Node[] nodes : result) {
 				for (Node node : nodes) {
+					resultString += node.toString() + "; ";
 					System.out.print(node.toString() + "; ");
 				}
+				resultString += "\n";
 				System.out.println();
 			}
 			System.out.println("--------------");
@@ -293,7 +295,7 @@ public class Drill_across_QueryTest extends TestCase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		return resultString;
 	}
 
 	/**

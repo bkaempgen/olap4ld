@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.olap4j.OlapException;
 import org.olap4j.Position;
@@ -56,6 +57,7 @@ import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.memory.MemoryStore;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
 import org.semanticweb.yars.nx.parser.NxParser;
 
@@ -128,13 +130,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		try {
 			LogicalOlapOperatorQueryPlanVisitor r2a;
 			if (queryplan._root instanceof DrillAcrossOp) {
-				r2a = new OlapDrillAcross2SparqlSesameVisitor(
-						repo);
+				r2a = new OlapDrillAcross2SparqlSesameVisitor(repo);
 			} else {
-				r2a = new Olap2SparqlSesameVisitor(
-						repo);
+				r2a = new Olap2SparqlSesameVisitor(repo);
 			}
-				
+
 			// We create visitor to translate logical into physical
 			// LogicalOlapOperatorQueryPlanVisitor r2a = new
 			// Olap2SparqlSesameDerivedDatasetVisitor(
@@ -988,6 +988,64 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			e.printStackTrace();
 		}
 
+		List<Node[]> result = new ArrayList<Node[]>();
+		// Check whether Drill-across query
+		// XXX: Wildcard delimiter
+		if (restrictions.cubeNamePattern != null
+				&& restrictions.cubeNamePattern.contains(",")) {
+
+			String[] datasets = restrictions.cubeNamePattern.split(",");
+			for (int i = 0; i < datasets.length; i++) {
+				String dataset = datasets[i];
+				Restrictions newrestrictions = new Restrictions();
+				newrestrictions.cubeNamePattern = dataset;
+
+				List<Node[]> intermediaryresult = getCubesPerDataSet(newrestrictions);
+
+				// Add to result
+				boolean first = true;
+				for (Node[] nodes : intermediaryresult) {
+					if (first) {
+						if (i == 0) {
+							result.add(nodes);
+						}
+						first = false;
+						continue;
+					}
+					result.add(nodes);
+				}
+			}
+
+			// Now, add "virtual cube"
+			// ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
+			// ?DESCRIPTION
+			Node[] virtualcube = new Node[] { result.get(1)[0],
+					result.get(1)[1],
+					new Resource(restrictions.cubeNamePattern),
+					new Literal("CUBE"), new Literal("Global Cube"),
+					new Literal("This is the global cube.") };
+			result.add(virtualcube);
+
+		} else {
+
+			getCubesPerDataSet(restrictions);
+
+		}
+
+		/*
+		 * Check on restrictions that the interface makes:
+		 * 
+		 * Restrictions are strong restrictions, no fuzzy, since those wild
+		 * cards have been eliminated before.
+		 */
+		// List<Node[]> result = applyRestrictions(cubeUris, restrictions);
+		return result;
+
+	}
+
+	private List<Node[]> getCubesPerDataSet(Restrictions restrictions)
+			throws OlapException {
+		List<Node[]> result = new ArrayList<Node[]>();
 		// For now, we simply preload.
 		if (restrictions.cubeNamePattern != null) {
 			try {
@@ -1012,17 +1070,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> result = sparql(querytemplate, true);
+		result = sparql(querytemplate, true);
 
-		/*
-		 * Check on restrictions that the interface makes:
-		 * 
-		 * Restrictions are strong restrictions, no fuzzy, since those wild
-		 * cards have been eliminated before.
-		 */
-		// List<Node[]> result = applyRestrictions(cubeUris, restrictions);
 		return result;
-
 	}
 
 	private void checkIntegrityConstraints() throws OlapException {
@@ -1254,20 +1304,23 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// long, expensive quadratic check (IC-12) (see
 				// http://lists.w3.org/Archives/Public/public-gld-wg/2013Jul/0017.html)
 				// Dave Reynolds has implemented a linear time version of it
-				testquery = TYPICALPREFIXES
-						+ "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
-				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-						testquery);
-				if (booleanQuery.evaluate() == true) {
-					error = true;
-					status = "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
-					Olap4ldUtil._log.config(status);
-					overview += status;
-				} else {
-					status = "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
-					Olap4ldUtil._log.config(status);
-					overview += status;
-				}
+				// testquery = TYPICALPREFIXES
+				// +
+				// "ASK {  FILTER( ?allEqual )  {    SELECT (MIN(?equal) AS ?allEqual) WHERE {        ?obs1 qb:dataSet ?dataset .        ?obs2 qb:dataSet ?dataset .        FILTER (?obs1 != ?obs2)        ?dataset qb:structure/qb:component/qb:componentProperty ?dim .        ?dim a qb:DimensionProperty .        ?obs1 ?dim ?value1 .        ?obs2 ?dim ?value2 .        BIND( ?value1 = ?value2 AS ?equal)    } GROUP BY ?obs1 ?obs2  }}";
+				// booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+				// testquery);
+				// if (booleanQuery.evaluate() == true) {
+				// error = true;
+				// status =
+				// "Failed specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
+				// Olap4ldUtil._log.config(status);
+				// overview += status;
+				// } else {
+				// status =
+				// "Successful specification check: IC-12. No duplicate observations. No two qb:Observations in the same qb:DataSet may have the same value for all dimensions.<br/>";
+				// Olap4ldUtil._log.config(status);
+				// overview += status;
+				// }
 
 			}
 
@@ -1551,10 +1604,95 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		Olap4ldUtil._log.config("Linked Data Engine: Get Dimensions...");
 
-		String additionalFilters = createFilterForRestrictions(restrictions);
-
 		List<Node[]> result = new ArrayList<Node[]>();
 
+		// Check whether Drill-across query
+		// XXX: Wildcard delimiter
+		if (restrictions.cubeNamePattern != null
+				&& restrictions.cubeNamePattern.contains(",")) {
+
+			String[] datasets = restrictions.cubeNamePattern.split(",");
+			for (int i = 0; i < datasets.length; i++) {
+				String dataset = datasets[i];
+				Restrictions newrestrictions = new Restrictions();
+				newrestrictions.cubeNamePattern = dataset;
+
+				List<Node[]> intermediaryresult = getDimensionsPerDataSet(newrestrictions);
+
+				// Add to result
+				boolean first = true;
+				for (Node[] anIntermediaryresult : intermediaryresult) {
+					if (first) {
+						if (i == 0) {
+							result.add(anIntermediaryresult);
+						}
+						first = false;
+						continue;
+					}
+
+					result.add(anIntermediaryresult);
+
+					// Also add dimension to global cube
+					Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+							.getNodeResultFields(intermediaryresult.get(0));
+
+					Node[] newnode = new Node[9];
+					newnode[dimensionmap.get("?CATALOG_NAME")] = anIntermediaryresult[dimensionmap
+							.get("?CATALOG_NAME")];
+					newnode[dimensionmap.get("?SCHEMA_NAME")] = anIntermediaryresult[dimensionmap
+							.get("?SCHEMA_NAME")];
+					newnode[dimensionmap.get("?CUBE_NAME")] = new Resource(
+							restrictions.cubeNamePattern);
+					newnode[dimensionmap.get("?DIMENSION_NAME")] = anIntermediaryresult[dimensionmap
+							.get("?DIMENSION_NAME")];
+					newnode[dimensionmap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[dimensionmap
+							.get("?DIMENSION_UNIQUE_NAME")];
+					newnode[dimensionmap.get("?DIMENSION_CAPTION")] = anIntermediaryresult[dimensionmap
+							.get("?DIMENSION_CAPTION")];
+					newnode[dimensionmap.get("?DIMENSION_ORDINAL")] = anIntermediaryresult[dimensionmap
+							.get("?DIMENSION_ORDINAL")];
+					newnode[dimensionmap.get("?DIMENSION_TYPE")] = anIntermediaryresult[dimensionmap
+							.get("?DIMENSION_TYPE")];
+					newnode[dimensionmap.get("?DESCRIPTION")] = anIntermediaryresult[dimensionmap
+							.get("?DESCRIPTION")];
+
+					// Only add if not already contained.
+					boolean contained = false;
+					for (Node[] aResult : result) {
+						boolean sameDimension = aResult[dimensionmap
+								.get("?DIMENSION_UNIQUE_NAME")].toString()
+								.equals(newnode[dimensionmap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString());
+						boolean sameCube = aResult[dimensionmap
+								.get("?CUBE_NAME")].toString().equals(
+								newnode[dimensionmap.get("?CUBE_NAME")]
+										.toString());
+
+						if (sameDimension && sameCube) {
+							contained = true;
+						}
+					}
+
+					if (!contained) {
+						result.add(newnode);
+					}
+				}
+
+			}
+
+		} else {
+
+			result = getDimensionsPerDataSet(restrictions);
+
+		}
+
+		return result;
+	}
+
+	private List<Node[]> getDimensionsPerDataSet(Restrictions restrictions) {
+		String additionalFilters = createFilterForRestrictions(restrictions);
+		List<Node[]> result = new ArrayList<Node[]>();
 		// Create header
 		Node[] header = new Node[] { new Variable("?CATALOG_NAME"),
 				new Variable("?SCHEMA_NAME"), new Variable("?CUBE_NAME"),
@@ -1620,7 +1758,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				result.add(nodes);
 			}
 		}
-
 		return result;
 	}
 

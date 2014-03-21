@@ -19,20 +19,12 @@
 package org.olap4j.driver.olap4ld;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.text.Segment;
-
-import org.olap4j.Axis;
 import org.olap4j.OlapException;
 import org.olap4j.Position;
-import org.olap4j.driver.olap4ld.Olap4ldConnection.Context;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.impl.Olap4jUtil;
 import org.olap4j.mdx.AxisNode;
 import org.olap4j.mdx.CallNode;
 import org.olap4j.mdx.CubeNode;
