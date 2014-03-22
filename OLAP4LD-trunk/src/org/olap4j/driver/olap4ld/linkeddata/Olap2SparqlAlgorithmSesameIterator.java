@@ -50,6 +50,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	private List<Node[]> result;
 	private Iterator<Node[]> iterator;
 	private HashMap<Integer, Integer> levelHeightMap;
+	private ArrayList<Node[]> newmeasures;
 
 	public Olap2SparqlAlgorithmSesameIterator(SailRepository repo,
 			List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
@@ -90,39 +91,6 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		 * no actual roll-up is done).
 		 */
 		evaluateSlicesRollups(slicesrollups, levelheights);
-
-		// Since we do a slice here, we should change the metadata.
-		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(dimensions.get(0));
-		Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(levels.get(0));
-
-		newdimensions = new ArrayList<Node[]>();
-
-		boolean first = true;
-		for (Node[] dimension : this.dimensions) {
-			// Only if a level is contained in slicesrollups add
-			// Is header added automatically?
-			if (first) {
-				newdimensions.add(dimensions.get(0));
-				first = false;
-				continue;
-			}
-			// Measure dimension should also be added.
-			if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-					.toString().equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
-				newdimensions.add(dimension);
-			}
-			for (Node[] slicesrollup : slicesrollups) {
-				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-						.toString().equals(
-								slicesrollup[levelmap
-										.get("?DIMENSION_UNIQUE_NAME")]
-										.toString())) {
-					newdimensions.add(dimension);
-				}
-			}
-		}
 
 		// Evaluate Dices
 		evaluateDices(membercombinations, hierarchysignature);
@@ -265,12 +233,30 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		Map<String, Integer> map = Olap4ldLinkedDataUtil
 				.getNodeResultFields(measures.get(0));
 
+		// At the same time, we can update the metadata.
+		// Since we do a projection here, we should change the metadata. Only keep those 
+		// measures that 1) are contained in projections and in measures.
+		this.newmeasures = new ArrayList<Node[]>();
+		
 		for (Node[] measure : projections) {
 
 			if (first) {
 				first = false;
 				continue;
 			}
+			
+			// Make sure that the projected measure actually is contained in measures and add if so
+			boolean contained = false;
+			for (Node[] aMeasure : measures) {
+				// add to newmeasures if 1) are contained in measures
+				if(aMeasure[map.get("?MEASURE_UNIQUE_NAME")].toString().equals(measure[map.get("?MEASURE_UNIQUE_NAME")].toString())) {
+					contained = true;
+				}
+			}
+			if (!contained) {
+				continue;
+			}
+			newmeasures.add(measure);
 
 			// For formulas, this is different
 			// XXX: Needs to be put before creating the Logical Olap Operator
@@ -967,6 +953,39 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			orderByClause += " ?" + dimensionPropertyVariable + levelHeight
 					+ " ";
 		}
+		
+		// Since we do a slice here, we should change the metadata.
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(dimensions.get(0));
+		Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(levels.get(0));
+
+		newdimensions = new ArrayList<Node[]>();
+
+		boolean first = true;
+		for (Node[] dimension : this.dimensions) {
+			// Only if a level is contained in slicesrollups add
+			// Is header added automatically?
+			if (first) {
+				newdimensions.add(dimensions.get(0));
+				first = false;
+				continue;
+			}
+			// Measure dimension should also be added.
+			if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+					.toString().equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+				newdimensions.add(dimension);
+			}
+			for (Node[] slicesrollup : slicesrollups) {
+				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								slicesrollup[levelmap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString())) {
+					newdimensions.add(dimension);
+				}
+			}
+		}
 	}
 
 	private void evaluateCube() {
@@ -1103,7 +1122,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	@Override
 	public List<Node[]> getMeasures(Restrictions restrictions)
 			throws OlapException {
-		return measures;
+		return newmeasures;
 	}
 
 	@Override

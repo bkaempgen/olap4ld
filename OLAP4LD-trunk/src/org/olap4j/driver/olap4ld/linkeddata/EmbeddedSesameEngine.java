@@ -1029,7 +1029,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		} else {
 
-			getCubesPerDataSet(restrictions);
+			result = getCubesPerDataSet(restrictions);
 
 		}
 

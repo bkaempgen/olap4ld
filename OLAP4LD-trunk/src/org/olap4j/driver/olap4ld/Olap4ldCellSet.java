@@ -67,6 +67,7 @@ import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.helper.PreprocessMdxVisitor;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.DiceOp;
+import org.olap4j.driver.olap4ld.linkeddata.DrillAcrossOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.ProjectionOp;
@@ -217,6 +218,7 @@ abstract class Olap4ldCellSet implements CellSet {
 				olap4jStatement);
 		selectNode.accept(visitor);
 
+		// Can also return the global cube
 		Cube cube = visitor.getCube();
 
 		// Axes Metadata (create MetaData for one specific axis)
@@ -321,9 +323,59 @@ abstract class Olap4ldCellSet implements CellSet {
 	 */
 	private LogicalOlapQueryPlan createInitialLogicalOlapQueryPlan() {
 
+		List<Node[]> cube = metaData.cube.transformMetadataObject2NxNodes();
+		
+		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(cube.get(0));
+		
+		LogicalOlapOp queryplanroot = null;
+		
+		if (cube.get(1)[cubemap.get("?CUBE_NAME")].toString().contains(",")) {
+
+			String[] datasets = cube.get(1)[cubemap.get("?CUBE_NAME")].toString().split(",");
+			List<LogicalOlapOp> singlecubequeryplans = new ArrayList<LogicalOlapOp>();
+			for (int i = 0; i < datasets.length; i++) {
+				String dataset = datasets[i];
+				
+				Restrictions restrictions = new Restrictions();
+				restrictions.cubeNamePattern = dataset;
+				
+				// Ask for the cube
+				try {
+					List<Node[]> singlecube = this.olap4jStatement.olap4jConnection.myLinkedData.getCubes(restrictions);
+					LogicalOlapOp singlequeryplan = createInitialQueryPlanPerDataSet(singlecube);
+					singlecubequeryplans.add(singlequeryplan);
+					
+				} catch (OlapException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				queryplanroot = null;
+				// queryplanroot is simply (XXX: can we make it bushy?) query plan with Drill-across operators.
+				for (LogicalOlapOp logicalOlapOp : singlecubequeryplans) {
+					if (queryplanroot == null) {
+						queryplanroot = logicalOlapOp;
+					} else {
+						DrillAcrossOp drillacross = new DrillAcrossOp(queryplanroot, logicalOlapOp);
+						queryplanroot = drillacross;
+					}
+				}
+				
+			}
+		} else {
+			queryplanroot = createInitialQueryPlanPerDataSet(cube);
+		}
+		
+		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(queryplanroot);
+		return myplan;
+	}
+	
+	private LogicalOlapOp createInitialQueryPlanPerDataSet(List<Node[]> cube) {
+
 		// BaseCube operator
 		boolean first;
-		List<Node[]> cube = metaData.cube.transformMetadataObject2NxNodes();
+		
 		List<Node[]> measures = new ArrayList<Node[]>();
 
 		List<Node[]> dimensions = new ArrayList<Node[]>();
@@ -331,6 +383,8 @@ abstract class Olap4ldCellSet implements CellSet {
 		List<Node[]> levels = new ArrayList<Node[]>();
 		List<Node[]> members = new ArrayList<Node[]>();
 
+		// The problem lies here: We use all elements of the global dataset:
+		
 		try {
 			
 			first = true;
@@ -653,10 +707,6 @@ abstract class Olap4ldCellSet implements CellSet {
 		
 		dimensionindicesList = new ArrayList<Integer>();
 		
-		Restrictions restrictions = new Restrictions();
-		restrictions.cubeNamePattern = Olap4ldLinkedDataUtil
-				.convertMDXtoURI(this.metaData.cube.getUniqueName());
-
 		for (Node[] dimension : dimensions) {
 			// Check what number
 			Measure measure = null;
@@ -694,9 +744,7 @@ abstract class Olap4ldCellSet implements CellSet {
 			}
 
 		}
-
-		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(rollup);
-		return myplan;
+		return rollup;
 	}
 
 	/**
