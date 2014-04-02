@@ -1,3 +1,49 @@
+==2014-04-02==
+* Drill-across operator and iterator work now. However, note, that for iterator neither reasoning is done nor arbitrary ordering of shared dimensions in result is considered.
+* Bugfix in Olap2SparqlAlgorithmIterator: Not properly updated measures metadata.
+* Working on test case: testDrillAcrossEstatwrapGDPpercapitainPPS_EurostatEmploymentRate
+* Question: Do we not need to make DrillAcrossSparqlIterator properly update the metadata? Do we need to create the metadata of a new cube, just like we do for metadata queries? 
+
+<pre>
+The problem with Drill-across currently is that the initial query plan adds all projected measures and adds all sliced dimensions.
+
+Also, the initial query plan uses elements from the global dataset, so that we cannot distinguish between
+measures from different datasets.
+
+However, need to make sure that only existing measures are projected. 
+
+Solution: Before projection, check whether existing in data cube.
+
+However, there we have the problem that the initial query plan uses Base-cube...
+
+The key problem is in createInitialQueryPlanPerDataSet() where we ask the Linked Data Engine for the metadata of each single dataset, 
+but also consider the metadata of "metaData.cube".
+
+</pre>
+
+* Question: When and how is metaData.cube set? It is set when creating the metadata. The metadata queries now also create a global cube.
+* Question: Where lies the error?
+** Maybe the metadata is not correctly build? How can I check?
+* Question: Do I need to make the DrillAcross Iterator return properly modelled metadata?
+
+* Problem: Our OLAP-to-SPARQL algorithm needs all SlicesRollups dimensions to be part of the queried data cube. However, our slicedDimensions is created for all datasets when creating the initial logical query plan. 
+
+* Problem: All multidimensional elements in MDX query first belong to the global cube. Now, before being used in the query to the single data cube, we have to check that they actually refer to an element of the dataset.
+
+* This is the case for projections, where we specifically project for all existing measures.
+
+* This also is the case for slices, where we slice for any dimensions from the global cube not mentioned in query.
+
+* How to deal with this issue?
+** OLAP-to-SPARQL algorithm has a well-defined meaning.
+** We can either create a correct initial query plan
+** Or, we can later adapt the initial query plan
+** Or, when we create the inputs to the OLAP-to-SPARQL algorithm, we ignore some parts of the query plan
+
+* I think, if possible, we work on the initial query plan.
+* Thus, next time, we try to filter non-existing projected measures and sliced dimensions.
+
+
 ==2014-03-22==
 * Metadata queries can return global cube
 

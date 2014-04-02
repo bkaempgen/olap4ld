@@ -201,7 +201,7 @@ public class Olap2SparqlSesameVisitor implements
 				first = false;
 				continue;
 			}
-			// Seach for lowest level
+			// Search for lowest level
 			Node[] baselevel = null;
 			first = true;
 			for (Node[] level : levels) {
@@ -252,6 +252,7 @@ public class Olap2SparqlSesameVisitor implements
 
 		// Currently, we should have retrieved the data, already, therefore, we
 		// only have one node.
+		// We use the OLAP-2-SPARQL algorithm.
 		PhysicalOlapIterator _root = new Olap2SparqlAlgorithmSesameIterator(
 				repo, cubes, measures, dimensions, hierarchies, levels, members, slicesrollups,
 				levelheights, projections, membercombinations,

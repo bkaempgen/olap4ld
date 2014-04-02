@@ -219,6 +219,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		selectNode.accept(visitor);
 
 		// Can also return the global cube
+		// Question: Do we actually get back the "global cube" here? Yes.
 		Cube cube = visitor.getCube();
 
 		// Axes Metadata (create MetaData for one specific axis)
@@ -324,156 +325,164 @@ abstract class Olap4ldCellSet implements CellSet {
 	private LogicalOlapQueryPlan createInitialLogicalOlapQueryPlan() {
 
 		List<Node[]> cube = metaData.cube.transformMetadataObject2NxNodes();
-		
+
 		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(cube.get(0));
-		
+
 		LogicalOlapOp queryplanroot = null;
-		
+
 		if (cube.get(1)[cubemap.get("?CUBE_NAME")].toString().contains(",")) {
 
-			String[] datasets = cube.get(1)[cubemap.get("?CUBE_NAME")].toString().split(",");
+			String[] datasets = cube.get(1)[cubemap.get("?CUBE_NAME")]
+					.toString().split(",");
 			List<LogicalOlapOp> singlecubequeryplans = new ArrayList<LogicalOlapOp>();
 			for (int i = 0; i < datasets.length; i++) {
 				String dataset = datasets[i];
-				
+
 				Restrictions restrictions = new Restrictions();
 				restrictions.cubeNamePattern = dataset;
-				
+
 				// Ask for the cube
 				try {
-					List<Node[]> singlecube = this.olap4jStatement.olap4jConnection.myLinkedData.getCubes(restrictions);
+					List<Node[]> singlecube = this.olap4jStatement.olap4jConnection.myLinkedData
+							.getCubes(restrictions);
 					LogicalOlapOp singlequeryplan = createInitialQueryPlanPerDataSet(singlecube);
 					singlecubequeryplans.add(singlequeryplan);
-					
+
 				} catch (OlapException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 				queryplanroot = null;
-				// queryplanroot is simply (XXX: can we make it bushy?) query plan with Drill-across operators.
+				// queryplanroot is simply (XXX: can we make it bushy?) query
+				// plan with Drill-across operators.
 				for (LogicalOlapOp logicalOlapOp : singlecubequeryplans) {
 					if (queryplanroot == null) {
 						queryplanroot = logicalOlapOp;
 					} else {
-						DrillAcrossOp drillacross = new DrillAcrossOp(queryplanroot, logicalOlapOp);
+						DrillAcrossOp drillacross = new DrillAcrossOp(
+								queryplanroot, logicalOlapOp);
 						queryplanroot = drillacross;
 					}
 				}
-				
+
 			}
 		} else {
 			queryplanroot = createInitialQueryPlanPerDataSet(cube);
 		}
-		
+
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(queryplanroot);
 		return myplan;
 	}
-	
+
 	private LogicalOlapOp createInitialQueryPlanPerDataSet(List<Node[]> cube) {
 
 		// BaseCube operator
 		boolean first;
-		
+
+		// The problem lies here: We use all elements of the global dataset:
+
+		/*
+		 * Instead, we should query the LDCE.
+		 */
+
+		// try {
+		//
+		// first = true;
+		// for (Olap4ldMeasure measure : metaData.cube.measures) {
+		// if (first) {
+		// measures.add(measure.transformMetadataObject2NxNodes(metaData.cube)
+		// .get(0));
+		// first = false;
+		// }
+		// measures.add(measure.transformMetadataObject2NxNodes(metaData.cube).get(
+		// 1));
+		// }
+		//
+		//
+		// first = true;
+		// for (Olap4ldDimension dimension : metaData.cube.dimensions) {
+		// if (first) {
+		// dimensions.add(dimension.transformMetadataObject2NxNodes()
+		// .get(0));
+		// first = false;
+		// }
+		// dimensions.add(dimension.transformMetadataObject2NxNodes().get(
+		// 1));
+		// first = true;
+		// for (Hierarchy hierarchy : dimension.getHierarchies()) {
+		// Olap4ldHierarchy olap4ldhierarchy = (Olap4ldHierarchy) hierarchy;
+		// if (first) {
+		// hierarchies.add(olap4ldhierarchy
+		// .transformMetadataObject2NxNodes(metaData.cube)
+		// .get(0));
+		// first = false;
+		// }
+		// hierarchies.add(olap4ldhierarchy
+		// .transformMetadataObject2NxNodes(metaData.cube)
+		// .get(1));
+		// first = true;
+		// for (Level level : hierarchy.getLevels()) {
+		// Olap4ldLevel olap4ldlevel = (Olap4ldLevel) level;
+		// if (first) {
+		// levels.add(olap4ldlevel
+		// .transformMetadataObject2NxNodes(
+		// metaData.cube).get(0));
+		// first = false;
+		// }
+		// levels.add(olap4ldlevel
+		// .transformMetadataObject2NxNodes(metaData.cube)
+		// .get(1));
+		// first = true;
+		// for (Member member : level.getMembers()) {
+		// Olap4ldMember olap4ldmember = (Olap4ldMember) member;
+		// if (first) {
+		// members.add(olap4ldmember
+		// .transformMetadataObject2NxNodes(
+		// metaData.cube).get(0));
+		// first = false;
+		// }
+		// members.add(olap4ldmember
+		// .transformMetadataObject2NxNodes(
+		// metaData.cube).get(1));
+		//
+		// }
+		// }
+		// }
+		// }
+		// } catch (OlapException exc) {
+		// throw new UnsupportedOperationException(
+		// "While asking for the metadata, there is an OLAP exception!");
+		// }
+
 		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(cube.get(0));
-		
+
 		Restrictions restrictions = new Restrictions();
-		restrictions.cubeNamePattern = cube.get(1)[cubemap.get("?CUBE_NAME")].toString();
-		
-		List<Node[]> measures =  new ArrayList<Node[]>();
+		restrictions.cubeNamePattern = cube.get(1)[cubemap.get("?CUBE_NAME")]
+				.toString();
+
+		List<Node[]> measures = new ArrayList<Node[]>();
 		List<Node[]> dimensions = new ArrayList<Node[]>();
 		List<Node[]> hierarchies = new ArrayList<Node[]>();
 		List<Node[]> levels = new ArrayList<Node[]>();
 		List<Node[]> members = new ArrayList<Node[]>();
 		try {
-			measures = this.olap4jStatement.olap4jConnection.myLinkedData.getMeasures(restrictions);
-			dimensions = this.olap4jStatement.olap4jConnection.myLinkedData.getDimensions(restrictions);
-			hierarchies = this.olap4jStatement.olap4jConnection.myLinkedData.getHierarchies(restrictions);
-			levels = this.olap4jStatement.olap4jConnection.myLinkedData.getLevels(restrictions);
-			members = this.olap4jStatement.olap4jConnection.myLinkedData.getMembers(restrictions);
-			
+			measures = this.olap4jStatement.olap4jConnection.myLinkedData
+					.getMeasures(restrictions);
+			dimensions = this.olap4jStatement.olap4jConnection.myLinkedData
+					.getDimensions(restrictions);
+			hierarchies = this.olap4jStatement.olap4jConnection.myLinkedData
+					.getHierarchies(restrictions);
+			levels = this.olap4jStatement.olap4jConnection.myLinkedData
+					.getLevels(restrictions);
+			members = this.olap4jStatement.olap4jConnection.myLinkedData
+					.getMembers(restrictions);
+
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
-
-
-		// The problem lies here: We use all elements of the global dataset:
-		
-		/*
-		 * Instead, we should query the LDCE.
-		 */
-		
-		try {
-			
-			first = true;
-			for (Olap4ldMeasure measure : metaData.cube.measures) {
-				if (first) {
-					measures.add(measure.transformMetadataObject2NxNodes(metaData.cube)
-							.get(0));
-					first = false;
-				}
-				measures.add(measure.transformMetadataObject2NxNodes(metaData.cube).get(
-						1));
-			}
-			
-			
-			first = true;
-			for (Olap4ldDimension dimension : metaData.cube.dimensions) {
-				if (first) {
-					dimensions.add(dimension.transformMetadataObject2NxNodes()
-							.get(0));
-					first = false;
-				}
-				dimensions.add(dimension.transformMetadataObject2NxNodes().get(
-						1));
-				first = true;
-				for (Hierarchy hierarchy : dimension.getHierarchies()) {
-					Olap4ldHierarchy olap4ldhierarchy = (Olap4ldHierarchy) hierarchy;
-					if (first) {
-						hierarchies.add(olap4ldhierarchy
-								.transformMetadataObject2NxNodes(metaData.cube)
-								.get(0));
-						first = false;
-					}
-					hierarchies.add(olap4ldhierarchy
-							.transformMetadataObject2NxNodes(metaData.cube)
-							.get(1));
-					first = true;
-					for (Level level : hierarchy.getLevels()) {
-						Olap4ldLevel olap4ldlevel = (Olap4ldLevel) level;
-						if (first) {
-							levels.add(olap4ldlevel
-									.transformMetadataObject2NxNodes(
-											metaData.cube).get(0));
-							first = false;
-						}
-						levels.add(olap4ldlevel
-								.transformMetadataObject2NxNodes(metaData.cube)
-								.get(1));
-						first = true;
-						for (Member member : level.getMembers()) {
-							Olap4ldMember olap4ldmember = (Olap4ldMember) member;
-							if (first) {
-								members.add(olap4ldmember
-										.transformMetadataObject2NxNodes(
-												metaData.cube).get(0));
-								first = false;
-							}
-							members.add(olap4ldmember
-									.transformMetadataObject2NxNodes(
-											metaData.cube).get(1));
-
-						}
-					}
-				}
-			}
-		} catch (OlapException exc) {
-			throw new UnsupportedOperationException(
-					"While asking for the metadata, there is an OLAP exception!");
 		}
 
 		// Cube from (cube, SlicesRollups, Dices, Projections)
@@ -531,6 +540,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		boolean isFirst = true;
 		for (Member member : usedMeasureSet) {
 			Olap4ldMember olapmember = (Olap4ldMember) member;
+			// All multidimensional elements in MDX query first belong to the global cube.
 			List<Node[]> membernode = olapmember
 					.transformMetadataObject2NxNodes(metaData.cube);
 			if (isFirst) {
@@ -726,9 +736,9 @@ abstract class Olap4ldCellSet implements CellSet {
 				rollupslevels);
 
 		// Create indices for dimensions
-		
+
 		dimensionindicesList = new ArrayList<Integer>();
-		
+
 		for (Node[] dimension : dimensions) {
 			// Check what number
 			Measure measure = null;
