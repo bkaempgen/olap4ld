@@ -3,9 +3,15 @@ package org.olap4j.driver.olap4ld.linkeddata;
 import org.openrdf.repository.sail.SailRepository;
 
 /**
- * Converts from logical olap query plan including drill-across operator to
- * physical olap query plan.
+ * This visitor creates a physical query plan. It is different from
+ * OlapDrillAcross2SparqlSesameVisitor and Olap2SparqlSesameVisitor that only
+ * use two Iterators, Olap2SparqlAlgorithmSesameIterator and
+ * OlapDrillAcross2SparqlSesameIterator. They implement the Drill-Across
+ * algorithm and the OLAP-to-SPARQL algorithm.
  * 
+ * Olap2SparqlSesameDerivedDatasetVisitor uses for every logical olap operator a
+ * separate physical olap iterator. Here, the repo also needs to be pre-filled with
+ * data cubes, yet, every iterator creates a new derived data cube.
  * 
  * @author benedikt
  */
@@ -20,17 +26,20 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 	/**
 	 * 
 	 * * Design decisions The LogicalOperators only get as input a cube and the
-	 * parameters, but not specifically the metadata of the cube. The
-	 * PhysicalIterators get as input another iterator and the parameters, but
-	 * also the metadata of the iterator. I create PhysicalIterators for
+	 * parameters, but not specifically the metadata of the cube.
+	 * 
+	 * The PhysicalIterators get as input another iterator and the parameters,
+	 * but also the metadata of the iterator. I create PhysicalIterators for
 	 * metadata, they get as input the repo and the parameters (restrictions).
 	 * Every LogicalOperator could be wrapped, get as input the identifier of a
-	 * cube and the parameters and return a new identifier. Mioeur2eur is
-	 * another LogicalOperator that could get wrapped, get as input the
-	 * identifier of a cube and the parameters and return a new identifier.
-	 * Mioeur2eur would also include PhysicalIterators. The Mioeur2eur iteratore
-	 * would get as input another iterator, BaseCubeIterator, and return the
-	 * conversion. Example: http://olap4ld.googlecode.com/dic/aggreg95#00;
+	 * cube and the parameters and return a new identifier.
+	 * 
+	 * Mioeur2eur is another LogicalOperator that could get wrapped, get as
+	 * input the identifier of a cube and the parameters and return a new
+	 * identifier. Mioeur2eur would also include PhysicalIterators. The
+	 * Mioeur2eur iterator would get as input another iterator,
+	 * BaseCubeIterator, and return the conversion. Example:
+	 * http://olap4ld.googlecode.com/dic/aggreg95#00;
 	 * http://olap4ld.googlecode.com/dic/geo#US;
 	 * http://olap4ld.googlecode.com/dic/indic_na#VI_PPS_EU28_HAB; 2012; 149;
 	 * 
@@ -246,7 +255,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 		so.inputop2.accept(this);
 		PhysicalOlapIterator root2 = _root;
 
-		DrillAcrossSparqlIterator resultiterator = new DrillAcrossSparqlIterator(
+		DrillAcrossSparqlDerivedDatasetIterator resultiterator = new DrillAcrossSparqlDerivedDatasetIterator(
 				root1, root2);
 
 		_root = resultiterator;
@@ -264,7 +273,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 
 		so.inputOp.accept(this);
 
-		SliceSparqlIterator slicecube = new SliceSparqlIterator(repo, _root,
+		SliceSparqlDerivedDatasetIterator slicecube = new SliceSparqlDerivedDatasetIterator(repo, _root,
 				so.slicedDimensions);
 
 		_root = slicecube;
@@ -294,8 +303,9 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 
 		// We do not need to change those metadata.
 
-		BaseCubeSparqlIterator basecube = new BaseCubeSparqlIterator(repo,
-				so.cubes, so.measures, so.dimensions, so.hierarchies, so.levels, so.members);
+		BaseCubeSparqlDerivedDatasetIterator basecube = new BaseCubeSparqlDerivedDatasetIterator(repo,
+				so.cubes, so.measures, so.dimensions, so.hierarchies,
+				so.levels, so.members);
 		_root = basecube;
 	}
 
@@ -303,30 +313,33 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 	public void visit(ConvertContextOp op) throws QueryException {
 		ConvertContextOp so = (ConvertContextOp) op;
 
-		ConvertContextSparqlIterator convertcontextcube;
+		ConvertSparqlDerivedDatasetIterator convertcontextcube;
 		if (so.inputOp2 == null) {
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root = _root;
-			convertcontextcube = new ConvertContextSparqlIterator(
-					repo, root, null, so.conversionfunction, so.domainUri);	
-		} else if (so.inputOp1 == so.inputOp2) { 
-			// If both operators are the same, we can reuse the iterator. 
-			// Unfortunately, this does not work for further nested equal operators. 
-			// If inside a logical olap query plan the same function is run on the same dataset, we 
-			// still have a problem that it is run twice. we could have a hashmap storing
-			// previous operators and reusing them if needed. 
+			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root,
+					null, so.conversionfunction, so.domainUri);
+		} else if (so.inputOp1 == so.inputOp2) {
+			// If both operators are the same, we can reuse the iterator.
+			// Unfortunately, this does not work for further nested equal
+			// operators.
+			// If inside a logical olap query plan the same function is run on
+			// the same dataset, we
+			// still have a problem that it is run twice. we could have a
+			// hashmap storing
+			// previous operators and reusing them if needed.
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root = _root;
-			convertcontextcube = new ConvertContextSparqlIterator(
-					repo, root, root, so.conversionfunction, so.domainUri);
+			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root,
+					root, so.conversionfunction, so.domainUri);
 		} else {
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root1 = _root;
 			so.inputOp2.accept(this);
 			PhysicalOlapIterator root2 = _root;
-			
-			convertcontextcube = new ConvertContextSparqlIterator(
-					repo, root1, root2, so.conversionfunction, so.domainUri);	
+
+			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root1,
+					root2, so.conversionfunction, so.domainUri);
 		}
 
 		_root = convertcontextcube;
@@ -335,6 +348,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 	@Override
 	public void visit(Object op) throws QueryException {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("visit(Object op) not implemented!");
+		throw new UnsupportedOperationException(
+				"visit(Object op) not implemented!");
 	}
 }

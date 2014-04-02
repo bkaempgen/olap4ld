@@ -16,7 +16,7 @@ import org.semanticweb.yars.nx.Node;
  * @author benedikt
  * 
  */
-public class SliceSparqlIterator implements PhysicalOlapIterator {
+public class SliceSparqlDerivedDatasetIterator implements PhysicalOlapIterator {
 
 	// The different metadata parts
 	private List<Node[]> cubes;
@@ -29,7 +29,7 @@ public class SliceSparqlIterator implements PhysicalOlapIterator {
 	private Iterator<Node[]> iterator;
 	private SailRepository repo;
 
-	public SliceSparqlIterator(SailRepository repo, PhysicalOlapIterator inputiterator,
+	public SliceSparqlDerivedDatasetIterator(SailRepository repo, PhysicalOlapIterator inputiterator,
 			List<Node[]> slicedDimensions) {
 		
 		this.repo = repo;

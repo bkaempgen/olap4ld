@@ -7,7 +7,7 @@ import java.util.List;
 import org.olap4j.OlapException;
 import org.semanticweb.yars.nx.Node;
 
-public class DrillAcrossSparqlIterator implements PhysicalOlapIterator {
+public class DrillAcrossSparqlDerivedDatasetIterator implements PhysicalOlapIterator {
 	
 	// The different metadata parts
 	private List<Node[]> cubes;
@@ -19,7 +19,7 @@ public class DrillAcrossSparqlIterator implements PhysicalOlapIterator {
 	
 	private Iterator<Node[]> iterator;
 
-	public DrillAcrossSparqlIterator(PhysicalOlapIterator inputiterator1,
+	public DrillAcrossSparqlDerivedDatasetIterator(PhysicalOlapIterator inputiterator1,
 			PhysicalOlapIterator inputiterator2) {
 		
 		try {

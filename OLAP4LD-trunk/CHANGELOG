@@ -1,3 +1,11 @@
+==2014-04-02_v2==
+* Towards paper: Derived datasets 
+* Refactored Visitor and Iterator names.
+* Now, we have: 
+** Visitor and Iterator for Drill-across and OLAP-to-SPARQL.
+** Visitor and Iterator for Derived Datasets, Convert.
+* See /media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/ for dumps created in between.
+
 ==2014-04-02==
 * Drill-across operator and iterator work now. However, note, that for iterator neither reasoning is done nor arbitrary ordering of shared dimensions in result is considered.
 * Bugfix in Olap2SparqlAlgorithmIterator: Not properly updated measures metadata.

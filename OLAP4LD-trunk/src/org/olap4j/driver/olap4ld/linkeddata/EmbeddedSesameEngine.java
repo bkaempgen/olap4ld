@@ -98,7 +98,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	private HashMap<Integer, Boolean> loadedMap = new HashMap<Integer, Boolean>();
 
 	/**
-	 * The Sesame repository (triple store).
+	 * The Sesame repository (triple store). Gets filled when asking for cubes.
 	 */
 	private SailRepository repo;
 
@@ -129,16 +129,15 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		try {
 			LogicalOlapOperatorQueryPlanVisitor r2a;
+			// Heuristics of how to select the right visitor.
 			if (queryplan._root instanceof DrillAcrossOp) {
 				r2a = new OlapDrillAcross2SparqlSesameVisitor(repo);
+			} else if (queryplan._root instanceof ConvertContextOp) {
+				// We create visitor to translate logical into physical
+				r2a = new Olap2SparqlSesameDerivedDatasetVisitor(repo);
 			} else {
 				r2a = new Olap2SparqlSesameVisitor(repo);
 			}
-
-			// We create visitor to translate logical into physical
-			// LogicalOlapOperatorQueryPlanVisitor r2a = new
-			// Olap2SparqlSesameDerivedDatasetVisitor(
-			// repo);
 
 			PhysicalOlapIterator newRoot;
 			// Transform into physical query plan

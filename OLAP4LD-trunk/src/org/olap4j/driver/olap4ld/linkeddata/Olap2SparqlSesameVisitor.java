@@ -11,6 +11,8 @@ import org.semanticweb.yars.nx.Node;
 /**
  * Converts from relational algebra plans to physical access plans.
  * 
+ * Assumes a pre-filled repository on which to compute OLAP-to-SPARQL algorithm.
+ * 
  * @author benedikt
  */
 public class Olap2SparqlSesameVisitor implements
@@ -36,6 +38,8 @@ public class Olap2SparqlSesameVisitor implements
 
 	/**
 	 * Constructor.
+	 * 
+	 * Assumes that repo is filled, already. 
 	 * 
 	 * @param repo
 	 *            A repository filled with all available cubes.

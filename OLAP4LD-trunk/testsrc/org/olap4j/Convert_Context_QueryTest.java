@@ -370,7 +370,10 @@ public class Convert_Context_QueryTest extends TestCase {
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 				computegdppercapita_op);
 
-		executeStatement(myplan);
+		String result = executeStatement(myplan);
+		
+		assertContains("http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803;", result);
+		 
 	}
 	
 	/**
@@ -420,14 +423,14 @@ public class Convert_Context_QueryTest extends TestCase {
 		executeStatement(myplan);
 	}
 
-	@SuppressWarnings("unused")
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
 			fail("expected to find '" + seek + "' in '" + s + "'");
 		}
 	}
 
-	private void executeStatement(LogicalOlapQueryPlan queryplan) {
+	private String executeStatement(LogicalOlapQueryPlan queryplan) {
+		String resultString = "";
 		try {
 			// For now, we simply return plan
 			System.out.println("--------------");
@@ -438,10 +441,13 @@ public class Convert_Context_QueryTest extends TestCase {
 			PhysicalOlapQueryPlan execplan = this.lde.getExecplan();
 			System.out.println("Physical plan:" + execplan.toString());
 			System.out.println("Result:");
+			
 			for (Node[] nodes : result) {
 				for (Node node : nodes) {
+					resultString += node.toString() + "; ";
 					System.out.print(node.toString() + "; ");
 				}
+				resultString += "\n";
 				System.out.println();
 			}
 			System.out.println("--------------");
@@ -449,7 +455,7 @@ public class Convert_Context_QueryTest extends TestCase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		return resultString;
 	}
 
 	/**

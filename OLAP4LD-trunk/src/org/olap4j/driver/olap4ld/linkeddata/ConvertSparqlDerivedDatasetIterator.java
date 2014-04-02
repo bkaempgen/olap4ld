@@ -42,7 +42,8 @@ import org.semanticweb.yars.nx.parser.NxParser;
  * @author benedikt
  * 
  */
-public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
+public class ConvertSparqlDerivedDatasetIterator implements
+		PhysicalOlapIterator {
 
 	// The different metadata parts
 	List<Node[]> cubes;
@@ -51,7 +52,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 	List<Node[]> hierarchies;
 	List<Node[]> levels;
 	List<Node[]> members;
-	
+
 	Map<String, Integer> cubemap = null;
 	Map<String, Integer> dimensionmap = null;
 	Map<String, Integer> measuremap = null;
@@ -71,7 +72,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 	private String dataset1;
 	private String dataset2;
 
-	public ConvertContextSparqlIterator(SailRepository repo,
+	public ConvertSparqlDerivedDatasetIterator(SailRepository repo,
 			PhysicalOlapIterator inputiterator1,
 			PhysicalOlapIterator inputiterator2, String conversionfunction,
 			String domainUri) {
@@ -114,19 +115,18 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 		 */
 
 		// Metadata
-		
+
 		prepareMetadata();
-		
-		
 
 		// Data
 
 		prepareData(bodypatterns, headpatterns);
-		
+
 		executeSelectQueryForOutput(bodypatterns, headpatterns);
 	}
 
-	private void prepareData(List<Node[]> bodypatterns, List<Node[]> headpatterns) {
+	private void prepareData(List<Node[]> bodypatterns,
+			List<Node[]> headpatterns) {
 		try {
 
 			// We assume one or two cubes, only.
@@ -176,7 +176,9 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 			head += obsvariable.toN3() + " qb:dataSet <" + newdataset + ">. \n";
 
 			// DSD. For now, assume same dsd as other dataset.
-			// Dsd seems not to be given to new datasets. Therefore, the construct query does not work. Instead, we add the dsd separately (adding triples).
+			// Dsd seems not to be given to new datasets. Therefore, the
+			// construct query does not work. Instead, we add the dsd separately
+			// (adding triples).
 			// Solution: Has to be propagated in select (!)
 			head += "<" + newdataset + ">" + " qb:structure ?dsd1. \n";
 
@@ -246,7 +248,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 			// not
 			// mentioned as predicate in body.
 			String select = "";
-			
+
 			// Add dsd
 			select += " ?dsd1 ?dsd2 ";
 
@@ -388,7 +390,9 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 			body += obsvariable.toN3() + " qb:dataSet <" + dataset1 + ">. \n";
 
 			// DSD. Use ?dsd1 for 1, ?dsd2 for 2.
-			// Dsd seems not to be given to new datasets. Therefore, the construct query does not work. Instead, we add the dsd separately (adding triples).
+			// Dsd seems not to be given to new datasets. Therefore, the
+			// construct query does not work. Instead, we add the dsd separately
+			// (adding triples).
 			body += "<" + dataset1 + ">" + " qb:structure ?dsd1. \n";
 
 			if (dataset2 != null) {
@@ -482,17 +486,21 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 					+ " } } }";
 
 			Olap4ldUtil._log.config("SPARQL query: " + constructquery);
-			
+
 			GraphQuery graphquery = con.prepareGraphQuery(
 					org.openrdf.query.QueryLanguage.SPARQL, constructquery);
-			
+
 			StringWriter stringout = new StringWriter();
 			RDFWriter w = Rio.createWriter(RDFFormat.RDFXML, stringout);
 			graphquery.evaluate(w);
 
 			this.triples = stringout.toString();
+			
+			if (Olap4ldUtil._isDebug) {
 
-			Olap4ldUtil._log.config("Loaded triples: " + triples);
+				Olap4ldUtil._log.config("Loaded triples: " + triples);
+
+			}
 			// Insert query to load triples
 			// String insertquery =
 			// "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
@@ -514,15 +522,21 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 
 			// Add to triple store
 			con.add(stream, "", RDFFormat.RDFXML);
-			
-			String filename = "dataset"+(dataset1 + dataset2).hashCode() + "-conversionfunction"
-			+ conversionfunction.hashCode();
-			
+
 			// Loaded really?
-			Olap4ldLinkedDataUtil.dumpRDF(repo, "/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/"+filename+".n3", RDFFormat.NTRIPLES);
-			
+			if (Olap4ldUtil._isDebug) {
+				String filename = "dataset" + (dataset1 + dataset2).hashCode()
+						+ "-conversionfunction" + conversionfunction.hashCode();
+
+				Olap4ldLinkedDataUtil
+						.dumpRDF(
+								repo,
+								"/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/"
+										+ filename + ".n3", RDFFormat.NTRIPLES);
+			}
+
 			con.close();
-			
+
 		} catch (RepositoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -554,7 +568,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 		this.dataset2 = null;
 		// How to decide for the uri?
 		this.newdataset = null;
-		
+
 		try {
 			Restrictions restriction = new Restrictions();
 
@@ -572,7 +586,7 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 			} catch (OlapException e2) {
 				// TODO Auto-generated catch block
 				e2.printStackTrace();
-			}		
+			}
 
 			// We use hash of combination conversionfunction + datasets
 			newdataset = domainUri + "dataset"
@@ -767,8 +781,8 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 				this.levels.add(newnode);
 			}
 			membermap = Olap4ldLinkedDataUtil
-					.getNodeResultFields(inputiterator1.getMembers(
-							restrictions).get(0));
+					.getNodeResultFields(inputiterator1
+							.getMembers(restrictions).get(0));
 			this.members = new ArrayList<Node[]>();
 			first = true;
 			for (Node[] node : inputiterator1.getMembers(restriction)) {
@@ -811,8 +825,8 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 				newnode[membermap.get("?PARENT_LEVEL")] = node[membermap
 						.get("?PARENT_LEVEL")];
 
-				this.members.add(newnode);			
-				
+				this.members.add(newnode);
+
 			}
 		} catch (OlapException e2) {
 			// TODO Auto-generated catch block
@@ -820,12 +834,12 @@ public class ConvertContextSparqlIterator implements PhysicalOlapIterator {
 		}
 	}
 
-	private void executeSelectQueryForOutput(List<Node[]> bodypatterns, List<Node[]> headpatterns) {
-		
+	private void executeSelectQueryForOutput(List<Node[]> bodypatterns,
+			List<Node[]> headpatterns) {
 
 		List<Node[]> myBindings = new ArrayList<Node[]>();
 		try {
-			
+
 			RepositoryConnection con = this.repo.getConnection();
 			// Select query for the output
 

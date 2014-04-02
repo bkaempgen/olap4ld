@@ -25,7 +25,12 @@ import org.openrdf.repository.sail.SailRepository;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.parser.NxParser;
 
-public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
+/**
+ * 
+ * @author benedikt
+ *
+ */
+public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterator {
 
 	public List<Node[]> cubes;
 	public List<Node[]> measures;
@@ -37,7 +42,7 @@ public class BaseCubeSparqlIterator implements PhysicalOlapIterator {
 	private SailRepository repo;
 	private Iterator<Node[]> iterator;
 
-	public BaseCubeSparqlIterator(SailRepository repo, List<Node[]> cubes,
+	public BaseCubeSparqlDerivedDatasetIterator(SailRepository repo, List<Node[]> cubes,
 			List<Node[]> measures, List<Node[]> dimensions,
 			List<Node[]> hierarchies, List<Node[]> levels, List<Node[]> members) {
 		// We assume that basecube has a repo with populated according to
