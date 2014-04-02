@@ -101,6 +101,12 @@ public class Olap4ldLinkedDataUtil {
 				port = ":"+uri.getPort()+"";
 			}
 			String path = uri.getPath();
+			String query = uri.getQuery();
+			if (query == null || query.equals("")) {
+				query = "";
+			} else {
+				query = "?"+query;
+			}
 
 			
 			// TODO: Could be that we need to check whether bogus comes out
@@ -113,7 +119,7 @@ public class Olap4ldLinkedDataUtil {
 					returnurlstring = header;
 				} else if (header.startsWith("/")) {
 					returnurlstring = protocol + "://" + domain + port
-							+ header;
+							+ header + query;
 				} else {
 					/*
 					 * relative URL May be: Gleiche Domäne, Gleiche Ressource,
@@ -123,11 +129,11 @@ public class Olap4ldLinkedDataUtil {
 					 */
 
 					returnurlstring = protocol + "://" + domain + port
-							+ path + header;
+							+ path + header + query;
 				}
 			} else {
 				returnurlstring = protocol + "://" + domain + port
-						+ path;
+						+ path + query;
 			}
 			// We should remove # uris
 			if (returnurlstring.contains("#")) {

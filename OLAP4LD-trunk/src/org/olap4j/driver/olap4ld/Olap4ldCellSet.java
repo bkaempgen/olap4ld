@@ -376,14 +376,36 @@ abstract class Olap4ldCellSet implements CellSet {
 		// BaseCube operator
 		boolean first;
 		
-		List<Node[]> measures = new ArrayList<Node[]>();
-
+		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(cube.get(0));
+		
+		Restrictions restrictions = new Restrictions();
+		restrictions.cubeNamePattern = cube.get(1)[cubemap.get("?CUBE_NAME")].toString();
+		
+		List<Node[]> measures =  new ArrayList<Node[]>();
 		List<Node[]> dimensions = new ArrayList<Node[]>();
 		List<Node[]> hierarchies = new ArrayList<Node[]>();
 		List<Node[]> levels = new ArrayList<Node[]>();
 		List<Node[]> members = new ArrayList<Node[]>();
+		try {
+			measures = this.olap4jStatement.olap4jConnection.myLinkedData.getMeasures(restrictions);
+			dimensions = this.olap4jStatement.olap4jConnection.myLinkedData.getDimensions(restrictions);
+			hierarchies = this.olap4jStatement.olap4jConnection.myLinkedData.getHierarchies(restrictions);
+			levels = this.olap4jStatement.olap4jConnection.myLinkedData.getLevels(restrictions);
+			members = this.olap4jStatement.olap4jConnection.myLinkedData.getMembers(restrictions);
+			
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
 
 		// The problem lies here: We use all elements of the global dataset:
+		
+		/*
+		 * Instead, we should query the LDCE.
+		 */
 		
 		try {
 			

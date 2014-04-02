@@ -537,6 +537,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// Workaround certain files are not loadable
 
+			// XXX: remove
 			if (locationstring
 					.equals("http://worldbank.270a.info/property/indicator.rdf")) {
 				return;
@@ -629,9 +630,34 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					// }
 					// in.close();
 					// is.close();
-					InputStream inputstream = connection.getInputStream();
-					con.add(inputstream, locationstring, format);
-					connection.disconnect();
+					try {
+						InputStream inputstream = connection.getInputStream();
+						con.add(inputstream, locationstring, format);
+						connection.disconnect();
+
+					} catch (RDFParseException e) {
+						// Try to continue on next line?
+						// int linenumber = e.getLineNumber();
+
+						// Since it happens often, we just log it in config
+						Olap4ldUtil._log.config("RDFParseException:"
+								+ e.getMessage());
+
+						if (e.getColumnNumber() == 1) {
+							Olap4ldUtil._log
+									.config("RDFParseException, but try afresh.");
+
+							// Try with in-built loading functionality
+							if (format == RDFFormat.RDFXML) {
+								con.add(location, locationstring,
+										RDFFormat.TURTLE);
+							} else {
+								con.add(location, locationstring,
+										RDFFormat.RDFXML);
+							}
+
+						}
+					}
 				}
 
 			}
@@ -657,14 +683,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		} catch (MalformedURLException e) {
 			// If this happens, it is not so bad.
 			e.printStackTrace();
-		} catch (RDFParseException e) {
-			// Try to continue on next line?
-			// int linenumber = e.getLineNumber();
-
-			// Since it happens often, we just log it in config
-			Olap4ldUtil._log.config("RDFParseException:" + e.getMessage());
 		} catch (IOException e) {
 			Olap4ldUtil._log.config("ConnectException:" + e.getMessage());
+			e.printStackTrace();
+		} catch (RDFParseException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -719,6 +742,27 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 				}
 
+				// If loading ds, also load components
+				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?comp WHERE {<"
+						+ uri
+						+ "> qb:structure ?dsd. ?dsd qb:component ?comp.}";
+				List<Node[]> components = sparql(query, true);
+				// There should be a dsd
+				// Note in spec:
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+				boolean first = true;
+				for (Node[] nodes : components) {
+					if (first) {
+						first = false;
+						continue;
+					}
+					try {
+						URL componenturi = new URL(nodes[0].toString());
+						loadInStore(componenturi);
+					} catch (MalformedURLException e) {
+					}
+				}
+
 				// If loading ds, also load measures
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?measure WHERE {<"
 						+ uri
@@ -727,12 +771,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-				boolean first = true;
+				first = true;
 				for (Node[] nodes : measures) {
 					if (first) {
 						first = false;
 						continue;
 					}
+
 					URL measureuri = new URL(nodes[0].toString());
 					loadInStore(measureuri);
 				}
@@ -1012,8 +1057,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-					//We do not want to have the single datasets returned.
-					//result.add(nodes);
+					// We do not want to have the single datasets returned.
+					// result.add(nodes);
 				}
 			}
 
@@ -1633,8 +1678,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-					//We do not want to have the single datasets returned.
-					//result.add(anIntermediaryresult);
+					// We do not want to have the single datasets returned.
+					// result.add(anIntermediaryresult);
 
 					// Also add dimension to global cube
 					Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
@@ -1816,9 +1861,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-					
-					//We do not want to have the single datasets returned.
-					//result.add(anIntermediaryresult);
+
+					// We do not want to have the single datasets returned.
+					// result.add(anIntermediaryresult);
 
 					// Also add measure to global cube
 					Map<String, Integer> map = Olap4ldLinkedDataUtil
@@ -1975,8 +2020,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						continue;
 					}
 
-					//We do not want to have the single datasets returned.
-					//result.add(anIntermediaryresult);
+					// We do not want to have the single datasets returned.
+					// result.add(anIntermediaryresult);
 
 					// Also add dimension to global cube
 					Map<String, Integer> hierarchymap = Olap4ldLinkedDataUtil
@@ -2195,19 +2240,20 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-					//We do not want to have the single datasets returned.
-					//result.add(anIntermediaryresult);
+					// We do not want to have the single datasets returned.
+					// result.add(anIntermediaryresult);
 
 					// Also add dimension to global cube
 					Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
 							.getNodeResultFields(intermediaryresult.get(0));
-					
+
 					Node[] newnode = new Node[12];
 					newnode[levelmap.get("?CATALOG_NAME")] = anIntermediaryresult[levelmap
 							.get("?CATALOG_NAME")];
 					newnode[levelmap.get("?SCHEMA_NAME")] = anIntermediaryresult[levelmap
 							.get("?SCHEMA_NAME")];
-					newnode[levelmap.get("?CUBE_NAME")] = new Resource(restrictions.cubeNamePattern);
+					newnode[levelmap.get("?CUBE_NAME")] = new Resource(
+							restrictions.cubeNamePattern);
 					newnode[levelmap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[levelmap
 							.get("?DIMENSION_UNIQUE_NAME")];
 					newnode[levelmap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[levelmap
@@ -2231,14 +2277,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					boolean contained = false;
 					for (Node[] aResult : result) {
 						boolean sameDimension = aResult[levelmap
-								.get("?LEVEL_UNIQUE_NAME")].toString()
-								.equals(newnode[levelmap
-										.get("?LEVEL_UNIQUE_NAME")]
+								.get("?LEVEL_UNIQUE_NAME")].toString().equals(
+								newnode[levelmap.get("?LEVEL_UNIQUE_NAME")]
 										.toString());
-						boolean sameCube = aResult[levelmap
-								.get("?CUBE_NAME")].toString().equals(
-								newnode[levelmap.get("?CUBE_NAME")]
-										.toString());
+						boolean sameCube = aResult[levelmap.get("?CUBE_NAME")]
+								.toString().equals(
+										newnode[levelmap.get("?CUBE_NAME")]
+												.toString());
 
 						if (sameDimension && sameCube) {
 							contained = true;
@@ -2465,20 +2510,21 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-					
-					//We do not want to have the single datasets returned.
-					//result.add(anIntermediaryresult);
+
+					// We do not want to have the single datasets returned.
+					// result.add(anIntermediaryresult);
 
 					// Also add dimension to global cube
 					Map<String, Integer> membermap = Olap4ldLinkedDataUtil
 							.getNodeResultFields(intermediaryresult.get(0));
-					
+
 					Node[] newnode = new Node[13];
 					newnode[membermap.get("?CATALOG_NAME")] = anIntermediaryresult[membermap
 							.get("?CATALOG_NAME")];
 					newnode[membermap.get("?SCHEMA_NAME")] = anIntermediaryresult[membermap
 							.get("?SCHEMA_NAME")];
-					newnode[membermap.get("?CUBE_NAME")] = new Resource(restrictions.cubeNamePattern);
+					newnode[membermap.get("?CUBE_NAME")] = new Resource(
+							restrictions.cubeNamePattern);
 					newnode[membermap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[membermap
 							.get("?DIMENSION_UNIQUE_NAME")];
 					newnode[membermap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[membermap
@@ -2504,14 +2550,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					boolean contained = false;
 					for (Node[] aResult : result) {
 						boolean sameDimension = aResult[membermap
-								.get("?MEMBER_UNIQUE_NAME")].toString()
-								.equals(newnode[membermap
-										.get("?MEMBER_UNIQUE_NAME")]
+								.get("?MEMBER_UNIQUE_NAME")].toString().equals(
+								newnode[membermap.get("?MEMBER_UNIQUE_NAME")]
 										.toString());
-						boolean sameCube = aResult[membermap
-								.get("?CUBE_NAME")].toString().equals(
-								newnode[membermap.get("?CUBE_NAME")]
-										.toString());
+						boolean sameCube = aResult[membermap.get("?CUBE_NAME")]
+								.toString().equals(
+										newnode[membermap.get("?CUBE_NAME")]
+												.toString());
 
 						if (sameDimension && sameCube) {
 							contained = true;

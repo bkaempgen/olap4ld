@@ -241,6 +241,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		for (Node[] measure : projections) {
 
 			if (first) {
+				newmeasures.add(projections.get(0));
 				first = false;
 				continue;
 			}

@@ -164,6 +164,12 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// dsUri = "http://localhost:8080/ldcx-trunk/ldcx/tests/ssb001/ttl/example.ttl#ds";
 		metadataTest(dsUri, 5, 5);
 	}
+	
+	public void testExampleSsb001_Pastebin_standardquery() {
+		String result = executeStatement("SELECT /* $session: 2fb5512e-fec0-3d4a-0d9d-ce0f04935678 */ NON EMPTY {[httpXXX3AXXX2FXXX2FpastebinYYYcomXXX2FrawYYYphpXXX3FiXXX3D839G2u72XXX23lo_discount]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FpastebinYYYcomXXX2FrawYYYphpXXX3FiXXX3D839G2u72XXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FpastebinYYYcomXXX2FrawYYYphpXXX3FiXXX3D839G2u72XXX23ds]");
+		
+		assertContains("|  | Customer  2 |     36.0 |", result);
+	}
 
 	/**
 	 * Do crossjoin over all dimensions on rows and show all measures on
