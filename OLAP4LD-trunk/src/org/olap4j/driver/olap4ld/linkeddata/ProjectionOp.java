@@ -8,7 +8,7 @@ import org.semanticweb.yars.nx.Node;
 
 /**
  * This operator defines the projected measures. Not mentioned measures in input are removed from
- * the cube (actually, this is wrong currently, since if we do not call projection, no measure is queried).
+ * the cube.
  * 
  * @author benedikt
  * 
@@ -18,6 +18,11 @@ public class ProjectionOp implements LogicalOlapOp {
 	public List<Node[]> projectedMeasures;
 	public LogicalOlapOp inputOp;
 
+	/**
+	 * 
+	 * @param inputOp
+	 * @param projections A list of projected measures using the metadata schema.
+	 */
 	public ProjectionOp(LogicalOlapOp inputOp, List<Node[]> projections) {
 		this.inputOp = inputOp;
 		this.projectedMeasures = projections;

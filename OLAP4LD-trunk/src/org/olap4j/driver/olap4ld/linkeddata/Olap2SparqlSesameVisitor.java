@@ -110,7 +110,7 @@ public class Olap2SparqlSesameVisitor implements
 	}
 
 	@Override
-	public void visit(ConvertContextOp op) throws QueryException {
+	public void visit(ConvertCubeOp op) throws QueryException {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException(
 				"visit(ConvertContextOp op) not implemented!");

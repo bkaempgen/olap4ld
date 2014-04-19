@@ -310,8 +310,8 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 	}
 
 	@Override
-	public void visit(ConvertContextOp op) throws QueryException {
-		ConvertContextOp so = (ConvertContextOp) op;
+	public void visit(ConvertCubeOp op) throws QueryException {
+		ConvertCubeOp so = (ConvertCubeOp) op;
 
 		ConvertSparqlDerivedDatasetIterator convertcontextcube;
 		if (so.inputOp2 == null) {

@@ -35,7 +35,7 @@ import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
-import org.olap4j.driver.olap4ld.linkeddata.ConvertContextOp;
+import org.olap4j.driver.olap4ld.linkeddata.ConvertCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataCubesEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
@@ -151,20 +151,26 @@ public class Convert_Context_QueryTest extends TestCase {
 
 		String mio_eur2eur = "{"
 				+ "?obs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR> .\n"
-				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value .\n"
-				+ "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?value)\" ."
+				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v1 .\n"
+				+ "?u2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"<http://estatwrap.ontologycentral.com/dic/unit#EUR>\" .\n"
+				+ "?v2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?v1)\" ."
+				// No filter, equal predicate is interpreted by just adding the resource to the graph pattern.
+				// + "FILTER (?u1 = <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR>) "
 				+ "} => {"
-				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> .\n"
-				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue"
+				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u2 .\n"
+				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v2 "
 				+ "} .";
 		
 		// Convert-context
-		LogicalOlapOp convertgdp = new ConvertContextOp(gdpbasecube,
+		LogicalOlapOp convertgdp = new ConvertCubeOp(gdpbasecube,
 				mio_eur2eur, domainUri);
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(convertgdp);
 
-		executeStatement(myplan);
+		String result= executeStatement(myplan);
+		
+		assertContains("http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#P7; http://estatwrap.ontologycentral.com/dic/unit#EUR; 2010; 5.59686E11; ", result);
+		
 	}
 
 	/**
@@ -175,7 +181,7 @@ public class Convert_Context_QueryTest extends TestCase {
 
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
-		// First: GDP dataset
+		// First: GDP and main components - Current prices dataset
 		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds";
 		Restrictions gdprestrictions = new Restrictions();
 		gdprestrictions.cubeNamePattern = gdpdsuri;
@@ -228,18 +234,21 @@ public class Convert_Context_QueryTest extends TestCase {
 
 		// Roll-up
 		// XXX: We do not need roll-up
-		
+			
 		String mio_eur2eur = "{"
 				+ "?obs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR> .\n"
-				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value .\n"
-				+ "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?value)\" ."
+				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v1 .\n"
+				+ "?u2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"<http://estatwrap.ontologycentral.com/dic/unit#EUR>\" .\n"
+				+ "?v2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?v1)\" ."
+				// No filter, equal predicate is interpreted by just adding the resource to the graph pattern.
+				// + "FILTER (?u1 = <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR>) "
 				+ "} => {"
-				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> .\n"
-				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue "
+				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u2 .\n"
+				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v2 "
 				+ "} .";
 
 		// Mioeur2eur(dataset): Converting MIO_EUR to EUR in GDP dataset
-		LogicalOlapOp mio_eur2eur_op = new ConvertContextOp(gdpbasecube,
+		LogicalOlapOp mio_eur2eur_op = new ConvertCubeOp(gdpbasecube,
 				mio_eur2eur, domainUri);
 
 		// Dice mioeur2eur for B1G.
@@ -288,7 +297,7 @@ public class Convert_Context_QueryTest extends TestCase {
 				"} . ";
 		
 		// Computing Nominal GDP from single parts in new EUR dataset.
-		LogicalOlapOp computegdp_op = new ConvertContextOp(mio_eur2eur_op, mio_eur2eur_op, computegdp, domainUri);
+		LogicalOlapOp computegdp_op = new ConvertCubeOp(mio_eur2eur_op, mio_eur2eur_op, computegdp, domainUri);
 		
 		/*
 		 * Should contain:
@@ -348,23 +357,39 @@ public class Convert_Context_QueryTest extends TestCase {
 //		LogicalOlapOp drillacrossgdppopulation = new DrillAcrossOp(
 //				slicedsexage, computegdp);
 
-		String computegdppercapita = "{" +
-				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> .\n" +
-				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> .\n" +
-				"?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value1 .\n" +
-				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#sex> <http://estatwrap.ontologycentral.com/dic/sex#T> .\n" +
-				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#age> <http://estatwrap.ontologycentral.com/dic/age#TOTAL> .\n" +
-				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 .\n" +
-				"?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(?value1 / ?value2)\" .\n" +
-				"} => {" +
-				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH> .\n" +
-				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB> .\n" +
-				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue " +
-				"}. ";
+        String computegdppercapita = "{" +
+
+                "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> ?i1 .\n" +
+
+                "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u1 .\n" +
+
+                "?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v1 .\n" +
+
+                "?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#sex> ?s2 .\n" +
+
+                "?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#age> ?a2 .\n" +
+
+                "?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v2 .\n" +
+
+                "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"IF(?i1 = <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> && ?u1 = <http://estatwrap.ontologycentral.com/dic/unit#EUR> && ?s2 = <http://estatwrap.ontologycentral.com/dic/sex#T> && ?a2 = <http://estatwrap.ontologycentral.com/dic/age#TOTAL>, ?v1 / ?v2, ?v1)\" .\n" +
+
+                "?i3 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"IF(?i1 = <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> && ?u1 = <http://estatwrap.ontologycentral.com/dic/unit#EUR> && ?s2 = <http://estatwrap.ontologycentral.com/dic/sex#T> && ?a2 = <http://estatwrap.ontologycentral.com/dic/age#TOTAL>, <http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH>, ?i1)\" .\n" +
+
+                "?u3 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"IF(?i1 = <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> && ?u1 = <http://estatwrap.ontologycentral.com/dic/unit#EUR> && ?s2 = <http://estatwrap.ontologycentral.com/dic/sex#T> && ?a2 = <http://estatwrap.ontologycentral.com/dic/age#TOTAL>, <http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB>, ?u1)\" .\n" +
+
+                "} => {" +
+
+                "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> ?i3 . \n" +
+
+                "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u3 .\n" +
+
+                "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue " +
+
+                "}. ";
 		
 		// Compute GDP per Capita from GDP and Population
 		// XXX: ComplexMeasureOp
-		LogicalOlapOp computegdppercapita_op = new ConvertContextOp(
+		LogicalOlapOp computegdppercapita_op = new ConvertCubeOp(
 				computegdp_op, populationbasecube, computegdppercapita, domainUri);
 		
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
@@ -372,6 +397,9 @@ public class Convert_Context_QueryTest extends TestCase {
 
 		String result = executeStatement(myplan);
 		
+		// XXX: Compare with: http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds
+		
+		// According to  GDP per capita - annual Data [nama_aux_gph] correct.
 		assertContains("http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803;", result);
 		 
 	}

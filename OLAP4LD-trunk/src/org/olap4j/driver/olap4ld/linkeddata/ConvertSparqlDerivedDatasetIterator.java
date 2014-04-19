@@ -184,6 +184,22 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			// ** For each dimension add dataset graph pattern if not already
 			// contained in Data-Fu program or Measure Dimension.
+			
+			// XXX: A cleaner way would be to specifically refer to the metadata of the first input iterator
+			Restrictions restrictions = new Restrictions();
+
+			// We assume dimensions and measures that we go through coming from first cube (otherwise metadata may not make sense anyway, sometimes).
+			List<Node[]> dimensions = null;
+			List<Node[]> measures = null;
+			try {
+				dimensions = this.inputiterator1.getDimensions(restrictions);
+				measures = this.inputiterator1.getMeasures(restrictions);
+			} catch (OlapException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
 			boolean first = true;
 			for (Node[] dimension : dimensions) {
 				if (first) {
@@ -197,6 +213,11 @@ public class ConvertSparqlDerivedDatasetIterator implements
 					continue;
 				}
 
+				/*
+				 * Although we create the headpatterns, since it does not make sense to add
+				 * graph patterns for dimensions to head for which there is not pendant in body,
+				 * we go through bodypatterns.
+				 */
 				if (!isPatternContained(bodypatterns, null,
 						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
 						null)) {
@@ -220,6 +241,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 					first = false;
 					continue;
 				}
+				// No extended measures. This means, currently, we are not considering aggregations.
 				if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 						.contains("AGGFUNC")) {
 					continue;
@@ -370,13 +392,13 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			// Heuristically, the variable we get from the first pattern
 			// subject.
-			// For now, we assume only one cube
-			// XXX: and use index if there are several.
 			obsvariable = bodypatterns.get(0)[0];
 
+			// The second variable we get from the next variable.
 			Node obsvariable2 = null;
+			
 			if (dataset2 != null) {
-				// Then we should find one
+				// Then we should find one additional apart from those using specific properties.
 				for (Node[] bodypattern : bodypatterns) {
 					if (!bodypattern[1]
 							.toN3()
@@ -405,6 +427,10 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			// ** For each dimension add dataset graph pattern if of
 			// specific dataset and not already contained in Data-Fu program
+			/*
+			 * for now, we assume that every dimension used in the second cube
+			 * is fixed since otherwise the metadata of the result cube would not be correct
+			 */
 			first = true;
 			for (Node[] dimension : dimensions) {
 				if (first) {
@@ -577,6 +603,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 					.getCubes(restrictions).get(0));
 
 			try {
+				// Assume cube to be index 1 
 				dataset1 = inputiterator1.getCubes(restrictions).get(1)[cubemap
 						.get("?CUBE_NAME")].toString();
 				if (inputiterator2 != null) {
@@ -1042,6 +1069,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	}
 
 	/**
+	 * This basically is an ASK implementation for specific triple patterns.
 	 * 
 	 * @param bodypatterns
 	 * @param object

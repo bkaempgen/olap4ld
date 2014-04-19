@@ -8,14 +8,21 @@ package org.olap4j.driver.olap4ld.linkeddata;
  * @author benedikt
  * 
  */
-public class ConvertContextOp implements LogicalOlapOp {
+public class ConvertCubeOp implements LogicalOlapOp {
 
 	public LogicalOlapOp inputOp1;
 	public LogicalOlapOp inputOp2;
 	public String conversionfunction;
 	public String domainUri;
 
-	public ConvertContextOp(LogicalOlapOp inputOp,
+	/**
+	 * 
+	 * @param inputOp
+	 * @param conversionfunction Currently, conversion function is a Linked-Data-Fu program. 
+	 * The goal is to represent it in terms of multidimensional elements. 
+	 * @param domainUri
+	 */
+	public ConvertCubeOp(LogicalOlapOp inputOp,
 			String conversionfunction, String domainUri) {
 		this.inputOp1 = inputOp;
 		this.inputOp2 = null;
@@ -23,7 +30,7 @@ public class ConvertContextOp implements LogicalOlapOp {
 		this.domainUri = domainUri;
 	}
 
-	public ConvertContextOp(LogicalOlapOp inputOp1, LogicalOlapOp inputOp2,
+	public ConvertCubeOp(LogicalOlapOp inputOp1, LogicalOlapOp inputOp2,
 			String conversionfunction, String domainUri) {
 		this.inputOp1 = inputOp1;
 		this.inputOp2 = inputOp2;

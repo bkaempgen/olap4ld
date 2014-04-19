@@ -19,6 +19,13 @@ public class DiceOp implements LogicalOlapOp {
 	public List<List<Node[]>> membercombinations;
 	public List<Node[]> hierarchysignature;
 
+	/**
+	 * 
+	 * @param op
+	 * @param hierarchysignature A list of hierarchies. For each hierarchy, in the member combinations
+	 * a list of members is given.
+	 * @param membercombinations A list of members to dice.
+	 */
 	public DiceOp(LogicalOlapOp op, List<Node[]> hierarchysignature,
 			List<List<Node[]>> membercombinations) {
 		this.inputOp = op;

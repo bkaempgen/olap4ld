@@ -132,7 +132,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Heuristics of how to select the right visitor.
 			if (queryplan._root instanceof DrillAcrossOp) {
 				r2a = new OlapDrillAcross2SparqlSesameVisitor(repo);
-			} else if (queryplan._root instanceof ConvertContextOp) {
+			} else if (queryplan._root instanceof ConvertCubeOp) {
 				// We create visitor to translate logical into physical
 				r2a = new Olap2SparqlSesameDerivedDatasetVisitor(repo);
 			} else {

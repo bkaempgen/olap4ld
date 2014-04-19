@@ -13,7 +13,7 @@ public interface LogicalOlapOperatorQueryPlanVisitor extends Visitor {
      * @param op usually this
      * @param obj a tree node that is the new tree's parent for op
      */
-	public void visit(ConvertContextOp op) throws QueryException;
+	public void visit(ConvertCubeOp op) throws QueryException;
 	public void visit(DrillAcrossOp op) throws QueryException;
     public void visit(RollupOp op) throws QueryException;
     public void visit(SliceOp op) throws QueryException;
