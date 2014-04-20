@@ -14,6 +14,7 @@ public class ConvertCubeOp implements LogicalOlapOp {
 	public LogicalOlapOp inputOp2;
 	public String conversionfunction;
 	public String domainUri;
+	private ConversionCorrespondence conversioncorrespondence;
 
 	/**
 	 * 
@@ -29,6 +30,21 @@ public class ConvertCubeOp implements LogicalOlapOp {
 		this.conversionfunction = conversionfunction;
 		this.domainUri = domainUri;
 	}
+	
+	/**
+	 * 
+	 * @param inputOp
+	 * @param conversionfunction Currently, conversion function is a Linked-Data-Fu program. 
+	 * The goal is to represent it in terms of multidimensional elements. 
+	 * @param domainUri
+	 */
+	public ConvertCubeOp(LogicalOlapOp inputOp,
+			ConversionCorrespondence conversioncorrespondence, String domainUri) {
+		this.inputOp1 = inputOp;
+		this.inputOp2 = null;
+		this.conversioncorrespondence = conversioncorrespondence;
+		this.domainUri = domainUri;
+	}
 
 	public ConvertCubeOp(LogicalOlapOp inputOp1, LogicalOlapOp inputOp2,
 			String conversionfunction, String domainUri) {
@@ -41,10 +57,10 @@ public class ConvertCubeOp implements LogicalOlapOp {
 	public String toString() {
 		if (inputOp2 == null) {
 			return "Convert-context (" + inputOp1.toString() + ", "
-					+ conversionfunction + ")";
+					+ conversionfunction + conversioncorrespondence.toString() + ")";
 		} else {
 			return "Convert-context (" + inputOp1.toString() + ", " + inputOp2.toString() + ", "
-					+ conversionfunction + ")";
+					+ conversionfunction + conversioncorrespondence.toString() + ")";
 		}
 	}
 

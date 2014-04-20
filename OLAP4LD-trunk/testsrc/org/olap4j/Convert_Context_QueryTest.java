@@ -35,6 +35,7 @@ import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
+import org.olap4j.driver.olap4ld.linkeddata.ConversionCorrespondence;
 import org.olap4j.driver.olap4ld.linkeddata.ConvertCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataCubesEngine;
@@ -44,7 +45,10 @@ import org.olap4j.driver.olap4ld.linkeddata.PhysicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
+import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
+import org.semanticweb.yars.nx.Variable;
 
 /**
  * Tests on executing drill-across.
@@ -96,7 +100,7 @@ public class Convert_Context_QueryTest extends TestCase {
 
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri";
 
-		// First: GDP per capita dataset
+		// First: GDP and main components
 		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds";
 		Restrictions gdprestrictions = new Restrictions();
 		gdprestrictions.cubeNamePattern = gdpdsuri;
@@ -148,22 +152,18 @@ public class Convert_Context_QueryTest extends TestCase {
 
 		// Roll-up
 		// XXX: We do not need roll-up
-
-		String mio_eur2eur = "{"
-				+ "?obs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR> .\n"
-				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v1 .\n"
-				+ "?u2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"<http://estatwrap.ontologycentral.com/dic/unit#EUR>\" .\n"
-				+ "?v2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?v1)\" ."
-				// No filter, equal predicate is interpreted by just adding the resource to the graph pattern.
-				// + "FILTER (?u1 = <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR>) "
-				+ "} => {"
-				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u2 .\n"
-				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v2 "
-				+ "} .";
+	
+		List<Node[]> mio_eur2eur_atoms = new ArrayList<Node[]>();
+		mio_eur2eur_atoms.add(new Node[] {new Variable("c1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("c1"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("v1")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("c2"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("c2"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("v2")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("v2"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(1000000 * ?v1)")});
+		ConversionCorrespondence mio_eur2eur_correspondence = new ConversionCorrespondence("mio_eur2eur", mio_eur2eur_atoms);
 		
 		// Convert-context
 		LogicalOlapOp convertgdp = new ConvertCubeOp(gdpbasecube,
-				mio_eur2eur, domainUri);
+				mio_eur2eur_correspondence, domainUri);
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(convertgdp);
 
