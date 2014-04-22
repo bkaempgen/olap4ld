@@ -154,11 +154,11 @@ public class Convert_Context_QueryTest extends TestCase {
 		// XXX: We do not need roll-up
 	
 		List<Node[]> mio_eur2eur_atoms = new ArrayList<Node[]>();
-		mio_eur2eur_atoms.add(new Node[] {new Variable("c1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("c1"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("v1")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("c2"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("c2"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("v2")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("v2"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(1000000 * ?v1)")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("fact1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("fact1"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value1")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("fact2"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("fact2"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value2")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("value2"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(1000000 * ?value1)")});
 		ConversionCorrespondence mio_eur2eur_correspondence = new ConversionCorrespondence("mio_eur2eur", mio_eur2eur_atoms);
 		
 		// Convert-context

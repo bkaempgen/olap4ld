@@ -32,6 +32,7 @@ import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.Rio;
+import org.semanticweb.yars.nx.BNode;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
@@ -64,7 +65,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	private Iterator<Node[]> iterator;
 	private PhysicalOlapIterator inputiterator1;
 	private PhysicalOlapIterator inputiterator2;
-	private String conversionfunction;
+	// private String conversionfunction;
 	private ConversionCorrespondence conversioncorrespondence;
 
 	private SailRepository repo;
@@ -74,102 +75,115 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	private String dataset1;
 	private String dataset2;
 
-	
 	public ConvertSparqlDerivedDatasetIterator(SailRepository repo,
 			PhysicalOlapIterator inputiterator1,
-			PhysicalOlapIterator inputiterator2, ConversionCorrespondence conversioncorrespondence,
-			String domainUri) {
-		
+			PhysicalOlapIterator inputiterator2,
+			ConversionCorrespondence conversioncorrespondence, String domainUri) {
+
 		this.repo = repo;
 		this.inputiterator1 = inputiterator1;
 		this.inputiterator2 = inputiterator2;
 		this.domainUri = domainUri;
-		
-		this.conversioncorrespondence= conversioncorrespondence; 
-		
+
+		this.conversioncorrespondence = conversioncorrespondence;
+
 		// Metadata
 
 		prepareMetadata();
-		
+
 		// Data
 
 		prepareData(conversioncorrespondence);
 
-		executeSelectQueryForOutput(conversioncorrespondence);
-		
 	}
 
 	private void prepareData(ConversionCorrespondence conversioncorrespondence) {
+
+		DataFuProgram dataFuProgram = createDataFuProgram(conversioncorrespondence);
+
+		// From bodypatterns and headpatterns of data-fu program, create SPARQL
+		// query.
+
+		executeSPARQLConstructQuery(dataFuProgram.bodypatterns,
+				dataFuProgram.headpatterns);
+
+		executeSPARQLSelectQuery();
+	}
+
+	/**
+	 * 
+	 * @param conversioncorrespondence2
+	 * @return Array with first element the body, second the head.
+	 */
+	private DataFuProgram createDataFuProgram(
+			ConversionCorrespondence conversioncorrespondence2) {
 		// We assume one or two cubes, only.
 
-		RepositoryConnection con = this.repo.getConnection();
-
 		/*
-		 * The bodypatterns should contain:
-		 * All graph patterns for c1.
-		 * All bindas patterns.
-		 * Dataset and structure graph patterns.
-		 * All missing dimensions/measures graph patterns.  
+		 * The bodypatterns should contain: All graph patterns for c1. All
+		 * bindas patterns. Dataset and structure graph patterns. All missing
+		 * dimensions/measures graph patterns.
 		 */
 		List<Node[]> bodypatterns = new ArrayList<Node[]>();
-		
+
 		List<Node[]> atoms = conversioncorrespondence.getAtoms();
-		
 
 		for (Node[] nodes : atoms) {
-			// All graph patterns for c1.
-			if (nodes[0].toString().equals("?c1")) {
+			// All graph patterns for facts from c1.
+			if (nodes[0].toN3().equals("?fact1")) {
 				bodypatterns.add(nodes);
 			}
 			// All bindas patterns.
-			if (nodes[1].toString().equals("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas")) {
+			if (nodes[1]
+					.toN3()
+					.equals("<http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas>")) {
 				bodypatterns.add(nodes);
 			}
 		}
-		
+
 		// Dataset and structure graph patterns
-		
+
 		// Heuristically, the variable we get from the first pattern
 		// subject.
-		Node obsvariable = atoms.get(0)[0];
+		Node obsvariable = new Variable("fact1");
 
-		// The second variable we get from the next variable.
 		Node obsvariable2 = null;
-		
 		if (dataset2 != null) {
-			// Then we should find one additional apart from those using specific properties.
-			for (Node[] atom : atoms) {
-				if (!atom[1]
-						.toN3()
-						.equals("<http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas>")
-						&& !atom[0].equals(bodypatterns.get(0)[0])) {
-					obsvariable2 = atom[0];
-				}
-			}
+			// The second variable we get from the next variable.
+			obsvariable2 = new Variable("fact2");
 		}
 
-		bodypatterns.add(new Node[] {obsvariable, new Resource("http://purl.org/linked-data/cube#dataSet"), new Resource(dataset1)});
+		bodypatterns.add(new Node[] { obsvariable,
+				new Resource("http://purl.org/linked-data/cube#dataSet"),
+				new Resource(dataset1) });
 
 		// DSD. Use ?dsd1 for 1, ?dsd2 for 2.
 		// Dsd seems not to be given to new datasets. Therefore, the
 		// construct query does not work. Instead, we add the dsd separately
 		// (adding triples).
-		bodypatterns.add(new Node[] { new Resource(dataset1), new Resource("http://purl.org/linked-data/cube#structure"), new Variable("dsd1")});
+		bodypatterns.add(new Node[] { new Resource(dataset1),
+				new Resource("http://purl.org/linked-data/cube#structure"),
+				new Variable("dsd1") });
 
 		if (dataset2 != null) {
-			bodypatterns.add(new Node[] {obsvariable2, new Resource("http://purl.org/linked-data/cube#dataSet"), new Resource(dataset2)});
+			bodypatterns.add(new Node[] { obsvariable2,
+					new Resource("http://purl.org/linked-data/cube#dataSet"),
+					new Resource(dataset2) });
 
 			// DSD.
-			bodypatterns.add(new Node[] {new Resource(dataset2), new Resource("http://purl.org/linked-data/cube#structure"), new Variable("dsd2")});
+			bodypatterns.add(new Node[] { new Resource(dataset2),
+					new Resource("http://purl.org/linked-data/cube#structure"),
+					new Variable("dsd2") });
 		}
-		
+
 		// All missing dimensions/measures graph patterns for c1
-		
+
 		// For each dimension add dataset graph pattern if of
 		// specific dataset and not already contained in atoms.
 		/*
-		 * for now, we assume that every dimension used in the second cube
-		 * is fixed since otherwise the metadata of the result cube would not be correct
+		 * for now, we assume that every dimension used in the second cube is
+		 * fixed since otherwise the metadata of the result cube would not be
+		 * correct
 		 */
 		Boolean first = true;
 		for (Node[] dimension : dimensions) {
@@ -184,21 +198,24 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			}
 
 			if (!isPatternContained(atoms, obsvariable,
-					dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
-					null)) {
-				bodypatterns.add(new Node[] {obsvariable, dimension[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")], Olap4ldLinkedDataUtil.makeUriToVariable(
-								dimension[dimensionmap
+					dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")], null)) {
+				bodypatterns.add(new Node[] {
+						obsvariable,
+						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
+						Olap4ldLinkedDataUtil
+								.makeUriToVariable(dimension[dimensionmap
 										.get("?DIMENSION_UNIQUE_NAME")]
-										.toString())});
-				
+										.toString()) });
+
 				if (dataset2 != null) {
-					bodypatterns.add(new Node[] {obsvariable2, dimension[dimensionmap
-									.get("?DIMENSION_UNIQUE_NAME")], 
-									Olap4ldLinkedDataUtil.makeUriToVariable(
-									dimension[dimensionmap
+					bodypatterns.add(new Node[] {
+							obsvariable2,
+							dimension[dimensionmap
+									.get("?DIMENSION_UNIQUE_NAME")],
+							Olap4ldLinkedDataUtil
+									.makeUriToVariable(dimension[dimensionmap
 											.get("?DIMENSION_UNIQUE_NAME")]
-											.toString())});
+											.toString()) });
 				}
 			}
 		}
@@ -215,69 +232,71 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				continue;
 			}
 
-			if (!isPatternContained(bodypatterns, null,
+			if (!isPatternContained(bodypatterns, obsvariable,
 					measure[measuremap.get("?MEASURE_UNIQUE_NAME")], null)) {
-				bodypatterns.add(new Node[] {obsvariable,
-						measure[measuremap.get("?MEASURE_UNIQUE_NAME")]
-						, Olap4ldLinkedDataUtil.makeUriToVariable(
-								measure[measuremap
+				bodypatterns.add(new Node[] {
+						obsvariable,
+						measure[measuremap.get("?MEASURE_UNIQUE_NAME")],
+						Olap4ldLinkedDataUtil
+								.makeUriToVariable(measure[measuremap
 										.get("?MEASURE_UNIQUE_NAME")]
-										.toString())});
+										.toString()) });
 				if (dataset2 != null) {
-					bodypatterns.add(new Node[] {obsvariable2,
-							measure[measuremap
-									.get("?MEASURE_UNIQUE_NAME")],
-							Olap4ldLinkedDataUtil.makeUriToVariable(
-									measure[measuremap
+					bodypatterns.add(new Node[] {
+							obsvariable2,
+							measure[measuremap.get("?MEASURE_UNIQUE_NAME")],
+							Olap4ldLinkedDataUtil
+									.makeUriToVariable(measure[measuremap
 											.get("?MEASURE_UNIQUE_NAME")]
-											.toString())});
+											.toString()) });
 				}
 			}
 		}
-		
+
 		/*
-		 * The bodypatterns should contain:
-		 * All graph patterns for c2.
-		 * Dataset and structure graph patterns.
-		 * All missing dimensions/measures graph patterns.  
+		 * The bodypatterns should contain: All graph patterns for c2. Dataset
+		 * and structure graph patterns. All missing dimensions/measures graph
+		 * patterns.
 		 */
-		
+
 		List<Node[]> headpatterns = new ArrayList<Node[]>();
-		
+
+		// Heuristically, the variable we create ourselves
+		Node newobsvariable = new BNode("_:fact2");
+
 		// All graph patterns for c2.
 		for (Node[] atom : atoms) {
-			
-			if (atom[0].toString().equals("?c2")) {
-				headpatterns.add(atom);
+
+			if (atom[0].toN3().equals("?fact2")) {
+				// We should be using new obs variable as blank node.
+
+				headpatterns
+						.add(new Node[] { newobsvariable, atom[1], atom[2] });
 			}
 		}
-		
-		// Dataset and structure graph patterns.
-		
-		// All missing dimensions/measures graph patterns.  
-		
-		// From bodypatterns and headpatterns of data-fu program, create SPARQL query.
-		
-				
-		
-		Node obsvariable = headpatterns.get(0)[0];
 
-		head += obsvariable.toN3() + " qb:dataSet <" + newdataset + ">. \n";
+		// Dataset and structure graph patterns.
+
+		headpatterns.add(new Node[] { newobsvariable,
+				new Resource("http://purl.org/linked-data/cube#dataSet"),
+				new Resource(newdataset) });
 
 		// DSD. For now, assume same dsd as other dataset.
 		// Dsd seems not to be given to new datasets. Therefore, the
 		// construct query does not work. Instead, we add the dsd separately
 		// (adding triples).
 		// Solution: Has to be propagated in select (!)
-		head += "<" + newdataset + ">" + " qb:structure ?dsd1. \n";
+		headpatterns.add(new Node[] { new Resource(newdataset),
+				new Resource("http://purl.org/linked-data/cube#structure"),
+				new Variable("dsd1") });
 
-		// ** For each dimension add dataset graph pattern if not already
-		// contained in Data-Fu program or Measure Dimension.
-		
-		// XXX: A cleaner way would be to specifically refer to the metadata of the first input iterator
+		// All missing dimensions/measures graph patterns.
+		// XXX: A cleaner way would be to specifically refer to the metadata of
+		// the first input iterator
 		Restrictions restrictions = new Restrictions();
 
-		// We assume dimensions and measures that we go through coming from first cube (otherwise metadata may not make sense anyway, sometimes).
+		// We assume dimensions and measures that we go through coming from
+		// first cube (otherwise metadata may not make sense anyway, sometimes).
 		List<Node[]> dimensions = null;
 		List<Node[]> measures = null;
 		try {
@@ -287,9 +306,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		boolean first = true;
+
+		first = true;
 		for (Node[] dimension : dimensions) {
 			if (first) {
 				first = false;
@@ -302,23 +320,15 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				continue;
 			}
 
-			/*
-			 * Although we create the headpatterns, since it does not make sense to add
-			 * graph patterns for dimensions to head for which there is not pendant in body,
-			 * we go through bodypatterns.
-			 */
-			if (!isPatternContained(bodypatterns, null,
-					dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
-					null)) {
-				head += obsvariable.toN3()
-						+ " "
-						+ dimension[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")].toN3()
-						+ " "
-						+ Olap4ldLinkedDataUtil.makeUriToVariable(
-								dimension[dimensionmap
+			if (!isPatternContained(atoms, new Variable("c2"),
+					dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")], null)) {
+				headpatterns.add(new Node[] {
+						newobsvariable,
+						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
+						Olap4ldLinkedDataUtil
+								.makeUriToVariable(dimension[dimensionmap
 										.get("?DIMENSION_UNIQUE_NAME")]
-										.toString()).toN3() + ". \n";
+										.toString()) });
 
 			}
 		}
@@ -330,83 +340,165 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				first = false;
 				continue;
 			}
-			// No extended measures. This means, currently, we are not considering aggregations.
+			// No extended measures. This means, currently, we are not
+			// considering aggregations.
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
 			}
 
-			if (!isPatternContained(bodypatterns, null,
+			if (!isPatternContained(atoms, new Variable("fact2"),
 					measure[measuremap.get("?MEASURE_UNIQUE_NAME")], null)) {
-				head += obsvariable.toN3()
-						+ " "
-						+ measure[measuremap.get("?MEASURE_UNIQUE_NAME")]
-								.toN3()
-						+ " "
-						+ Olap4ldLinkedDataUtil.makeUriToVariable(
-								measure[measuremap
+				headpatterns.add(new Node[] {
+						newobsvariable,
+						measure[measuremap.get("?MEASURE_UNIQUE_NAME")],
+
+						Olap4ldLinkedDataUtil
+								.makeUriToVariable(measure[measuremap
 										.get("?MEASURE_UNIQUE_NAME")]
-										.toString()).toN3() + ". \n";
+										.toString()) });
 			}
 		}
-		// ** }
-		// ** where { {
-		// ** select
-		// ** Select:
-		// String select =
-		// "?geo ?unit1 ?indic_na1 ?time ((?boneg * 1000000) as ?boneg_eur) ";
-		// ** Add select variables for every dimension and measure which is
-		// not
-		// mentioned as predicate in body.
-		String select = "";
 
-		// Add dsd
-		select += " ?dsd1 ?dsd2 ";
+		// Return Data-Fu query
+		String dataFuProgram = "{ \n";
+		for (Node[] nodes : bodypatterns) {
+			dataFuProgram += nodes[0].toN3() + " " + nodes[1].toN3() + " "
+					+ nodes[2].toN3() + " . \n";
+		}
+		dataFuProgram += " } => { \n";
+		for (Node[] nodes : headpatterns) {
+			dataFuProgram += nodes[0].toN3() + " " + nodes[1].toN3() + " "
+					+ nodes[2].toN3() + " . \n";
+		}
+		dataFuProgram += "} ";
 
-		// Build hashmap from dimension or measure node and variable node.
-		HashMap<Node, Node> selectbodymap = new HashMap<Node, Node>();
+		Olap4ldUtil._log.config("Linked-Data-Fu-Program: " + dataFuProgram);
 
-		first = true;
-		for (Node[] dimension : dimensions) {
-			if (first) {
-				first = false;
-				continue;
+		DataFuProgram dataFuProgramObject = new DataFuProgram(bodypatterns,
+				headpatterns);
+
+		return dataFuProgramObject;
+	}
+
+	private void executeSPARQLSelectQuery() {
+		List<Node[]> myBindings = new ArrayList<Node[]>();
+		try {
+
+			RepositoryConnection con = this.repo.getConnection();
+			// Select query for the output
+
+			Node newobsvariable = new Variable("c1");
+
+			/*
+			 * Select: 1) Add variables for each dimension and measure. Where:
+			 * 1) Add graph pattern for specific new dataset.
+			 * 
+			 * 2) Add graph patterns for each dimension and measure
+			 */
+
+			String prefixes = "PREFIX qb:<http://purl.org/linked-data/cube#> "
+					+ "PREFIX olap4ld:<http://purl.org/olap4ld/>";
+
+			String select = "";
+
+			boolean first = true;
+			for (Node[] dimension : dimensions) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+					continue;
+				}
+
+				// Create variable and add
+				Node dimensionvariable = Olap4ldLinkedDataUtil
+						.makeUriToVariable(dimension[dimensionmap
+								.get("?DIMENSION_UNIQUE_NAME")].toString());
+				// What to do with it? Add to a map
+				select += " " + dimensionvariable.toN3() + " ";
 			}
-			if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-					.toString().equals(
-							Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
-				continue;
+			// ** For each measure add dataset graph pattern if not already
+			// contained in Data-Fu program
+			first = true;
+			for (Node[] measure : measures) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+						.contains("AGGFUNC")) {
+					continue;
+				}
+
+				// Create variable and add
+				Node measurevariable = Olap4ldLinkedDataUtil
+						.makeUriToVariable(measure[measuremap
+								.get("?MEASURE_UNIQUE_NAME")].toString());
+				// What to do with it? Add to a map
+				select += " " + measurevariable.toN3() + " ";
 			}
 
-			if (!isPatternContained(bodypatterns, null,
-					dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
-					null)) {
+			// String where = "?obs1 qb:dataSet <"
+			// + newdataset
+			// + ">. "
+			// +
+			// "?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?boneg_eur. "
+			// +
+			// "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#geo> ?geo. "
+			// +
+			// "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?unit1. "
+			// +
+			// "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> ?indic_na1. "
+			// + "?obs1 <http://purl.org/dc/terms/date> ?time. \n";
+			String where = "";
+
+			// * 1) Add graph pattern for specific new dataset.
+
+			where += newobsvariable.toN3() + " qb:dataSet <" + newdataset
+					+ ">. \n";
+
+			// * 2) Add graph patterns for each dimension and measure
+
+			first = true;
+			for (Node[] dimension : dimensions) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+						.toString().equals(
+								Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+					continue;
+				}
+
 				// Create variable and add
 				Node dimensionvariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(dimension[dimensionmap
 								.get("?DIMENSION_UNIQUE_NAME")].toString());
 				// What to do with it? Add to a map
 				Resource dimensionresource = new Resource(
-						dimension[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")].toString());
-				selectbodymap.put(dimensionresource, dimensionvariable);
+						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+								.toString());
+				where += newobsvariable.toN3() + " " + dimensionresource.toN3()
+						+ " " + dimensionvariable.toN3() + ". \n";
 			}
-		}
-		// ** For each measure add dataset graph pattern if not already
-		// contained in Data-Fu program
-		first = true;
-		for (Node[] measure : measures) {
-			if (first) {
-				first = false;
-				continue;
-			}
-			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
-					.contains("AGGFUNC")) {
-				continue;
-			}
+			// ** For each measure add dataset graph pattern if not already
+			// contained in Data-Fu program
+			first = true;
+			for (Node[] measure : measures) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+						.contains("AGGFUNC")) {
+					continue;
+				}
 
-			if (!isPatternContained(bodypatterns, null,
-					measure[measuremap.get("?MEASURE_UNIQUE_NAME")], null)) {
 				// Create variable and add
 				Node measurevariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(measure[measuremap
@@ -415,133 +507,247 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				Resource measureresource = new Resource(
 						measure[measuremap.get("?MEASURE_UNIQUE_NAME")]
 								.toString());
-				selectbodymap.put(measureresource, measurevariable);
+				where += newobsvariable.toN3() + " " + measureresource.toN3()
+						+ " " + measurevariable.toN3() + ". \n";
+
 			}
-		}
 
-		// ** Add all variables from objects in body which are not constants
+			String observationquery = prefixes + " select " + select
+					+ " where {" + where + " }";
 
-		for (Node[] bodypattern : bodypatterns) {
-			// We add variable to map if no constant
-			if (bodypattern[2].toN3().startsWith("?")) {
-				selectbodymap.put(bodypattern[1], bodypattern[2]);
+			Olap4ldUtil._log.config("SPARQL SELECT query: " + observationquery);
+			ByteArrayOutputStream boas = new ByteArrayOutputStream();
+			// FileOutputStream fos = new
+			// FileOutputStream("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/resources/result.srx");
+
+			SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
+					boas);
+
+			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
+					observationquery);
+			tupleQuery.evaluate(sparqlWriter);
+
+			ByteArrayInputStream bais = new ByteArrayInputStream(
+					boas.toByteArray());
+
+			// String xmlwriterstreamString =
+			// Olap4ldLinkedDataUtil.convertStreamToString(bais);
+			// System.out.println(xmlwriterstreamString);
+			// Transform sparql xml to nx
+			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(bais);
+
+			// Only log if needed
+			if (Olap4ldUtil._isDebug) {
+				String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
+				Olap4ldUtil._log.config("NX output: " + test2);
+				nx.reset();
 			}
-		}
 
-		// add bindas variables: Look for qrl:bindas; use subject as
-		// variable to select; create select
-		// http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas
-		for (Node[] bodypattern : bodypatterns) {
-			if (bodypattern[1]
-					.toN3()
-					.equals("<http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas>")) {
-				// Add directly to select
-				select += " (" + bodypattern[2].toString() + " as "
-						+ bodypattern[0].toN3() + ") ";
+			NxParser nxp = new NxParser(nx);
+
+			Node[] nxx;
+			while (nxp.hasNext()) {
+				try {
+					nxx = nxp.next();
+					myBindings.add(nxx);
+				} catch (Exception e) {
+
+					// Might happen often, therefore config only
+					Olap4ldUtil._log
+							.config("NxParser: Could not parse properly: "
+									+ e.getMessage());
+				}
+				;
 			}
+
+			boas.close();
+			con.close();
+			// do something interesting with the values here...
+			// con.close();
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedQueryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (QueryEvaluationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TupleQueryResultHandlerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 
-		// Create full select
-		Set<Entry<Node, Node>> selectbodyset = selectbodymap.entrySet();
-		for (Entry<Node, Node> entry : selectbodyset) {
-			select += " " + entry.getValue().toN3() + " ";
-		}
-
-		// ** where {
-		// ** Body:
-		// String bodyold = "?obs1 qb:dataSet <"
-		// + dataset
-		// + ">. "
-		// +
-		// "?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?boneg. "
-		// +
-		// "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#geo> ?geo. "
-		// +
-		// "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?unit1. "
-		// +
-		// "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> ?indic_na1. "
-		// + "?obs1 <http://purl.org/dc/terms/date> ?time. "
-		// +
-		// "FILTER (?unit1 = <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR>)";
-
-		constructquery = prefixes + "construct { " + head
-				+ " } where { { select " + select + " where {" + body
-				+ " } } }";
-
-		Olap4ldUtil._log.config("SPARQL query: " + constructquery);
-
-		GraphQuery graphquery = con.prepareGraphQuery(
-				org.openrdf.query.QueryLanguage.SPARQL, constructquery);
-
-		StringWriter stringout = new StringWriter();
-		RDFWriter w = Rio.createWriter(RDFFormat.RDFXML, stringout);
-		graphquery.evaluate(w);
-
-		this.triples = stringout.toString();
-		
-		if (Olap4ldUtil._isDebug) {
-
-			Olap4ldUtil._log.config("Loaded triples: " + triples);
-
-		}
-		// Insert query to load triples
-		// String insertquery =
-		// "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
-		// + triples + " } }";
-		//
-		// Olap4ldUtil._log.config("SPARQL query: " + insertquery);
-		//
-		// Update updateQuery = con.prepareUpdate(QueryLanguage.SPARQL,
-		// insertquery);
-		// updateQuery.execute();
-
-		// Would not work: prolog error
-		// ByteArrayInputStream inputstream = new
-		// ByteArrayInputStream(w.toString().getBytes());
-
-		// UTF-8 encoding seems important
-		InputStream stream = new ByteArrayInputStream(
-				triples.getBytes("UTF-8"));
-
-		// Add to triple store
-		con.add(stream, "", RDFFormat.RDFXML);
-
-		// Loaded really?
-		if (Olap4ldUtil._isDebug) {
-			String filename = "dataset" + (dataset1 + dataset2).hashCode()
-					+ "-conversionfunction" + conversionfunction.hashCode();
-
-			Olap4ldLinkedDataUtil
-					.dumpRDF(
-							repo,
-							"/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/"
-									+ filename + ".n3", RDFFormat.NTRIPLES);
-		}
-
-		con.close();
-
-	} catch (RepositoryException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (MalformedURLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (MalformedQueryException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (QueryEvaluationException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (RDFHandlerException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	} catch (RDFParseException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
+		this.iterator = myBindings.iterator();
 	}
+
+	private void executeSPARQLConstructQuery(List<Node[]> bodypatterns,
+			List<Node[]> headpatterns) {
+
+		try {
+
+			// We assume one or two cubes, only.
+
+			RepositoryConnection con = this.repo.getConnection();
+
+			// Construct query to create triples
+			String constructquery = "";
+
+			// ** PREFIXES
+			String prefixes = "PREFIX qb:<http://purl.org/linked-data/cube#> "
+					+ "PREFIX olap4ld:<http://purl.org/olap4ld/>";
+
+			// ** where { {
+			// ** select
+			// ** Select:
+			// String select =
+			// "?geo ?unit1 ?indic_na1 ?time ((?boneg * 1000000) as ?boneg_eur) ";
+			// ** Add select variables for every dimension and measure which is
+			// not
+			// mentioned as predicate in body.
+			String select = "";
+
+			// body head
+			String body = "";
+
+			for (Node[] bodypattern : bodypatterns) {
+
+				// Only if not bindas.
+				if (!bodypattern[1]
+						.toN3()
+						.equals("<http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas>")) {
+					body += bodypattern[0].toN3() + " " + bodypattern[1].toN3() + " "
+							+ bodypattern[2].toN3() + " . \n";
+				}
+			}
+
+			String head = "";
+
+			for (Node[] nodes : headpatterns) {
+				head += nodes[0].toN3() + " " + nodes[1].toN3() + " "
+						+ nodes[2].toN3() + " . \n";
+			}
+
+			// Add dsd
+			select += " ?dsd1 ?dsd2 ";
+
+			// Build hashmap from dimension or measure node and variable node.
+			HashMap<Node, Node> selectbodymap = new HashMap<Node, Node>();
+
+			// Do I not simply need to go through bodypatterns and add all
+			// variables?
+
+			for (Node[] nodes : bodypatterns) {
+				if (nodes[2] instanceof Variable) {
+					selectbodymap.put(nodes[1], nodes[2]);
+				}
+			}
+
+			// add bindas variables: Look for qrl:bindas; use subject as
+			// variable to select; create select
+			// http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas
+			for (Node[] bodypattern : bodypatterns) {
+				if (bodypattern[1]
+						.toN3()
+						.equals("<http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas>")) {
+					// Add directly to select without quotes (toString())
+					select += " (" + bodypattern[2].toString() + " as "
+							+ bodypattern[0].toN3() + ") ";
+				}
+			}
+
+			// Create full select
+			Set<Entry<Node, Node>> selectbodyset = selectbodymap.entrySet();
+			for (Entry<Node, Node> entry : selectbodyset) {
+				select += " " + entry.getValue().toN3() + " ";
+			}
+
+			constructquery = prefixes + "construct { " + head
+					+ " } where { { select " + select + " where {" + body
+					+ " } } }";
+
+			Olap4ldUtil._log
+					.config("SPARQL CONSTRUCT query: " + constructquery);
+
+			GraphQuery graphquery = con.prepareGraphQuery(
+					org.openrdf.query.QueryLanguage.SPARQL, constructquery);
+
+			StringWriter stringout = new StringWriter();
+			RDFWriter w = Rio.createWriter(RDFFormat.RDFXML, stringout);
+			graphquery.evaluate(w);
+
+			this.triples = stringout.toString();
+
+			if (Olap4ldUtil._isDebug) {
+
+				Olap4ldUtil._log.config("Loaded triples: " + triples);
+
+			}
+			// Insert query to load triples
+			// String insertquery =
+			// "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
+			// + triples + " } }";
+			//
+			// Olap4ldUtil._log.config("SPARQL query: " + insertquery);
+			//
+			// Update updateQuery = con.prepareUpdate(QueryLanguage.SPARQL,
+			// insertquery);
+			// updateQuery.execute();
+
+			// Would not work: prolog error
+			// ByteArrayInputStream inputstream = new
+			// ByteArrayInputStream(w.toString().getBytes());
+
+			// UTF-8 encoding seems important
+			InputStream stream = new ByteArrayInputStream(
+					triples.getBytes("UTF-8"));
+
+			// Add to triple store
+			con.add(stream, "", RDFFormat.RDFXML);
+
+			// Loaded really?
+			if (Olap4ldUtil._isDebug) {
+				String filename = "dataset" + (dataset1 + dataset2).hashCode()
+						+ "-conversionfunction"
+						+ conversioncorrespondence.getname().hashCode();
+
+				Olap4ldLinkedDataUtil
+						.dumpRDF(
+								repo,
+								"/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/"
+										+ filename + ".n3", RDFFormat.NTRIPLES);
+			}
+
+			con.close();
+
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedQueryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (QueryEvaluationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RDFHandlerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (RDFParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
 	public ConvertSparqlDerivedDatasetIterator(SailRepository repo,
@@ -554,14 +760,10 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		this.inputiterator2 = inputiterator2;
 		this.domainUri = domainUri;
 
-		// Prepare conversion function
-
-		this.conversionfunction = conversionfunction;
-
 		List<List<Node[]>> conversionfunction_body_head = null;
 		try {
 			conversionfunction_body_head = Olap4ldLinkedDataUtil
-					.splitandparseN3rule(this.conversionfunction);
+					.splitandparseN3rule(conversionfunction);
 		} catch (IOException e3) {
 			// TODO Auto-generated catch block
 			e3.printStackTrace();
@@ -656,11 +858,14 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			// ** For each dimension add dataset graph pattern if not already
 			// contained in Data-Fu program or Measure Dimension.
-			
-			// XXX: A cleaner way would be to specifically refer to the metadata of the first input iterator
+
+			// XXX: A cleaner way would be to specifically refer to the metadata
+			// of the first input iterator
 			Restrictions restrictions = new Restrictions();
 
-			// We assume dimensions and measures that we go through coming from first cube (otherwise metadata may not make sense anyway, sometimes).
+			// We assume dimensions and measures that we go through coming from
+			// first cube (otherwise metadata may not make sense anyway,
+			// sometimes).
 			List<Node[]> dimensions = null;
 			List<Node[]> measures = null;
 			try {
@@ -670,8 +875,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			
+
 			boolean first = true;
 			for (Node[] dimension : dimensions) {
 				if (first) {
@@ -686,9 +890,9 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				}
 
 				/*
-				 * Although we create the headpatterns, since it does not make sense to add
-				 * graph patterns for dimensions to head for which there is not pendant in body,
-				 * we go through bodypatterns.
+				 * Although we create the headpatterns, since it does not make
+				 * sense to add graph patterns for dimensions to head for which
+				 * there is not pendant in body, we go through bodypatterns.
 				 */
 				if (!isPatternContained(bodypatterns, null,
 						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
@@ -713,7 +917,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 					first = false;
 					continue;
 				}
-				// No extended measures. This means, currently, we are not considering aggregations.
+				// No extended measures. This means, currently, we are not
+				// considering aggregations.
 				if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 						.contains("AGGFUNC")) {
 					continue;
@@ -868,9 +1073,10 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			// The second variable we get from the next variable.
 			Node obsvariable2 = null;
-			
+
 			if (dataset2 != null) {
-				// Then we should find one additional apart from those using specific properties.
+				// Then we should find one additional apart from those using
+				// specific properties.
 				for (Node[] bodypattern : bodypatterns) {
 					if (!bodypattern[1]
 							.toN3()
@@ -901,7 +1107,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			// specific dataset and not already contained in Data-Fu program
 			/*
 			 * for now, we assume that every dimension used in the second cube
-			 * is fixed since otherwise the metadata of the result cube would not be correct
+			 * is fixed since otherwise the metadata of the result cube would
+			 * not be correct
 			 */
 			first = true;
 			for (Node[] dimension : dimensions) {
@@ -993,7 +1200,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			graphquery.evaluate(w);
 
 			this.triples = stringout.toString();
-			
+
 			if (Olap4ldUtil._isDebug) {
 
 				Olap4ldUtil._log.config("Loaded triples: " + triples);
@@ -1024,7 +1231,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			// Loaded really?
 			if (Olap4ldUtil._isDebug) {
 				String filename = "dataset" + (dataset1 + dataset2).hashCode()
-						+ "-conversionfunction" + conversionfunction.hashCode();
+						+ "-conversionfunction" + this.conversioncorrespondence;
 
 				Olap4ldLinkedDataUtil
 						.dumpRDF(
@@ -1075,7 +1282,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 					.getCubes(restrictions).get(0));
 
 			try {
-				// Assume cube to be index 1 
+				// Assume cube to be index 1
 				dataset1 = inputiterator1.getCubes(restrictions).get(1)[cubemap
 						.get("?CUBE_NAME")].toString();
 				if (inputiterator2 != null) {
@@ -1090,7 +1297,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			// We use hash of combination conversionfunction + datasets
 			newdataset = domainUri + "dataset"
 					+ (dataset1 + dataset2).hashCode() + "/conversionfunction"
-					+ conversionfunction.hashCode();
+					+ conversioncorrespondence.getname().hashCode();
 
 			this.cubes = new ArrayList<Node[]>();
 			boolean first = true;
@@ -1672,6 +1879,23 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	public List<Node[]> getMembers(Restrictions restrictions)
 			throws OlapException {
 		return members;
+	}
+
+	/**
+	 * Represents data fu program with bodypatterns and headpatterns.
+	 * 
+	 * @author benedikt
+	 * 
+	 */
+	class DataFuProgram {
+		public List<Node[]> bodypatterns;
+		public List<Node[]> headpatterns;
+
+		public DataFuProgram(List<Node[]> bodypatterns,
+				List<Node[]> headpatterns) {
+			this.bodypatterns = bodypatterns;
+			this.headpatterns = headpatterns;
+		}
 	}
 
 }

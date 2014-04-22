@@ -14,7 +14,7 @@ public class ConvertCubeOp implements LogicalOlapOp {
 	public LogicalOlapOp inputOp2;
 	public String conversionfunction;
 	public String domainUri;
-	private ConversionCorrespondence conversioncorrespondence;
+	public ConversionCorrespondence conversioncorrespondence;
 
 	/**
 	 * 
