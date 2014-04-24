@@ -7,7 +7,7 @@ import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.semanticweb.yars.nx.Node;
 
 /**
- * This operator removes a Dimension from a Cube, a result of a lower
+ * This operator removes dimensions from a Cube, a result of a lower
  * LogicalOlapOp.
  * 
  * @author benedikt

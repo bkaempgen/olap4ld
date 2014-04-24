@@ -7,7 +7,7 @@ import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.semanticweb.yars.nx.Node;
 
 /**
- * This operator removes facts from a result of a LogicalOlapOp that does not
+ * This operator removes facts from a result of a LogicalOlapOp that do not
  * comply with a condition.
  * 
  * @author benedikt

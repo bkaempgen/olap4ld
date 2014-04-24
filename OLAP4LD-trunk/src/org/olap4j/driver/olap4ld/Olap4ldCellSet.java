@@ -485,6 +485,12 @@ abstract class Olap4ldCellSet implements CellSet {
 			e.printStackTrace();
 		}
 
+		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(measures.get(0));
+
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(dimensions.get(0));
+
 		// Cube from (cube, SlicesRollups, Dices, Projections)
 		LogicalOlapOp basecube = new BaseCubeOp(cube, measures, dimensions,
 				hierarchies, levels, members);
@@ -505,6 +511,7 @@ abstract class Olap4ldCellSet implements CellSet {
 					// Check whether measure already contained.
 					if ((positionmembers.get(i).getMemberType() == Member.Type.MEASURE || positionmembers
 							.get(i).getMemberType() == Member.Type.FORMULA)) {
+
 						usedMeasureSet.add(positionmembers.get(i));
 					}
 				}
@@ -539,15 +546,29 @@ abstract class Olap4ldCellSet implements CellSet {
 		// Now, fill projections
 		boolean isFirst = true;
 		for (Member member : usedMeasureSet) {
-			Olap4ldMember olapmember = (Olap4ldMember) member;
-			// All multidimensional elements in MDX query first belong to the global cube.
-			List<Node[]> membernode = olapmember
-					.transformMetadataObject2NxNodes(metaData.cube);
-			if (isFirst) {
-				isFirst = false;
-				projections.add(membernode.get(0));
+			// Olap4ldMember member = (Olap4ldMember) member;
+			// All multidimensional elements in MDX query first belong to the
+			// global cube.
+
+			// Instead of transforming with metaData.cube which is wrong, I
+			// specifically ask
+			// for that measure in that cube. If not existing, not adding.
+			// List<Node[]> membernode = member
+			// .transformMetadataObject2NxNodes(metaData.cube);
+
+			String membernameuri = Olap4ldLinkedDataUtil.convertMDXtoURI(member
+					.getUniqueName());
+
+			for (Node[] measure : measures) {
+				if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+						.equals(membernameuri)) {
+					if (isFirst) {
+						isFirst = false;
+						projections.add(measures.get(0));
+					}
+					projections.add(measure);
+				}
 			}
-			projections.add(membernode.get(1));
 		}
 		// We store this list of measures for later looking up the number of a
 		// measure.
@@ -695,12 +716,32 @@ abstract class Olap4ldCellSet implements CellSet {
 		slicedDimensions.add(((Olap4ldDimension) realdimensions.get(0))
 				.transformMetadataObject2NxNodes().get(0));
 		for (Dimension realdimension : realdimensions) {
-			Olap4ldDimension olapdimension = (Olap4ldDimension) realdimension;
-			Node[] dimension = olapdimension.transformMetadataObject2NxNodes()
-					.get(1);
-			Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
-					.getNodeResultFields(olapdimension
-							.transformMetadataObject2NxNodes().get(0));
+//			Olap4ldDimension olapdimension = (Olap4ldDimension) realdimension;
+
+			// Instead of doing awkward translation of object, we directly
+			// search for the object in dimensions
+			// Node[] dimension =
+			// olapdimension.transformMetadataObject2NxNodes()
+			// .get(1);
+
+			Node[] dimension = null;
+			
+			boolean containedincube = false;
+
+			String dimensionnameuri = Olap4ldLinkedDataUtil.convertMDXtoURI(realdimension
+					.getUniqueName());
+
+			for (Node[] aDimension : dimensions) {
+				if (aDimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")].toString()
+						.equals(dimensionnameuri)) {
+					dimension = aDimension;
+					containedincube = true;
+				}
+			}
+			
+			if (!containedincube) {
+				continue;
+			}
 
 			boolean contained = false;
 			// For every dimension, check whether in not sliced.
@@ -716,12 +757,18 @@ abstract class Olap4ldCellSet implements CellSet {
 					contained = true;
 				}
 			}
-			if (!contained
-					&& !(dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-							.toString()
-							.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))) {
-				slicedDimensions.add(dimension);
+
+			if (contained) {
+				continue;
 			}
+			
+			if ((dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+					.toString()
+					.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))) {
+				continue;
+			}
+			
+			slicedDimensions.add(dimension);
 		}
 
 		// Test, slicedDimensions and
@@ -756,9 +803,6 @@ abstract class Olap4ldCellSet implements CellSet {
 						}
 						measure = (Measure) member;
 					} else {
-
-						Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
-								.getNodeResultFields(dimensions.get(0));
 
 						// If dimension == member.dimension then store
 						// Add index in correct ordering.

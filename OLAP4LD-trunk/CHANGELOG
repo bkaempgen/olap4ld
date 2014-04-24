@@ -1,3 +1,59 @@
+==2014-04-24==
+* Still problem of Drill-Across
+* Status (Query + Result)
+
+Drill_across_QueryTest
+
+<pre>
+
+Logical plan:Drill-across(Slice (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds), 
+
+{http://ontologycentral.com/2009/01/eurostat/ns#aggreg95, http://ontologycentral.com/2009/01/eurostat/ns#indic_na}), 
+
+Slice (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds), 
+
+{http://ontologycentral.com/2009/01/eurostat/ns#sex}
+
+))
+
++ 
+
+http://olap4ld.googlecode.com/dic/geo#US; 2011; 148.0; 1; 148; 70.433333333333333333333333;
+
+</pre>
+
+Example_QB_Datasets_QueryTest.testDrillAcrossEstatwrapGDPpercapitainPPS_EurostatEmploymentRate
+
+<pre>
+
+Logical query plan: Drill-across(
+
+Rollup (Slice (Dice (Projection (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds), 
+
+{http://purl.org/linked-data/sdmx/2009/measure#obsValueAGGFUNCAVG, http://purl.org/linked-data/sdmx/2009/measure#obsValueAGGFUNCCOUNT}), {}), 
+
+{http://ontologycentral.com/2009/01/eurostat/ns#aggreg95, http://ontologycentral.com/2009/01/eurostat/ns#indic_na}), {}), 
+
+Rollup (Slice (Dice (Projection (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds), 
+
+{http://ontologycentral.com/2009/01/eurostat/ns#employment_rate}), {}), 
+
+{http://ontologycentral.com/2009/01/eurostat/ns#sex}), {}))
+
++
+
+
+|  |   US   |  | 2005 |       159.0 |       159.0 |            159.0 |
+|  |        |  | 2006 |       155.0 |       155.0 |            155.0 |
+|  |        |  | 2007 |       152.0 |       152.0 |            152.0 |
+|  |        |  | 2008 |       147.0 |       147.0 |            147.0 |
+|  |        |  | 2009 |       147.0 |       147.0 |            147.0 |
+|  |        |  | 2010 |       148.0 |       148.0 |            148.0 |
+|  |        |  | 2011 |       148.0 |       148.0 |            148.0 |
+
+</pre>
+ 
+
 ==2014-04-02_v2==
 * Towards paper: Derived datasets 
 * Refactored Visitor and Iterator names.
@@ -32,6 +88,7 @@ but also consider the metadata of "metaData.cube".
 * Question: When and how is metaData.cube set? It is set when creating the metadata. The metadata queries now also create a global cube.
 * Question: Where lies the error?
 ** Maybe the metadata is not correctly build? How can I check?
+
 * Question: Do I need to make the DrillAcross Iterator return properly modelled metadata?
 
 * Problem: Our OLAP-to-SPARQL algorithm needs all SlicesRollups dimensions to be part of the queried data cube. However, our slicedDimensions is created for all datasets when creating the initial logical query plan. 

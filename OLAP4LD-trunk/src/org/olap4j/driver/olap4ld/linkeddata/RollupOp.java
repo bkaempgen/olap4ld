@@ -7,8 +7,7 @@ import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.semanticweb.yars.nx.Node;
 
 /**
- * This operator rolls up a Dimension of a Cube (the former LogicalOlapOp) to
- * the next higher Level. Currently, roll-up operator is defined as to set
+ * This operator rolls up dimensions of a Cube (the former LogicalOlapOp) to
  * for each hierarchy a specific level.
  * 
  * 

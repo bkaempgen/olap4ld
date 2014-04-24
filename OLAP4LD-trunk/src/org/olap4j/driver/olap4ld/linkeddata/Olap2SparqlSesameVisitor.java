@@ -13,6 +13,9 @@ import org.semanticweb.yars.nx.Node;
  * 
  * Assumes a pre-filled repository on which to compute OLAP-to-SPARQL algorithm.
  * 
+ * Also, assumes that query plan for each type of operator only contains one instance (since
+ * attributes are simply overridden).
+ * 
  * @author benedikt
  */
 public class Olap2SparqlSesameVisitor implements
@@ -72,6 +75,7 @@ public class Olap2SparqlSesameVisitor implements
 		SliceOp so = (SliceOp) o;
 
 		// we do not need to do anything with SliceOp
+		// We assume that slice is called only once per query plan.
 		this.slicedDimensions = so.slicedDimensions;
 	}
 

@@ -51,7 +51,8 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	// private static final String TESTURL =
 	// "http://yahoofinancewrap.appspot.com/archive/BAC/2012-12-12#ds";
 	//private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
-	private static final String TESTURL = "http://localhost/Auslagerung/lineorder_qb.ttl#ds";
+	//private static final String TESTURL = "http://localhost/Auslagerung/lineorder_qb.ttl#ds";
+	private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds,http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
 	// private static final String TESTURL =
 	// "http://data.webfoundation.org/webindex/dataset/ITUA-Imputed";
 
