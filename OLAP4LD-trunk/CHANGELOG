@@ -1,3 +1,9 @@
+==2014-04-30==
+* Works now. Problems were:
+* Not clear what infos are extracted from original MDX parse tree.
+* Now, measure list is created from MDX parse tree.
+* Measure list is list of members, so, no header.
+
 ==2014-04-24==
 * Still problem of Drill-Across
 * Status (Query + Result)
