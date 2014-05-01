@@ -1,6 +1,6 @@
 ==2014-05-01==
 ===Use dataset name in measure name (as in ISEM paper)===
-
+* Had to replace dataset name with "" in property and variable.
 
 ===Problem: Drill-Across over cubes with same measures===
 * Problem is that in the MDX query, there is no way to distinguish between the measures.

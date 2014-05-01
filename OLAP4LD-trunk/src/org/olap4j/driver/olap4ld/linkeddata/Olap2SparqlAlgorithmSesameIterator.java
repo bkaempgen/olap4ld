@@ -227,10 +227,12 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		// Now, for each measure, we create a measure value column.
 		// Any measure should be contained only once, unless calculated
 		// measures
-		HashMap<Integer, Boolean> measureMap = new HashMap<Integer, Boolean>();
+		HashMap<Integer, Boolean> projectedMeasureMap = new HashMap<Integer, Boolean>();
 		boolean first = true;
 
-		Map<String, Integer> map = Olap4ldLinkedDataUtil
+		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(cubes.get(0));
+		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(measures.get(0));
 
 		// At the same time, we can update the metadata.
@@ -252,7 +254,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			boolean contained = false;
 			for (Node[] aMeasure : measures) {
 				// add to newmeasures if 1) are contained in measures
-				if(aMeasure[map.get("?MEASURE_UNIQUE_NAME")].toString().equals(measure[map.get("?MEASURE_UNIQUE_NAME")].toString())) {
+				if(aMeasure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString().equals(measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString())) {
 					contained = true;
 				}
 			}
@@ -265,7 +267,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			// XXX: Needs to be put before creating the Logical Olap Operator
 			// Tree
 			// Will probably not work since MEASURE_AGGREGATOR
-			if (measure[map.get("?MEASURE_AGGREGATOR")].toString().equals(
+			if (measure[measuremap.get("?MEASURE_AGGREGATOR")].toString().equals(
 					"http://purl.org/olap#calculated")) {
 
 				/*
@@ -321,41 +323,48 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			} else {
 
 				// As always, remove Aggregation Function from Measure Name
-				String measureProperty = measure[map
+				// And now, see below
+				String measureProperty = measure[measuremap
 						.get("?MEASURE_UNIQUE_NAME")].toString().replace(
 						"AGGFUNC"
-								+ measure[map.get("?MEASURE_AGGREGATOR")]
+								+ measure[measuremap.get("?MEASURE_AGGREGATOR")]
 										.toString()
 										.replace("http://purl.org/olap#", "")
 										.toUpperCase(), "");
+				// And now, also (possibly) remove Dataset Name from Measure Name
+				measureProperty = measureProperty.replace(cubes.get(1)[cubemap.get("?CUBE_NAME")].toString(), "");
 
 				// We also remove aggregation function from Measure Property
 				// Variable so
 				// that the same property is not selected twice.
+				String measurePropertyVariableString = measure[measuremap
+				               								.get("?MEASURE_UNIQUE_NAME")]
+				               										.toString()
+				               										.replace(
+				               												"AGGFUNC"
+				               														+ measure[measuremap
+				               																.get("?MEASURE_AGGREGATOR")]
+				               																.toString()
+				               																.replace(
+				               																		"http://purl.org/olap#",
+				               																		"")
+				               																.toUpperCase(), "");
+				// Also, we remove dataset name
+				measurePropertyVariableString = measurePropertyVariableString.replace(cubes.get(1)[cubemap.get("?CUBE_NAME")].toString(), "");
+				
 				Node measurePropertyVariable = Olap4ldLinkedDataUtil
-						.makeUriToVariable(measure[map
-								.get("?MEASURE_UNIQUE_NAME")]
-								.toString()
-								.replace(
-										"AGGFUNC"
-												+ measure[map
-														.get("?MEASURE_AGGREGATOR")]
-														.toString()
-														.replace(
-																"http://purl.org/olap#",
-																"")
-														.toUpperCase(), ""));
+						.makeUriToVariable(measurePropertyVariableString);
 
 				// Unique name for variable
 				Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
-						.makeUriToVariable(measure[map
+						.makeUriToVariable(measure[measuremap
 								.get("?MEASURE_UNIQUE_NAME")].toString());
 
-				String aggregationfunction = measure[map
+				String aggregationfunction = measure[measuremap
 						.get("?MEASURE_AGGREGATOR")].toString().replace(
 						"http://purl.org/olap#", "");
 
-				if (measure[map.get("?MEASURE_AGGREGATOR")].toString().equals(
+				if (measure[measuremap.get("?MEASURE_AGGREGATOR")].toString().equals(
 						"null")) {
 					// In this case, we can only use top
 					aggregationfunction = "Max";
@@ -371,10 +380,10 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 				// According to spec, every measure needs to be set for every
 				// observation only once
-				if (!measureMap.containsKey(measureProperty.hashCode())) {
+				if (!projectedMeasureMap.containsKey(measureProperty.hashCode())) {
 					whereClause += "?obs <" + measureProperty + "> ?"
 							+ measurePropertyVariable + ".";
-					measureMap.put(measureProperty.hashCode(), true);
+					projectedMeasureMap.put(measureProperty.hashCode(), true);
 				}
 			}
 		}
