@@ -1,6 +1,25 @@
 ==2014-05-01==
+===Design experiments===
+In ISEM paper, we compare: Percentage of Nos with Real GDP growth rate.
+
+Since we cannot compute Percentage of Nos, we compare:
+
+SUM of Nos from GESIS with Employment rate, by sex from Estatwrap from Germany.
+
+This would show: Integration of Germany. 
+
+In ISEM paper, we had with respect to size of datasets:
+
+1) 2 DS with 20,268 triples
+3a) 4 DS with 24,636 triples
+3b) 8 DS with 35,482 triples
+
+We now would like to extend this.
+
+
 ===Use dataset name in measure name (as in ISEM paper)===
 * Had to replace dataset name with "" in property and variable.
+* Currently only for SUM.
 
 ===Problem: Drill-Across over cubes with same measures===
 * Problem is that in the MDX query, there is no way to distinguish between the measures.
