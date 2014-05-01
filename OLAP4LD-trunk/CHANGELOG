@@ -1,3 +1,85 @@
+==2014-05-01==
+===Use dataset name in measure name (as in ISEM paper)===
+
+
+===Problem: Drill-Across over cubes with same measures===
+* Problem is that in the MDX query, there is no way to distinguish between the measures.
+* Possible solutions
+** Decide from the ordering: The first obsValue, the second obsValue. However, this would need to be generic.
+** Merge measures: In resulting cube, only have one measure. If there are several facts that have the same dimension member combination, we would throw an error. This would allow to union cubes. 
+** Further automatically distinguish measures by the cube. Thus, not only sdmx-measure:obsValueAGGFUNCAVG and sdmx-measure:obsValueAGGFUNCCOUNT and sdmx-measure:obsValue, but sdmx-measure:obsValueCube1AGGFUNCAVG ...
+
+Question:
+
+* How many measures does the "global cube" have? Drill-Across should be defined as combining measures from several cubes (otherwise, would make it more complicated as is). Processing-wise, it would not make a difference. The global cube should have measures for each single measure in the cubes. This is how we defined it in ISEM paper: Note, in order to compare metrics from separate cubes - different from Dimensions and Members - Measures always need to denote different metrics, even though they may be described by the same property or linked by owl:sameAs. Thus, how about: 
+
+Problem:
+
+ALLBUS/ZA4570v590.rdf defines an rdf:range of xsd:decimal, Estatwrap defines an rdf:range of xsd:double. As a result, the metadata queries for measures return two different measures with the same name. 
+
+Solution:
+
+The real problem is that publishers use sdmx-measure:obsValue differently. They set a range, although the official publishers have not done that. In my opinion, in this case, publishers should create sub-properties of sdmx-measure and then "extend" it.
+
+As a workaround, for now, we simply always assume xsd:decimal as data-type. However, this is a quick-fix.
+
+Question: What dataset does the measure httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG use? It results in this:
+
++--+------+-------------+
+|  | 2005 |             |
+|  | 2006 |       93.86 |
+|  | 2007 |             |
+|  | 2008 |       95.28 |
+|  | 2009 |             |
+|  | 2010 |             |
+|  | 2011 |             |
+|  | 2012 |             |
+|  | 1980 |             |
+|  | 1991 |             |
+|  | 1992 |             |
+|  | 1994 |             |
+|  | 1996 |             |
+|  | 1998 |             |
+|  | 2000 |             |
+|  | 2004 |             |
+
+The new measure httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsAGGFUNCSUM does not result in anything.
+
+In summary, the problem is that: Either we do select a general measure. Then, both OLAP-2-SPARQL algorithms return results. Nested loop would find the overlaps and probably return the first datasets measure since the global cube does ...? Good question.
+
+The problem is the following: The "global" cube describes all measures, dimensions etc. But Drill-Across assumes the metadata of the first dataset. This is wrong since we need the union of measures etc. 
+
+Solution: The Metadata about the "global" cube needs to be a super-set of the Metadata of the resulting Drill-Across operators. Especially, since Drill-Across can be nested, also. Thus, we need to distinguish:
+
+* createMetadata()
+* createData()
+
+One thing I do not like currently: 
+
+1) Partly, we create the metadata using SPARQL queries in metadata queries of Linked Data Cubes Engine. 
+2) Partly, we create the metadata directly on given metadata in analytical operators.
+
+The thing is that the analytical operators create many more different data cubes, e.g., slices of the overall data cubes.
+
+Therefore, we probably cannot find synergies, here. 
+
+Plan: 
+
+To have the operators create the metadata, also.
+
+Allow Base-Cube, to also return metadata of the "global cube".
+
+Unfortunately, metadata queries with their "restrictions" are still different from simply loading the cube metadata. Therefore, this refactoring is postponed.
+
+Instead, I go ahead and add the metadata processing to Drill-Across iterator.
+
+Quick-fix for now: The measures are created specifically, all others are not.
+
+If I ask for the same measure twice, the result would always be the first measure (since we cannot distinguish
+between different datasets)
+
+Therefore, next goal is to -- similar to ISEM paper -- to also use the dataset name in the measure name.
+
 ==2014-04-30==
 * Works now. Problems were:
 * Not clear what infos are extracted from original MDX parse tree.

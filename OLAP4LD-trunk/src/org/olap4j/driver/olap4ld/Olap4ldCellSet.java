@@ -1572,6 +1572,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		// No header
 		for (int i = 0; i < measureList.size() && measure != null; i++) {
 
+			// Problem in case the same measure is used by several cubes, then we always use the first.
 			if (measureList.get(i).getUniqueName()
 					.equals(measure.getUniqueName())) {
 				// No header
