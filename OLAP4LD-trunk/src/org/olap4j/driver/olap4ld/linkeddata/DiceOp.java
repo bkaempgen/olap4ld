@@ -47,7 +47,14 @@ public class DiceOp implements LogicalOlapOp {
 
 			// There is no header
 			for (int i = 0; i < membercombinations.size(); i++) {
+				
+				if (i!=0) {
+					positionsStringArray += " OR ";
+				}
+				
+				// One possible member combination (inside AND)
 				List<Node[]> members = membercombinations.get(i);
+				
 				String positionStringArray[] = new String[members
 				                  						.size()-1];
 				// First is header
@@ -60,7 +67,7 @@ public class DiceOp implements LogicalOlapOp {
 				}
 				positionsStringArray += "("
 						+ Olap4ldLinkedDataUtil.implodeArray(
-								positionStringArray, ", ") + ")";
+								positionStringArray, " AND ") + ")";
 			}
 		}
 

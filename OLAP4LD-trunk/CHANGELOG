@@ -1,5 +1,5 @@
 ==2014-05-01==
-===Design experiments===
+===XXX Design experiments===
 In ISEM paper, we compare: Percentage of Nos with Real GDP growth rate.
 
 Since we cannot compute Percentage of Nos, we compare:
@@ -16,6 +16,58 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+===First, integrate properly GESIS and Estatwrap===
+Drill-across(
+
+Rollup (Slice (Dice (Projection (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds), {http://purl.org/linked-data/sdmx/2009/measure#obsValueAGGFUNCAVG, http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#dsAGGFUNCSUM}), (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00) OR (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://olap4ld.googlecode.com/dic/geo#DE)), {http://ontologycentral.com/2009/01/eurostat/ns#aggreg95, http://ontologycentral.com/2009/01/eurostat/ns#geo, http://ontologycentral.com/2009/01/eurostat/ns#indic_na}), {}), 
+
+
+Rollup (Slice (Dice (Projection (BaseCube (http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds), {http://purl.org/linked-data/sdmx/2009/measure#obsValueAGGFUNCAVG, http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#dsAGGFUNCSUM}), (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00) OR (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://olap4ld.googlecode.com/dic/geo#DE)), {http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo, http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable}), {}))
+
+... Now, we see that we need to start integrate the datasets. How to do that, entity consolidation 
+as in ISEM paper?
+
+===Dice for integration===
+The problem seems that we dice only for the gesis:geo dimension.
+
+First, check whether dice works at all:
+
+SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM]} 
+ON COLUMNS, 
+
+{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS 
+
+FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds]
+
+WHERE CrossJoin({[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]},{[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvariableYYYrdfXXX23v590_1]})
+
+Note, we are not allowed to ask (e.g., dice) for non-existing members.
+
+Question: How is dice defined?
+
+According to OLAP4LD demo paper, Dice removes for every possible member combination on axes filtered dimension members. This probably is not completely true. We dice as specified in WHERE clause (filter axis). A filter axis would return member combinations (positions) from a fixed set of levels (or hierarchies) from the filter axis. Thus, for filter axis (just as for the column and row axis), we create a list of member combinations (positions). In filter axis, either we have a list of members, or we have a list of lists. We want to have returned a list of positions. Every position is a possible combination of members of a fixed set of levels. 
+
+In case there are members, directly, we return 
+
+Execute logical query plan: Rollup (Slice (Dice (Projection (BaseCube (http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds), {http://purl.org/linked-data/sdmx/2009/measure#obsValueAGGFUNCAVG, http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#dsAGGFUNCSUM}), (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00) OR (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_0)), {http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo, http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable}), {})
+
+This seemingly "error" to use geo for both OR sides is ok since every OR should have the same "signature".
+
+Watch out: Saiku would use CrossJoin for representing AND: CrossJoin({[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FcikXXX2F1141391XXX23id]}, {[httpXXX3AXXX2FXXX2FpublicYYYbZZZkaempgenYYYdeXXX3A8080XXX2FvocabXXX2FusZZZgaapZZZ2009ZZZ01ZZZ31XXX23Assets]})
+
+SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsAGGFUNCSUM]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds] WHERE CrossJoin({[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300], [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FdicXXX2FgeoXXX23DE]}, {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvariableYYYrdfXXX23v590_1]}}
+
+SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsAGGFUNCSUM]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FdicXXX2FgeoXXX23DE]}
+
+Drill-across(
+
+Rollup (Slice (Dice (Projection (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds), {http://purl.org/linked-data/sdmx/2009/measure#obsValueAGGFUNCAVG, http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#dsAGGFUNCSUM}), (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00) OR (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://olap4ld.googlecode.com/dic/geo#DE)), {http://ontologycentral.com/2009/01/eurostat/ns#aggreg95, http://ontologycentral.com/2009/01/eurostat/ns#geo, http://ontologycentral.com/2009/01/eurostat/ns#indic_na}), {}), 
+
+
+Rollup (Slice (Dice (Projection (BaseCube (http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds), {http://purl.org/linked-data/sdmx/2009/measure#obsValueAGGFUNCAVG, http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#dsAGGFUNCSUM}), (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00) OR (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://olap4ld.googlecode.com/dic/geo#DE)), {http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo, http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable}), {}))
+
+... Now, we see that we need to start integrate the datasets. How to do that, entity consolidation 
+as in ISEM paper?
 
 ===Use dataset name in measure name (as in ISEM paper)===
 * Had to replace dataset name with "" in property and variable.
