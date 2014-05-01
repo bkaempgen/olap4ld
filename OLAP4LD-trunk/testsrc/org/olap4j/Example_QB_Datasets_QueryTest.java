@@ -164,7 +164,10 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// dsUri = "http://localhost:8080/ldcx-trunk/ldcx/tests/ssb001/ttl/example.ttl#ds";
 		metadataTest(dsUri, 5, 5);
 	}
-	
+
+	/**
+	 * Maybe wrong after changes to the paste-bin for the ESWC demo.
+	 */
 	public void testExampleSsb001_Pastebin_standardquery() {
 		String result = executeStatement("SELECT /* $session: 2fb5512e-fec0-3d4a-0d9d-ce0f04935678 */ NON EMPTY {[httpXXX3AXXX2FXXX2FpastebinYYYcomXXX2FrawYYYphpXXX3FiXXX3D839G2u72XXX23lo_discount]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FpastebinYYYcomXXX2FrawYYYphpXXX3FiXXX3D839G2u72XXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FpastebinYYYcomXXX2FrawYYYphpXXX3FiXXX3D839G2u72XXX23ds]");
 		
@@ -348,7 +351,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// name =
 		// "http://localhost:8888/archive/909832/0001193125-10-230379#ds";
 
-		metadataTest(name, 6, 2);
+		metadataTest(name, 6, 3);
 	}
 
 	/**
@@ -545,6 +548,16 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		
 		assertContains("|  |        |  | 2011 |       148.0 |         1.0 |       148.0 |            70.43 |", result);
 
+	}
+	
+	/**
+	 * Query from ISEM paper.
+	 */
+	public void testDrillAcrossUnemploymentFearAndGDPGrowth() {
+		
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds]");
+		
+		assertContains("|  |        |  | 2011 |       148.0 |         1.0 |       148.0 |            70.43 |", result);
 	}
 	
 	

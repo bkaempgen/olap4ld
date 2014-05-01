@@ -246,6 +246,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				continue;
 			}
 			
+			// XXX Should actually not make a difference anymore, since we do not add them to projections in the first place.
+			
 			// Make sure that the projected measure actually is contained in measures and add if so
 			boolean contained = false;
 			for (Node[] aMeasure : measures) {

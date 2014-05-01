@@ -16,7 +16,7 @@ WHERE {
 ?CUBE_NAME qb:structure ?dsd. 
 ?dsd qb:component ?compSpec. 
 ?compSpec qb:measure ?MEASURE_UNIQUE_NAME.  
-OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:range ?DATA_TYPE. } 
+BIND('http://www.w3.org/2001/XMLSchema#decimal' as ?DATA_TYPE). 
 OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = "en" ) } 
 
 FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR }

@@ -586,13 +586,15 @@ abstract class Olap4ldCellSet implements CellSet {
 			String membernameuri = Olap4ldLinkedDataUtil.convertMDXtoURI(member
 					.getUniqueName());
 
+			if (isFirst) {
+				isFirst = false;
+				projections.add(measures.get(0));
+			}
+			
 			for (Node[] measure : measures) {
 				if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 						.equals(membernameuri)) {
-					if (isFirst) {
-						isFirst = false;
-						projections.add(measures.get(0));
-					}
+					
 					projections.add(measure);
 				}
 			}

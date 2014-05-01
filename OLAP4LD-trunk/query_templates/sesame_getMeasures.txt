@@ -16,7 +16,7 @@ WHERE {
 ?CUBE_NAME qb:structure ?dsd. 
 ?dsd qb:component ?compSpec. 
 ?compSpec qb:measure ?MEASURE_UNIQUE_NAME.  
-OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:range ?DATA_TYPE. } 
+BIND('http://www.w3.org/2001/XMLSchema#decimal' as ?DATA_TYPE). 
 OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = "en" ) } 
 
 ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR 
@@ -33,7 +33,7 @@ BIND('true' as ?MEASURE_IS_VISIBLE).
 ?CUBE_NAME qb:structure ?dsd. 
 ?dsd qb:component ?compSpec. 
 ?compSpec qb:measure ?MEASURE_UNIQUE_NAME_PREFIX.  
-OPTIONAL {?MEASURE_UNIQUE_NAME_PREFIX rdfs:range ?DATA_TYPE. } 
+BIND('http://www.w3.org/2001/XMLSchema#decimal' as ?DATA_TYPE).
 OPTIONAL {?MEASURE_UNIQUE_NAME_PREFIX rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = "en" ) } 
 
 FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR_PART } 
@@ -52,12 +52,31 @@ BIND('true' as ?MEASURE_IS_VISIBLE).
 ?CUBE_NAME qb:structure ?dsd. 
 ?dsd qb:component ?compSpec. 
 ?compSpec qb:measure ?MEASURE_UNIQUE_NAME_PREFIX.  
-OPTIONAL {?MEASURE_UNIQUE_NAME_PREFIX rdfs:range ?DATA_TYPE. } 
+BIND('http://www.w3.org/2001/XMLSchema#decimal' as ?DATA_TYPE).
 OPTIONAL {?MEASURE_UNIQUE_NAME_PREFIX rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = "en" ) } 
 
 FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR_PART } 
 BIND('http://purl.org/olap#avg' as ?MEASURE_AGGREGATOR). 
 BIND(CONCAT(STR(?MEASURE_UNIQUE_NAME_PREFIX), "AGGFUNCAVG") as ?MEASURE_UNIQUE_NAME). 
+
+OPTIONAL {?compSpec qb:expression ?EXPRESSION } 
+BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 
+BIND('{{{TABLE_SCHEM}}}' as ?SCHEMA_NAME). 
+BIND(?MEASURE_UNIQUE_NAME as ?MEASURE_NAME).
+BIND('true' as ?MEASURE_IS_VISIBLE). 
+{{{FILTERS}}}
+
+} UNION {
+
+?CUBE_NAME qb:structure ?dsd. 
+?dsd qb:component ?compSpec. 
+?compSpec qb:measure ?MEASURE_UNIQUE_NAME_PREFIX.  
+BIND('http://www.w3.org/2001/XMLSchema#decimal' as ?DATA_TYPE). 
+OPTIONAL {?MEASURE_UNIQUE_NAME_PREFIX rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = "en" ) } 
+
+FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR_PART } 
+BIND('http://purl.org/olap#sum' as ?MEASURE_AGGREGATOR). 
+BIND(CONCAT(STR(?MEASURE_UNIQUE_NAME_PREFIX), CONCAT(STR(?CUBE_NAME), "AGGFUNCSUM")) as ?MEASURE_UNIQUE_NAME). 
 
 OPTIONAL {?compSpec qb:expression ?EXPRESSION } 
 BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 
