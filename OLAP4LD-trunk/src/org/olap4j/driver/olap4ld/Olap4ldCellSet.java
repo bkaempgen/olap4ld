@@ -628,7 +628,7 @@ abstract class Olap4ldCellSet implements CellSet {
 			first = true;
 			for (Member member : signaturemembers) {
 				Olap4ldMember olapmember = (Olap4ldMember) member;
-				// No measures
+				// No measures (from global cube)
 				Olap4ldHierarchy hierarchy = olapmember.getHierarchy();
 				if (!hierarchy.getUniqueName().equals(
 						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
@@ -637,6 +637,7 @@ abstract class Olap4ldCellSet implements CellSet {
 						
 						newfilterAxisSignature.add(hierarchies.get(0));
 					}
+					// Now, we need to find this hierarchy from the global cube in the local cube.
 					String hierarchynameuri = Olap4ldLinkedDataUtil.convertMDXtoURI(hierarchy.getUniqueName());
 					for (Node[] ahierarchy : hierarchies) {
 						if (ahierarchy[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")].toString()
@@ -650,6 +651,9 @@ abstract class Olap4ldCellSet implements CellSet {
 							 * a consolidated hierarchy etc. 
 							 * 
 							 * We then need to find the respective member and hierarchy in the original dataset.
+							 * 
+							 * Currently, I will probably not find the hierarchy for the dataset,
+							 * since the hierarchy will have the name of another datasets dimension.
 							 */
 							
 							newfilterAxisSignature.add(ahierarchy);

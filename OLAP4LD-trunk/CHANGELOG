@@ -1,5 +1,4 @@
-==2014-05-01==
-===XXX Design experiments===
+==XXX Design experiments==
 In ISEM paper, we compare: Percentage of Nos with Real GDP growth rate.
 
 Since we cannot compute Percentage of Nos, we compare:
@@ -15,6 +14,77 @@ In ISEM paper, we had with respect to size of datasets:
 3b) 8 DS with 35,482 triples
 
 We now would like to extend this.
+
+==2014-05-02==
+* No success with entity consolidation for Drill-Across.
+* Problem: If I just replace all occurrences of a URI with the canonical form, I have the problem that Estatwrap is using the same URI for Dim / Hier / Level, whereas GESIS uses different ones for Dim / Hier / Level. This is because Estatrap uses rdfs:range nuts:Region whereas GESIS uses a code list #list.
+
+Todo: 
+A first step would be to "consolidate" dimensions and members, i.e., to only return canonical identifiers.
+
+A second step would be to only use those canonical identifiers (let's make it the first occurence) in MDX queries (so that those identifiers can be found).
+
+A third step would be to change the generation of OLAP operators to use the right Linked Data identifiers for the respective dataset. However, how to know the correct identifier? 
+
+A forth step would be to change the Drill-Across operator to consider equivalences.
+
+===Entity consolidation===
+SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsAGGFUNCSUM]} ON COLUMNS, 
+
+{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS 
+
+FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds] 
+
+WHERE CrossJoin({[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300], [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FdicXXX2FgeoXXX23DE]},{[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvariableYYYrdfXXX23v590_1]})
+
+
+Logical query plan: Drill-across(
+
+Rollup (Slice (Dice (Projection (BaseCube (http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds), {http://purl.org/linked-data/sdmx/2009/measure#obsValueAGGFUNCAVG, http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#dsAGGFUNCSUM}), (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00 AND http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1) OR (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://olap4ld.googlecode.com/dic/geo#DE AND http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1)), {http://ontologycentral.com/2009/01/eurostat/ns#aggreg95, http://ontologycentral.com/2009/01/eurostat/ns#geo, http://ontologycentral.com/2009/01/eurostat/ns#indic_na}), {}), 
+
+
+Rollup (Slice (Dice (Projection (BaseCube (http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds), {http://purl.org/linked-data/sdmx/2009/measure#obsValueAGGFUNCAVG, http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#dsAGGFUNCSUM}), (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00 AND http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1) OR (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://olap4ld.googlecode.com/dic/geo#DE AND http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1)), {http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo, http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable}), {}))
+
+What problems do we see here?
+
+Assume we really set estatwrap:geo owl:sameAs gesis:geo. This is what we do here: http://people.aifb.kit.edu/bka/Public/cube_additionalRDF.rdf
+
+Then, both dimensions may have the same two codelists or define different ranges, e.g., nuts:region.
+
+In ISEM paper, we 1) use canonical identifiers for dimensions and members when storing the metadata and 2) from the multiCubeDimensionsClosureTable mapping canonical values to dimension URIs use all dimension URIs in a OR filter clause for querying the data (which of course makes the query for data quite slow). 
+
+However, something similar, we could do also: 
+
+1) When querying for dimensions / hierarchies / levels and members I consolidate and use a canonical identifier which I map to original dimension URIs. Thus, we will have as identifiers new canonical ones. XXX: Could we not instead allow all possible identifiers?
+
+2) When querying for facts I use all dimension URIs in an OR filter clause and all member URIs in another OR filter clause.
+
+Why does our current query not work? Since we filter for gesis:geo although for estatwrap we would need to filter for estatwrap:geo. 
+
+There are different possibilities:
+
+* We could leave the OLAP-to-SPARQL algorithm as it is and make sure that the proper dimensions are used as input to it. However, we would need to extend Drill-Across to consider equal dimensions and members.
+* We could extend the OLAP-to-SPARQL algorithm to query for all possible dimensions or members.
+
+A first step would be to "consolidate" dimensions and members, i.e., to only return canonical identifiers.
+
+A second step would be to only use those canonical identifiers (let's make it the first occurence) in MDX queries (so that those identifiers can be found).
+
+A third step would be to change the generation of OLAP operators to use the right Linked Data identifiers for the respective dataset. However, how to know the correct identifier? 
+
+A forth step would be to change the Drill-Across operator to consider equivalences.
+
+How have I done it for ISEM paper? I created canonical identifiers for metadata and queried simply for every possible URI in data.
+
+What is different with triple stores? I have a query on the global cube with canonical identifiers. When I create the initial query plan, I use elements from the single datasets. This works in case the elements are directly represented in the single datasets. However, in case of canonical identifiers, I do not directly have the elements represented with this name. One thing I could do is to use those canonical identifiers still, but internally map.
+
+Problem: If I just replace all occurrences of a URI with the canonical form, I have the problem that Estatwrap is using the same URI for Dim / Hier / Level, whereas GESIS uses different ones for Dim / Hier / Level. This is because Estatrap uses rdfs:range nuts:Region whereas GESIS uses a code list #list.
+
+How was that in ISEM paper? In ISEM paper, I did not represent Hierarchies, yet. I assumed every dimension to have exactly one hierarchy and level with the same name as the dimension (see findDimensionHierarchies). 
+
+How about defining that #list is also owl:sameAs estatwrap:geo? In this case, 
+
+==2014-05-01==
 
 ===First, integrate properly GESIS and Estatwrap===
 Drill-across(

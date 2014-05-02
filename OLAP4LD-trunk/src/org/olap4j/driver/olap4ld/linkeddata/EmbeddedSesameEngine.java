@@ -1051,6 +1051,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// Add to result
 				boolean first = true;
 				for (Node[] nodes : intermediaryresult) {
+					// We do not want to have the single datasets returned.
+					// result.add(nodes);
 					if (first) {
 						if (i == 0) {
 							result.add(nodes);
@@ -1058,10 +1060,39 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-					// We do not want to have the single datasets returned.
-					// result.add(nodes);
 				}
 			}
+
+			/*
+			 * Now that we have loaded all cube, we need to implement entity
+			 * consolidation.
+			 * 
+			 * We create an equivalence table. Then, for each dimension unique
+			 * name, we have one equivalence class. Then we can do as before.
+			 */
+
+			// List<Node[]> myresult = sparql(querytemplate, true);
+			// // Add all of result2 to result
+			// boolean first = true;
+			// for (Node[] nodes : myresult) {
+			// if (first) {
+			// first = false;
+			// continue;
+			// }
+			// result.add(nodes);
+			// }
+
+			// for now, we simply assume equivalence statements given
+
+			List<Node[]> equivs = new ArrayList<Node[]>();
+
+			equivs.add(new Node[] {
+					new Resource(
+							"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
+					new Resource(
+							"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
+
+			this.equivalenceList = createEquivalenceList(equivs);
 
 			// Now, add "virtual cube"
 			// ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
@@ -1655,8 +1686,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		// Check whether Drill-across query
 		// XXX: Wildcard delimiter
-		if (restrictions.cubeNamePattern != null
-				&& restrictions.cubeNamePattern.contains(",")) {
+		if (restrictions.cubeNamePattern != null) {
 
 			String[] datasets = restrictions.cubeNamePattern.split(",");
 			for (int i = 0; i < datasets.length; i++) {
@@ -1672,37 +1702,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// Add to result
 				boolean first = true;
 
-				/*
-				 * XXX: Here we need to implement entity consolidation.
-				 * 
-				 * We create an equivalence table. Then, for each dimension
-				 * unique name, we have one equivalence class. Then we can do as
-				 * before.
-				 */
-
-				// List<Node[]> myresult = sparql(querytemplate, true);
-				// // Add all of result2 to result
-				// boolean first = true;
-				// for (Node[] nodes : myresult) {
-				// if (first) {
-				// first = false;
-				// continue;
-				// }
-				// result.add(nodes);
-				// }
-
-				// for now, we simply assume equivalence statements given
-
-				List<Node[]> equivs = new ArrayList<Node[]>();
-
-				equivs.add(new Node[] {
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
-						new Resource(
-								"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-				this.equivalenceList = createEquivalenceList(equivs);
-
 				for (Node[] anIntermediaryresult : intermediaryresult) {
 					if (first) {
 						if (i == 0) {
@@ -1711,78 +1710,99 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-					// We do not want to have the single datasets returned.
-					// result.add(anIntermediaryresult);
 
-					// Also add dimension to global cube
-					Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
-							.getNodeResultFields(intermediaryresult.get(0));
-
-					Node[] newnode = new Node[9];
-					newnode[dimensionmap.get("?CATALOG_NAME")] = anIntermediaryresult[dimensionmap
-							.get("?CATALOG_NAME")];
-					newnode[dimensionmap.get("?SCHEMA_NAME")] = anIntermediaryresult[dimensionmap
-							.get("?SCHEMA_NAME")];
-					// New cube name of global cube
-					newnode[dimensionmap.get("?CUBE_NAME")] = new Resource(
-							restrictions.cubeNamePattern);
-
-					// Needs to be canonical name if in equivalenceList
-					Node canonical = getCanonical(anIntermediaryresult[dimensionmap
-																		.get("?DIMENSION_UNIQUE_NAME")]);
-					
-					newnode[dimensionmap.get("?DIMENSION_NAME")] = canonical;
-
-					// Needs to be canonical name
-					newnode[dimensionmap.get("?DIMENSION_UNIQUE_NAME")] = canonical;
-					
-					newnode[dimensionmap.get("?DIMENSION_CAPTION")] = anIntermediaryresult[dimensionmap
-							.get("?DIMENSION_CAPTION")];
-					newnode[dimensionmap.get("?DIMENSION_ORDINAL")] = anIntermediaryresult[dimensionmap
-							.get("?DIMENSION_ORDINAL")];
-					newnode[dimensionmap.get("?DIMENSION_TYPE")] = anIntermediaryresult[dimensionmap
-							.get("?DIMENSION_TYPE")];
-					newnode[dimensionmap.get("?DESCRIPTION")] = anIntermediaryresult[dimensionmap
-							.get("?DESCRIPTION")];
-
-					// Only add if not already contained.
-					boolean contained = false;
-					for (Node[] aResult : result) {
-						boolean sameDimension = aResult[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")].toString()
-								.equals(newnode[dimensionmap
-										.get("?DIMENSION_UNIQUE_NAME")]
-										.toString());
-						boolean sameCube = aResult[dimensionmap
-								.get("?CUBE_NAME")].toString().equals(
-								newnode[dimensionmap.get("?CUBE_NAME")]
-										.toString());
-
-						if (sameDimension && sameCube) {
-							contained = true;
-						}
-					}
-
-					if (!contained) {
-						result.add(newnode);
-					}
+					result.add(anIntermediaryresult);
 				}
-
 			}
 
 		} else {
-
 			result = getDimensionsPerDataSet(restrictions);
-
 		}
 
+		// Create global cube which is intersection of all dimensions and new
+		// cube name
+		return createGlobalDimensions(restrictions, result);
+	}
+
+	private List<Node[]> createGlobalDimensions(Restrictions restrictions,
+			List<Node[]> intermediaryresult) {
+
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(intermediaryresult.get(0));
+
+		// Add to result
+		boolean first = true;
+
+		for (Node[] anIntermediaryresult : intermediaryresult) {
+
+			if (first) {
+				first = false;
+				result.add(anIntermediaryresult);
+				continue;
+			}
+
+			// Also add dimension to global cube
+
+			Node[] newnode = new Node[9];
+			newnode[dimensionmap.get("?CATALOG_NAME")] = anIntermediaryresult[dimensionmap
+					.get("?CATALOG_NAME")];
+			newnode[dimensionmap.get("?SCHEMA_NAME")] = anIntermediaryresult[dimensionmap
+					.get("?SCHEMA_NAME")];
+			// New cube name of global cube
+			if (restrictions.cubeNamePattern == null) {
+				newnode[dimensionmap.get("?CUBE_NAME")] = anIntermediaryresult[dimensionmap
+						.get("?CUBE_NAME")];
+			} else {
+				newnode[dimensionmap.get("?CUBE_NAME")] = new Resource(
+						restrictions.cubeNamePattern);
+			}
+
+			newnode[dimensionmap.get("?DIMENSION_NAME")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_NAME")];
+
+			// Needs to be canonical name
+			newnode[dimensionmap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_UNIQUE_NAME")];
+
+			newnode[dimensionmap.get("?DIMENSION_CAPTION")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_CAPTION")];
+			newnode[dimensionmap.get("?DIMENSION_ORDINAL")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_ORDINAL")];
+			newnode[dimensionmap.get("?DIMENSION_TYPE")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_TYPE")];
+			newnode[dimensionmap.get("?DESCRIPTION")] = anIntermediaryresult[dimensionmap
+					.get("?DESCRIPTION")];
+
+			// Only add if not already contained.
+			boolean contained = false;
+			for (Node[] aResult : result) {
+				boolean sameDimension = aResult[dimensionmap
+						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
+						newnode[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+								.toString());
+				boolean sameCube = aResult[dimensionmap.get("?CUBE_NAME")]
+						.toString().equals(
+								newnode[dimensionmap.get("?CUBE_NAME")]
+										.toString());
+
+				if (sameDimension && sameCube) {
+					contained = true;
+				}
+			}
+
+			if (!contained) {
+				result.add(newnode);
+			}
+		}
 		return result;
 	}
 
 	private Node getCanonical(Node canonical) {
 		for (List<Node> equivalenceClass : equivalenceList) {
 			for (Node node : equivalenceClass) {
-				
+
 				if (node.equals(canonical)) {
 					canonical = equivalenceClass.get(0);
 					break;
@@ -1794,17 +1814,18 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	/**
 	 * 
-	 * @param equivs - equiv[0] first same as and equiv[1] second same as entity.
+	 * @param equivs
+	 *            - equiv[0] first same as and equiv[1] second same as entity.
 	 * @return
 	 */
 	private List<List<Node>> createEquivalenceList(List<Node[]> equivs) {
 		List<List<Node>> equivalenceList = new ArrayList<List<Node>>();
 
 		for (Node[] equiv : equivs) {
-			
+
 			Node A = equiv[0];
 			Node B = equiv[1];
-			
+
 			// Store equiv
 			List<Node> rA = null;
 			for (List<Node> equivalenceClass : equivalenceList) {
@@ -1828,7 +1849,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					break;
 				}
 			}
-			
+
 			if (rA == null && rB == null) {
 				ArrayList<Node> newEquivalenceClass = new ArrayList<Node>();
 				newEquivalenceClass.add(A);
@@ -1836,26 +1857,25 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				equivalenceList.add(newEquivalenceClass);
 			} else if (rA != null && rB != null) {
 				// merge rA and rB
-				
+
 				for (Node node : rB) {
 					rA.add(node);
 				}
 				equivalenceList.remove(rB);
-				
+
 			} else if (rA != null) {
 				// add B to rA
-				
+
 				rA.add(B);
-				
-				
+
 			} else if (rB != null) {
 				// add A to rB
-				
+
 				rB.add(A);
 			}
-			
+
 		}
-		
+
 		return equivalenceList;
 	}
 
@@ -1889,12 +1909,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			List<Node[]> myresult = sparql(querytemplate, true);
 			// Add all of result2 to result
 			boolean first = true;
-			for (Node[] nodes : myresult) {
+			for (Node[] anIntermediaryresult : myresult) {
 				if (first) {
 					first = false;
 					continue;
 				}
-				result.add(nodes);
+
+				result.add(anIntermediaryresult);
 			}
 		}
 
@@ -1927,6 +1948,10 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				result.add(nodes);
 			}
 		}
+		
+		// Use canonical identifier
+		result = replaceIdentifiersWithCanonical(result);
+		
 		return result;
 	}
 
@@ -2093,6 +2118,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			}
 			result.add(nodes);
 		}
+		
+		// Use canonical identifier
+		result = replaceIdentifiersWithCanonical(result);
 
 		return result;
 	}
@@ -2115,8 +2143,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		// Check whether Drill-across query
 		// XXX: Wildcard delimiter
-		if (restrictions.cubeNamePattern != null
-				&& restrictions.cubeNamePattern.contains(",")) {
+		if (restrictions.cubeNamePattern != null) {
 
 			String[] datasets = restrictions.cubeNamePattern.split(",");
 			for (int i = 0; i < datasets.length; i++) {
@@ -2141,52 +2168,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 
 					// We do not want to have the single datasets returned.
-					// result.add(anIntermediaryresult);
-
-					// Also add dimension to global cube
-					Map<String, Integer> hierarchymap = Olap4ldLinkedDataUtil
-							.getNodeResultFields(intermediaryresult.get(0));
-					Node[] newnode = new Node[9];
-					newnode[hierarchymap.get("?CATALOG_NAME")] = anIntermediaryresult[hierarchymap
-							.get("?CATALOG_NAME")];
-					newnode[hierarchymap.get("?SCHEMA_NAME")] = anIntermediaryresult[hierarchymap
-							.get("?SCHEMA_NAME")];
-					newnode[hierarchymap.get("?CUBE_NAME")] = new Resource(
-							restrictions.cubeNamePattern);
-					newnode[hierarchymap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[hierarchymap
-							.get("?DIMENSION_UNIQUE_NAME")];
-					newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[hierarchymap
-							.get("?HIERARCHY_UNIQUE_NAME")];
-					newnode[hierarchymap.get("?HIERARCHY_NAME")] = anIntermediaryresult[hierarchymap
-							.get("?HIERARCHY_NAME")];
-					newnode[hierarchymap.get("?HIERARCHY_CAPTION")] = anIntermediaryresult[hierarchymap
-							.get("?HIERARCHY_CAPTION")];
-					newnode[hierarchymap.get("?DESCRIPTION")] = anIntermediaryresult[hierarchymap
-							.get("?DESCRIPTION")];
-					newnode[hierarchymap.get("?HIERARCHY_MAX_LEVEL_NUMBER")] = anIntermediaryresult[hierarchymap
-							.get("?HIERARCHY_MAX_LEVEL_NUMBER")];
-
-					// Only add if not already contained.
-					boolean contained = false;
-					for (Node[] aResult : result) {
-						boolean sameDimension = aResult[hierarchymap
-								.get("?HIERARCHY_UNIQUE_NAME")].toString()
-								.equals(newnode[hierarchymap
-										.get("?HIERARCHY_UNIQUE_NAME")]
-										.toString());
-						boolean sameCube = aResult[hierarchymap
-								.get("?CUBE_NAME")].toString().equals(
-								newnode[hierarchymap.get("?CUBE_NAME")]
-										.toString());
-
-						if (sameDimension && sameCube) {
-							contained = true;
-						}
-					}
-
-					if (!contained) {
-						result.add(newnode);
-					}
+					result.add(anIntermediaryresult);
 				}
 
 			}
@@ -2197,6 +2179,78 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		}
 
+		// Create global hierarchies which is intersection of all hierarchies
+		// and new
+		// cube name
+		return createGlobalHierarchies(restrictions, result);
+	}
+
+	private List<Node[]> createGlobalHierarchies(Restrictions restrictions,
+			List<Node[]> intermediaryresult) {
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		
+		boolean first = true;
+		for (Node[] anIntermediaryresult : intermediaryresult) {
+			
+			if (first) {
+				first = false;
+				result.add(anIntermediaryresult);
+				continue;
+			}
+
+			// Also add hierarchy to global cube
+			Map<String, Integer> hierarchymap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(intermediaryresult.get(0));
+
+			Node[] newnode = new Node[9];
+			newnode[hierarchymap.get("?CATALOG_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?CATALOG_NAME")];
+			newnode[hierarchymap.get("?SCHEMA_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?SCHEMA_NAME")];
+
+			// New cube name of global cube
+			if (restrictions.cubeNamePattern == null) {
+				newnode[hierarchymap.get("?CUBE_NAME")] = anIntermediaryresult[hierarchymap
+						.get("?CUBE_NAME")];
+			} else {
+				newnode[hierarchymap.get("?CUBE_NAME")] = new Resource(
+						restrictions.cubeNamePattern);
+			}
+			newnode[hierarchymap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?DIMENSION_UNIQUE_NAME")];
+			newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?HIERARCHY_UNIQUE_NAME")];
+			newnode[hierarchymap.get("?HIERARCHY_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?HIERARCHY_NAME")];
+			newnode[hierarchymap.get("?HIERARCHY_CAPTION")] = anIntermediaryresult[hierarchymap
+					.get("?HIERARCHY_CAPTION")];
+			newnode[hierarchymap.get("?DESCRIPTION")] = anIntermediaryresult[hierarchymap
+					.get("?DESCRIPTION")];
+			newnode[hierarchymap.get("?HIERARCHY_MAX_LEVEL_NUMBER")] = anIntermediaryresult[hierarchymap
+					.get("?HIERARCHY_MAX_LEVEL_NUMBER")];
+
+			// Only add if not already contained.
+			boolean contained = false;
+			for (Node[] aResult : result) {
+				boolean sameDimension = aResult[hierarchymap
+						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
+						newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")]
+								.toString());
+				boolean sameCube = aResult[hierarchymap.get("?CUBE_NAME")]
+						.toString().equals(
+								newnode[hierarchymap.get("?CUBE_NAME")]
+										.toString());
+
+				if (sameDimension && sameCube) {
+					contained = true;
+				}
+			}
+
+			if (!contained) {
+				result.add(newnode);
+			}
+		}
 		return result;
 	}
 
@@ -2232,6 +2286,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			List<Node[]> myresult = sparql(querytemplate, true);
 
+			// Add all of result to result
 			boolean first = true;
 			for (Node[] nodes : myresult) {
 				if (first) {
@@ -2240,7 +2295,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				}
 				result.add(nodes);
 			}
-
+			
 		}
 
 		// List<Node[]> result = applyRestrictions(hierarchyResults,
@@ -2316,8 +2371,26 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				result.add(nodes);
 			}
 		}
+		
+		// Use canonical identifier
+		result = replaceIdentifiersWithCanonical(result);
 
 		return result;
+	}
+
+	private List<Node[]> replaceIdentifiersWithCanonical(List<Node[]> result) {
+		
+		List<Node[]> newresult = new ArrayList<Node[]>();
+		
+		for (Node[] anIntermediaryresult : result) {
+			Node[] newnode = new Node[anIntermediaryresult.length];
+			for (int i = 0; i < anIntermediaryresult.length; i++) {
+				newnode[i] = getCanonical(anIntermediaryresult[i]);
+			}
+			newresult.add(newnode);
+		}
+		
+		return newresult;
 	}
 
 	/**
@@ -2558,6 +2631,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				result.add(nodes);
 			}
 		}
+		
+		// Use canonical identifier
+		result = replaceIdentifiersWithCanonical(result);
 
 		return result;
 	}
@@ -2754,6 +2830,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			addToResult(intermediaryresult, result);
 
 		}
+		
+		// Use canonical identifier
+		result = replaceIdentifiersWithCanonical(result);
 
 		return result;
 	}
