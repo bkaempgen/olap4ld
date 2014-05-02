@@ -569,6 +569,18 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 	
 	/**
+	 * Similar than above but with three datasets (and three measures).
+	 * 
+	 * XXX: Shows error. Array out of bound.
+	 */
+	public void testThreeDataSetsGdpGesisEmploymentrate() {
+		
+		String result = executeStatement("SELECT /* $session: 2fc2ccae-67f1-6594-712a-6277e201ee4a */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsAGGFUNCSUM],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec420XXX23dsAGGFUNCSUM],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec420XXX23ds]");
+
+		assertContains("|  | 2008 |      4097.0 |      1384.0 |      461.33 |       95.28 |", result);
+	}	
+	
+	/**
 	 * Should be correct, since I ask for GESIS average for Germany only, which is the same as for all.
 	 * 
 	 * Also, I ask for only "Nos" (httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvariableYYYrdfXXX23v590_1), which should be less than 1384 (SUM)

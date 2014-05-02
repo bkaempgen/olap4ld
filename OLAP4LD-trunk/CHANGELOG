@@ -27,6 +27,8 @@ Rollup (Slice (Dice (Projection (BaseCube (http://lod.gesis.org/lodpilot/ALLBUS/
 ... Now, we see that we need to start integrate the datasets. How to do that, entity consolidation 
 as in ISEM paper?
 
+What exactly do we need to do? 
+
 ===Dice for integration===
 The problem seems that we dice only for the gesis:geo dimension.
 
