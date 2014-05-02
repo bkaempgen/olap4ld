@@ -556,12 +556,20 @@ abstract class Olap4ldCellSet implements CellSet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(measures.get(0));
 
 		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(dimensions.get(0));
+		
+		Map<String, Integer> hierarchymap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(hierarchies.get(0));
+		
+		Map<String, Integer> membermap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(members.get(0));
+		
+		
 
 		// Cube from (cube, SlicesRollups, Dices, Projections)
 		LogicalOlapOp basecube = new BaseCubeOp(cube, measures, dimensions,
@@ -626,13 +634,27 @@ abstract class Olap4ldCellSet implements CellSet {
 						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
 					if (first) {
 						first = false;
-						newfilterAxisSignature.add(olapmember.getHierarchy()
-								.transformMetadataObject2NxNodes(metaData.cube)
-								.get(0));
+						
+						newfilterAxisSignature.add(hierarchies.get(0));
 					}
-					newfilterAxisSignature.add(hierarchy
-							.transformMetadataObject2NxNodes(metaData.cube)
-							.get(1));
+					String hierarchynameuri = Olap4ldLinkedDataUtil.convertMDXtoURI(hierarchy.getUniqueName());
+					for (Node[] ahierarchy : hierarchies) {
+						if (ahierarchy[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")].toString()
+								.equals(hierarchynameuri)) {
+							
+							/*
+							 * XXX: The problem is that we should take the dataset specific hierarchy and not the hierarchy of the first 
+							 * member (which in our example is from gesis).
+							 * 
+							 * The problem is that we will have only one consolidated member from
+							 * a consolidated hierarchy etc. 
+							 * 
+							 * We then need to find the respective member and hierarchy in the original dataset.
+							 */
+							
+							newfilterAxisSignature.add(ahierarchy);
+						}
+					}
 				}
 			}
 		}
@@ -645,8 +667,10 @@ abstract class Olap4ldCellSet implements CellSet {
 				Olap4ldMember olapmember = (Olap4ldMember) member;
 				// No measures
 				if (member.getMemberType() != Member.Type.MEASURE) {
+					
 					List<Node[]> membernodes = olapmember
 							.transformMetadataObject2NxNodes(metaData.cube);
+					
 					if (first1) {
 						first1 = false;
 						newMembers.add(membernodes.get(0));

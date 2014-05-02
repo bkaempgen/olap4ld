@@ -110,6 +110,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	private PhysicalOlapQueryPlan execplan;
 
+	private List<List<Node>> equivalenceList;
+
 	public EmbeddedSesameEngine(URL serverUrlObject,
 			List<String> datastructuredefinitions, List<String> datasets,
 			String databasename) throws OlapException {
@@ -1669,6 +1671,38 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 				// Add to result
 				boolean first = true;
+
+				/*
+				 * XXX: Here we need to implement entity consolidation.
+				 * 
+				 * We create an equivalence table. Then, for each dimension
+				 * unique name, we have one equivalence class. Then we can do as
+				 * before.
+				 */
+
+				// List<Node[]> myresult = sparql(querytemplate, true);
+				// // Add all of result2 to result
+				// boolean first = true;
+				// for (Node[] nodes : myresult) {
+				// if (first) {
+				// first = false;
+				// continue;
+				// }
+				// result.add(nodes);
+				// }
+
+				// for now, we simply assume equivalence statements given
+
+				List<Node[]> equivs = new ArrayList<Node[]>();
+
+				equivs.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
+						new Resource(
+								"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
+
+				this.equivalenceList = createEquivalenceList(equivs);
+
 				for (Node[] anIntermediaryresult : intermediaryresult) {
 					if (first) {
 						if (i == 0) {
@@ -1689,12 +1723,19 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 							.get("?CATALOG_NAME")];
 					newnode[dimensionmap.get("?SCHEMA_NAME")] = anIntermediaryresult[dimensionmap
 							.get("?SCHEMA_NAME")];
+					// New cube name of global cube
 					newnode[dimensionmap.get("?CUBE_NAME")] = new Resource(
 							restrictions.cubeNamePattern);
-					newnode[dimensionmap.get("?DIMENSION_NAME")] = anIntermediaryresult[dimensionmap
-							.get("?DIMENSION_NAME")];
-					newnode[dimensionmap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[dimensionmap
-							.get("?DIMENSION_UNIQUE_NAME")];
+
+					// Needs to be canonical name if in equivalenceList
+					Node canonical = getCanonical(anIntermediaryresult[dimensionmap
+																		.get("?DIMENSION_UNIQUE_NAME")]);
+					
+					newnode[dimensionmap.get("?DIMENSION_NAME")] = canonical;
+
+					// Needs to be canonical name
+					newnode[dimensionmap.get("?DIMENSION_UNIQUE_NAME")] = canonical;
+					
 					newnode[dimensionmap.get("?DIMENSION_CAPTION")] = anIntermediaryresult[dimensionmap
 							.get("?DIMENSION_CAPTION")];
 					newnode[dimensionmap.get("?DIMENSION_ORDINAL")] = anIntermediaryresult[dimensionmap
@@ -1736,6 +1777,86 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		}
 
 		return result;
+	}
+
+	private Node getCanonical(Node canonical) {
+		for (List<Node> equivalenceClass : equivalenceList) {
+			for (Node node : equivalenceClass) {
+				
+				if (node.equals(canonical)) {
+					canonical = equivalenceClass.get(0);
+					break;
+				}
+			}
+		}
+		return canonical;
+	}
+
+	/**
+	 * 
+	 * @param equivs - equiv[0] first same as and equiv[1] second same as entity.
+	 * @return
+	 */
+	private List<List<Node>> createEquivalenceList(List<Node[]> equivs) {
+		List<List<Node>> equivalenceList = new ArrayList<List<Node>>();
+
+		for (Node[] equiv : equivs) {
+			
+			Node A = equiv[0];
+			Node B = equiv[1];
+			
+			// Store equiv
+			List<Node> rA = null;
+			for (List<Node> equivalenceClass : equivalenceList) {
+				for (Node node : equivalenceClass) {
+					if (node.equals(A)) {
+						rA = equivalenceClass;
+					}
+				}
+				if (rA != null) {
+					break;
+				}
+			}
+			List<Node> rB = null;
+			for (List<Node> equivalenceClass : equivalenceList) {
+				for (Node node : equivalenceClass) {
+					if (node.equals(B)) {
+						rB = equivalenceClass;
+					}
+				}
+				if (rB != null) {
+					break;
+				}
+			}
+			
+			if (rA == null && rB == null) {
+				ArrayList<Node> newEquivalenceClass = new ArrayList<Node>();
+				newEquivalenceClass.add(A);
+				newEquivalenceClass.add(B);
+				equivalenceList.add(newEquivalenceClass);
+			} else if (rA != null && rB != null) {
+				// merge rA and rB
+				
+				for (Node node : rB) {
+					rA.add(node);
+				}
+				equivalenceList.remove(rB);
+				
+			} else if (rA != null) {
+				// add B to rA
+				
+				rA.add(B);
+				
+				
+			} else if (rB != null) {
+				// add A to rB
+				
+				rB.add(A);
+			}
+			
+		}
+		
+		return equivalenceList;
 	}
 
 	private List<Node[]> getDimensionsPerDataSet(Restrictions restrictions) {
