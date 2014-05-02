@@ -35,7 +35,7 @@ import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
-import org.olap4j.driver.olap4ld.linkeddata.ConversionCorrespondence;
+import org.olap4j.driver.olap4ld.linkeddata.ReconciliationCorrespondence;
 import org.olap4j.driver.olap4ld.linkeddata.ConvertCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataCubesEngine;
@@ -154,12 +154,12 @@ public class Convert_Context_QueryTest extends TestCase {
 		// XXX: We do not need roll-up
 	
 		List<Node[]> mio_eur2eur_atoms = new ArrayList<Node[]>();
-		mio_eur2eur_atoms.add(new Node[] {new Variable("fact1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("fact1"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value1")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("fact2"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("fact2"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value2")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value1")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value2")});
 		mio_eur2eur_atoms.add(new Node[] {new Variable("value2"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(1000000 * ?value1)")});
-		ConversionCorrespondence mio_eur2eur_correspondence = new ConversionCorrespondence("mio_eur2eur", mio_eur2eur_atoms);
+		ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence("mio_eur2eur", mio_eur2eur_atoms);
 		
 		// Convert-context
 		LogicalOlapOp convertgdp = new ConvertCubeOp(gdpbasecube,
@@ -235,21 +235,37 @@ public class Convert_Context_QueryTest extends TestCase {
 		// Roll-up
 		// XXX: We do not need roll-up
 			
-		String mio_eur2eur = "{"
-				+ "?obs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR> .\n"
-				+ "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v1 .\n"
-				+ "?u2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"<http://estatwrap.ontologycentral.com/dic/unit#EUR>\" .\n"
-				+ "?v2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?v1)\" ."
-				// No filter, equal predicate is interpreted by just adding the resource to the graph pattern.
-				// + "FILTER (?u1 = <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR>) "
-				+ "} => {"
-				+ "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u2 .\n"
-				+ "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v2 "
-				+ "} .";
+		List<Node[]> mio_eur2eur_atoms = new ArrayList<Node[]>();
+		mio_eur2eur_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value1")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value2")});
+		mio_eur2eur_atoms.add(new Node[] {new Variable("value2"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(1000000 * ?value1)")});
+		ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence("mio_eur2eur", mio_eur2eur_atoms);
+		
+		// String mio_eur2eur = "{"
+		// +
+		// "?obs <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR> .\n"
+		// +
+		// "?obs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v1 .\n"
+		// +
+		// "?u2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"<http://estatwrap.ontologycentral.com/dic/unit#EUR>\" .\n"
+		// +
+		// "?v2 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(1000000 * ?v1)\" ."
+		// // No filter, equal predicate is interpreted by just adding the
+		// resource to the graph pattern.
+		// // +
+		// "FILTER (?u1 = <http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR>) "
+		// + "} => {"
+		// +
+		// "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u2 .\n"
+		// +
+		// "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v2 "
+		// + "} .";
 
 		// Mioeur2eur(dataset): Converting MIO_EUR to EUR in GDP dataset
 		LogicalOlapOp mio_eur2eur_op = new ConvertCubeOp(gdpbasecube,
-				mio_eur2eur, domainUri);
+				mio_eur2eur_correspondence, domainUri);
 
 		// Dice mioeur2eur for B1G.
 		// No dice necessary, directly possible with convert-context
@@ -285,19 +301,30 @@ public class Convert_Context_QueryTest extends TestCase {
 		// LogicalOlapOp computegdp = new ConvertContextOp(drillacross, 1,
 		// domainUri);
 		
-		String computegdp = "{" +
-				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#B1G> .\n" +
-				"?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value1 .\n" +
-				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31> .\n" +
-				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 .\n" +
-				"?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(?value1 + ?value2)\" ." +
-				"} => {" +
-				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> .\n" +
-				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue " +
-				"} . ";
+		List<Node[]> computegdp_atoms = new ArrayList<Node[]>();
+		computegdp_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#indic_na"), new Resource("http://estatwrap.ontologycentral.com/dic/indic_na#B1G")});
+		computegdp_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value1")});
+		computegdp_atoms.add(new Node[] {new Variable("inputcube2"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#indic_na"), new Resource("http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31")});
+		computegdp_atoms.add(new Node[] {new Variable("inputcube2"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value2")});
+		computegdp_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#indic_na"), new Resource("http://estatwrap.ontologycentral.com/dic/indic_na#NGDP")});
+		computegdp_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value3")});
+		computegdp_atoms.add(new Node[] {new Variable("value3"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(?value1 + ?value2)")});
+		ReconciliationCorrespondence computegdp_correspondence = new ReconciliationCorrespondence("computegdp", computegdp_atoms);
+		
+		
+//		String computegdp = "{" +
+//				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#B1G> .\n" +
+//				"?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value1 .\n" +
+//				"?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31> .\n" +
+//				"?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?value2 .\n" +
+//				"?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"(?value1 + ?value2)\" ." +
+//				"} => {" +
+//				"_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> .\n" +
+//				"_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue " +
+//				"} . ";
 		
 		// Computing Nominal GDP from single parts in new EUR dataset.
-		LogicalOlapOp computegdp_op = new ConvertCubeOp(mio_eur2eur_op, mio_eur2eur_op, computegdp, domainUri);
+		LogicalOlapOp computegdp_op = new ConvertCubeOp(mio_eur2eur_op, mio_eur2eur_op, computegdp_correspondence, domainUri);
 		
 		/*
 		 * Should contain:
@@ -356,41 +383,66 @@ public class Convert_Context_QueryTest extends TestCase {
 		// Drill-across gdp and population dataset
 //		LogicalOlapOp drillacrossgdppopulation = new DrillAcrossOp(
 //				slicedsexage, computegdp);
-
-        String computegdppercapita = "{" +
-
-                "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> ?i1 .\n" +
-
-                "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u1 .\n" +
-
-                "?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v1 .\n" +
-
-                "?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#sex> ?s2 .\n" +
-
-                "?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#age> ?a2 .\n" +
-
-                "?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v2 .\n" +
-
-                "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"IF(?i1 = <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> && ?u1 = <http://estatwrap.ontologycentral.com/dic/unit#EUR> && ?s2 = <http://estatwrap.ontologycentral.com/dic/sex#T> && ?a2 = <http://estatwrap.ontologycentral.com/dic/age#TOTAL>, ?v1 / ?v2, ?v1)\" .\n" +
-
-                "?i3 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"IF(?i1 = <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> && ?u1 = <http://estatwrap.ontologycentral.com/dic/unit#EUR> && ?s2 = <http://estatwrap.ontologycentral.com/dic/sex#T> && ?a2 = <http://estatwrap.ontologycentral.com/dic/age#TOTAL>, <http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH>, ?i1)\" .\n" +
-
-                "?u3 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"IF(?i1 = <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> && ?u1 = <http://estatwrap.ontologycentral.com/dic/unit#EUR> && ?s2 = <http://estatwrap.ontologycentral.com/dic/sex#T> && ?a2 = <http://estatwrap.ontologycentral.com/dic/age#TOTAL>, <http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB>, ?u1)\" .\n" +
-
-                "} => {" +
-
-                "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> ?i3 . \n" +
-
-                "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u3 .\n" +
-
-                "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue " +
-
-                "}. ";
 		
+		List<Node[]> computegdppercapita_atoms = new ArrayList<Node[]>();
+		computegdppercapita_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#indic_na"), new Resource("http://estatwrap.ontologycentral.com/dic/indic_na#NGDP")});
+		computegdppercapita_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
+		computegdppercapita_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value1")});
+		computegdppercapita_atoms.add(new Node[] {new Variable("inputcube2"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#sex"), new Resource("http://estatwrap.ontologycentral.com/dic/sex#T")});
+		computegdppercapita_atoms.add(new Node[] {new Variable("inputcube2"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#age"), new Resource("http://estatwrap.ontologycentral.com/dic/age#TOTAL")});
+		computegdppercapita_atoms.add(new Node[] {new Variable("inputcube2"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value2")});
+		computegdppercapita_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#indic_na"), new Resource("http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH")});
+		computegdppercapita_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB")});
+		computegdppercapita_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value3")});
+		computegdppercapita_atoms.add(new Node[] {new Variable("value3"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(?value1 / ?value2)")});
+		ReconciliationCorrespondence computegdppercapita_correspondence = new ReconciliationCorrespondence("computegdppercapita", computegdppercapita_atoms);
+	
+		// String computegdppercapita = "{" +
+		//
+		// "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> ?i1 .\n"
+		// +
+		//
+		// "?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u1 .\n"
+		// +
+		//
+		// "?obs1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v1 .\n"
+		// +
+		//
+		// "?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#sex> ?s2 .\n"
+		// +
+		//
+		// "?obs2 <http://ontologycentral.com/2009/01/eurostat/ns#age> ?a2 .\n"
+		// +
+		//
+		// "?obs2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?v2 .\n"
+		// +
+		//
+		// "?newvalue <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"IF(?i1 = <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> && ?u1 = <http://estatwrap.ontologycentral.com/dic/unit#EUR> && ?s2 = <http://estatwrap.ontologycentral.com/dic/sex#T> && ?a2 = <http://estatwrap.ontologycentral.com/dic/age#TOTAL>, ?v1 / ?v2, ?v1)\" .\n"
+		// +
+		//
+		// "?i3 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"IF(?i1 = <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> && ?u1 = <http://estatwrap.ontologycentral.com/dic/unit#EUR> && ?s2 = <http://estatwrap.ontologycentral.com/dic/sex#T> && ?a2 = <http://estatwrap.ontologycentral.com/dic/age#TOTAL>, <http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH>, ?i1)\" .\n"
+		// +
+		//
+		// "?u3 <http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas> \"IF(?i1 = <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> && ?u1 = <http://estatwrap.ontologycentral.com/dic/unit#EUR> && ?s2 = <http://estatwrap.ontologycentral.com/dic/sex#T> && ?a2 = <http://estatwrap.ontologycentral.com/dic/age#TOTAL>, <http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB>, ?u1)\" .\n"
+		// +
+		//
+		// "} => {" +
+		//
+		// "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> ?i3 . \n"
+		// +
+		//
+		// "_:newobs <http://ontologycentral.com/2009/01/eurostat/ns#unit> ?u3 .\n"
+		// +
+		//
+		// "_:newobs <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?newvalue "
+		// +
+		//
+		// "}. ";
+
 		// Compute GDP per Capita from GDP and Population
 		// XXX: ComplexMeasureOp
 		LogicalOlapOp computegdppercapita_op = new ConvertCubeOp(
-				computegdp_op, populationbasecube, computegdppercapita, domainUri);
+				computegdp_op, populationbasecube, computegdppercapita_correspondence, domainUri);
 		
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 				computegdppercapita_op);

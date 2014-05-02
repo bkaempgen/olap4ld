@@ -66,7 +66,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	private PhysicalOlapIterator inputiterator1;
 	private PhysicalOlapIterator inputiterator2;
 	// private String conversionfunction;
-	private ConversionCorrespondence conversioncorrespondence;
+	private ReconciliationCorrespondence conversioncorrespondence;
 
 	private SailRepository repo;
 	private String triples;
@@ -78,7 +78,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	public ConvertSparqlDerivedDatasetIterator(SailRepository repo,
 			PhysicalOlapIterator inputiterator1,
 			PhysicalOlapIterator inputiterator2,
-			ConversionCorrespondence conversioncorrespondence, String domainUri) {
+			ReconciliationCorrespondence conversioncorrespondence, String domainUri) {
 
 		this.repo = repo;
 		this.inputiterator1 = inputiterator1;
@@ -97,7 +97,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 	}
 
-	private void prepareData(ConversionCorrespondence conversioncorrespondence) {
+	private void prepareData(ReconciliationCorrespondence conversioncorrespondence) {
 
 		DataFuProgram dataFuProgram = createDataFuProgram(conversioncorrespondence);
 
@@ -116,7 +116,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	 * @return Array with first element the body, second the head.
 	 */
 	private DataFuProgram createDataFuProgram(
-			ConversionCorrespondence conversioncorrespondence2) {
+			ReconciliationCorrespondence conversioncorrespondence2) {
 		// We assume one or two cubes, only.
 
 		/*
@@ -129,8 +129,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		List<Node[]> atoms = conversioncorrespondence.getAtoms();
 
 		for (Node[] nodes : atoms) {
-			// All graph patterns for facts from c1.
-			if (nodes[0].toN3().equals("?fact1")) {
+			// All graph patterns for inputcube1 from c1.
+			if (nodes[0].toN3().equals("?inputcube1")) {
 				bodypatterns.add(nodes);
 			}
 			// All bindas patterns.
@@ -145,12 +145,12 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 		// Heuristically, the variable we get from the first pattern
 		// subject.
-		Node obsvariable = new Variable("fact1");
+		Node obsvariable = new Variable("inputcube1");
 
 		Node obsvariable2 = null;
 		if (dataset2 != null) {
 			// The second variable we get from the next variable.
-			obsvariable2 = new Variable("fact2");
+			obsvariable2 = new Variable("inputcube2");
 		}
 
 		bodypatterns.add(new Node[] { obsvariable,
@@ -254,7 +254,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		}
 
 		/*
-		 * The bodypatterns should contain: All graph patterns for c2. Dataset
+		 * The bodypatterns should contain: All graph patterns for outputcube. Dataset
 		 * and structure graph patterns. All missing dimensions/measures graph
 		 * patterns.
 		 */
@@ -262,22 +262,22 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		List<Node[]> headpatterns = new ArrayList<Node[]>();
 
 		// Heuristically, the variable we create ourselves
-		Node newobsvariable = new BNode("_:fact2");
+		Node outputblanknodevariable = new BNode("_:outputcube");
 
-		// All graph patterns for c2.
+		// All graph patterns for outputcube.
 		for (Node[] atom : atoms) {
 
-			if (atom[0].toN3().equals("?fact2")) {
+			if (atom[0].toN3().equals("?outputcube")) {
 				// We should be using new obs variable as blank node.
 
 				headpatterns
-						.add(new Node[] { newobsvariable, atom[1], atom[2] });
+						.add(new Node[] { outputblanknodevariable, atom[1], atom[2] });
 			}
 		}
 
 		// Dataset and structure graph patterns.
 
-		headpatterns.add(new Node[] { newobsvariable,
+		headpatterns.add(new Node[] { outputblanknodevariable,
 				new Resource("http://purl.org/linked-data/cube#dataSet"),
 				new Resource(newdataset) });
 
@@ -320,10 +320,10 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				continue;
 			}
 
-			if (!isPatternContained(atoms, new Variable("c2"),
+			if (!isPatternContained(atoms, new Variable("outputcube"),
 					dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")], null)) {
 				headpatterns.add(new Node[] {
-						newobsvariable,
+						outputblanknodevariable,
 						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")],
 						Olap4ldLinkedDataUtil
 								.makeUriToVariable(dimension[dimensionmap
@@ -347,10 +347,10 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				continue;
 			}
 
-			if (!isPatternContained(atoms, new Variable("fact2"),
+			if (!isPatternContained(atoms, new Variable("outputcube"),
 					measure[measuremap.get("?MEASURE_UNIQUE_NAME")], null)) {
 				headpatterns.add(new Node[] {
-						newobsvariable,
+						outputblanknodevariable,
 						measure[measuremap.get("?MEASURE_UNIQUE_NAME")],
 
 						Olap4ldLinkedDataUtil

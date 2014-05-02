@@ -17,7 +17,11 @@ We now would like to extend this.
 
 ==2014-05-02==
 * No success with entity consolidation for Drill-Across.
-* Problem: If I just replace all occurrences of a URI with the canonical form, I have the problem that Estatwrap is using the same URI for Dim / Hier / Level, whereas GESIS uses different ones for Dim / Hier / Level. This is because Estatrap uses rdfs:range nuts:Region whereas GESIS uses a code list #list.
+* Problem: If I just replace all occurrences of a URI with the canonical form, I have the problem 
+that Estatwrap is using the same URI for Dim / Hier / Level, whereas GESIS uses different ones for 
+Dim / Hier / Level. This is because Estatwrap uses rdfs:range nuts:Region whereas GESIS uses a code 
+list #list.
+* How about defining that #list is also owl:sameAs estatwrap:geo? In this case, 
 
 Todo: 
 A first step would be to "consolidate" dimensions and members, i.e., to only return canonical identifiers.
@@ -27,6 +31,14 @@ A second step would be to only use those canonical identifiers (let's make it th
 A third step would be to change the generation of OLAP operators to use the right Linked Data identifiers for the respective dataset. However, how to know the correct identifier? 
 
 A forth step would be to change the Drill-Across operator to consider equivalences.
+
+===Convert-Cube===
+* Now I use inputcube1, inputcube2 and outputcube.
+* Also, I have written all reconciliation correspondences.
+* Next steps:
+* Implement Merge-Cubes
+* Compare GDP per capita computed and GDP per capita directly.
+* Extend the case study with external datasets
 
 ===Entity consolidation===
 SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsAGGFUNCSUM]} ON COLUMNS, 
@@ -81,8 +93,6 @@ What is different with triple stores? I have a query on the global cube with can
 Problem: If I just replace all occurrences of a URI with the canonical form, I have the problem that Estatwrap is using the same URI for Dim / Hier / Level, whereas GESIS uses different ones for Dim / Hier / Level. This is because Estatrap uses rdfs:range nuts:Region whereas GESIS uses a code list #list.
 
 How was that in ISEM paper? In ISEM paper, I did not represent Hierarchies, yet. I assumed every dimension to have exactly one hierarchy and level with the same name as the dimension (see findDimensionHierarchies). 
-
-How about defining that #list is also owl:sameAs estatwrap:geo? In this case, 
 
 ==2014-05-01==
 

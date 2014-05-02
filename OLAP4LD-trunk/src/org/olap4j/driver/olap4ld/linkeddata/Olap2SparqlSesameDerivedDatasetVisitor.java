@@ -318,7 +318,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root = _root;
 			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root,
-					null, so.conversioncorrespondence, so.domainUri);
+					null, so.reconciliationcorrespondence, so.domainUri);
 		} else if (so.inputOp1 == so.inputOp2) {
 			// If both operators are the same, we can reuse the iterator.
 			// Unfortunately, this does not work for further nested equal
@@ -331,7 +331,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root = _root;
 			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root,
-					root, so.conversioncorrespondence, so.domainUri);
+					root, so.reconciliationcorrespondence, so.domainUri);
 		} else {
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root1 = _root;
