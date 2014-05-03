@@ -110,6 +110,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		// XXX: Should we not do this only if next() or hasNext()?
 		
 		this.result = engine.sparql(query, false);
+		
+		this.result = this.engine.replaceIdentifiersWithCanonical(this.result);
 
 		this.iterator = result.iterator();
 	}

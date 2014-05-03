@@ -21,9 +21,7 @@ We now would like to extend this.
 * Problem: If we compare own Nodes with Nodes from metadata SPARQL queries, we can never be sure when it is a Resource and when it is a Literal. In some case we sometimes get returned Literal and sometimes Resources (e.g., for measures).
 Solution: In those cases, we compare the toString results.
 * See: http://linked-data-cubes.org/index.php/EmbeddedSesameEngine#Entity_Consolitation
-
-
-==2014-05-02==
+4-05-02==
 * No success with entity consolidation for Drill-Across.
 * Problem: If I just replace all occurrences of a URI with the canonical form, I have the problem 
 that Estatwrap is using the same URI for Dim / Hier / Level, whereas GESIS uses different ones for 

@@ -1123,9 +1123,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
 
 		// Could also for the olap
-		// equivs.add(new Node[] {
-		// new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-		// new Resource("http://ontologycentral.com/dic/geo#DE") });
+		equivs.add(new Node[] {
+		new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
+		new Resource("http://ontologycentral.com/dic/geo#DE") });
 
 		equivs.add(new Node[] {
 				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
@@ -2424,7 +2424,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		return result;
 	}
 
-	private List<Node[]> replaceIdentifiersWithCanonical(List<Node[]> result) {
+	public List<Node[]> replaceIdentifiersWithCanonical(List<Node[]> result) {
 
 		List<Node[]> newresult = new ArrayList<Node[]>();
 
