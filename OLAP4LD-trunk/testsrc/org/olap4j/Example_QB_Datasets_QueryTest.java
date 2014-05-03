@@ -161,7 +161,8 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	public void testExampleSsb001Metadata() {
 		String dsUri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
 		// localhost
-		// dsUri = "http://localhost:8080/ldcx-trunk/ldcx/tests/ssb001/ttl/example.ttl#ds";
+		// dsUri =
+		// "http://localhost:8080/ldcx-trunk/ldcx/tests/ssb001/ttl/example.ttl#ds";
 		metadataTest(dsUri, 5, 5);
 	}
 
@@ -170,7 +171,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 */
 	public void testExampleSsb001_Pastebin_standardquery() {
 		String result = executeStatement("SELECT /* $session: 2fb5512e-fec0-3d4a-0d9d-ce0f04935678 */ NON EMPTY {[httpXXX3AXXX2FXXX2FpastebinYYYcomXXX2FrawYYYphpXXX3FiXXX3D839G2u72XXX23lo_discount]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FpastebinYYYcomXXX2FrawYYYphpXXX3FiXXX3D839G2u72XXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FpastebinYYYcomXXX2FrawYYYphpXXX3FiXXX3D839G2u72XXX23ds]");
-		
+
 		assertContains("|  | Customer  2 |     36.0 |", result);
 	}
 
@@ -192,14 +193,12 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 				"|  | Customer  2 |  | Date 19940101 |  | Part  1 |  | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
 				result);
 	}
-	
+
 	/**
 	 * Do crossjoin over all dimensions on rows and show all measures on
 	 * columns.
 	 */
 	public void testExampleSsb001Lineorder_QB_OlapFullCrossJoin() {
-		
-		
 
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleSsb001OlapFullCrossJoin */ {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_revenue],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_discount],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_quantity],[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_supplycost]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_orderdateCodeList])}, CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])}, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_suppkeyCodeList])}))) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]");
 
@@ -213,8 +212,6 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 				"|  | Customer  2 |  | Date 19940101 |  | Part  1 |  | Supplier  1 | 2372193.0 |      4.0 |     2471035.0 |     17.0 |    87213.0 |",
 				result);
 	}
-	
-	
 
 	/**
 	 * Do crossjoin over all dimensions on rows and show all measures on
@@ -239,40 +236,43 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 	/**
 	 * We query for customers on rows and parts on columns and explicitly select
-	 * lo_extendedprice as measure per WHERE clause. Also, we use NON EMPTY on columns.
+	 * lo_extendedprice as measure per WHERE clause. Also, we use NON EMPTY on
+	 * columns.
 	 * 
 	 * 
 	 */
 	public void testExampleSsb001OlapDiceMeasureNoNonEmpty() {
 
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleSsb001OlapDiceMeasureNoNonEmpty */ NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice]}");
-		
-		// Localhost
-		// result = executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
 
-		// TODO: Here, we see the problem, that only the combined use of NON EMPTY on rows and columns work. To debug.
-		assertEquals(
-				false,
-				result.contains("| Part  1   | Part  3 |"));
+		// Localhost
+		// result =
+		// executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
+
+		// TODO: Here, we see the problem, that only the combined use of NON
+		// EMPTY on rows and columns work. To debug.
+		assertEquals(false, result.contains("| Part  1   | Part  3 |"));
 	}
-	
+
 	/**
 	 * We query for customers on rows and parts on columns and explicitly select
-	 * lo_extendedprice as measure per WHERE clause. Also, we use NON EMPTY on columns.
+	 * lo_extendedprice as measure per WHERE clause. Also, we use NON EMPTY on
+	 * columns.
 	 * 
-	 * TODO: Here, we see the problem, that only the combined use of NON EMPTY on rows and columns work. To debug.
+	 * TODO: Here, we see the problem, that only the combined use of NON EMPTY
+	 * on rows and columns work. To debug.
 	 */
 	public void testExampleSsb001OlapDiceMeasureNonCombinedNonEmpty() {
 
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleSsb001OlapDiceMeasureNonCombinedNonEmpty */ NON EMPTY {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE {[httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice]}");
-		
-		// Localhost
-		// result = executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
 
-		// TODO: Here, we see the problem, that only the combined use of NON EMPTY on rows and columns work. To debug.
-		assertEquals(
-				false,
-				result.contains("| Part  1   | Part  3 |"));
+		// Localhost
+		// result =
+		// executeStatement("SELECT NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_partkeyCodeList])} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_custkeyCodeList])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds] WHERE { [httpXXX3AXXX2FXXX2FlocalhostXXX3A8080XXX2FLDCXZZZtrunkXXX2FldcxXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23lo_extendedprice] }");
+
+		// TODO: Here, we see the problem, that only the combined use of NON
+		// EMPTY on rows and columns work. To debug.
+		assertEquals(false, result.contains("| Part  1   | Part  3 |"));
 	}
 
 	/**
@@ -283,9 +283,11 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 * http://edgarwrap.ontologycentral.com/vocab/edgar#issuer). All ranges are
 	 * non-skos-concepts, thus, there is not code list.
 	 * 
-	 * Note, this dataset was not successful in the data cube checker / validator of Dave Reynolds
-	 * (see http://www.w3.org/2011/gld/validator/qb/qb-validator): 1) Since the validator does not
-	 * do resolving of links, it does not find ranges of the dimension properties. 2) 
+	 * Note, this dataset was not successful in the data cube checker /
+	 * validator of Dave Reynolds (see
+	 * http://www.w3.org/2011/gld/validator/qb/qb-validator): 1) Since the
+	 * validator does not do resolving of links, it does not find ranges of the
+	 * dimension properties. 2)
 	 */
 	public void testExampleEdgarCOSTCOMetadata() {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/edgarwrap/0001193125-10-230379.rdf#ds";
@@ -303,26 +305,20 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 	/**
 	 * This time, do crossjoin on measure, dtstart, dtend on columns, subject on
-	 * rows, with non-empty on rows. 
+	 * rows, with non-empty on rows.
 	 * 
 	 */
 	public void testExampleEdgarCOSTCOOlapLargeDateCrossjoinColumnsNonEmptyRowsCOUNT() {
 		String result;
 		result = executeStatement("	SELECT /* $session: olap4ld_example_datasets_testExampleEdgarCOSTCOOlapLargeDateCrossjoinColumnsNonEmptyRowsCOUNT */ CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]}, CrossJoin({Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])}, {Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtend])})) ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]");
-		assertContains(
-				"Available for sale securities",
-				result);
-		assertContains(
-				"7.0",
-				result);
+		assertContains("Available for sale securities", result);
+		assertContains("7.0", result);
 	}
-	
+
 	public void testExampleEdgarCOSTCOOlapLargeSegmentSubjectCrossjoinNonEmptyRowsCOUNT() {
 		String result;
 		result = executeStatement(" SELECT /* $session: olap4ld_example_datasets_testExampleEdgarCOSTCOOlapLargeSegmentSubjectCrossjoinNonEmptyRowsCOUNT */ NON EMPTY CrossJoin({Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])},{Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23segment])}) ON COLUMNS, NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]");
-		assertContains(
-				"0000909832 2009-08-30",
-				result);
+		assertContains("0000909832 2009-08-30", result);
 	}
 
 	/**
@@ -369,15 +365,15 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	/**
 	 * This is how Estatwrap shall publish data currently.
 	 * 
-	 * Properties:
-	 * Separate ds and dsd uris. Some have codelists, some do not (time, geo). No aggregation function.
+	 * Properties: Separate ds and dsd uris. Some have codelists, some do not
+	 * (time, geo). No aggregation function.
 	 * 
 	 */
 	public void testOriginalEstatwrapGDPpercapitainPPSMetadata() {
 		String name = "http://estatwrap.ontologycentral.com/id/tec00114#ds";
 		metadataTest(name, 5, 3);
 	}
-	
+
 	/**
 	 * Same as above but this time example.
 	 * 
@@ -389,7 +385,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// name = "http://localhost:8888/id/tec00114#ds";
 		metadataTest(name, 5, 3);
 	}
-	
+
 	/**
 	 * We query for all esa95 aggregates and both measures.
 	 */
@@ -397,14 +393,13 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// Example
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleEstatwrapGDPpercapitainPPSOlapEsaAggregateBothMeasures */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsdYYYrdfXXX23cl_aggreg95])} ON ROWS	FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23ds]");
 		// Localhost
-		//String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8888XXX2FdsdXXX2Ftec00114XXX23cl_aggreg95])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8888XXX2FidXXX2Ftec00114XXX23ds]");
-		assertContains(
-				"|  00 |       94.49 |       344.0 |",
-				result);
+		// String result =
+		// executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8888XXX2FdsdXXX2Ftec00114XXX23cl_aggreg95])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8888XXX2FidXXX2Ftec00114XXX23ds]");
+		assertContains("|  00 |       94.49 |       344.0 |", result);
 	}
-	
+
 	// TODO add query test
-	
+
 	public void testExampleEurostatEmploymentRateMetadata() {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
 		// GDP
@@ -413,8 +408,8 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 
 	/**
-	 * Generic Queries on Eurostat. Several queries one after another. Should be rather fast since
-	 * not every time the repository is filled?
+	 * Generic Queries on Eurostat. Several queries one after another. Should be
+	 * rather fast since not every time the repository is filled?
 	 */
 	public void testExampleEurostatEmploymentRateOlap() {
 		String result;
@@ -477,9 +472,9 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 				result);
 
 	}
-	
+
 	/**
-	 * Queries on smartdbwrap. 
+	 * Queries on smartdbwrap.
 	 */
 	public void testExampleSmartDbWrapMetadata() {
 
@@ -488,9 +483,9 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	}
 
 	// TODO: olap query test
-	
+
 	/**
-	 * Queries on smartdbwrap. 
+	 * Queries on smartdbwrap.
 	 */
 	public void testSmartDbWrapMetadata() {
 
@@ -535,8 +530,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		assertContains("| Adjusted Closing Price |      10.57 |", result);
 
 	}
-	
-	
+
 	/**
 	 * Generic Query
 	 */
@@ -545,82 +539,99 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// Problem:
 		// Make sure: , = XXX2C
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleEstatwrapGDPpercapitainPPSOlapEsaAggregateBothMeasures */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue],[httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23employment_rate]} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23geo])},{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		
-		assertContains("|  |        |  | 2011 |       148.0 |         1.0 |       148.0 |            70.43 |", result);
+
+		assertContains(
+				"|  |        |  | 2011 |       148.0 |         1.0 |       148.0 |            70.43 |",
+				result);
 
 	}
-	
+
 	/**
 	 * Query towards ISEM paper.
 	 * 
-	 * Correctly returns: 
+	 * Correctly returns:
 	 * 
-	 * 1) The shared measure obsValueAVG of the first (Estatwrap) dataset.
-	 * 2) The sum of answers of the GESIS dataset.
-	 * 3) The sum of Employment rate of Estatwrap dataset. 
+	 * 1) The shared measure obsValueAVG of the first (Estatwrap) dataset. 2)
+	 * The sum of answers of the GESIS dataset. 3) The sum of Employment rate of
+	 * Estatwrap dataset.
 	 * 
 	 */
 	public void testDrillAcrossTowardsUnemploymentFearAndEmploymentRate() {
-		
+
 		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsAGGFUNCSUM]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds]");
 
-		
-		assertContains("|  | 2008 |       95.28 |      461.33 |      4097.0 |", result);
+		assertContains("|  | 2008 |       95.28 |      461.33 |      4097.0 |",
+				result);
 	}
-	
+
 	/**
 	 * Similar than above but with three datasets (and three measures).
 	 * 
 	 * XXX: Shows error. Array out of bound.
 	 */
 	public void testThreeDataSetsGdpGesisEmploymentrate() {
-		
+
 		String result = executeStatement("SELECT /* $session: 2fc2ccae-67f1-6594-712a-6277e201ee4a */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsAGGFUNCSUM],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec420XXX23dsAGGFUNCSUM],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec420XXX23ds]");
 
-		assertContains("|  | 2008 |      4097.0 |      1384.0 |      461.33 |       95.28 |", result);
-	}	
-	
+		assertContains(
+				"|  | 2008 |      4097.0 |      1384.0 |      461.33 |       95.28 |",
+				result);
+	}
+
 	/**
-	 * Should be correct, since I ask for GESIS average for Germany only, which is the same as for all.
+	 * Should be correct, since I ask for GESIS average for Germany only, which
+	 * is the same as for all.
 	 * 
-	 * Also, I ask for only "Nos" (httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvariableYYYrdfXXX23v590_1), which should be less than 1384 (SUM)
+	 * Also, I ask for only "Nos" (
+	 * httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvariableYYYrdfXXX23v590_1
+	 * ), which should be less than 1384 (SUM)
 	 * 
-	 * It is correct that AVG and SUM are the same, since behind it there is per year only one value.
+	 * It is correct that AVG and SUM are the same, since behind it there is per
+	 * year only one value.
 	 */
 	public void testDiceGermanyUnemploymentFear() {
-		
+
 		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds] WHERE CrossJoin({[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]},{[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvariableYYYrdfXXX23v590_1]})");
 
-		
 		assertContains("|  | 2008 |      1144.0 |      1144.0 |", result);
 	}
-	
+
+	public void testDiceGermanyEmploymentrate() {
+
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsAGGFUNCSUM]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23ds] WHERE {[httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FdicXXX2FgeoXXX23BA]}");
+
+		assertContains("|  | 2008 |        26.0 |        26.0 |",
+				result);
+	}
+
 	/**
-	 * Here, I explicitly want to integrate with OLAP4LD example estatwrap dataset (no quota).
+	 * Here, I explicitly want to integrate with OLAP4LD example estatwrap
+	 * dataset (no quota).
 	 * 
-	 * Without WHERE, we correctly get (only slight differences
-	 * from above query over original datasets): |  | 2008 |       95.26 |      461.33 |      4096.0 |
+	 * Without WHERE, we correctly get (only slight differences from above query
+	 * over original datasets): | | 2008 | 95.26 | 461.33 | 4096.0 |
 	 * 
-	 * With WHERE, we should get reduced numbers for Eurostat datasets and same for gesis datasets.
+	 * With WHERE, we should get reduced numbers for Eurostat datasets and same
+	 * for gesis datasets.
 	 * 
 	 */
 	public void testDrillAcrossUnemploymentFearAndEmploymentRateGermanyExampleDatasets() {
-		
-		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsAGGFUNCSUM]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds] WHERE CrossJoin({[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]},{[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvariableYYYrdfXXX23v590_1]})");
 
-		
-		assertContains("|  | 2008 |       95.28 |      461.33 |      4097.0 |", result);
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsAGGFUNCSUM]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftec00114_dsYYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
+
+		assertContains("|  | 2008 |       95.28 |      461.33 |      4097.0 |",
+				result);
 	}
-	
+
 	/**
 	 * Here, I explicitly want to integrate.
 	 */
 	public void testDrillAcrossUnemploymentFearAndEmploymentRateGermany() {
-		
-		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsAGGFUNCSUM]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300], [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FdicXXX2FgeoXXX23DE]}");
 
-		
-		assertContains("|  | 2008 |       95.28 |      461.33 |      4097.0 |", result);
+		String result = executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsAGGFUNCSUM]} ON COLUMNS, {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds] WHERE CrossJoin({[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]},{[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvariableYYYrdfXXX23v590_1]})");
+
+		assertContains("|  | 2008 |       95.28 |      461.33 |      4097.0 |",
+				result);
 	}
 
 	private void assertContains(String seek, String s) {
@@ -634,7 +645,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		String resultString = "";
 		CellSet cset;
 		try {
-			
+
 			cset = stmt.executeOlapQuery(mdxString);
 
 			// String s = TestContext.toString(cset);

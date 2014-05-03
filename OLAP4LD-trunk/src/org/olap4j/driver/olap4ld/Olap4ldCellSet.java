@@ -396,137 +396,84 @@ abstract class Olap4ldCellSet implements CellSet {
 	 */
 	private LogicalOlapQueryPlan createInitialLogicalOlapQueryPlan() {
 
-		List<Node[]> cube = metaData.cube.transformMetadataObject2NxNodes();
+		try {
+			// We should not transform cube to Node, but search through cubes
+			Restrictions restrictions = new Restrictions();
+			restrictions.cubeNamePattern = metaData.cube.getUniqueName();
+			List<Node[]> cubes = this.olap4jStatement.olap4jConnection.myLinkedData
+					.getCubes(restrictions);
 
-		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(cube.get(0));
+			Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(cubes.get(0));
 
-		LogicalOlapOp queryplanroot = null;
-
-		if (cube.get(1)[cubemap.get("?CUBE_NAME")].toString().contains(",")) {
-
-			String[] datasets = cube.get(1)[cubemap.get("?CUBE_NAME")]
-					.toString().split(",");
-			List<LogicalOlapOp> singlecubequeryplans = new ArrayList<LogicalOlapOp>();
-			for (int i = 0; i < datasets.length; i++) {
-				String dataset = datasets[i];
-
-				Restrictions restrictions = new Restrictions();
-				restrictions.cubeNamePattern = dataset;
-
-				// Ask for the cube
-				try {
-					List<Node[]> singlecube = this.olap4jStatement.olap4jConnection.myLinkedData
-							.getCubes(restrictions);
-					LogicalOlapOp singlequeryplan = createInitialQueryPlanPerDataSet(singlecube);
-					singlecubequeryplans.add(singlequeryplan);
-
-				} catch (OlapException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			List<Node[]> cube = new ArrayList<Node[]>();
+			cube.add(cubes.get(0));
+			for (Node[] aCube : cubes) {
+				if (aCube[cubemap.get("?CUBE_NAME")].toString().equals(
+						restrictions.cubeNamePattern)) {
+					// We do not need all cubes.
+					cube.add(aCube);
 				}
-
-				queryplanroot = null;
-				// queryplanroot is simply (XXX: can we make it bushy?) query
-				// plan with Drill-across operators.
-				for (LogicalOlapOp logicalOlapOp : singlecubequeryplans) {
-					if (queryplanroot == null) {
-						queryplanroot = logicalOlapOp;
-					} else {
-						DrillAcrossOp drillacross = new DrillAcrossOp(
-								queryplanroot, logicalOlapOp);
-						queryplanroot = drillacross;
-					}
-				}
-
 			}
-		} else {
-			queryplanroot = createInitialQueryPlanPerDataSet(cube);
-		}
 
-		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(queryplanroot);
-		return myplan;
+			LogicalOlapOp queryplanroot = null;
+
+			if (restrictions.cubeNamePattern.contains(",")) {
+
+				String[] datasets = restrictions.cubeNamePattern.split(",");
+				List<LogicalOlapOp> singlecubequeryplans = new ArrayList<LogicalOlapOp>();
+				for (int i = 0; i < datasets.length; i++) {
+					String dataset = datasets[i];
+
+					restrictions = new Restrictions();
+					restrictions.cubeNamePattern = dataset;
+
+					// Ask for the cube
+					try {
+						List<Node[]> singlecube = this.olap4jStatement.olap4jConnection.myLinkedData
+								.getCubes(restrictions);
+						LogicalOlapOp singlequeryplan = createInitialQueryPlanPerDataSet(singlecube);
+						singlecubequeryplans.add(singlequeryplan);
+
+					} catch (OlapException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					queryplanroot = null;
+					// queryplanroot is simply (XXX: can we make it bushy?)
+					// query
+					// plan with Drill-across operators.
+					for (LogicalOlapOp logicalOlapOp : singlecubequeryplans) {
+						if (queryplanroot == null) {
+							queryplanroot = logicalOlapOp;
+						} else {
+							DrillAcrossOp drillacross = new DrillAcrossOp(
+									queryplanroot, logicalOlapOp);
+							queryplanroot = drillacross;
+						}
+					}
+
+				}
+			} else {
+				queryplanroot = createInitialQueryPlanPerDataSet(cube);
+			}
+
+			LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
+					queryplanroot);
+			return myplan;
+
+		} catch (OlapException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return null;
 	}
 
 	private LogicalOlapOp createInitialQueryPlanPerDataSet(List<Node[]> cube) {
 
 		// BaseCube operator
 		boolean first;
-
-		// The problem lies here: We use all elements of the global dataset:
-
-		/*
-		 * Instead, we should query the LDCE.
-		 */
-
-		// try {
-		//
-		// first = true;
-		// for (Olap4ldMeasure measure : metaData.cube.measures) {
-		// if (first) {
-		// measures.add(measure.transformMetadataObject2NxNodes(metaData.cube)
-		// .get(0));
-		// first = false;
-		// }
-		// measures.add(measure.transformMetadataObject2NxNodes(metaData.cube).get(
-		// 1));
-		// }
-		//
-		//
-		// first = true;
-		// for (Olap4ldDimension dimension : metaData.cube.dimensions) {
-		// if (first) {
-		// dimensions.add(dimension.transformMetadataObject2NxNodes()
-		// .get(0));
-		// first = false;
-		// }
-		// dimensions.add(dimension.transformMetadataObject2NxNodes().get(
-		// 1));
-		// first = true;
-		// for (Hierarchy hierarchy : dimension.getHierarchies()) {
-		// Olap4ldHierarchy olap4ldhierarchy = (Olap4ldHierarchy) hierarchy;
-		// if (first) {
-		// hierarchies.add(olap4ldhierarchy
-		// .transformMetadataObject2NxNodes(metaData.cube)
-		// .get(0));
-		// first = false;
-		// }
-		// hierarchies.add(olap4ldhierarchy
-		// .transformMetadataObject2NxNodes(metaData.cube)
-		// .get(1));
-		// first = true;
-		// for (Level level : hierarchy.getLevels()) {
-		// Olap4ldLevel olap4ldlevel = (Olap4ldLevel) level;
-		// if (first) {
-		// levels.add(olap4ldlevel
-		// .transformMetadataObject2NxNodes(
-		// metaData.cube).get(0));
-		// first = false;
-		// }
-		// levels.add(olap4ldlevel
-		// .transformMetadataObject2NxNodes(metaData.cube)
-		// .get(1));
-		// first = true;
-		// for (Member member : level.getMembers()) {
-		// Olap4ldMember olap4ldmember = (Olap4ldMember) member;
-		// if (first) {
-		// members.add(olap4ldmember
-		// .transformMetadataObject2NxNodes(
-		// metaData.cube).get(0));
-		// first = false;
-		// }
-		// members.add(olap4ldmember
-		// .transformMetadataObject2NxNodes(
-		// metaData.cube).get(1));
-		//
-		// }
-		// }
-		// }
-		// }
-		// } catch (OlapException exc) {
-		// throw new UnsupportedOperationException(
-		// "While asking for the metadata, there is an OLAP exception!");
-		// }
 
 		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(cube.get(0));
@@ -556,20 +503,18 @@ abstract class Olap4ldCellSet implements CellSet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(measures.get(0));
 
 		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(dimensions.get(0));
-		
+
 		Map<String, Integer> hierarchymap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(hierarchies.get(0));
-		
+
 		Map<String, Integer> membermap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(members.get(0));
-		
-		
 
 		// Cube from (cube, SlicesRollups, Dices, Projections)
 		LogicalOlapOp basecube = new BaseCubeOp(cube, measures, dimensions,
@@ -585,7 +530,8 @@ abstract class Olap4ldCellSet implements CellSet {
 			// All multidimensional elements in MDX query first belong to the
 			// global cube.
 
-			// XXX: Should do that for all: Instead of transforming with metaData.cube which is wrong, I
+			// XXX: Should do that for all: Instead of transforming with
+			// metaData.cube which is wrong, I
 			// specifically ask
 			// for that measure in that cube. If not existing, not adding.
 			// List<Node[]> membernode = member
@@ -598,11 +544,11 @@ abstract class Olap4ldCellSet implements CellSet {
 				isFirst = false;
 				projections.add(measures.get(0));
 			}
-			
+
 			for (Node[] measure : measures) {
 				if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 						.equals(membernameuri)) {
-					
+
 					projections.add(measure);
 				}
 			}
@@ -634,28 +580,39 @@ abstract class Olap4ldCellSet implements CellSet {
 						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
 					if (first) {
 						first = false;
-						
+
 						newfilterAxisSignature.add(hierarchies.get(0));
 					}
-					// Now, we need to find this hierarchy from the global cube in the local cube.
-					String hierarchynameuri = Olap4ldLinkedDataUtil.convertMDXtoURI(hierarchy.getUniqueName());
+					// Now, we need to find this hierarchy from the global cube
+					// in the local cube.
+					String hierarchynameuri = Olap4ldLinkedDataUtil
+							.convertMDXtoURI(hierarchy.getUniqueName());
 					for (Node[] ahierarchy : hierarchies) {
-						if (ahierarchy[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")].toString()
+						if (ahierarchy[hierarchymap
+								.get("?HIERARCHY_UNIQUE_NAME")].toString()
 								.equals(hierarchynameuri)) {
-							
+
 							/*
-							 * XXX: The problem is that we should take the dataset specific hierarchy and not the hierarchy of the first 
-							 * member (which in our example is from gesis).
+							 * The problem is that we should take the dataset
+							 * specific hierarchy and not the hierarchy of the
+							 * first member (which in our example is from
+							 * gesis).
 							 * 
-							 * The problem is that we will have only one consolidated member from
-							 * a consolidated hierarchy etc. 
+							 * The problem is that we will have only one
+							 * consolidated member from a consolidated hierarchy
+							 * etc.
 							 * 
-							 * We then need to find the respective member and hierarchy in the original dataset.
+							 * We then need to find the respective member and
+							 * hierarchy in the original dataset.
 							 * 
-							 * Currently, I will probably not find the hierarchy for the dataset,
-							 * since the hierarchy will have the name of another datasets dimension.
+							 * Currently, I will probably not find the hierarchy
+							 * for the dataset, since the hierarchy will have
+							 * the name of another datasets dimension.
+							 * 
+							 * Thus, we also replace the single dataset
+							 * identifiers with canonical values.
 							 */
-							
+
 							newfilterAxisSignature.add(ahierarchy);
 						}
 					}
@@ -671,10 +628,10 @@ abstract class Olap4ldCellSet implements CellSet {
 				Olap4ldMember olapmember = (Olap4ldMember) member;
 				// No measures
 				if (member.getMemberType() != Member.Type.MEASURE) {
-					
+
 					List<Node[]> membernodes = olapmember
 							.transformMetadataObject2NxNodes(metaData.cube);
-					
+
 					if (first1) {
 						first1 = false;
 						newMembers.add(membernodes.get(0));
@@ -990,7 +947,7 @@ abstract class Olap4ldCellSet implements CellSet {
 				concatNr += node[i].toString();
 			}
 
-			// No header 
+			// No header
 			String[] valueArray = new String[measureList.size()];
 
 			// No header
@@ -1600,7 +1557,8 @@ abstract class Olap4ldCellSet implements CellSet {
 		// No header
 		for (int i = 0; i < measureList.size() && measure != null; i++) {
 
-			// Problem in case the same measure is used by several cubes, then we always use the first.
+			// Problem in case the same measure is used by several cubes, then
+			// we always use the first.
 			if (measureList.get(i).getUniqueName()
 					.equals(measure.getUniqueName())) {
 				// No header

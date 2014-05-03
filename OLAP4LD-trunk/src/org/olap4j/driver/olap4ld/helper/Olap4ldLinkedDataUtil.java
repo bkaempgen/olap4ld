@@ -71,7 +71,7 @@ public class Olap4ldLinkedDataUtil {
 		// (which if possible should be always the same):
 		return encodeSpecialMdxCharactersInNames(uri);
 	}
-	
+
 	/**
 	 * Helper Method for asking for location
 	 * 
@@ -91,24 +91,23 @@ public class Olap4ldLinkedDataUtil {
 		try {
 			connection = (HttpURLConnection) uri.openConnection();
 			connection.setConnectTimeout(5000);
-			//int responsecode = connection.getResponseCode();
+			// int responsecode = connection.getResponseCode();
 			connection.setRequestProperty("Accept", "application/rdf+xml");
 			String header = connection.getHeaderField("location");
 			String domain = uri.getHost();
 			String protocol = uri.getProtocol();
 			String port = "";
 			if (uri.getPort() != 80 && uri.getPort() != -1) {
-				port = ":"+uri.getPort()+"";
+				port = ":" + uri.getPort() + "";
 			}
 			String path = uri.getPath();
 			String query = uri.getQuery();
 			if (query == null || query.equals("")) {
 				query = "";
 			} else {
-				query = "?"+query;
+				query = "?" + query;
 			}
 
-			
 			// TODO: Could be that we need to check whether bogus comes out
 			// (e.g., Not found).
 			if (header != null) {
@@ -118,8 +117,8 @@ public class Olap4ldLinkedDataUtil {
 					// absolute URL
 					returnurlstring = header;
 				} else if (header.startsWith("/")) {
-					returnurlstring = protocol + "://" + domain + port
-							+ header + query;
+					returnurlstring = protocol + "://" + domain + port + header
+							+ query;
 				} else {
 					/*
 					 * relative URL May be: Gleiche Domäne, Gleiche Ressource,
@@ -128,12 +127,18 @@ public class Olap4ldLinkedDataUtil {
 					 * Relative_URL)
 					 */
 
-					returnurlstring = protocol + "://" + domain + port
-							+ path + header + query;
+					returnurlstring = protocol + "://" + domain + port + path
+							+ header + query;
 				}
 			} else {
-				returnurlstring = protocol + "://" + domain + port
-						+ path + query;
+
+				// Actually, not correct, but needed for linked-statistics
+				if (path.startsWith("/../")) {
+					path = path.replace("../", "");
+				}
+
+				returnurlstring = protocol + "://" + domain + port + path
+						+ query;
 			}
 			// We should remove # uris
 			if (returnurlstring.contains("#")) {
@@ -205,8 +210,10 @@ public class Olap4ldLinkedDataUtil {
 	public static String convertNodeToMDX(org.semanticweb.yars.nx.Node node) {
 		// If value is uri, then convert into MDX friendly format
 		if (node.toString().equals("null")) {
-			// XXX: Not sure whether it is clever to have this like an object name with square br.
-			// No this is complete nonsense. We need to make sure that "null" gets returned by rowset and null by metadata object.  
+			// XXX: Not sure whether it is clever to have this like an object
+			// name with square br.
+			// No this is complete nonsense. We need to make sure that "null"
+			// gets returned by rowset and null by metadata object.
 			return null;
 		} else if (node.toString().equals("Measures")) {
 			// Measures does not get encoded, can stay.
@@ -283,7 +290,7 @@ public class Olap4ldLinkedDataUtil {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * SPARQL does not allow all characters as parameter names, e.g.,
 	 * ?sdmx-measure:obsValue. Therefore, we transform the URI representation
@@ -295,7 +302,7 @@ public class Olap4ldLinkedDataUtil {
 	public static Variable makeUriToVariable(String uriRepresentation) {
 		// We simply remove all special characters
 		uriRepresentation = uriRepresentation.replaceAll("[^a-zA-Z0-9]+", "");
-		return new Variable("?"+uriRepresentation);
+		return new Variable("?" + uriRepresentation);
 	}
 
 	/**
@@ -560,21 +567,23 @@ public class Olap4ldLinkedDataUtil {
 		}
 		return mapFields;
 	}
-	
-	public static List<List<Node[]>> splitandparseN3rule(String n3rule) throws IOException {
+
+	public static List<List<Node[]>> splitandparseN3rule(String n3rule)
+			throws IOException {
 		// Remove {, }
-		
+
 		n3rule = n3rule.replace("{", "");
 		n3rule = n3rule.replace("}", "");
-				
+
 		// Take => as split.
-		
+
 		int n3ruleindex = n3rule.indexOf("=>");
-		
+
 		String n3rule_body = n3rule.substring(0, n3ruleindex);
-		String n3rule_head = n3rule.substring(n3ruleindex+2, n3rule.length());
-		
-		InputStream stream = new ByteArrayInputStream(n3rule_body.getBytes("UTF-8"));
+		String n3rule_head = n3rule.substring(n3ruleindex + 2, n3rule.length());
+
+		InputStream stream = new ByteArrayInputStream(
+				n3rule_body.getBytes("UTF-8"));
 		NxParser nxp = new NxParser(stream);
 
 		List<Node[]> n3rule_nodes_body = new ArrayList<Node[]>();
@@ -584,12 +593,12 @@ public class Olap4ldLinkedDataUtil {
 			nxx = nxp.next();
 			n3rule_nodes_body.add(nxx);
 			for (Node node : nxx) {
-				System.out.print(node.toN3()+ " ");
+				System.out.print(node.toN3() + " ");
 			}
 			System.out.println();
 		}
 		stream.close();
-			
+
 		stream = new ByteArrayInputStream(n3rule_head.getBytes("UTF-8"));
 		nxp = new NxParser(stream);
 
@@ -599,16 +608,16 @@ public class Olap4ldLinkedDataUtil {
 			nxx = nxp.next();
 			n3rule_nodes_head.add(nxx);
 			for (Node node : nxx) {
-				System.out.print(node.toN3()+" ");
+				System.out.print(node.toN3() + " ");
 			}
 			System.out.println();
 		}
 		stream.close();
-		
+
 		List<List<Node[]>> result = new ArrayList<List<Node[]>>();
 		result.add(n3rule_nodes_body);
 		result.add(n3rule_nodes_head);
-		
+
 		return result;
 	}
 
@@ -638,7 +647,8 @@ public class Olap4ldLinkedDataUtil {
 			StreamSource ssource = new StreamSource(xml);
 			StreamResult sresult = new StreamResult(baos);
 
-			Olap4ldUtil._log.config("...applying xslt to transform xml to nx...");
+			Olap4ldUtil._log
+					.config("...applying xslt to transform xml to nx...");
 
 			t.transform(ssource, sresult);
 
@@ -652,6 +662,7 @@ public class Olap4ldLinkedDataUtil {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
+
 	/**
 	 * dump RDF graph
 	 * 
@@ -661,7 +672,8 @@ public class Olap4ldLinkedDataUtil {
 	 *            the RDF serialization format for the dump
 	 * @return
 	 */
-	public static void dumpRDF(SailRepository repo, String file, RDFFormat outform) {
+	public static void dumpRDF(SailRepository repo, String file,
+			RDFFormat outform) {
 		try {
 			// dump the graph in the specified format
 			System.out.println("\n==GRAPH DUMP==\n");
@@ -677,14 +689,15 @@ public class Olap4ldLinkedDataUtil {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param repo
 	 * @param query
 	 * @param caching
 	 */
-	public static void sparqlRepoUpdate(SailRepository repo, String query, boolean caching) {
+	public static void sparqlRepoUpdate(SailRepository repo, String query,
+			boolean caching) {
 		Olap4ldUtil._log.config("SPARQL update query: " + query);
 
 		try {
@@ -706,5 +719,5 @@ public class Olap4ldLinkedDataUtil {
 			e1.printStackTrace();
 		}
 	}
-	
+
 }

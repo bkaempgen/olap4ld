@@ -21,6 +21,10 @@ We now would like to extend this.
 that Estatwrap is using the same URI for Dim / Hier / Level, whereas GESIS uses different ones for 
 Dim / Hier / Level. This is because Estatwrap uses rdfs:range nuts:Region whereas GESIS uses a code 
 list #list.
+* What do we want? 
+** Canonical identifier for dimension? gesis:geo (selected because first dataset)
+** Canonical identifier for hierarchy? gesis:geo (since estatwrap hierarchy is the same as estatwrap dimension) - However, 
+** 
 * How about defining that #list is also owl:sameAs estatwrap:geo? In this case, 
 
 Todo: 

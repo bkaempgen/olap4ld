@@ -55,8 +55,9 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	//private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds,http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
 	//private static final String TESTURL = "http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds";
 	// private static final String TESTURL = "http://estatwrap.ontologycentral.com/id/tec00114#ds,http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds";
-	private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds,http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds";	
-	// private static final String TESTURL =
+	//private static final String TESTURL = "http://eurostat.linked-statistics.org/data/tec00114";
+	private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds,http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds";
+	
 	// "http://data.webfoundation.org/webindex/dataset/ITUA-Imputed";
 
 	private static final String NL = System.getProperty("line.separator");
@@ -170,7 +171,7 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 		// Set the level to a particular level
 
 		// For debugging purposes
-		// Olap4ldUtil._log.setLevel(Level.CONFIG);
+		//Olap4ldUtil._log.setLevel(Level.CONFIG);
 
 		// For monitoring usage
 		// Olap4ldUtil._log.setLevel(Level.INFO);

@@ -487,7 +487,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		String query = "select (count(?s) as ?count) where {?s ?p ?o}";
 		List<Node[]> result = sparql(query, false);
 		this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
-		Olap4ldUtil._log.config("Number of loaded triples: "
+		Olap4ldUtil._log.config("Number of loaded triples before: "
 				+ this.LOADED_TRIPLE_SIZE);
 
 		if (this.LOADED_TRIPLE_SIZE > this.MAX_LOAD_TRIPLE_SIZE) {
@@ -562,12 +562,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				connection.setConnectTimeout(5000);
 				int responsecode = connection.getResponseCode();
 
-				// Not acceptable?
+				// Not acceptable format?
 				if (responsecode == 406) {
 					connection.disconnect();
 					connection = (HttpURLConnection) location.openConnection();
 					connection.setRequestProperty("Accept", "text/turtle");
 					format = RDFFormat.TURTLE;
+					responsecode = connection.getResponseCode();
 				}
 
 				// Error
@@ -677,6 +678,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			}
 
 			con.close();
+			
+			// Check max loaded
+			query = "select (count(?s) as ?count) where {?s ?p ?o}";
+			result = sparql(query, false);
+			this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
+			Olap4ldUtil._log.config("Number of loaded triples after: "
+					+ this.LOADED_TRIPLE_SIZE);
 
 		} catch (RepositoryException e) {
 			throw new OlapException("Problem with repository: "
@@ -1063,52 +1071,90 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				}
 			}
 
-			/*
-			 * Now that we have loaded all cube, we need to implement entity
-			 * consolidation.
-			 * 
-			 * We create an equivalence table. Then, for each dimension unique
-			 * name, we have one equivalence class. Then we can do as before.
-			 */
-
-			// List<Node[]> myresult = sparql(querytemplate, true);
-			// // Add all of result2 to result
-			// boolean first = true;
-			// for (Node[] nodes : myresult) {
-			// if (first) {
-			// first = false;
-			// continue;
-			// }
-			// result.add(nodes);
-			// }
-
-			// for now, we simply assume equivalence statements given
-
-			List<Node[]> equivs = new ArrayList<Node[]>();
-
-			equivs.add(new Node[] {
-					new Resource(
-							"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
-					new Resource(
-							"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-			this.equivalenceList = createEquivalenceList(equivs);
-
-			// Now, add "virtual cube"
-			// ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
-			// ?DESCRIPTION
-			Node[] virtualcube = new Node[] { new Literal(TABLE_CAT),
-					new Literal(TABLE_SCHEM),
-					new Resource(restrictions.cubeNamePattern),
-					new Literal("CUBE"), new Literal("Global Cube"),
-					new Literal("This is the global cube.") };
-			result.add(virtualcube);
-
 		} else {
 
 			result = getCubesPerDataSet(restrictions);
 
 		}
+
+		/*
+		 * Now that we have loaded all cube, we need to implement entity
+		 * consolidation.
+		 * 
+		 * We create an equivalence table. Then, for each dimension unique name,
+		 * we have one equivalence class. Then we can do as before.
+		 */
+
+		// List<Node[]> myresult = sparql(querytemplate, true);
+		// // Add all of result2 to result
+		// boolean first = true;
+		// for (Node[] nodes : myresult) {
+		// if (first) {
+		// first = false;
+		// continue;
+		// }
+		// result.add(nodes);
+		// }
+
+		// for now, we simply assume equivalence statements given
+
+		List<Node[]> equivs = new ArrayList<Node[]>();
+
+		equivs.add(new Node[] {
+				new Resource(
+						"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
+				new Resource(
+						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
+		
+		// Hierarchy gesis-geo:list = estatwrap:geo
+		equivs.add(new Node[] {
+				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list"),
+				new Resource("http://ontologycentral.com/2009/01/eurostat/ns#geo") });
+
+		// Could also for the olap
+//		equivs.add(new Node[] {
+//				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
+//				new Resource("http://ontologycentral.com/dic/geo#DE") });
+		
+		equivs.add(new Node[] {
+				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
+				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
+
+		this.equivalenceList = createEquivalenceList(equivs);
+
+		// Now, add "virtual cube"
+		// ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
+		// ?DESCRIPTION
+		String globalcubename = "";
+		if (restrictions.cubeNamePattern == null) {
+
+			Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(result.get(0));
+
+			// Concatenate all cubes.
+			boolean first = true;
+			for (Node[] nodes : result) {
+				if (first) {
+					// First header;
+					first = false;
+					continue;
+				}
+				
+				if (!globalcubename.equals("")) {
+					globalcubename += ",";
+				}
+				globalcubename += nodes[cubemap.get("?CUBE_NAME")];
+			}
+
+		} else {
+			globalcubename = restrictions.cubeNamePattern;
+		}
+
+		Node[] virtualcube = new Node[] { new Literal(TABLE_CAT),
+				new Literal(TABLE_SCHEM), new Literal(globalcubename),
+				new Literal("CUBE"), new Literal("Global Cube"),
+				new Literal("This is the global cube.") };
+		result.add(virtualcube);
 
 		/*
 		 * Check on restrictions that the interface makes:
@@ -1948,10 +1994,10 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				result.add(nodes);
 			}
 		}
-		
+
 		// Use canonical identifier
 		result = replaceIdentifiersWithCanonical(result);
-		
+
 		return result;
 	}
 
@@ -2118,7 +2164,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			}
 			result.add(nodes);
 		}
-		
+
 		// Use canonical identifier
 		result = replaceIdentifiersWithCanonical(result);
 
@@ -2189,10 +2235,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			List<Node[]> intermediaryresult) {
 		List<Node[]> result = new ArrayList<Node[]>();
 
-		
 		boolean first = true;
 		for (Node[] anIntermediaryresult : intermediaryresult) {
-			
+
 			if (first) {
 				first = false;
 				result.add(anIntermediaryresult);
@@ -2295,7 +2340,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				}
 				result.add(nodes);
 			}
-			
+
 		}
 
 		// List<Node[]> result = applyRestrictions(hierarchyResults,
@@ -2371,7 +2416,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				result.add(nodes);
 			}
 		}
-		
+
 		// Use canonical identifier
 		result = replaceIdentifiersWithCanonical(result);
 
@@ -2379,9 +2424,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	}
 
 	private List<Node[]> replaceIdentifiersWithCanonical(List<Node[]> result) {
-		
+
 		List<Node[]> newresult = new ArrayList<Node[]>();
-		
+
 		for (Node[] anIntermediaryresult : result) {
 			Node[] newnode = new Node[anIntermediaryresult.length];
 			for (int i = 0; i < anIntermediaryresult.length; i++) {
@@ -2389,7 +2434,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			}
 			newresult.add(newnode);
 		}
-		
+
 		return newresult;
 	}
 
@@ -2631,7 +2676,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				result.add(nodes);
 			}
 		}
-		
+
 		// Use canonical identifier
 		result = replaceIdentifiersWithCanonical(result);
 
@@ -2830,7 +2875,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			addToResult(intermediaryresult, result);
 
 		}
-		
+
 		// Use canonical identifier
 		result = replaceIdentifiersWithCanonical(result);
 
@@ -3129,38 +3174,51 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	}
 
 	private String createFilterForRestrictions(Restrictions restrictions) {
+		
 		// We need to create a filter for the specific restriction
 		String cubeNamePatternFilter = (restrictions.cubeNamePattern != null) ? " FILTER (?CUBE_NAME = <"
 				+ restrictions.cubeNamePattern + ">) "
 				: "";
-		String dimensionUniqueNameFilter = (restrictions.dimensionUniqueName != null && !restrictions.dimensionUniqueName
-				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?DIMENSION_UNIQUE_NAME = <"
-				+ restrictions.dimensionUniqueName + ">) "
-				: "";
-		String hierarchyUniqueNameFilter = (restrictions.hierarchyUniqueName != null && !restrictions.hierarchyUniqueName
-				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?HIERARCHY_UNIQUE_NAME = <"
-				+ restrictions.hierarchyUniqueName + ">) "
-				: "";
-		String levelUniqueNameFilter = (restrictions.levelUniqueName != null && !restrictions.levelUniqueName
-				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?LEVEL_UNIQUE_NAME = <"
-				+ restrictions.levelUniqueName + ">) "
-				: "";
-
-		String memberUniqueNameFilter;
-		if (restrictions.memberUniqueName != null) {
-			String resource = restrictions.memberUniqueName;
-			// Since we sometimes manually build member names, we have to check
-			// on strings
-			memberUniqueNameFilter = " FILTER (str(?MEMBER_UNIQUE_NAME) = \""
-					+ resource + "\") ";
-
-		} else {
-			memberUniqueNameFilter = "";
-		}
+		String dimensionUniqueNameFilter = createFilterConsiderEquivalences(restrictions.dimensionUniqueName, "DIMENSION_UNIQUE_NAME");
+				
+		String hierarchyUniqueNameFilter = createFilterConsiderEquivalences(restrictions.hierarchyUniqueName, "HIERARCHY_UNIQUE_NAME");
+				
+		String levelUniqueNameFilter = createFilterConsiderEquivalences(restrictions.levelUniqueName, "LEVEL_UNIQUE_NAME");
+		
+		String memberUniqueNameFilter = createFilterConsiderEquivalences(restrictions.memberUniqueName, "MEMBER_UNIQUE_NAME");
 
 		return cubeNamePatternFilter + dimensionUniqueNameFilter
 				+ hierarchyUniqueNameFilter + levelUniqueNameFilter
 				+ memberUniqueNameFilter;
+	}
+
+	private String createFilterConsiderEquivalences(String uniqueName, String variableName) {
+		if (uniqueName != null && !uniqueName
+				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+			
+			List<Node> equivalenceClass = new ArrayList<Node>();
+			equivalenceClass.add(new Resource(uniqueName));
+			for (List<Node> iterable_element : this.equivalenceList) {
+				for (Node node : iterable_element) {
+					if (uniqueName.equals(node.toString())) {
+						equivalenceClass = iterable_element;
+						break;
+					}
+				}
+			}
+			
+			// Since we sometimes manually build member names, we have to check
+			// on strings
+			String[] filterString = new String[equivalenceClass.size()];
+			for (int i = 0; i < filterString.length; i++) {
+				filterString[i] = "str(?"+variableName+") = \""+equivalenceClass.get(i)+"\"";
+			}
+			
+			return "FILTER ("+Olap4ldLinkedDataUtil.implodeArray(filterString, "||")+")";
+			
+		} else {
+			return "";
+		}
 	}
 
 	/**

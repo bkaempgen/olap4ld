@@ -315,6 +315,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 
 		ConvertSparqlDerivedDatasetIterator convertcontextcube;
 		if (so.inputOp2 == null) {
+			
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root = _root;
 			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root,
@@ -339,7 +340,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 			PhysicalOlapIterator root2 = _root;
 
 			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root1,
-					root2, so.conversionfunction, so.domainUri);
+					root2, so.reconciliationcorrespondence, so.domainUri);
 		}
 
 		_root = convertcontextcube;
