@@ -2009,7 +2009,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 		Olap4ldUtil._log.config("Logical query plan to string: "
 				+ queryplan.toString());
 
-		Olap2SparqlSesameVisitor r2a = new Olap2SparqlSesameVisitor(repo);
+		Olap2SparqlSesameVisitor r2a = new Olap2SparqlSesameVisitor(null);
 
 		PhysicalOlapIterator newRoot;
 		try {

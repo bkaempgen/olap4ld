@@ -97,6 +97,7 @@ class Olap4ldMeasure extends Olap4ldMember implements Measure, Named {
 		return visible;
 	}
 
+	@Deprecated
 	public List<Node[]> transformMetadataObject2NxNodes(Cube cube) {
 		List<Node[]> nodes = new ArrayList<Node[]>();
 
@@ -119,15 +120,15 @@ class Olap4ldMeasure extends Olap4ldMember implements Measure, Named {
 		nodes.add(header);
 
 		Node[] cubenode = new Node[] {
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getSchema().getCatalog().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getSchema().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getUniqueName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getUniqueName())), new Literal(Olap4ldLinkedDataUtil
-								.convertMDXtoURI(this.getName())),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getCatalog().getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getUniqueName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getUniqueName()), Olap4ldLinkedDataUtil
+								.convertMDXtoURI(this.getName()),
 				new Literal(this.getCaption()),
 				new Literal(this.getDatatype().toString()),
 				new Literal(this.isVisible()+""),

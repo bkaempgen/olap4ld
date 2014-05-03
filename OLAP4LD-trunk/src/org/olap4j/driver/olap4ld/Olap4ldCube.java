@@ -611,6 +611,7 @@ class Olap4ldCube implements Cube, Named {
 		}
 	}
 	
+	@Deprecated
 	public List<Node[]> transformMetadataObject2NxNodes() {
 		List<Node[]> nodes = new ArrayList<Node[]>();
 
@@ -628,12 +629,12 @@ class Olap4ldCube implements Cube, Named {
 			nodes.add(header);
 			
 			Node[] cubenode = new Node[] {
-					new Literal(Olap4ldLinkedDataUtil
-							.convertMDXtoURI(this.getSchema().getCatalog().getName())),
-					new Literal(Olap4ldLinkedDataUtil
-							.convertMDXtoURI(this.getSchema().getName())),
-					new Literal(Olap4ldLinkedDataUtil
-							.convertMDXtoURI(this.getUniqueName())), new Literal("CUBE"),
+					Olap4ldLinkedDataUtil
+							.convertMDXtoURI(this.getSchema().getCatalog().getName()),
+					Olap4ldLinkedDataUtil
+							.convertMDXtoURI(this.getSchema().getName()),
+					Olap4ldLinkedDataUtil
+							.convertMDXtoURI(this.getUniqueName()), new Literal("CUBE"),
 					new Literal(this.getCaption()),
 					new Literal(this.getDescription()) };
 			nodes.add(cubenode);

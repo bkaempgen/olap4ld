@@ -89,6 +89,7 @@ import org.olap4j.metadata.NamedList;
 import org.olap4j.metadata.Property;
 import org.olap4j.metadata.Schema;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -399,7 +400,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		try {
 			// We should not transform cube to Node, but search through cubes
 			Restrictions restrictions = new Restrictions();
-			restrictions.cubeNamePattern = metaData.cube.getUniqueName();
+			restrictions.cubeNamePattern = Olap4ldLinkedDataUtil.convertMDXtoURI(metaData.cube.getUniqueName());
 			List<Node[]> cubes = this.olap4jStatement.olap4jConnection.myLinkedData
 					.getCubes(restrictions);
 
@@ -409,7 +410,7 @@ abstract class Olap4ldCellSet implements CellSet {
 			List<Node[]> cube = new ArrayList<Node[]>();
 			cube.add(cubes.get(0));
 			for (Node[] aCube : cubes) {
-				if (aCube[cubemap.get("?CUBE_NAME")].toString().equals(
+				if (aCube[cubemap.get("?CUBE_NAME")].equals(
 						restrictions.cubeNamePattern)) {
 					// We do not need all cubes.
 					cube.add(aCube);
@@ -418,15 +419,15 @@ abstract class Olap4ldCellSet implements CellSet {
 
 			LogicalOlapOp queryplanroot = null;
 
-			if (restrictions.cubeNamePattern.contains(",")) {
+			if (restrictions.cubeNamePattern.toString().contains(",")) {
 
-				String[] datasets = restrictions.cubeNamePattern.split(",");
+				String[] datasets = restrictions.cubeNamePattern.toString().split(",");
 				List<LogicalOlapOp> singlecubequeryplans = new ArrayList<LogicalOlapOp>();
 				for (int i = 0; i < datasets.length; i++) {
 					String dataset = datasets[i];
 
 					restrictions = new Restrictions();
-					restrictions.cubeNamePattern = dataset;
+					restrictions.cubeNamePattern = new Resource(dataset);
 
 					// Ask for the cube
 					try {
@@ -479,8 +480,7 @@ abstract class Olap4ldCellSet implements CellSet {
 				.getNodeResultFields(cube.get(0));
 
 		Restrictions restrictions = new Restrictions();
-		restrictions.cubeNamePattern = cube.get(1)[cubemap.get("?CUBE_NAME")]
-				.toString();
+		restrictions.cubeNamePattern = cube.get(1)[cubemap.get("?CUBE_NAME")];
 
 		List<Node[]> measures = new ArrayList<Node[]>();
 		List<Node[]> dimensions = new ArrayList<Node[]>();
@@ -537,7 +537,7 @@ abstract class Olap4ldCellSet implements CellSet {
 			// List<Node[]> membernode = member
 			// .transformMetadataObject2NxNodes(metaData.cube);
 
-			String membernameuri = Olap4ldLinkedDataUtil.convertMDXtoURI(member
+			Node membernameuri = Olap4ldLinkedDataUtil.convertMDXtoURI(member
 					.getUniqueName());
 
 			if (isFirst) {
@@ -546,8 +546,9 @@ abstract class Olap4ldCellSet implements CellSet {
 			}
 
 			for (Node[] measure : measures) {
+				// For measure, we cannot be sure about the encoding.
 				if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
-						.equals(membernameuri)) {
+						.equals(membernameuri.toString())) {
 
 					projections.add(measure);
 				}
@@ -585,11 +586,11 @@ abstract class Olap4ldCellSet implements CellSet {
 					}
 					// Now, we need to find this hierarchy from the global cube
 					// in the local cube.
-					String hierarchynameuri = Olap4ldLinkedDataUtil
+					Node hierarchynameuri = Olap4ldLinkedDataUtil
 							.convertMDXtoURI(hierarchy.getUniqueName());
 					for (Node[] ahierarchy : hierarchies) {
 						if (ahierarchy[hierarchymap
-								.get("?HIERARCHY_UNIQUE_NAME")].toString()
+								.get("?HIERARCHY_UNIQUE_NAME")]
 								.equals(hierarchynameuri)) {
 
 							/*
@@ -783,12 +784,12 @@ abstract class Olap4ldCellSet implements CellSet {
 
 			boolean containedincube = false;
 
-			String dimensionnameuri = Olap4ldLinkedDataUtil
+			Node dimensionnameuri = Olap4ldLinkedDataUtil
 					.convertMDXtoURI(realdimension.getUniqueName());
 
 			for (Node[] aDimension : dimensions) {
 				if (aDimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-						.toString().equals(dimensionnameuri)) {
+						.equals(dimensionnameuri)) {
 					dimension = aDimension;
 					containedincube = true;
 				}
@@ -806,9 +807,8 @@ abstract class Olap4ldCellSet implements CellSet {
 						.getNodeResultFields(notslicedhierarchies.get(0));
 
 				if (notslicedhierarchy[notslicedhierarchymap
-						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
-						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-								.toString())) {
+						.get("?DIMENSION_UNIQUE_NAME")].equals(
+						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")])) {
 					contained = true;
 				}
 			}
@@ -861,11 +861,11 @@ abstract class Olap4ldCellSet implements CellSet {
 
 						// If dimension == member.dimension then store
 						// Add index in correct ordering.
-						String memberdimension = Olap4ldLinkedDataUtil
+						Node memberdimension = Olap4ldLinkedDataUtil
 								.convertMDXtoURI(member.getDimension()
 										.getUniqueName());
 						if (memberdimension.equals(dimension[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")].toString())) {
+								.get("?DIMENSION_UNIQUE_NAME")])) {
 							dimensionindicesList.add(index);
 						}
 						// Count index
@@ -1535,7 +1535,7 @@ abstract class Olap4ldCellSet implements CellSet {
 					measure = (Measure) member;
 				} else {
 					concatNrs.add(Olap4ldLinkedDataUtil.convertMDXtoURI(member
-							.getUniqueName()));
+							.getUniqueName()).toString());
 				}
 			}
 		}

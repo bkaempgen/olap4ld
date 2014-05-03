@@ -420,9 +420,9 @@ public class MdxMetadataExtractorVisitor<Object> implements ParseTreeVisitor<Obj
 		// If we cannot cast to double, we return null.
 		// Also, we need to decode to uri representation
 		Double one = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call
-				.getArgList().get(0).accept(this).toString()));
+				.getArgList().get(0).accept(this).toString()).toString());
 		Double two = new Double(Olap4ldLinkedDataUtil.convertMDXtoURI(call
-				.getArgList().get(1).accept(this).toString()));
+				.getArgList().get(1).accept(this).toString()).toString());
 		if (call.getOperatorName().equals("+")) {
 			return (Object) new Double(one.doubleValue() + two.doubleValue());
 		}
@@ -500,7 +500,7 @@ public class MdxMetadataExtractorVisitor<Object> implements ParseTreeVisitor<Obj
 		String value = (String) call.getArgList().get(0).accept(this);
 		// We have to translate MDX first to real value since for the square
 		// brackets
-		value = Olap4ldLinkedDataUtil.convertMDXtoURI(value);
+		value = Olap4ldLinkedDataUtil.convertMDXtoURI(value).toString();
 		if (caster.equals("NUMERIC")) {
 			return (Object) (new Double(value));
 		}

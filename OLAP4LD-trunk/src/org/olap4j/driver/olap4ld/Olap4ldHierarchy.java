@@ -135,6 +135,7 @@ class Olap4ldHierarchy
                 ((Olap4ldHierarchy) obj).getUniqueName());
     }
     
+    @Deprecated
 	public List<Node[]> transformMetadataObject2NxNodes(Cube cube) {
 		List<Node[]> nodes = new ArrayList<Node[]>();
 
@@ -158,17 +159,17 @@ class Olap4ldHierarchy
 		nodes.add(header);
 
 		Node[] metadatanode = new Node[] {
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getSchema().getCatalog().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getSchema().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getUniqueName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getDimension().getUniqueName())), new Literal(Olap4ldLinkedDataUtil
-								.convertMDXtoURI(this.getUniqueName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getName())),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getCatalog().getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getUniqueName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getDimension().getUniqueName()), Olap4ldLinkedDataUtil
+								.convertMDXtoURI(this.getUniqueName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getName()),
 				new Literal(this.getCaption()),
 				new Literal(this.getDescription()),
 				// Not exactly what HIERARCHY_MAX_LEVEL_NUMBER means, but should be sufficient.

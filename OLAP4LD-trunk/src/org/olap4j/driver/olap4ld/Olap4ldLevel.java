@@ -230,6 +230,7 @@ class Olap4ldLevel
                 ((Olap4ldLevel) obj).getUniqueName());
     }
     
+    @Deprecated
 	public List<Node[]> transformMetadataObject2NxNodes(Cube cube) {
 		List<Node[]> nodes = new ArrayList<Node[]>();
 
@@ -253,20 +254,20 @@ class Olap4ldLevel
 		nodes.add(header);
 
 		Node[] metadatanode = new Node[] {
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getSchema().getCatalog().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getSchema().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getUniqueName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getDimension().getUniqueName())), new Literal(Olap4ldLinkedDataUtil
-								.convertMDXtoURI(this.getHierarchy().getUniqueName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getUniqueName())),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getCatalog().getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getUniqueName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getDimension().getUniqueName()), Olap4ldLinkedDataUtil
+								.convertMDXtoURI(this.getHierarchy().getUniqueName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getUniqueName()),
 				new Literal(this.getCaption()),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getName())),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getName()),
 				new Literal(this.getDescription()),
 				new Literal(this.getDepth()+""),
 				new Literal(this.getCardinality()+""),

@@ -1,9 +1,6 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -14,20 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.olap4j.OlapException;
-import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.metadata.Member;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
 import org.semanticweb.yars.nx.Node;
-import org.semanticweb.yars.nx.parser.NxParser;
+import org.semanticweb.yars.nx.Resource;
+import org.semanticweb.yars.nx.Variable;
 
 public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator {
 
@@ -45,21 +33,21 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	String groupByClause = " ";
 	String orderByClause = " ";
 
-	private SailRepository repo;
+	private EmbeddedSesameEngine engine;
 	private String query;
 	private List<Node[]> result;
 	private Iterator<Node[]> iterator;
 	private HashMap<Integer, Integer> levelHeightMap;
-	private ArrayList<Node[]> newmeasures;
+	private ArrayList<Node[]> newmeasures;	
 
-	public Olap2SparqlAlgorithmSesameIterator(SailRepository repo,
+	public Olap2SparqlAlgorithmSesameIterator(EmbeddedSesameEngine engine,
 			List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
 			List<Node[]> hierarchies, List<Node[]> levels,
 			List<Node[]> members, List<Node[]> slicesrollups,
 			List<Integer> levelheights, List<Node[]> projections,
 			List<List<Node[]>> membercombinations,
 			List<Node[]> hierarchysignature) {
-		this.repo = repo;
+		this.engine = engine;
 
 		this.cubes = cubes;
 		this.measures = measures;
@@ -120,96 +108,10 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 		// At initialisation, we execute the sparql query.
 		// XXX: Should we not do this only if next() or hasNext()?
-		this.result = sparql();
+		
+		this.result = engine.sparql(query, false);
 
 		this.iterator = result.iterator();
-	}
-
-	/**
-	 * Simply copied over from embedded sesame.
-	 * 
-	 * @param query
-	 * @param caching
-	 * @return
-	 */
-	private List<Node[]> sparql() {
-
-		Olap4ldUtil._log.config("SPARQL query: " + query);
-
-		List<Node[]> myBindings = new ArrayList<Node[]>();
-
-		try {
-			RepositoryConnection con = repo.getConnection();
-
-			ByteArrayOutputStream boas = new ByteArrayOutputStream();
-			// FileOutputStream fos = new
-			// FileOutputStream("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/resources/result.srx");
-
-			SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
-					boas);
-
-			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
-					query);
-			tupleQuery.evaluate(sparqlWriter);
-
-			ByteArrayInputStream bais = new ByteArrayInputStream(
-					boas.toByteArray());
-
-			// String xmlwriterstreamString =
-			// Olap4ldLinkedDataUtil.convertStreamToString(bais);
-			// System.out.println(xmlwriterstreamString);
-			// Transform sparql xml to nx
-			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(bais);
-
-			// Only log if needed
-			if (Olap4ldUtil._isDebug) {
-				String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
-				Olap4ldUtil._log.config("NX output: " + test2);
-				nx.reset();
-			}
-
-			NxParser nxp = new NxParser(nx);
-
-			Node[] nxx;
-			while (nxp.hasNext()) {
-				try {
-					nxx = nxp.next();
-					myBindings.add(nxx);
-				} catch (Exception e) {
-
-					// Might happen often, therefore config only
-					Olap4ldUtil._log
-							.config("NxParser: Could not parse properly: "
-									+ e.getMessage());
-				}
-				;
-			}
-
-			boas.close();
-			con.close();
-			// do something interesting with the values here...
-			// con.close();
-		} catch (RepositoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedQueryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (QueryEvaluationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TupleQueryResultHandlerException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-		return myBindings;
 	}
 
 	/**
@@ -353,12 +255,12 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				measurePropertyVariableString = measurePropertyVariableString.replace(cubes.get(1)[cubemap.get("?CUBE_NAME")].toString(), "");
 				
 				Node measurePropertyVariable = Olap4ldLinkedDataUtil
-						.makeUriToVariable(measurePropertyVariableString);
+						.makeUriToVariable(new Resource(measurePropertyVariableString));
 
 				// Unique name for variable
 				Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(measure[measuremap
-								.get("?MEASURE_UNIQUE_NAME")].toString());
+								.get("?MEASURE_UNIQUE_NAME")]);
 
 				String aggregationfunction = measure[measuremap
 						.get("?MEASURE_AGGREGATOR")].toString().replace(
@@ -431,8 +333,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				// To compute Dices Level Height, we need the levelmaxnumber of
 				// the hierarchy. Thus, we also have the hierarchysignature.
 				Integer diceslevelHeight = levelmaxnumber - levelnumber;
-				String dimensionProperty = membercombinations.get(0).get(i)[map
-						.get("?DIMENSION_UNIQUE_NAME")].toString();
+				Node dimensionProperty = membercombinations.get(0).get(i)[map
+						.get("?DIMENSION_UNIQUE_NAME")];
 
 				Integer slicesRollupsLevelHeight = levelHeightMap
 						.get(dimensionProperty.hashCode());
@@ -480,7 +382,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					// First, we need to convert it to URI representation.
 					Node dimensionPropertyVariable = Olap4ldLinkedDataUtil
 							.makeUriToVariable(membercombination.get(i)[map1
-									.get("?DIMENSION_UNIQUE_NAME")].toString());
+									.get("?DIMENSION_UNIQUE_NAME")]);
 
 					// We need to know the member to filter
 					String memberResource = membercombination.get(i)[map1
@@ -922,8 +824,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			// query for all dimension members
 			// String hierarchyURI = LdOlap4jUtil.decodeUriForMdx(hierarchy
 			// .getUniqueName());
-			String dimensionProperty = slicesrollups.get(i)[map
-					.get("?DIMENSION_UNIQUE_NAME")].toString();
+			Node dimensionProperty = slicesrollups.get(i)[map
+					.get("?DIMENSION_UNIQUE_NAME")];
 			// XXX Why exactly do I include the level? Probably, because I need
 			// the level depth from the hierarchy.
 			String levelURI = slicesrollups.get(i)[map
@@ -1017,7 +919,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	}
 
 	/**
-	 * This method returns graph patterns for a property path for levels.
+	 * This method returns graph patterns for a dimension assignment as well as property path for levels.
 	 * 
 	 * @param levelStart
 	 *            startingPoint of level
@@ -1028,7 +930,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	 * @return
 	 */
 	private String addLevelPropertyPath(Integer levelStart,
-			Integer levelHeight, String dimensionProperty, String levelURI) {
+			Integer levelHeight, Node dimensionProperty, String levelURI) {
 
 		String whereClause = "";
 
@@ -1043,12 +945,27 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			 * easy possible to do that if we simply ask each position for the
 			 * i'th position member.
 			 */
-			whereClause += "?obs <" + dimensionProperty + "> ?"
-					+ dimensionPropertyVariable + levelHeight + ". ";
+//			whereClause += "?obs <" + dimensionProperty + "> ?"
+//					+ dimensionPropertyVariable + levelHeight + ". ";
 
 			// If level height is 0, it could be that no level is existing which
 			// is why we leave that
 			// pattern out.
+			
+			/*
+			 * We need to extend this with entity consolidation.
+			 * For that, we use an additional variable for the dimensionProperty (canonical name)
+			 */
+			
+			// The variable we adapt from the dimensionProperty variable
+			Variable dimensionPropertyDimensionVariable = Olap4ldLinkedDataUtil
+					.makeUriToVariable(new Resource(dimensionProperty+"Dimension"));
+			
+			String filter = engine.createFilterConsiderEquivalences(dimensionProperty, dimensionPropertyDimensionVariable);
+		
+			whereClause += "?obs ?" + dimensionPropertyDimensionVariable + " ?"
+					+ dimensionPropertyVariable + levelHeight + ". ";
+			whereClause += filter;
 
 		} else {
 
@@ -1069,6 +986,11 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					+ " skos:member <" + levelURI + ">. ";
 			// Removed part of hasTopConcept, since we know the members
 			// already.
+			
+			/*
+			 * XXX Not done for this if branch, yet: We need to extend this with entity consolidation.
+			 * For that, we use an additional variable for the dimensionProperty (canonical name)
+			 */
 
 		}
 

@@ -38,7 +38,9 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.Rio;
+import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
 import org.semanticweb.yars.nx.parser.NxParser;
 
@@ -160,7 +162,7 @@ public class Olap4ldLinkedDataUtil {
 	 * @param uri
 	 * @return
 	 */
-	static String decodeUriWithPrefix(String encodedname) {
+	static Node decodeUriWithPrefix(String encodedname) {
 
 		if (standard_prefix2uri == null && standard_uri2prefix == null) {
 			readInStandardPrefixes();
@@ -179,11 +181,11 @@ public class Olap4ldLinkedDataUtil {
 			String prefixuri = standard_prefix2uri.get(prefix.hashCode());
 
 			if (prefixuri != null) {
-				return prefixuri + qname;
+				return new Resource(prefixuri + qname);
 			}
 		}
 
-		return decodedname;
+		return new Resource(decodedname);
 
 	}
 
@@ -225,10 +227,10 @@ public class Olap4ldLinkedDataUtil {
 		}
 	}
 
-	public static String convertMDXtoURI(String mdx) {
+	public static Node convertMDXtoURI(String mdx) {
 		if (mdx.equals("Measures")) {
 			// No conversion needed.
-			return mdx;
+			return new Literal(mdx);
 		}
 		// First, we remove the square brackets
 		mdx = removeSquareBrackets(mdx);
@@ -299,9 +301,9 @@ public class Olap4ldLinkedDataUtil {
 	 * @param uriRepresentation
 	 * @return
 	 */
-	public static Variable makeUriToVariable(String uriRepresentation) {
+	public static Variable makeUriToVariable(Node uri) {
 		// We simply remove all special characters
-		uriRepresentation = uriRepresentation.replaceAll("[^a-zA-Z0-9]+", "");
+		String uriRepresentation = uri.toString().replaceAll("[^a-zA-Z0-9]+", "");
 		return new Variable("?" + uriRepresentation);
 	}
 

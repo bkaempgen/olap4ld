@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.metadata.Member;
+import org.semanticweb.yars.nx.Node;
 
 /**
  * Restrictions describe filters for multidimensional elements in terms of
@@ -14,13 +15,13 @@ import org.olap4j.metadata.Member;
  */
 public class Restrictions {
 	// Restrictions
-	public String catalog = null;
-	public String schemaPattern = null;
-	public String cubeNamePattern = null;
-	public String dimensionUniqueName = null;
-	public String hierarchyUniqueName = null;
-	public String levelUniqueName = null;
-	public String memberUniqueName = null;
+	public Node catalog = null;
+	public Node schemaPattern = null;
+	public Node cubeNamePattern = null;
+	public Node dimensionUniqueName = null;
+	public Node hierarchyUniqueName = null;
+	public Node levelUniqueName = null;
+	public Node memberUniqueName = null;
 	public Integer tree = null;
 	public Set<Member.TreeOp> treeOps = null;
 

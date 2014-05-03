@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.openrdf.repository.sail.SailRepository;
 import org.semanticweb.yars.nx.Node;
 
 /**
@@ -37,7 +36,7 @@ public class Olap2SparqlSesameVisitor implements
 	private List<Node[]> projectedMeasures = new ArrayList<Node[]>();
 
 	// For the moment, we know the repo (we could wrap it also)
-	private SailRepository repo;
+	private EmbeddedSesameEngine engine;
 
 	/**
 	 * Constructor.
@@ -48,8 +47,8 @@ public class Olap2SparqlSesameVisitor implements
 	 *            A repository filled with all available cubes.
 	 * 
 	 */
-	public Olap2SparqlSesameVisitor(SailRepository repo) {
-		this.repo = repo;
+	public Olap2SparqlSesameVisitor(EmbeddedSesameEngine engine) {
+		this.engine = engine;
 	}
 
 	/**
@@ -262,7 +261,7 @@ public class Olap2SparqlSesameVisitor implements
 		// only have one node.
 		// We use the OLAP-2-SPARQL algorithm.
 		PhysicalOlapIterator _root = new Olap2SparqlAlgorithmSesameIterator(
-				repo, cubes, measures, dimensions, hierarchies, levels, members, slicesrollups,
+				this.engine, cubes, measures, dimensions, hierarchies, levels, members, slicesrollups,
 				levelheights, projections, membercombinations,
 				hierarchysignature);
 

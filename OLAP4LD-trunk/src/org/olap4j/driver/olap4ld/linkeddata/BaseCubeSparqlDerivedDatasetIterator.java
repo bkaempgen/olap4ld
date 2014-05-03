@@ -23,6 +23,8 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
+import org.semanticweb.yars.nx.Variable;
 import org.semanticweb.yars.nx.parser.NxParser;
 
 /**
@@ -80,8 +82,8 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(dimensions.get(0));
 		for (int i = 1; i < dimensions.size(); i++) {
-			String dimensionProperty = dimensions.get(i)[dimensionmap
-					.get("?DIMENSION_UNIQUE_NAME")].toString();
+			Node dimensionProperty = dimensions.get(i)[dimensionmap
+					.get("?DIMENSION_UNIQUE_NAME")];
 
 			if (dimensionProperty
 					.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
@@ -110,15 +112,8 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 			// We also remove aggregation function from Measure Property
 			// Variable so
 			// that the same property is not selected twice.
-			Node measurePropertyVariable = Olap4ldLinkedDataUtil
-					.makeUriToVariable(measure[measuremap
-							.get("?MEASURE_UNIQUE_NAME")].toString().replace(
-							"AGGFUNC"
-									+ measure[measuremap
-											.get("?MEASURE_AGGREGATOR")]
-											.toString()
-											.replace("http://purl.org/olap#",
-													"").toUpperCase(), ""));
+			Variable measurePropertyVariable = Olap4ldLinkedDataUtil
+					.makeUriToVariable(new Resource(measureProperty));
 
 			// Unique name for variable
 //			Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil

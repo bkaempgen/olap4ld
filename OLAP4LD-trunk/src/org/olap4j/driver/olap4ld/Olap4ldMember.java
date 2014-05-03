@@ -395,22 +395,22 @@ class Olap4ldMember
 		
 		
 		Node[] metadatanode = new Node[] {
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getSchema().getCatalog().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getSchema().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(cube.getUniqueName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getDimension().getUniqueName())), new Literal(Olap4ldLinkedDataUtil
-								.convertMDXtoURI(this.getHierarchy().getUniqueName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getLevel().getUniqueName())),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getCatalog().getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getSchema().getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(cube.getUniqueName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getDimension().getUniqueName()), Olap4ldLinkedDataUtil
+								.convertMDXtoURI(this.getHierarchy().getUniqueName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getLevel().getUniqueName()),
 				new Literal(this.getLevel().getDepth()+""),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getUniqueName())),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getUniqueName()),
 				new Literal(this.getCaption()),
 				new Literal(this.getMemberType().ordinal()+""),
 				new Literal(parentuniquename),

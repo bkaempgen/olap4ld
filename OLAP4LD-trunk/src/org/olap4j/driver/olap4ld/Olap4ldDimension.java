@@ -104,6 +104,7 @@ class Olap4ldDimension extends Olap4ldElement implements Dimension, Named {
 		return ordinal;
 	}
 
+	@Deprecated
 	public List<Node[]> transformMetadataObject2NxNodes() {
 		List<Node[]> nodes = new ArrayList<Node[]>();
 
@@ -118,16 +119,16 @@ class Olap4ldDimension extends Olap4ldElement implements Dimension, Named {
 		nodes.add(header);
 
 		Node[] cubenode = new Node[] {
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.olap4jCube.getSchema().getCatalog().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.olap4jCube.getSchema().getName())),
-				new Literal(Olap4ldLinkedDataUtil
-								.convertMDXtoURI(this.olap4jCube.getName())),
-								new Literal(Olap4ldLinkedDataUtil
-										.convertMDXtoURI(this.getUniqueName())),
-				new Literal(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(this.getName())), new Literal(this.getCaption()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.olap4jCube.getSchema().getCatalog().getName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.olap4jCube.getSchema().getName()),
+				Olap4ldLinkedDataUtil
+								.convertMDXtoURI(this.olap4jCube.getName()),
+								Olap4ldLinkedDataUtil
+										.convertMDXtoURI(this.getUniqueName()),
+				Olap4ldLinkedDataUtil
+						.convertMDXtoURI(this.getName()), new Literal(this.getCaption()),
 				new Literal(this.getOrdinal()+""),
 				new Literal(this.type.toString()),
 				new Literal(this.getDescription()) };
