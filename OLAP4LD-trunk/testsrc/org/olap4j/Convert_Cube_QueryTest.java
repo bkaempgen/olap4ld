@@ -56,11 +56,11 @@ import org.semanticweb.yars.nx.Variable;
  * 
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
-public class Convert_Context_QueryTest extends TestCase {
+public class Convert_Cube_QueryTest extends TestCase {
 
 	private LinkedDataCubesEngine lde;
 
-	public Convert_Context_QueryTest() throws SQLException {
+	public Convert_Cube_QueryTest() throws SQLException {
 
 		Olap4ldUtil.prepareLogging();
 		// Logging
@@ -86,6 +86,9 @@ public class Convert_Context_QueryTest extends TestCase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		// For now, we strictly separate Convert-Cube and Drill-Across with equivalence classes.
+		EmbeddedSesameEngine.equivs = new ArrayList<Node[]>();
 	}
 
 	protected void setUp() throws SQLException {

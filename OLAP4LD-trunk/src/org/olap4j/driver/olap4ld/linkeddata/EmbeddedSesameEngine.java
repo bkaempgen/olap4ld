@@ -112,6 +112,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	private List<List<Node>> equivalenceList;
 
+	public static List<Node[]> equivs = new ArrayList<Node[]>();
+
 	public EmbeddedSesameEngine(URL serverUrlObject,
 			List<String> datastructuredefinitions, List<String> datasets,
 			String databasename) throws OlapException {
@@ -707,15 +709,16 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 * @param location
 	 */
 	private void loadCube(Node cubeNamePattern) throws OlapException {
-	
+
 		if (cubeNamePattern == null) {
 			// There is nothing to load
-			Olap4ldUtil._log.config("If no cubeNamePattern is given, we cannot load a cube.");
+			Olap4ldUtil._log
+					.config("If no cubeNamePattern is given, we cannot load a cube.");
 			return;
 		}
-		
+
 		try {
-			
+
 			URL uri = new URL(cubeNamePattern.toString());
 
 			// If we have cube uri and location is not loaded, yet, we start
@@ -1056,7 +1059,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// XXX: Wildcard delimiter
 		if (restrictions.cubeNamePattern != null) {
 
-			String[] datasets = restrictions.cubeNamePattern.toString().split(",");
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
 			for (int i = 0; i < datasets.length; i++) {
 				String dataset = datasets[i];
 				Restrictions newrestrictions = new Restrictions();
@@ -1104,35 +1108,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// }
 		// result.add(nodes);
 		// }
-
-		// for now, we simply assume equivalence statements given
-
-		List<Node[]> equivs = new ArrayList<Node[]>();
-
-		equivs.add(new Node[] {
-				new Resource(
-						"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
-				new Resource(
-						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-		// Hierarchy gesis-geo:list = estatwrap:geo
-		equivs.add(new Node[] {
-				new Resource(
-						"http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list"),
-				new Resource(
-						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-		// Could also for the olap
-		equivs.add(new Node[] {
-		new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-		new Resource("http://ontologycentral.com/dic/geo#DE") });
-
-		equivs.add(new Node[] {
-				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
-		
-		// For now, we strictly separate Convert-Cube and Drill-Across with equivalence classes.
-		equivs = new ArrayList<Node[]>();
 
 		this.equivalenceList = createEquivalenceList(equivs);
 
@@ -1738,7 +1713,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// XXX: Wildcard delimiter
 		if (restrictions.cubeNamePattern != null) {
 
-			String[] datasets = restrictions.cubeNamePattern.toString().split(",");
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
 			for (int i = 0; i < datasets.length; i++) {
 				String dataset = datasets[i];
 				// Should make sure that the full restrictions are used.
@@ -1806,8 +1782,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				newnode[dimensionmap.get("?CUBE_NAME")] = anIntermediaryresult[dimensionmap
 						.get("?CUBE_NAME")];
 			} else {
-				newnode[dimensionmap.get("?CUBE_NAME")] = 
-						restrictions.cubeNamePattern;
+				newnode[dimensionmap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
 			}
 
 			newnode[dimensionmap.get("?DIMENSION_NAME")] = anIntermediaryresult[dimensionmap
@@ -2035,7 +2010,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// XXX: Wildcard delimiter
 		if (restrictions.cubeNamePattern != null) {
 
-			String[] datasets = restrictions.cubeNamePattern.toString().split(",");
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
 			for (int i = 0; i < datasets.length; i++) {
 				String dataset = datasets[i];
 				// Should make sure that the full restrictions are used.
@@ -2069,8 +2045,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 							.get("?CATALOG_NAME")];
 					newnode[map.get("?SCHEMA_NAME")] = anIntermediaryresult[map
 							.get("?SCHEMA_NAME")];
-					newnode[map.get("?CUBE_NAME")] = 
-							restrictions.cubeNamePattern;
+					newnode[map.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
 					newnode[map.get("?MEASURE_UNIQUE_NAME")] = anIntermediaryresult[map
 							.get("?MEASURE_UNIQUE_NAME")];
 					newnode[map.get("?MEASURE_NAME")] = anIntermediaryresult[map
@@ -2195,7 +2170,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// XXX: Wildcard delimiter
 		if (restrictions.cubeNamePattern != null) {
 
-			String[] datasets = restrictions.cubeNamePattern.toString().split(",");
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
 			for (int i = 0; i < datasets.length; i++) {
 				String dataset = datasets[i];
 				// Should make sure that the full restrictions are used.
@@ -2263,8 +2239,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				newnode[hierarchymap.get("?CUBE_NAME")] = anIntermediaryresult[hierarchymap
 						.get("?CUBE_NAME")];
 			} else {
-				newnode[hierarchymap.get("?CUBE_NAME")] = 
-						restrictions.cubeNamePattern;
+				newnode[hierarchymap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
 			}
 			newnode[hierarchymap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[hierarchymap
 					.get("?DIMENSION_UNIQUE_NAME")];
@@ -2460,7 +2435,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// XXX: Wildcard delimiter
 		if (restrictions.cubeNamePattern != null) {
 
-			String[] datasets = restrictions.cubeNamePattern.toString().split(",");
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
 			for (int i = 0; i < datasets.length; i++) {
 				String dataset = datasets[i];
 				// Should make sure that the full restrictions are used.
@@ -2493,8 +2469,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 							.get("?CATALOG_NAME")];
 					newnode[levelmap.get("?SCHEMA_NAME")] = anIntermediaryresult[levelmap
 							.get("?SCHEMA_NAME")];
-					newnode[levelmap.get("?CUBE_NAME")] = 
-							restrictions.cubeNamePattern;
+					newnode[levelmap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
 					newnode[levelmap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[levelmap
 							.get("?DIMENSION_UNIQUE_NAME")];
 					newnode[levelmap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[levelmap
@@ -2732,7 +2707,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// XXX: Wildcard delimiter
 		if (restrictions.cubeNamePattern != null) {
 
-			String[] datasets = restrictions.cubeNamePattern.toString().split(",");
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
 			for (int i = 0; i < datasets.length; i++) {
 				String dataset = datasets[i];
 				// Should make sure that the full restrictions are used.
@@ -2767,8 +2743,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 							.get("?CATALOG_NAME")];
 					newnode[membermap.get("?SCHEMA_NAME")] = anIntermediaryresult[membermap
 							.get("?SCHEMA_NAME")];
-					newnode[membermap.get("?CUBE_NAME")] =
-							restrictions.cubeNamePattern;
+					newnode[membermap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
 					newnode[membermap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[membermap
 							.get("?DIMENSION_UNIQUE_NAME")];
 					newnode[membermap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[membermap
@@ -3178,38 +3153,58 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	private String createFilterForRestrictions(Restrictions restrictions) {
 
+		String filter = "";
 		// We need to create a filter for the specific restriction
-		String cubeNamePatternFilter = (restrictions.cubeNamePattern != null) ? " FILTER (?CUBE_NAME = <"
+		filter += (restrictions.cubeNamePattern != null) ? " FILTER (?CUBE_NAME = <"
 				+ restrictions.cubeNamePattern + ">) "
 				: "";
-		String dimensionUniqueNameFilter = createFilterConsiderEquivalences(
-				restrictions.dimensionUniqueName, new Variable("DIMENSION_UNIQUE_NAME"));
 
-		String hierarchyUniqueNameFilter = createFilterConsiderEquivalences(
-				restrictions.hierarchyUniqueName, new Variable("HIERARCHY_UNIQUE_NAME"));
+		if (restrictions.dimensionUniqueName != null && !restrictions.dimensionUniqueName
+				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+			filter += " filter("
+					+ createConditionConsiderEquivalences(
+							restrictions.dimensionUniqueName, new Variable(
+									"DIMENSION_UNIQUE_NAME")) + ") ";
+		}
 
-		String levelUniqueNameFilter = createFilterConsiderEquivalences(
-				restrictions.levelUniqueName, new Variable("LEVEL_UNIQUE_NAME"));
+		if (restrictions.hierarchyUniqueName != null && !restrictions.hierarchyUniqueName
+				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+		
+		filter += " filter("+createConditionConsiderEquivalences(
+				restrictions.hierarchyUniqueName, new Variable(
+						"HIERARCHY_UNIQUE_NAME"))+ ") ";
+		
+		}
 
-		String memberUniqueNameFilter = createFilterConsiderEquivalences(
-				restrictions.memberUniqueName, new Variable("MEMBER_UNIQUE_NAME"));
+		if (restrictions.levelUniqueName != null && !restrictions.levelUniqueName
+				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+			
+		filter += " filter("+createConditionConsiderEquivalences(
+				restrictions.levelUniqueName, new Variable("LEVEL_UNIQUE_NAME"))+") ";
+		
+		}
 
-		return cubeNamePatternFilter + dimensionUniqueNameFilter
-				+ hierarchyUniqueNameFilter + levelUniqueNameFilter
-				+ memberUniqueNameFilter;
+		if (restrictions.memberUniqueName != null && !restrictions.memberUniqueName
+				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+			
+		filter += " filter("+createConditionConsiderEquivalences(
+				restrictions.memberUniqueName, new Variable(
+						"MEMBER_UNIQUE_NAME"))+") ";
+		}
+
+		return filter;
 	}
 
 	/**
-	 * This method creates a filter string for a Resource with a specific variable for all equivalences.
+	 * This method creates a filter string for a Resource with a specific
+	 * variable for all equivalences.
+	 * 
 	 * @param canonicalResource
 	 * @param variableName
 	 * @return
 	 */
-	public String createFilterConsiderEquivalences(Node canonicalResource,
+	public String createConditionConsiderEquivalences(Node canonicalResource,
 			Variable variable) {
-		if (canonicalResource != null
-				&& !canonicalResource
-						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
 
 			List<Node> equivalenceClass = getEquivalenceClassOfNode(canonicalResource);
 
@@ -3221,13 +3216,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						+ equivalenceClass.get(i) + "\"";
 			}
 
-			return "FILTER ("
+			return "("
 					+ Olap4ldLinkedDataUtil.implodeArray(filterString, " || ")
 					+ ")";
-
-		} else {
-			return "";
-		}
 	}
 
 	private List<Node> getEquivalenceClassOfNode(Node resource) {

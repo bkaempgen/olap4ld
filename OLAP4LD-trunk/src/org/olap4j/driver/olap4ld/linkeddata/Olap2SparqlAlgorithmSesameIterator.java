@@ -403,9 +403,6 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					// We need to know the member to filter
 					Node memberResource = membercombination.get(i)[map1
 							.get("?MEMBER_UNIQUE_NAME")];
-					
-					// Make variable
-					Variable memberResourceVariable = Olap4ldLinkedDataUtil.makeUriToVariable(memberResource);
 
 					int levelnumber = new Integer(
 							membercombination.get(i)[map1.get("?LEVEL_NUMBER")]
@@ -418,22 +415,17 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					// Need to know the level of the member
 					Integer diceslevelHeight = levelmaxnumber - levelnumber;
 
-					if (isResourceAndNotLiteral(memberResource)) {
-
-						// How about: Here adding a variable for the
-						// memberResource and later, for
-						// each memberResource adding a new filter considering
-						// equivalences.
-						andList.add(" ?" + dimensionPropertyVariable
-								+ diceslevelHeight + " = " + "?"
-								+ memberResourceVariable + " ");
-					} else {
-						// For some reason, we need to convert the variable
-						// using str.
-						andList.add(" str(?" + dimensionPropertyVariable
-								+ diceslevelHeight + ") = " + "?"
-								+ memberResourceVariable + " ");
-					}
+					// How about: Here adding a variable for the
+					// memberResource and later, for
+					// each memberResource adding a new filter considering
+					// equivalences.
+					// andList.add(" ?" + dimensionPropertyVariable
+					// + diceslevelHeight + " = " + "?"
+					// + memberResourceVariable + " ");
+					andList.add(this.engine.createConditionConsiderEquivalences(
+							memberResource, new Variable(
+									dimensionPropertyVariable.toString()
+											+ diceslevelHeight.toString())));
 
 				}
 				// For sesame, instead of AND is &&
@@ -444,29 +436,6 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			whereClause += Olap4ldLinkedDataUtil.implodeArray(
 					orList.toArray(new String[0]), " || ");
 			whereClause += ") ";
-
-			// Now, adding for every memberResource the equivalences, but only
-			// if not already added?
-			for (List<Node[]> membercombination : membercombinations) {
-
-				for (int i = 1; i < membercombination.size(); i++) {
-					
-					Map<String, Integer> map1 = Olap4ldLinkedDataUtil
-							.getNodeResultFields(membercombination.get(0));
-					
-					// Member filter
-					Node memberResource = membercombination.get(i)[map1
-					                   							.get("?MEMBER_UNIQUE_NAME")];
-					
-					// Member variable
-					Variable memberResourceVariable = Olap4ldLinkedDataUtil.makeUriToVariable(memberResource);
-					
-					whereClause += this.engine
-							.createFilterConsiderEquivalences(memberResource,
-									memberResourceVariable);
-				}
-
-			}
 
 		}
 
@@ -1012,12 +981,12 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					.makeUriToVariable(new Resource(dimensionProperty
 							+ "Dimension"));
 
-			String filter = engine.createFilterConsiderEquivalences(
+			String condition = engine.createConditionConsiderEquivalences(
 					dimensionProperty, dimensionPropertyDimensionVariable);
 
 			whereClause += "?obs ?" + dimensionPropertyDimensionVariable + " ?"
 					+ dimensionPropertyVariable + levelHeight + ". ";
-			whereClause += filter;
+			whereClause += " filter("+condition+") ";
 
 		} else {
 
@@ -1128,16 +1097,6 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	public List<Node[]> getMembers(Restrictions restrictions)
 			throws OlapException {
 		return members;
-	}
-
-	/**
-	 * Given a string, check whether resource or literal.
-	 * 
-	 * @param resource
-	 * @return
-	 */
-	private boolean isResourceAndNotLiteral(Node resource) {
-		return resource.toString().startsWith("http:");
 	}
 
 	/**

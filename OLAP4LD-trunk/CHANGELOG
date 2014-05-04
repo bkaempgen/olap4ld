@@ -17,6 +17,12 @@ We now would like to extend this.
 
 ==2014-05-04==
 * Removed all compliation problems due to refactoring.
+* Correctly computed comparison of Employment Fear vs. Real GDP Growth Rate.
+* Growth rate:
+** http://epp.eurostat.ec.europa.eu/tgm/table.do?tab=table&init=1&plugin=1&language=en&pcode=tec00115 (not tsieb020, anymore, renamed? See number of triples)
+** http://estatwrap.ontologycentral.com/data/tec00115
+* Integration/Entity consolidation of gesis:geo and estatwrap:geo as well as gesis-geo:00 and estatwrap-geo:DE included.
+* No complex measure included.
 
 ==2014-05-03==
 * Lots of refactoring (Restrictions are now Nodes)
