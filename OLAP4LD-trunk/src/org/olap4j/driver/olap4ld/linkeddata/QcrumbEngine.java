@@ -444,8 +444,8 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 	 * @param levelUniqueName
 	 * @return
 	 */
-	private boolean isMeasureQueriedForExplicitly(String dimensionUniqueName,
-			String hierarchyUniqueName, String levelUniqueName) {
+	private boolean isMeasureQueriedForExplicitly(Node dimensionUniqueName,
+			Node hierarchyUniqueName, Node levelUniqueName) {
 		// If one is set, it should not be Measures, not.
 		// Watch out: no square brackets are needed.
 		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName
@@ -580,18 +580,17 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 
 		try {
 			if (restrictions.cubeNamePattern != null) {
-				String uri = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.cubeNamePattern);
+				Node uri = restrictions.cubeNamePattern;
 
-				if (!isStored(uri)) {
+				if (!isStored(uri.toString())) {
 					// We also store URI in map
-					String location = askForLocation(uri);
+					String location = askForLocation(uri.toString());
 
 					// Here, we always load, since we want to update.
 					if (!isStored(location)) {
 
 						// We load the entire cube
-						loadCube(uri, location);
+						loadCube(uri.toString(), location);
 
 						// We need to materialise implicit information
 						runNormalizationAlgorithm();
@@ -1672,8 +1671,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 
 				if (restrictions.cubeNamePattern != null) {
 					additionalFilters += " FILTER (?CUBE_NAME = <"
-							+ Olap4ldLinkedDataUtil
-									.convertMDXtoURI(restrictions.cubeNamePattern)
+							+ restrictions.cubeNamePattern
 							+ ">) ";
 				}
 			}
@@ -1742,8 +1740,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 
 				// Here, we need a specific filter
 				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.memberUniqueName)
+						+ restrictions.memberUniqueName
 						+ ">) ";
 
 			}
@@ -1934,36 +1931,31 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 
 	}
 
-	private boolean isResourceAndNotLiteral(String resource) {
-		return resource.startsWith("http:");
+	private boolean isResourceAndNotLiteral(Node resource) {
+		return resource.toString().startsWith("http:");
 	}
 
 	private String createFilterForRestrictions(Restrictions restrictions) {
 		// We need to create a filter for the specific restriction
 		String cubeNamePatternFilter = (restrictions.cubeNamePattern != null) ? " FILTER (?CUBE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.cubeNamePattern) + ">) "
+				+ restrictions.cubeNamePattern + ">) "
 				: "";
 		String dimensionUniqueNameFilter = (restrictions.dimensionUniqueName != null && !restrictions.dimensionUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?DIMENSION_UNIQUE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.dimensionUniqueName)
+				+ restrictions.dimensionUniqueName
 				+ ">) " : "";
 		String hierarchyUniqueNameFilter = (restrictions.hierarchyUniqueName != null && !restrictions.hierarchyUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?HIERARCHY_UNIQUE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.hierarchyUniqueName)
+				+ restrictions.hierarchyUniqueName
 				+ ">) " : "";
 		String levelUniqueNameFilter = (restrictions.levelUniqueName != null && !restrictions.levelUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?LEVEL_UNIQUE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.levelUniqueName) + ">) "
+				+ restrictions.levelUniqueName + ">) "
 				: "";
 
 		String memberUniqueNameFilter;
 		if (restrictions.memberUniqueName != null) {
-			String resource = Olap4ldLinkedDataUtil
-					.convertMDXtoURI(restrictions.memberUniqueName);
+			Node resource = restrictions.memberUniqueName;
 			if (isResourceAndNotLiteral(resource)) {
 				memberUniqueNameFilter = " FILTER (?MEMBER_UNIQUE_NAME = <"
 						+ resource + ">) ";

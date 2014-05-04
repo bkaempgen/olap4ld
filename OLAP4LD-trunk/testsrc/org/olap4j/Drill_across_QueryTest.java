@@ -46,6 +46,7 @@ import org.olap4j.driver.olap4ld.linkeddata.SliceOp;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
 
 /**
  * Tests on executing drill-across.
@@ -104,7 +105,7 @@ public class Drill_across_QueryTest extends TestCase {
 		// datasets.
 
 		// First: GDP per capita dataset
-		String gdpdsuri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
+		Node gdpdsuri = new Resource("http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds");
 		Restrictions gdprestrictions = new Restrictions();
 		gdprestrictions.cubeNamePattern = gdpdsuri;
 
@@ -177,7 +178,7 @@ public class Drill_across_QueryTest extends TestCase {
 		// XXX: We do not need roll-up
 
 		// Second: Employment rate, by sex dataset
-		String emplratedsuri = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds";
+		Node emplratedsuri = new Resource("http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tsdec420_ds.rdf#ds");
 		Restrictions emplraterestrictions = new Restrictions();
 		emplraterestrictions.cubeNamePattern = emplratedsuri;
 
@@ -260,7 +261,7 @@ public class Drill_across_QueryTest extends TestCase {
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(drillacross);
 
 		String result = executeStatement(myplan);
-		assertContains("http://olap4ld.googlecode.com/dic/geo#US; 2011; 148.0; 1; 148; 70.433333333333333333333333;", result);
+		assertContains("http://olap4ld.googlecode.com/dic/geo#US; 2011; 148.0; 1; 148.0; 148; 70.433333333333333333333333;", result);
 	}
 
 	private void assertContains(String seek, String s) {

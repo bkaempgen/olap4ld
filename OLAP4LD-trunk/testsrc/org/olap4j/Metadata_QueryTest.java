@@ -40,6 +40,7 @@ import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
 
 /**
  * Unit tests for metadata queries directly on an LDCE engine, e.g. on
@@ -88,7 +89,7 @@ public class Metadata_QueryTest extends TestCase {
 
 	public void test_Metadata_Queries() throws OlapException {
 		// Available datasets: GDP indicators, population, GDP per capita
-		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds,http://estatwrap.ontologycentral.com/id/demo_pjan#ds,http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds";
+		Node gdpdsuri = new Resource("http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds,http://estatwrap.ontologycentral.com/id/demo_pjan#ds,http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds");
 		Restrictions gdprestrictions = new Restrictions();
 		gdprestrictions.cubeNamePattern = gdpdsuri;
 

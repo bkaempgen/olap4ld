@@ -101,7 +101,7 @@ public class Convert_Context_QueryTest extends TestCase {
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri";
 
 		// First: GDP and main components
-		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds";
+		Node gdpdsuri = new Resource("http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds");
 		Restrictions gdprestrictions = new Restrictions();
 		gdprestrictions.cubeNamePattern = gdpdsuri;
 
@@ -182,7 +182,7 @@ public class Convert_Context_QueryTest extends TestCase {
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
 		// First: GDP and main components - Current prices dataset
-		String gdpdsuri = "http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds";
+		Node gdpdsuri = new Resource("http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds");
 		Restrictions gdprestrictions = new Restrictions();
 		gdprestrictions.cubeNamePattern = gdpdsuri;
 
@@ -334,7 +334,7 @@ public class Convert_Context_QueryTest extends TestCase {
 		// XXX Would I need to add to DSD: eurostat:indic_na dic_indic_na:NGDP; ?
 
 		// Second: Population dataset
-		String populationuri = "http://estatwrap.ontologycentral.com/id/demo_pjan#ds";
+		Node populationuri = new Resource("http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
 		Restrictions populationrestrictions = new Restrictions();
 		populationrestrictions.cubeNamePattern = populationuri;
 
@@ -465,7 +465,7 @@ public class Convert_Context_QueryTest extends TestCase {
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
 		// First: GDP current dataset
-		String gdpdsuri = "http://worldbank.270a.info/dataset/NY.GDP.MKTP.CD";
+		Node gdpdsuri = new Resource("http://worldbank.270a.info/dataset/NY.GDP.MKTP.CD");
 		Restrictions gdprestrictions = new Restrictions();
 		gdprestrictions.cubeNamePattern = gdpdsuri;
 

@@ -205,7 +205,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 						Olap4ldLinkedDataUtil
 								.makeUriToVariable(dimension[dimensionmap
 										.get("?DIMENSION_UNIQUE_NAME")]
-										.toString()) });
+										) });
 
 				if (dataset2 != null) {
 					bodypatterns.add(new Node[] {
@@ -215,7 +215,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 							Olap4ldLinkedDataUtil
 									.makeUriToVariable(dimension[dimensionmap
 											.get("?DIMENSION_UNIQUE_NAME")]
-											.toString()) });
+											) });
 				}
 			}
 		}
@@ -240,7 +240,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 						Olap4ldLinkedDataUtil
 								.makeUriToVariable(measure[measuremap
 										.get("?MEASURE_UNIQUE_NAME")]
-										.toString()) });
+										) });
 				if (dataset2 != null) {
 					bodypatterns.add(new Node[] {
 							obsvariable2,
@@ -248,7 +248,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 							Olap4ldLinkedDataUtil
 									.makeUriToVariable(measure[measuremap
 											.get("?MEASURE_UNIQUE_NAME")]
-											.toString()) });
+											) });
 				}
 			}
 		}
@@ -328,7 +328,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 						Olap4ldLinkedDataUtil
 								.makeUriToVariable(dimension[dimensionmap
 										.get("?DIMENSION_UNIQUE_NAME")]
-										.toString()) });
+										) });
 
 			}
 		}
@@ -356,7 +356,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 						Olap4ldLinkedDataUtil
 								.makeUriToVariable(measure[measuremap
 										.get("?MEASURE_UNIQUE_NAME")]
-										.toString()) });
+										) });
 			}
 		}
 
@@ -417,7 +417,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				// Create variable and add
 				Node dimensionvariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(dimension[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")].toString());
+								.get("?DIMENSION_UNIQUE_NAME")]);
 				// What to do with it? Add to a map
 				select += " " + dimensionvariable.toN3() + " ";
 			}
@@ -437,7 +437,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				// Create variable and add
 				Node measurevariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(measure[measuremap
-								.get("?MEASURE_UNIQUE_NAME")].toString());
+								.get("?MEASURE_UNIQUE_NAME")]);
 				// What to do with it? Add to a map
 				select += " " + measurevariable.toN3() + " ";
 			}
@@ -478,7 +478,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				// Create variable and add
 				Node dimensionvariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(dimension[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")].toString());
+								.get("?DIMENSION_UNIQUE_NAME")]);
 				// What to do with it? Add to a map
 				Resource dimensionresource = new Resource(
 						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
@@ -502,7 +502,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				// Create variable and add
 				Node measurevariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(measure[measuremap
-								.get("?MEASURE_UNIQUE_NAME")].toString());
+								.get("?MEASURE_UNIQUE_NAME")]);
 				// What to do with it? Add to a map
 				Resource measureresource = new Resource(
 						measure[measuremap.get("?MEASURE_UNIQUE_NAME")]
@@ -905,7 +905,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 							+ Olap4ldLinkedDataUtil.makeUriToVariable(
 									dimension[dimensionmap
 											.get("?DIMENSION_UNIQUE_NAME")]
-											.toString()).toN3() + ". \n";
+											).toN3() + ". \n";
 
 				}
 			}
@@ -934,7 +934,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 							+ Olap4ldLinkedDataUtil.makeUriToVariable(
 									measure[measuremap
 											.get("?MEASURE_UNIQUE_NAME")]
-											.toString()).toN3() + ". \n";
+											).toN3() + ". \n";
 				}
 			}
 			// ** }
@@ -972,7 +972,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 					// Create variable and add
 					Node dimensionvariable = Olap4ldLinkedDataUtil
 							.makeUriToVariable(dimension[dimensionmap
-									.get("?DIMENSION_UNIQUE_NAME")].toString());
+									.get("?DIMENSION_UNIQUE_NAME")]);
 					// What to do with it? Add to a map
 					Resource dimensionresource = new Resource(
 							dimension[dimensionmap
@@ -998,7 +998,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 					// Create variable and add
 					Node measurevariable = Olap4ldLinkedDataUtil
 							.makeUriToVariable(measure[measuremap
-									.get("?MEASURE_UNIQUE_NAME")].toString());
+									.get("?MEASURE_UNIQUE_NAME")]);
 					// What to do with it? Add to a map
 					Resource measureresource = new Resource(
 							measure[measuremap.get("?MEASURE_UNIQUE_NAME")]
@@ -1133,7 +1133,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 							+ Olap4ldLinkedDataUtil.makeUriToVariable(
 									dimension[dimensionmap
 											.get("?DIMENSION_UNIQUE_NAME")]
-											.toString()).toN3() + ". \n";
+											).toN3() + ". \n";
 					if (dataset2 != null) {
 						body += obsvariable2.toN3()
 								+ " "
@@ -1143,7 +1143,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 								+ Olap4ldLinkedDataUtil.makeUriToVariable(
 										dimension[dimensionmap
 												.get("?DIMENSION_UNIQUE_NAME")]
-												.toString()).toN3() + ". \n";
+												).toN3() + ". \n";
 					}
 				}
 			}
@@ -1170,7 +1170,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 							+ Olap4ldLinkedDataUtil.makeUriToVariable(
 									measure[measuremap
 											.get("?MEASURE_UNIQUE_NAME")]
-											.toString()).toN3() + ". \n";
+											).toN3() + ". \n";
 					if (dataset2 != null) {
 						body += obsvariable2.toN3()
 								+ " "
@@ -1180,7 +1180,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 								+ Olap4ldLinkedDataUtil.makeUriToVariable(
 										measure[measuremap
 												.get("?MEASURE_UNIQUE_NAME")]
-												.toString()).toN3() + ". \n";
+												).toN3() + ". \n";
 					}
 				}
 			}
@@ -1577,7 +1577,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				// Create variable and add
 				Node dimensionvariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(dimension[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")].toString());
+								.get("?DIMENSION_UNIQUE_NAME")]);
 				// What to do with it? Add to a map
 				select += " " + dimensionvariable.toN3() + " ";
 			}
@@ -1597,7 +1597,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				// Create variable and add
 				Node measurevariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(measure[measuremap
-								.get("?MEASURE_UNIQUE_NAME")].toString());
+								.get("?MEASURE_UNIQUE_NAME")]);
 				// What to do with it? Add to a map
 				select += " " + measurevariable.toN3() + " ";
 			}
@@ -1638,7 +1638,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				// Create variable and add
 				Node dimensionvariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(dimension[dimensionmap
-								.get("?DIMENSION_UNIQUE_NAME")].toString());
+								.get("?DIMENSION_UNIQUE_NAME")]);
 				// What to do with it? Add to a map
 				Resource dimensionresource = new Resource(
 						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
@@ -1662,7 +1662,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				// Create variable and add
 				Node measurevariable = Olap4ldLinkedDataUtil
 						.makeUriToVariable(measure[measuremap
-								.get("?MEASURE_UNIQUE_NAME")].toString());
+								.get("?MEASURE_UNIQUE_NAME")]);
 				// What to do with it? Add to a map
 				Resource measureresource = new Resource(
 						measure[measuremap.get("?MEASURE_UNIQUE_NAME")]

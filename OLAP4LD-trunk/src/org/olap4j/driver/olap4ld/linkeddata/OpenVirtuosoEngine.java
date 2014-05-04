@@ -860,8 +860,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters = " FILTER (?CUBE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.cubeNamePattern)
+						+ restrictions.cubeNamePattern
 						+ ">) ";
 			}
 
@@ -906,8 +905,8 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @param levelUniqueName
 	 * @return
 	 */
-	private boolean isMeasureQueriedFor(String dimensionUniqueName,
-			String hierarchyUniqueName, String levelUniqueName) {
+	private boolean isMeasureQueriedFor(Node dimensionUniqueName,
+			Node hierarchyUniqueName, Node levelUniqueName) {
 		// If one is set, it should not be Measures, not.
 		// Watch out: square brackets are needed.
 		boolean notExplicitlyStated = dimensionUniqueName == null
@@ -966,8 +965,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters = " FILTER (?CUBE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.cubeNamePattern)
+						+ restrictions.cubeNamePattern
 						+ ">) ";
 			}
 
@@ -1110,8 +1108,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters = " FILTER (?CUBE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.cubeNamePattern)
+						+ restrictions.cubeNamePattern
 						+ ">) ";
 			}
 
@@ -1155,14 +1152,12 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters += " FILTER (?CUBE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.cubeNamePattern)
+						+ restrictions.cubeNamePattern
 						+ ">) ";
 			}
 			if (restrictions.dimensionUniqueName != null) {
 				specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.dimensionUniqueName)
+						+ restrictions.dimensionUniqueName
 						+ ">) ";
 			}
 
@@ -1325,8 +1320,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 				if (restrictions.cubeNamePattern != null) {
 					additionalFilters += " FILTER (?CUBE_NAME = <"
-							+ Olap4ldLinkedDataUtil
-									.convertMDXtoURI(restrictions.cubeNamePattern)
+							+ restrictions.cubeNamePattern
 							+ ">) ";
 				}
 			}
@@ -1350,14 +1344,12 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 			if (restrictions.cubeNamePattern != null) {
 				additionalFilters += " FILTER (?CUBE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.cubeNamePattern)
+						+ restrictions.cubeNamePattern
 						+ ">) ";
 			}
 			if (restrictions.memberUniqueName != null) {
 				additionalFilters += " FILTER (?MEASURE_UNIQUE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.memberUniqueName)
+						+ restrictions.memberUniqueName
 						+ ">) ";
 			}
 
@@ -1413,8 +1405,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 				// Here, we need a specific filter
 				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.memberUniqueName)
+						+ restrictions.memberUniqueName
 						+ ">) ";
 
 				query = Olap4ldLinkedDataUtil.getStandardPrefixes()
@@ -1544,14 +1535,12 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters += " FILTER (?CUBE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.cubeNamePattern)
+						+ restrictions.cubeNamePattern
 						+ ">) ";
 			}
 			if (restrictions.dimensionUniqueName != null) {
 				specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.dimensionUniqueName)
+						+ restrictions.dimensionUniqueName
 						+ ">) ";
 			}
 
@@ -1631,14 +1620,11 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			// First we ask for the dimensionWithoutHierarchies
 			String dimensionWithoutHierarchies = null;
 			if (restrictions.dimensionUniqueName != null) {
-				dimensionWithoutHierarchies = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.dimensionUniqueName);
+				dimensionWithoutHierarchies = restrictions.dimensionUniqueName.toString();
 			} else if (restrictions.hierarchyUniqueName != null) {
-				dimensionWithoutHierarchies = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.hierarchyUniqueName);
+				dimensionWithoutHierarchies = restrictions.hierarchyUniqueName.toString();
 			} else if (restrictions.levelUniqueName != null) {
-				dimensionWithoutHierarchies = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.levelUniqueName);
+				dimensionWithoutHierarchies = restrictions.levelUniqueName.toString();
 			}
 
 			// Here, we need specific filters, since only cube and dimension
@@ -1646,14 +1632,12 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String alteredadditionalFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				alteredadditionalFilters += " FILTER (?CUBE_NAME = <"
-						+ Olap4ldLinkedDataUtil
-								.convertMDXtoURI(restrictions.cubeNamePattern)
+						+ restrictions.cubeNamePattern
 						+ ">) ";
 			}
 			if (restrictions.memberUniqueName != null) {
 				// Check whether uri or Literal
-				String resource = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.memberUniqueName);
+				Node resource = restrictions.memberUniqueName;
 				if (isResourceAndNotLiteral(resource)) {
 					alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = <"
 							+ resource + ">) ";
@@ -1732,31 +1716,26 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 	}
 
-	private boolean isResourceAndNotLiteral(String resource) {
-		return resource.startsWith("http:");
+	private boolean isResourceAndNotLiteral(Node resource) {
+		return resource.toString().startsWith("http:");
 	}
 
 	private String createFilterForRestrictions(Restrictions restrictions) {
 		// We need to create a filter for the specific restriction
 		String cubeNamePatternFilter = (restrictions.cubeNamePattern != null) ? " FILTER (?CUBE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.cubeNamePattern) + ">) "
+				+ restrictions.cubeNamePattern + ">) "
 				: "";
 		String dimensionUniqueNameFilter = (restrictions.dimensionUniqueName != null) ? " FILTER (?DIMENSION_UNIQUE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.dimensionUniqueName)
+				+ restrictions.dimensionUniqueName
 				+ ">) " : "";
 		String hierarchyUniqueNameFilter = (restrictions.hierarchyUniqueName != null) ? " FILTER (?HIERARCHY_UNIQUE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.hierarchyUniqueName)
+				+ restrictions.hierarchyUniqueName
 				+ ">) " : "";
 		String levelUniqueNameFilter = (restrictions.levelUniqueName != null) ? " FILTER (?LEVEL_UNIQUE_NAME = <"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.levelUniqueName) + ">) "
+				+ restrictions.levelUniqueName + ">) "
 				: "";
 		String memberUniqueNameFilter = (restrictions.memberUniqueName != null) ? " FILTER (str(?MEMBER_UNIQUE_NAME) = str(<"
-				+ Olap4ldLinkedDataUtil
-						.convertMDXtoURI(restrictions.memberUniqueName)
+				+ restrictions.memberUniqueName
 				+ ">)) " : "";
 
 		return cubeNamePatternFilter + dimensionUniqueNameFilter
@@ -1800,7 +1779,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 		// cube is olap4ld
 		Cube mycube = (Cube) cube;
 
-		String dsd = Olap4ldLinkedDataUtil.convertMDXtoURI(mycube
+		Node dsd = Olap4ldLinkedDataUtil.convertMDXtoURI(mycube
 				.getUniqueName());
 
 		// Now, we have all neccessary data
@@ -1824,10 +1803,10 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			// query for all dimension members
 			// String hierarchyURI = LdOlap4jUtil.decodeUriForMdx(hierarchy
 			// .getUniqueName());
-			String dimensionProperty = Olap4ldLinkedDataUtil
+			Node dimensionProperty = Olap4ldLinkedDataUtil
 					.convertMDXtoURI(level.getDimension().getUniqueName());
 			// XXX Why exactly do I include the level?
-			String levelURI = Olap4ldLinkedDataUtil.convertMDXtoURI(level
+			Node levelURI = Olap4ldLinkedDataUtil.convertMDXtoURI(level
 					.getUniqueName());
 
 			// Now, depending on level depth we need to behave differently
@@ -1845,7 +1824,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			whereClause += addLevelPropertyPath(0, levelHeight,
 					dimensionProperty, levelURI);
 
-			String dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
+			Node dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
 			selectClause += " ?" + dimensionPropertyVariable + levelHeight
 					+ " ";
 			groupByClause += " ?" + dimensionPropertyVariable + levelHeight
@@ -1864,7 +1843,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 				// Dices Level Height
 				Integer diceslevelHeight = (member.getHierarchy().getLevels()
 						.size() - 1 - member.getLevel().getDepth());
-				String dimensionProperty = Olap4ldLinkedDataUtil
+				Node dimensionProperty = Olap4ldLinkedDataUtil
 						.convertMDXtoURI(member.getLevel().getDimension()
 								.getUniqueName());
 				Integer slicesRollupsLevelHeight = (levelHeightMap
@@ -1873,7 +1852,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 				if (member.getMemberType() != Member.Type.MEASURE
 						&& diceslevelHeight > slicesRollupsLevelHeight) {
 
-					String levelURI = Olap4ldLinkedDataUtil
+					Node levelURI = Olap4ldLinkedDataUtil
 							.convertMDXtoURI(member.getLevel().getUniqueName());
 
 					whereClause += addLevelPropertyPath(
@@ -1894,12 +1873,12 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 				for (Member member : position.getMembers()) {
 					// We need to know the variable to filter
 					// First, we need to convert it to URI representation.
-					String dimensionPropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil
+					Node dimensionPropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil
 							.convertMDXtoURI(member.getLevel().getDimension()
 									.getUniqueName()));
 
 					// We need to know the member to filter
-					String memberResource = Olap4ldLinkedDataUtil
+					Node memberResource = Olap4ldLinkedDataUtil
 							.convertMDXtoURI(member.getUniqueName());
 
 					// Need to know the level of the member
@@ -2339,19 +2318,21 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 				// Measure
 				// Measure property has aggregator attached to it " avg".
-				String measureProperty1 = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure1.getUniqueName()).replace(
-								" " + measure.getAggregator().name(), "");
+				Node measureProperty1 = Olap4ldLinkedDataUtil
+						.convertMDXtoURI(measure1.getUniqueName().replace(
+								" " + measure.getAggregator().name(), ""));
 				// We do not encode the aggregation function in the measure, any
 				// more.
-				String measurePropertyVariable1 = makeUriToParameter(measure1
-						.getUniqueName());
+				Node measurePropertyVariable1 = makeUriToParameter(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(measure1
+						.getUniqueName()));
 
-				String measureProperty2 = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure2.getUniqueName()).replace(
-								" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable2 = makeUriToParameter(measure2
-						.getUniqueName());
+				Node measureProperty2 = Olap4ldLinkedDataUtil
+						.convertMDXtoURI(measure2.getUniqueName().replace(
+								" " + measure.getAggregator().name(), ""));
+				Node measurePropertyVariable2 = makeUriToParameter(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(measure2
+						.getUniqueName()));
 
 				// We take the aggregator from the measure
 				selectClause += " " + measure1.getAggregator().name() + "(?"
@@ -2374,11 +2355,11 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			} else {
 
 				// Measure
-				String measureProperty = Olap4ldLinkedDataUtil.convertMDXtoURI(
-						measure.getUniqueName()).replace(
-						" " + measure.getAggregator().name(), "");
-				String measurePropertyVariable = makeUriToParameter(measure
-						.getUniqueName());
+				Node measureProperty = Olap4ldLinkedDataUtil.convertMDXtoURI(
+						measure.getUniqueName().replace(
+								" " + measure.getAggregator().name(), ""));
+				Node measurePropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil.convertMDXtoURI(measure
+						.getUniqueName()));
 
 				// We take the aggregator from the measure
 				// Since we use OPTIONAL, there might be empty columns, which is
@@ -2419,11 +2400,11 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @return
 	 */
 	private String addLevelPropertyPath(Integer levelStart,
-			Integer levelHeight, String dimensionProperty, String levelURI) {
+			Integer levelHeight, Node dimensionProperty, Node levelURI) {
 
 		String whereClause = "";
 
-		String dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
+		Node dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
 
 		if (levelHeight == 0) {
 			/*
@@ -2474,10 +2455,9 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @param uriRepresentation
 	 * @return
 	 */
-	private String makeUriToParameter(String uriRepresentation) {
+	private Node makeUriToParameter(Node uriRepresentation) {
 		// We simply remove all special characters
-		uriRepresentation = uriRepresentation.replaceAll("[^a-zA-Z0-9]+", "");
-		return uriRepresentation;
+		return new Variable(uriRepresentation.toString().replaceAll("[^a-zA-Z0-9]+", ""));
 	}
 
 	@Override

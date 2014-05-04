@@ -38,7 +38,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	private List<Node[]> result;
 	private Iterator<Node[]> iterator;
 	private HashMap<Integer, Integer> levelHeightMap;
-	private ArrayList<Node[]> newmeasures;	
+	private ArrayList<Node[]> newmeasures;
 
 	public Olap2SparqlAlgorithmSesameIterator(EmbeddedSesameEngine engine,
 			List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
@@ -108,9 +108,9 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 		// At initialisation, we execute the sparql query.
 		// XXX: Should we not do this only if next() or hasNext()?
-		
+
 		this.result = engine.sparql(query, false);
-		
+
 		this.result = this.engine.replaceIdentifiersWithCanonical(this.result);
 
 		this.iterator = result.iterator();
@@ -140,10 +140,11 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				.getNodeResultFields(measures.get(0));
 
 		// At the same time, we can update the metadata.
-		// Since we do a projection here, we should change the metadata. Only keep those 
+		// Since we do a projection here, we should change the metadata. Only
+		// keep those
 		// measures that 1) are contained in projections and in measures.
 		this.newmeasures = new ArrayList<Node[]>();
-		
+
 		for (Node[] measure : projections) {
 
 			if (first) {
@@ -151,14 +152,18 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				first = false;
 				continue;
 			}
-			
-			// XXX Should actually not make a difference anymore, since we do not add them to projections in the first place.
-			
-			// Make sure that the projected measure actually is contained in measures and add if so
+
+			// XXX Should actually not make a difference anymore, since we do
+			// not add them to projections in the first place.
+
+			// Make sure that the projected measure actually is contained in
+			// measures and add if so
 			boolean contained = false;
 			for (Node[] aMeasure : measures) {
 				// add to newmeasures if 1) are contained in measures
-				if(aMeasure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString().equals(measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString())) {
+				if (aMeasure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+						.equals(measure[measuremap.get("?MEASURE_UNIQUE_NAME")]
+								.toString())) {
 					contained = true;
 				}
 			}
@@ -171,8 +176,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			// XXX: Needs to be put before creating the Logical Olap Operator
 			// Tree
 			// Will probably not work since MEASURE_AGGREGATOR
-			if (measure[measuremap.get("?MEASURE_AGGREGATOR")].toString().equals(
-					"http://purl.org/olap#calculated")) {
+			if (measure[measuremap.get("?MEASURE_AGGREGATOR")].toString()
+					.equals("http://purl.org/olap#calculated")) {
 
 				/*
 				 * For now, hard coded. Here, I also partly evaluate a query
@@ -229,35 +234,41 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				// As always, remove Aggregation Function from Measure Name
 				// And now, see below
 				String measureProperty = measure[measuremap
-						.get("?MEASURE_UNIQUE_NAME")].toString().replace(
-						"AGGFUNC"
-								+ measure[measuremap.get("?MEASURE_AGGREGATOR")]
-										.toString()
-										.replace("http://purl.org/olap#", "")
-										.toUpperCase(), "");
-				// And now, also (possibly) remove Dataset Name from Measure Name
-				measureProperty = measureProperty.replace(cubes.get(1)[cubemap.get("?CUBE_NAME")].toString(), "");
+						.get("?MEASURE_UNIQUE_NAME")]
+						.toString()
+						.replace(
+								"AGGFUNC"
+										+ measure[measuremap.get("?MEASURE_AGGREGATOR")]
+												.toString()
+												.replace(
+														"http://purl.org/olap#",
+														"").toUpperCase(), "");
+				// And now, also (possibly) remove Dataset Name from Measure
+				// Name
+				measureProperty = measureProperty.replace(
+						cubes.get(1)[cubemap.get("?CUBE_NAME")].toString(), "");
 
 				// We also remove aggregation function from Measure Property
 				// Variable so
 				// that the same property is not selected twice.
 				String measurePropertyVariableString = measure[measuremap
-				               								.get("?MEASURE_UNIQUE_NAME")]
-				               										.toString()
-				               										.replace(
-				               												"AGGFUNC"
-				               														+ measure[measuremap
-				               																.get("?MEASURE_AGGREGATOR")]
-				               																.toString()
-				               																.replace(
-				               																		"http://purl.org/olap#",
-				               																		"")
-				               																.toUpperCase(), "");
+						.get("?MEASURE_UNIQUE_NAME")]
+						.toString()
+						.replace(
+								"AGGFUNC"
+										+ measure[measuremap.get("?MEASURE_AGGREGATOR")]
+												.toString()
+												.replace(
+														"http://purl.org/olap#",
+														"").toUpperCase(), "");
 				// Also, we remove dataset name
-				measurePropertyVariableString = measurePropertyVariableString.replace(cubes.get(1)[cubemap.get("?CUBE_NAME")].toString(), "");
-				
+				measurePropertyVariableString = measurePropertyVariableString
+						.replace(cubes.get(1)[cubemap.get("?CUBE_NAME")]
+								.toString(), "");
+
 				Node measurePropertyVariable = Olap4ldLinkedDataUtil
-						.makeUriToVariable(new Resource(measurePropertyVariableString));
+						.makeUriToVariable(new Resource(
+								measurePropertyVariableString));
 
 				// Unique name for variable
 				Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
@@ -268,8 +279,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 						.get("?MEASURE_AGGREGATOR")].toString().replace(
 						"http://purl.org/olap#", "");
 
-				if (measure[measuremap.get("?MEASURE_AGGREGATOR")].toString().equals(
-						"null")) {
+				if (measure[measuremap.get("?MEASURE_AGGREGATOR")].toString()
+						.equals("null")) {
 					// In this case, we can only use top
 					aggregationfunction = "Max";
 				}
@@ -284,7 +295,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 				// According to spec, every measure needs to be set for every
 				// observation only once
-				if (!projectedMeasureMap.containsKey(measureProperty.hashCode())) {
+				if (!projectedMeasureMap
+						.containsKey(measureProperty.hashCode())) {
 					whereClause += "?obs <" + measureProperty + "> ?"
 							+ measurePropertyVariable + ".";
 					projectedMeasureMap.put(measureProperty.hashCode(), true);
@@ -346,6 +358,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					String levelURI = membercombinations.get(0).get(i)[map
 							.get("?LEVEL_UNIQUE_NAME")].toString();
 
+					// Also considers equivalence classes
 					whereClause += addLevelPropertyPath(0, diceslevelHeight,
 							dimensionProperty, levelURI);
 				} else if (new Integer(
@@ -357,6 +370,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					String levelURI = membercombinations.get(0).get(i)[map
 							.get("?LEVEL_UNIQUE_NAME")].toString();
 
+					// Also considers equivalence classes
 					whereClause += addLevelPropertyPath(
 							slicesRollupsLevelHeight, diceslevelHeight,
 							dimensionProperty, levelURI);
@@ -387,8 +401,11 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 									.get("?DIMENSION_UNIQUE_NAME")]);
 
 					// We need to know the member to filter
-					String memberResource = membercombination.get(i)[map1
-							.get("?MEMBER_UNIQUE_NAME")].toString();
+					Node memberResource = membercombination.get(i)[map1
+							.get("?MEMBER_UNIQUE_NAME")];
+					
+					// Make variable
+					Variable memberResourceVariable = Olap4ldLinkedDataUtil.makeUriToVariable(memberResource);
 
 					int levelnumber = new Integer(
 							membercombination.get(i)[map1.get("?LEVEL_NUMBER")]
@@ -402,15 +419,20 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					Integer diceslevelHeight = levelmaxnumber - levelnumber;
 
 					if (isResourceAndNotLiteral(memberResource)) {
+
+						// How about: Here adding a variable for the
+						// memberResource and later, for
+						// each memberResource adding a new filter considering
+						// equivalences.
 						andList.add(" ?" + dimensionPropertyVariable
-								+ diceslevelHeight + " = " + "<"
-								+ memberResource + "> ");
+								+ diceslevelHeight + " = " + "?"
+								+ memberResourceVariable + " ");
 					} else {
 						// For some reason, we need to convert the variable
 						// using str.
 						andList.add(" str(?" + dimensionPropertyVariable
-								+ diceslevelHeight + ") = " + "\""
-								+ memberResource + "\" ");
+								+ diceslevelHeight + ") = " + "?"
+								+ memberResourceVariable + " ");
 					}
 
 				}
@@ -422,6 +444,29 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			whereClause += Olap4ldLinkedDataUtil.implodeArray(
 					orList.toArray(new String[0]), " || ");
 			whereClause += ") ";
+
+			// Now, adding for every memberResource the equivalences, but only
+			// if not already added?
+			for (List<Node[]> membercombination : membercombinations) {
+
+				for (int i = 1; i < membercombination.size(); i++) {
+					
+					Map<String, Integer> map1 = Olap4ldLinkedDataUtil
+							.getNodeResultFields(membercombination.get(0));
+					
+					// Member filter
+					Node memberResource = membercombination.get(i)[map1
+					                   							.get("?MEMBER_UNIQUE_NAME")];
+					
+					// Member variable
+					Variable memberResourceVariable = Olap4ldLinkedDataUtil.makeUriToVariable(memberResource);
+					
+					whereClause += this.engine
+							.createFilterConsiderEquivalences(memberResource,
+									memberResourceVariable);
+				}
+
+			}
 
 		}
 
@@ -869,7 +914,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			orderByClause += " ?" + dimensionPropertyVariable + levelHeight
 					+ " ";
 		}
-		
+
 		// Since we do a slice here, we should change the metadata.
 		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(dimensions.get(0));
@@ -889,7 +934,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			}
 			// Measure dimension should also be added.
 			if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-					.toString().equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+					.toString().equals(
+							Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
 				newdimensions.add(dimension);
 			}
 			for (Node[] slicesrollup : slicesrollups) {
@@ -921,7 +967,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	}
 
 	/**
-	 * This method returns graph patterns for a dimension assignment as well as property path for levels.
+	 * This method returns graph patterns for a dimension assignment as well as
+	 * property path for levels.
 	 * 
 	 * @param levelStart
 	 *            startingPoint of level
@@ -947,24 +994,27 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			 * easy possible to do that if we simply ask each position for the
 			 * i'th position member.
 			 */
-//			whereClause += "?obs <" + dimensionProperty + "> ?"
-//					+ dimensionPropertyVariable + levelHeight + ". ";
+			// whereClause += "?obs <" + dimensionProperty + "> ?"
+			// + dimensionPropertyVariable + levelHeight + ". ";
 
 			// If level height is 0, it could be that no level is existing which
 			// is why we leave that
 			// pattern out.
-			
+
 			/*
-			 * We need to extend this with entity consolidation.
-			 * For that, we use an additional variable for the dimensionProperty (canonical name)
+			 * We need to extend this with entity consolidation. For that, we
+			 * use an additional variable for the dimensionProperty (canonical
+			 * name)
 			 */
-			
+
 			// The variable we adapt from the dimensionProperty variable
 			Variable dimensionPropertyDimensionVariable = Olap4ldLinkedDataUtil
-					.makeUriToVariable(new Resource(dimensionProperty+"Dimension"));
-			
-			String filter = engine.createFilterConsiderEquivalences(dimensionProperty, dimensionPropertyDimensionVariable);
-		
+					.makeUriToVariable(new Resource(dimensionProperty
+							+ "Dimension"));
+
+			String filter = engine.createFilterConsiderEquivalences(
+					dimensionProperty, dimensionPropertyDimensionVariable);
+
 			whereClause += "?obs ?" + dimensionPropertyDimensionVariable + " ?"
 					+ dimensionPropertyVariable + levelHeight + ". ";
 			whereClause += filter;
@@ -988,10 +1038,11 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					+ " skos:member <" + levelURI + ">. ";
 			// Removed part of hasTopConcept, since we know the members
 			// already.
-			
+
 			/*
-			 * XXX Not done for this if branch, yet: We need to extend this with entity consolidation.
-			 * For that, we use an additional variable for the dimensionProperty (canonical name)
+			 * XXX Not done for this if branch, yet: We need to extend this with
+			 * entity consolidation. For that, we use an additional variable for
+			 * the dimensionProperty (canonical name)
 			 */
 
 		}
@@ -1085,8 +1136,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	 * @param resource
 	 * @return
 	 */
-	private boolean isResourceAndNotLiteral(String resource) {
-		return resource.startsWith("http:");
+	private boolean isResourceAndNotLiteral(Node resource) {
+		return resource.toString().startsWith("http:");
 	}
 
 	/**

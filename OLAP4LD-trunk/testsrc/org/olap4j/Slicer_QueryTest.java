@@ -46,6 +46,7 @@ import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
 
 /**
  * Tests on building a slicer. Input: Arbitrary dataset. Output: For each
@@ -250,7 +251,7 @@ public class Slicer_QueryTest extends TestCase {
 
 	private void populateMetadata(String dsUri) {
 		Restrictions restrictions = new Restrictions();
-		restrictions.cubeNamePattern = dsUri;
+		restrictions.cubeNamePattern = new Resource(dsUri);
 
 		try {
 			// In order to fill the engine with data
@@ -293,9 +294,9 @@ public class Slicer_QueryTest extends TestCase {
 			this.membersofdimensions = new HashMap<Integer, List<Node[]>>();
 			for (int i = 1; i < dimensions.size(); i++) {
 				restrictions = new Restrictions();
-				restrictions.cubeNamePattern = dsUri;
+				restrictions.cubeNamePattern = new Resource(dsUri);
 				restrictions.dimensionUniqueName = dimensions.get(i)[dimensionmap
-						.get("?DIMENSION_UNIQUE_NAME")].toString();
+						.get("?DIMENSION_UNIQUE_NAME")];
 				// Fix all members: We get all members no matter from which
 				// hierarchy?
 				List<Node[]> members = lde.getMembers(restrictions);

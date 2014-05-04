@@ -1130,6 +1130,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		equivs.add(new Node[] {
 				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
 				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
+		
+		// For now, we strictly separate Convert-Cube and Drill-Across with equivalence classes.
+		equivs = new ArrayList<Node[]>();
 
 		this.equivalenceList = createEquivalenceList(equivs);
 
