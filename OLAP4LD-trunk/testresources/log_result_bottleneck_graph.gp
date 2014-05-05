@@ -24,4 +24,4 @@ set xlabel "Queries"
 set ylabel "Elapsed query time in ms"
 #set title  "Elapsed query time per component" 
 
-plot "< sqlite3 /home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/testresources/bottleneck.db 'select querytime,queryname,triples,avg(loadingvalidatingdataset),avg(generatinglogicalqueryplan),avg(executinglogicalqueryplan) from bottleneck where queryname like \" test%\" group by queryname,triples order by triples, queryname desc'" using 4 t "Loading and validating dataset", '' using 5:xticlabels(2) t "Generating query plan", '' using 6:xticlabels(2) t "Executing query plan"
+plot "< sqlite3 /home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/testresources/bottleneck.db 'select querytime,queryname,triples,avg(loadvalidatedatasetstime),avg(executemetadataqueriestime),avg(generatinglogicalqueryplantime),avg(generatingphysicalqueryplantime),avg(executingphysicalqueryplantime) from bottleneck where queryname like \"%test%\" group by queryname,triples order by triples, queryname desc'" using 4 t "Loading and validating dataset", '' using 5:xticlabels(2) t "Generating query plan", '' using 6:xticlabels(2) t "Executing query plan"

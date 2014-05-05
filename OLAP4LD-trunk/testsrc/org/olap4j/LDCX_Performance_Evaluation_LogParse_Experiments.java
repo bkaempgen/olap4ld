@@ -28,24 +28,37 @@ import edu.kit.aifb.exrunner.model.attribute.StringAttribute;
 public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
 	/*
-	 * We are interested in creating such a table: querytime | queryname |
-	 * triples | loadingvalidatingdataset | generatinglogicalqueryplan |
-	 * executinglogicalqueryplan
+	 * We are interested in creating such a table: 
 	 */
 	public static class LDCX_Query_Attributes {
 		public static final Attribute QUERYTIME = new StringAttribute(
 				"querytime");
 		public static final Attribute QUERYNAME = new StringAttribute(
 				"queryname");
-		public static final Attribute TRIPLES = new IntAttribute("triples");
-		public static final Attribute LOADINGVALIDATINGDATASET = new IntAttribute(
-				"loadingvalidatingdataset");
-		public static final Attribute GENERATINGLOGICALQUERYPLAN = new IntAttribute(
-				"generatinglogicalqueryplan");
-		public static final Attribute EXECUTINGLOGICALQUERYPLAN = new IntAttribute(
-				"executinglogicalqueryplan");
-		public static final Attribute TRANSMISSIONTIME = new IntAttribute(
-				"userquerytime");
+		public static final Attribute DATASETSCOUNT = new IntAttribute("datasetscount");
+		
+		public static final Attribute TRIPLESCOUNT = new IntAttribute("triplescount");
+		public static final Attribute OBSERVATIONSCOUNT = new IntAttribute("observationscount");
+		
+		public static final Attribute LOOKUPSCOUNT = new IntAttribute("lookupscount");
+		
+		public static final Attribute LOADVALIDATEDATASETSTIME = new IntAttribute(
+				"loadvalidatedatasetstime");
+		
+		public static final Attribute EXECUTEMETADATAQUERIESTIME = new IntAttribute(
+				"executemetadataqueriestime");
+		
+		public static final Attribute EXECUTEMETADATAQUERIESCOUNT = new IntAttribute(
+				"executemetadataqueriescount");
+
+		public static final Attribute GENERATELOGICALQUERYPLANTIME = new IntAttribute(
+				"generatelogicalqueryplantime");
+		
+		public static final Attribute GENERATEPHYSICALQUERYPLANTIME = new IntAttribute(
+				"generatephysicalqueryplantime");
+		
+		public static final Attribute EXECUTEPHYSICALQUERYPLAN = new IntAttribute(
+				"executephysicalqueryplantime");
 	}
 
 	public static class LDCX_ParameterSetProvider extends ParameterSetProvider {
@@ -53,11 +66,17 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 		public LDCX_ParameterSetProvider() {
 			registerAttributes(LDCX_Query_Attributes.QUERYTIME,
 					LDCX_Query_Attributes.QUERYNAME,
-					LDCX_Query_Attributes.TRIPLES,
-					LDCX_Query_Attributes.LOADINGVALIDATINGDATASET,
-					LDCX_Query_Attributes.GENERATINGLOGICALQUERYPLAN,
-					LDCX_Query_Attributes.EXECUTINGLOGICALQUERYPLAN,
-					LDCX_Query_Attributes.TRANSMISSIONTIME);
+					LDCX_Query_Attributes.DATASETSCOUNT,
+					LDCX_Query_Attributes.TRIPLESCOUNT,
+					LDCX_Query_Attributes.OBSERVATIONSCOUNT,
+					LDCX_Query_Attributes.LOOKUPSCOUNT,
+					LDCX_Query_Attributes.LOADVALIDATEDATASETSTIME,
+					LDCX_Query_Attributes.EXECUTEMETADATAQUERIESTIME,
+					LDCX_Query_Attributes.EXECUTEMETADATAQUERIESCOUNT,
+					LDCX_Query_Attributes.GENERATELOGICALQUERYPLANTIME,
+					LDCX_Query_Attributes.GENERATEPHYSICALQUERYPLANTIME,
+					LDCX_Query_Attributes.EXECUTEPHYSICALQUERYPLAN
+					);
 		}
 
 		@Override
@@ -109,6 +128,8 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 					// Oct 19, 2013 9:19:24 PM
 					// org.olap4j.driver.olap4ld.Olap4ldStatement
 					// executeOlapQuery
+
+					
 					if (line.contains("org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery")) {
 
 						query.querytime = line
@@ -128,6 +149,7 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 					// [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2Fssb001XXX2FttlXXX2FexampleYYYttlXXX23ds]
 					if (line.contains("Parse MDX: SELECT ")) {
 
+						// Complete would be: "^INFO: Parse MDX: SELECT /\\\\*(.+)\\\\*/.*"
 						Pattern p = Pattern.compile("^.*/\\*(.+)\\*/.*");
 						Matcher m = p.matcher(line);
 
@@ -150,7 +172,7 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
 						if (m.find()) {
 							System.out.println(m.group(1));
-							query.parsemdx = new Integer(m.group(1));
+							query.parsemdxtime = new Integer(m.group(1));
 						}
 						continue;
 					}
@@ -165,33 +187,58 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
 						if (m.find()) {
 							System.out.println(m.group(1));
-							if (query.executemetadataqueries == -1) {
-								query.executemetadataqueries = new Integer(
+							if (query.executemetadataqueriestime == -1) {
+								query.executemetadataqueriestime = new Integer(
 										m.group(1));
+								query.executemetadataqueriescount = 1;
 							} else {
-								query.executemetadataqueries += new Integer(
+								// Increase
+								query.executemetadataqueriestime += new Integer(
 										m.group(1));
+								query.executemetadataqueriescount++;
 							}
 
+						}
+						continue;
+					}
+					
+					// INFO: Load dataset: 2 datasets to load.
+					if (line.contains("Load dataset: ")) {
+
+						Pattern p = Pattern.compile("^.*Load dataset: (.+) datasets crawled.*");
+						Matcher m = p.matcher(line);
+
+						if (m.find()) {
+							System.out.println(m.group(1));
+							if (query.datasetscount < (new Integer(m.group(1)))) {
+								query.datasetscount = new Integer(m.group(1));
+							}
 						}
 						continue;
 					}
 
 					// INFO: Load dataset: loading 175 triples finished in
 					// 3933ms.
-					if (line.contains("Load dataset:")) {
+					if (line.contains("Load dataset: directed crawling algorithm finished in")) {
 
+						// Two groups not used, anymore.
+//						Pattern p = Pattern
+//								.compile("^.*loading (.+) triples finished in (.+)ms.*");
 						Pattern p = Pattern
-								.compile("^.*loading (.+) triples finished in (.+)ms.*");
+								.compile("^.*Load dataset: directed crawling algorithm finished in (.+)ms.*");
+						
 						Matcher m = p.matcher(line);
 
 						if (m.find()) {
 
-							System.out.println(m.group(1));
-							query.triples = new Integer(m.group(1));
+							if (query.directedcrawlingdatasetstime == -1) {
+								System.out.println(m.group(1));
+								query.directedcrawlingdatasetstime = new Integer(m.group(1));
+							} else {
+								System.out.println(m.group(1));
+								query.directedcrawlingdatasetstime += new Integer(m.group(1));
+							}
 
-							System.out.println(m.group(2));
-							query.loaddataset = new Integer(m.group(2));
 						}
 					}
 
@@ -203,8 +250,14 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 						Matcher m = p.matcher(line);
 
 						if (m.find()) {
-							System.out.println(m.group(1));
-							query.normalisation = new Integer(m.group(1));
+							
+							if (query.normalisationtime == -1) {
+								System.out.println(m.group(1));
+								query.normalisationtime = new Integer(m.group(1));
+							} else {
+								System.out.println(m.group(1));
+								query.normalisationtime += new Integer(m.group(1));
+							}
 						}
 						continue;
 					}
@@ -217,11 +270,61 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 						Matcher m = p.matcher(line);
 
 						if (m.find()) {
-							System.out.println(m.group(1));
-							query.integrityconstraints = new Integer(m.group(1));
+							if (query.integrityconstraintstime == -1) {
+								System.out.println(m.group(1));
+								query.integrityconstraintstime = new Integer(m.group(1));
+							} else {
+								System.out.println(m.group(1));
+								query.integrityconstraintstime += new Integer(m.group(1));
+							}
 						}
 						continue;
 					}
+					
+					// INFO: Lookup on resource: http://
+					if (line.contains("Lookup on resource:")) {
+
+						Pattern p = Pattern.compile("^.*Lookup on resource:.*");
+						Matcher m = p.matcher(line);
+
+						if (m.find()) {
+							if (query.lookupscount == -1) {
+
+								query.lookupscount = 1;
+							} else {
+								query.lookupscount++;
+							}
+						}
+						continue;
+					}
+					
+					// INFO: Load datasets: Number of loaded triples for all datasets: 500
+					if (line.contains("Load datasets: Number of loaded triples for all datasets:")) {
+
+						Pattern p = Pattern.compile("^.*Load datasets: Number of loaded triples for all datasets: (.+)");
+						Matcher m = p.matcher(line);
+
+						if (m.find()) {
+
+							query.triplescount = new Integer(m.group(1));
+						}
+						continue;
+					}
+					
+					// INFO: Load datasets: Number of observations for all datasets: 500
+					if (line.contains("Load datasets: Number of observations for all datasets:")) {
+
+						Pattern p = Pattern.compile("^.*Load datasets: Number of observations for all datasets: (.+)");
+						Matcher m = p.matcher(line);
+
+						if (m.find()) {
+
+							query.observationscount = new Integer(m.group(1));
+						}
+						continue;
+					}
+					
+										
 
 					// INFO: Transform MDX parse tree: finished in 5131ms.
 					if (line.contains("Transform MDX parse tree: finished")) {
@@ -231,23 +334,45 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
 						if (m.find()) {
 							System.out.println(m.group(1));
-							query.transformmdxparsetree = new Integer(
+							query.transformmdxparsetreetime = new Integer(
 									m.group(1));
 						}
 					}
 
-					// INFO: Create and execute physical query plan: finished in
-					// 65ms.
-					// TODO: We do not need to separate.
-					// INFO: Execute logical query plan: finished in 74ms.
-					if (line.contains("Execute logical query plan: finished")) {
+					if (line.contains("Execute logical query plan: Generate physical query plan finished")) {
 
 						Pattern p = Pattern.compile("^.*finished in (.+)ms.*");
 						Matcher m = p.matcher(line);
 
 						if (m.find()) {
 							System.out.println(m.group(1));
-							query.executelogicalqueryplan = new Integer(
+							query.generatephysicalqueryplantime = new Integer(
+									m.group(1));
+						}
+					}
+					
+					if (line.contains("Execute logical query plan: Execute physical query plan finished in")) {
+
+						Pattern p = Pattern.compile("^.*finished in (.+)ms.*");
+						Matcher m = p.matcher(line);
+
+						if (m.find()) {
+							System.out.println(m.group(1));
+							query.executephysicalqueryplantime = new Integer(
+									m.group(1));
+						}
+
+						continue;
+					}
+					
+					if (line.contains("Execute logical query plan: Cache results finished in")) {
+
+						Pattern p = Pattern.compile("^.*finished in (.+)ms.*");
+						Matcher m = p.matcher(line);
+
+						if (m.find()) {
+							System.out.println(m.group(1));
+							query.cacheresultstime = new Integer(
 									m.group(1));
 						}
 						
@@ -293,31 +418,48 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 		public QueryLogParameterSet(QueryLog queryLog) {
 
 			
-			// Computes the necessary metrics
+			/*
+			 * Computes the necessary metrics:
+			 *
+			 * 
+			 */
 			
 			m_attrValues.put(LDCX_Query_Attributes.QUERYTIME,
 					queryLog.querytime);
+			
 			m_attrValues.put(LDCX_Query_Attributes.QUERYNAME,
 					queryLog.queryname);
-			m_attrValues.put(LDCX_Query_Attributes.TRIPLES, queryLog.triples);
-			int loadingandvalidatingdataset = queryLog.loaddataset
-					+ queryLog.normalisation + queryLog.integrityconstraints;
-
-			m_attrValues.put(LDCX_Query_Attributes.LOADINGVALIDATINGDATASET,
-					loadingandvalidatingdataset);
-			int generatinglogicalqueryplan = queryLog.parsemdx
-					+ queryLog.transformmdxparsetree
-					- loadingandvalidatingdataset;
-			m_attrValues.put(LDCX_Query_Attributes.GENERATINGLOGICALQUERYPLAN,
-					generatinglogicalqueryplan);
-
-			int executinglogicalqueryplan = queryLog.executelogicalqueryplan;
-			m_attrValues.put(LDCX_Query_Attributes.EXECUTINGLOGICALQUERYPLAN,
-					executinglogicalqueryplan);
 			
-			int transmissiontime = queryLog.userquerytime - loadingandvalidatingdataset - generatinglogicalqueryplan - executinglogicalqueryplan;
-			m_attrValues.put(LDCX_Query_Attributes.TRANSMISSIONTIME,
-					transmissiontime);
+			m_attrValues.put(LDCX_Query_Attributes.TRIPLESCOUNT, queryLog.triplescount);
+			
+			m_attrValues.put(LDCX_Query_Attributes.DATASETSCOUNT, queryLog.datasetscount);
+			
+			m_attrValues.put(LDCX_Query_Attributes.OBSERVATIONSCOUNT, queryLog.observationscount);
+			
+			m_attrValues.put(LDCX_Query_Attributes.LOOKUPSCOUNT, queryLog.lookupscount);
+			
+			m_attrValues.put(LDCX_Query_Attributes.LOADVALIDATEDATASETSTIME,
+					queryLog.directedcrawlingdatasetstime
+					+ queryLog.normalisationtime + queryLog.integrityconstraintstime);
+
+			m_attrValues.put(LDCX_Query_Attributes.EXECUTEMETADATAQUERIESTIME,
+					queryLog.executemetadataqueriestime-(queryLog.directedcrawlingdatasetstime
+					+ queryLog.normalisationtime + queryLog.integrityconstraintstime));
+			
+			m_attrValues.put(LDCX_Query_Attributes.EXECUTEMETADATAQUERIESCOUNT,
+					queryLog.executemetadataqueriescount);
+			
+			m_attrValues.put(LDCX_Query_Attributes.GENERATELOGICALQUERYPLANTIME,
+					queryLog.parsemdxtime
+					+ queryLog.transformmdxparsetreetime
+					- queryLog.executemetadataqueriestime);
+			
+			m_attrValues.put(LDCX_Query_Attributes.GENERATEPHYSICALQUERYPLANTIME,
+					queryLog.generatephysicalqueryplantime);
+			
+			m_attrValues.put(LDCX_Query_Attributes.EXECUTEPHYSICALQUERYPLAN,
+					queryLog.executephysicalqueryplantime+queryLog.cacheresultstime);
+			
 		}
 	}
 
@@ -351,20 +493,50 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 	public static class QueryLog {
 		// Ordered as happening in stream
 		String querytime = "none";
+
+		// Name of query 
 		String queryname = "none";
-		int parsemdx = -1;
-		int executemetadataqueries = -1;
-		int loaddataset = -1;
-		int normalisation = -1;
-		int integrityconstraints = -1;
-		int triples = -1;
-		int transformmdxparsetree = -1;
-		int createandexecutephysicalqueryplan = -1;
-		int executelogicalqueryplan = -1;
-		int userquerytime = -1;
+		
+		// Time parsing MDX
+		int parsemdxtime = -1;
+		
+		// Metadata queries 
+		int executemetadataqueriestime = -1;
+		int executemetadataqueriescount = -1;
+		
+		// Datasets
+		int datasetscount = -1;
+		
+		// Crawling 
+		int directedcrawlingdatasetstime = -1;
+		
+		// Normalisation
+		int normalisationtime = -1;
+		
+		// Validation
+		int integrityconstraintstime = -1;
+		
+		// Lookups
+		int lookupscount = -1;
+		
+		// Triples
+		int triplescount = -1;
+		
+		// Observations
+		int observationscount = -1;
+		
+		// Transform MDX parse tree to logical query plan
+		int transformmdxparsetreetime = -1;
+		
+		// Execute logical query plan
+		int generatephysicalqueryplantime = -1;
+		
+		int executephysicalqueryplantime = -1;
+		
+		int cacheresultstime = -1;
 	}
 
-	private static final File SCANNEDFILE = new File("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/testresources/olap4ld_0.log");
+	private static final File SCANNEDFILE = new File("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/log/olap4ld_0.log");
 	//private static final File SCANNEDFILE = new File("/media/84F01919F0191352/Projects/2013/paper/paper-olap4ld-demo/Experiments/PerformanceStudy/catalina_bigger_5_runs_test_including_slice_2013-10-22_v2.out");
 	//private static final File SCANNEDFILE = new File("/media/84F01919F0191352/Projects/2013/paper/paper-olap4ld-demo/Experiments/PerformanceStudy/catalina_bigger_5_runs_test_2013-10-20.out");
 			

@@ -3,3 +3,4 @@
 * log_result_bottleneck_graph.png <= resulting figure
 * example_olap4ld_0.log <= example log file to parse
 * olap4ld_0.log <= real log file
+* LDCX_Performance_Evaluation_LogParse_Experiments <= Adds new lines to sqlite database

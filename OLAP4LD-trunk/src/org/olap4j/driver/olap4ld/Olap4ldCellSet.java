@@ -164,20 +164,22 @@ abstract class Olap4ldCellSet implements CellSet {
 
 		Olap4ldUtil._log.info("Execute logical query plan: "
 				+ queryplan.toString());
-		long time = System.currentTimeMillis();
 		/*
 		 * Now, execute Logical OLAP Operator Query Tree in LinkedDataEngine
 		 */
 		List<Node[]> olapQueryResult = olap4jStatement.olap4jConnection.myLinkedData
 				.executeOlapQuery(queryplan);
 
+		Olap4ldUtil._log.info("Execute logical query plan: Cache results.");
+		long time = System.currentTimeMillis();
+		
 		// Important part, we need to allow efficient access to the results
 		cacheDataFromOlapQuery(olapQueryResult);
 
 		areCellsPopulated = true;
 		// We track the time it takes to prepare the query
 		time = System.currentTimeMillis() - time;
-		Olap4ldUtil._log.info("Execute logical query plan: finished in " + time
+		Olap4ldUtil._log.info("Execute logical query plan: Cache results finished in " + time
 				+ "ms.");
 	}
 
@@ -186,7 +188,6 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * This is the method to map an MDX query to 1) metadata of a pivot table
 	 * and 2) an initial logical olap query plan to populate the pivot table
 	 * cells.
-	 * 
 	 * 
 	 * 
 	 * We create: this.metaData = metadata; this.axisList = axisList;
@@ -222,6 +223,7 @@ abstract class Olap4ldCellSet implements CellSet {
 
 		// Can also return the global cube
 		// Question: Do we actually get back the "global cube" here? Yes.
+		// This is the reason for generating a new cube (global cube): Olap4ld requires exactly on cube?
 		Cube cube = visitor.getCube();
 
 		// Axes Metadata (create MetaData for one specific axis)
