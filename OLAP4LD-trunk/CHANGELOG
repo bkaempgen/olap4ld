@@ -15,6 +15,13 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-05-07==
+* Problem: So far we only supported one Drill-Across per query. 
+* Solution: Now, the Drill-Across visitor goes through the entire tree and picks all non-Drill-Across subtrees converted to Iterator with OLAP-to-SPARQL.
+
+* Problem: Results are empty.
+* Solution: For nested-loop join, we need to be able to init the Drill-Across iterator, which first was not implemented.
+
 ==2014-05-04==
 * Removed all compliation problems due to refactoring.
 * Correctly computed comparison of Employment Fear vs. Real GDP Growth Rate.

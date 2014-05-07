@@ -156,13 +156,18 @@ public class Convert_Cube_QueryTest extends TestCase {
 		// Roll-up
 		// XXX: We do not need roll-up
 	
-		List<Node[]> mio_eur2eur_atoms = new ArrayList<Node[]>();
-		mio_eur2eur_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("inputcube1"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value1")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value2")});
-		mio_eur2eur_atoms.add(new Node[] {new Variable("value2"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(1000000 * ?value1)")});
-		ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence("mio_eur2eur", mio_eur2eur_atoms);
+		List<Node[]> mio_eur2eur_inputmembers = new ArrayList<Node[]>();
+		mio_eur2eur_inputmembers.add(new Node[] {new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR")});
+		
+		// mio_eur2eur_inputmembers.add(new Node[] {new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value1")});
+		
+		List<Node[]> mio_eur2eur_outputmembers = new ArrayList<Node[]>();
+		mio_eur2eur_outputmembers.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
+		// mio_eur2eur_outputmembers.add(new Node[] {new Variable("outputcube"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value2")});
+		
+		String mio_eur2eur_function = "(1000000 * ?value1)";
+		
+		ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence("mio_eur2eur", mio_eur2eur_inputmembers, null, mio_eur2eur_outputmembers, mio_eur2eur_function);
 		
 		// Convert-context
 		LogicalOlapOp convertgdp = new ConvertCubeOp(gdpbasecube,
@@ -244,7 +249,8 @@ public class Convert_Cube_QueryTest extends TestCase {
 		mio_eur2eur_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR")});
 		mio_eur2eur_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value2")});
 		mio_eur2eur_atoms.add(new Node[] {new Variable("value2"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(1000000 * ?value1)")});
-		ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence("mio_eur2eur", mio_eur2eur_atoms);
+		//ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence("mio_eur2eur", mio_eur2eur_atoms);
+		ReconciliationCorrespondence mio_eur2eur_correspondence = null;
 		
 		// String mio_eur2eur = "{"
 		// +
@@ -312,8 +318,8 @@ public class Convert_Cube_QueryTest extends TestCase {
 		computegdp_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#indic_na"), new Resource("http://estatwrap.ontologycentral.com/dic/indic_na#NGDP")});
 		computegdp_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value3")});
 		computegdp_atoms.add(new Node[] {new Variable("value3"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(?value1 + ?value2)")});
-		ReconciliationCorrespondence computegdp_correspondence = new ReconciliationCorrespondence("computegdp", computegdp_atoms);
-		
+		//ReconciliationCorrespondence computegdp_correspondence = new ReconciliationCorrespondence("computegdp", computegdp_atoms);
+		ReconciliationCorrespondence computegdp_correspondence = null;
 		
 //		String computegdp = "{" +
 //				"?obs1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#B1G> .\n" +
@@ -398,7 +404,8 @@ public class Convert_Cube_QueryTest extends TestCase {
 		computegdppercapita_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://ontologycentral.com/2009/01/eurostat/ns#unit"), new Resource("http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB")});
 		computegdppercapita_atoms.add(new Node[] {new Variable("outputcube"), new Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"), new Variable("value3")});
 		computegdppercapita_atoms.add(new Node[] {new Variable("value3"), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal("(?value1 / ?value2)")});
-		ReconciliationCorrespondence computegdppercapita_correspondence = new ReconciliationCorrespondence("computegdppercapita", computegdppercapita_atoms);
+//		ReconciliationCorrespondence computegdppercapita_correspondence = new ReconciliationCorrespondence("computegdppercapita", computegdppercapita_atoms);
+		ReconciliationCorrespondence computegdppercapita_correspondence = null;
 	
 		// String computegdppercapita = "{" +
 		//

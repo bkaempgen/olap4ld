@@ -33,6 +33,7 @@ import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.Rio;
 import org.semanticweb.yars.nx.BNode;
+import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
@@ -86,6 +87,28 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		this.domainUri = domainUri;
 
 		this.conversioncorrespondence = conversioncorrespondence;
+		
+		// Basics
+
+		try {
+			
+			Restrictions restriction = new Restrictions();
+			// Assume cube to be index 1
+			dataset1 = inputiterator1.getCubes(restriction).get(1)[cubemap
+					.get("?CUBE_NAME")].toString();
+			if (inputiterator2 != null) {
+				dataset2 = inputiterator2.getCubes(restriction).get(1)[cubemap
+						.get("?CUBE_NAME")].toString();
+			}
+		} catch (OlapException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+
+		// We use hash of combination conversionfunction + datasets
+		newdataset = domainUri + "dataset"
+				+ (dataset1 + dataset2).hashCode() + "/conversionfunction"
+				+ conversioncorrespondence.getname().hashCode();
 
 		// Metadata
 
@@ -93,13 +116,13 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 		// Data
 
-		prepareData(conversioncorrespondence);
+		prepareData();
 
 	}
 
-	private void prepareData(ReconciliationCorrespondence conversioncorrespondence) {
+	private void prepareData() {
 
-		DataFuProgram dataFuProgram = createDataFuProgram(conversioncorrespondence);
+		DataFuProgram dataFuProgram = createDataFuProgram();
 
 		// From bodypatterns and headpatterns of data-fu program, create SPARQL
 		// query.
@@ -115,33 +138,45 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	 * @param conversioncorrespondence2
 	 * @return Array with first element the body, second the head.
 	 */
-	private DataFuProgram createDataFuProgram(
-			ReconciliationCorrespondence conversioncorrespondence2) {
+	private DataFuProgram createDataFuProgram() {
 		// We assume one or two cubes, only.
 
+		List<Node[]> bodypatterns = createBody();
+		
+		List<Node[]> headpatterns = createHead();
+		
+		// Return Data-Fu query
+		String dataFuProgram = "{ \n";
+		for (Node[] nodes : bodypatterns) {
+			dataFuProgram += nodes[0].toN3() + " " + nodes[1].toN3() + " "
+					+ nodes[2].toN3() + " . \n";
+		}
+		dataFuProgram += " } => { \n";
+		for (Node[] nodes : headpatterns) {
+			dataFuProgram += nodes[0].toN3() + " " + nodes[1].toN3() + " "
+					+ nodes[2].toN3() + " . \n";
+		}
+		dataFuProgram += "} ";
+
+		Olap4ldUtil._log.config("Linked-Data-Fu-Program: " + dataFuProgram);
+
+		DataFuProgram dataFuProgramObject = new DataFuProgram(bodypatterns,
+				headpatterns);
+
+		return dataFuProgramObject;
+	}
+
+
+
+	private List<Node[]> createBody() {
 		/*
 		 * The bodypatterns should contain: All graph patterns for c1. All
 		 * bindas patterns. Dataset and structure graph patterns. All missing
 		 * dimensions/measures graph patterns.
 		 */
 		List<Node[]> bodypatterns = new ArrayList<Node[]>();
-
-		List<Node[]> atoms = conversioncorrespondence.getAtoms();
-
-		for (Node[] nodes : atoms) {
-			// All graph patterns for inputcube1 from c1.
-			if (nodes[0].toN3().equals("?inputcube1")) {
-				bodypatterns.add(nodes);
-			}
-			// All bindas patterns.
-			if (nodes[1]
-					.toN3()
-					.equals("<http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas>")) {
-				bodypatterns.add(nodes);
-			}
-		}
-
-		// Dataset and structure graph patterns
+		
+		// Dataset Triples
 
 		// Heuristically, the variable we get from the first pattern
 		// subject.
@@ -175,8 +210,18 @@ public class ConvertSparqlDerivedDatasetIterator implements
 					new Resource("http://purl.org/linked-data/cube#structure"),
 					new Variable("dsd2") });
 		}
+		
+		// Inputmembers Triples
 
-		// All missing dimensions/measures graph patterns for c1
+		List<Node[]> inputmembers1 = conversioncorrespondence.getInputmembers1();
+
+		for (Node[] nodes : inputmembers1) {
+			bodypatterns.add(new Node[] { obsvariable, nodes[0], nodes[1]});
+		}
+
+		// Dimension Triples:
+		
+		// All missing dimensions graph patterns for c1
 
 		// For each dimension add dataset graph pattern if of
 		// specific dataset and not already contained in atoms.
@@ -197,7 +242,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				continue;
 			}
 
-			if (!isPatternContained(atoms, obsvariable,
+			if (!isPatternContained(bodypatterns, obsvariable,
 					dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")], null)) {
 				bodypatterns.add(new Node[] {
 						obsvariable,
@@ -219,8 +264,9 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				}
 			}
 		}
-		// ** For each measure add dataset graph pattern if not already
-		// contained in atoms
+		
+		// Measure Triples:
+		
 		first = true;
 		for (Node[] measure : measures) {
 			if (first) {
@@ -252,29 +298,34 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				}
 			}
 		}
-
-		/*
-		 * The bodypatterns should contain: All graph patterns for outputcube. Dataset
-		 * and structure graph patterns. All missing dimensions/measures graph
-		 * patterns.
-		 */
-
+		
+		// Function Triples:
+		
+		// First is header
+		for (int i = 1; i < measures.size(); i++) {
+			Node[] measure = measures.get(i);
+			
+			// No extended measures. This means, currently, we are not
+			// considering aggregations.
+			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+					.contains("AGGFUNC")) {
+				continue;
+			}
+			
+			bodypatterns.add(new Node[] {new Variable("outputvalue"+i), new Resource("http://www.aifb.kit.edu/project/ld-retriever/qrl#bindas"), new Literal(conversioncorrespondence.getFunction())});
+		}
+			
+		return bodypatterns;
+	}
+	
+	private List<Node[]> createHead() {
 		List<Node[]> headpatterns = new ArrayList<Node[]>();
 
 		// Heuristically, the variable we create ourselves
 		Node outputblanknodevariable = new BNode("_:outputcube");
-
-		// All graph patterns for outputcube.
-		for (Node[] atom : atoms) {
-
-			if (atom[0].toN3().equals("?outputcube")) {
-				// We should be using new obs variable as blank node.
-
-				headpatterns
-						.add(new Node[] { outputblanknodevariable, atom[1], atom[2] });
-			}
-		}
-
+		
+		// Dataset Triples: 
+		
 		// Dataset and structure graph patterns.
 
 		headpatterns.add(new Node[] { outputblanknodevariable,
@@ -289,7 +340,17 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		headpatterns.add(new Node[] { new Resource(newdataset),
 				new Resource("http://purl.org/linked-data/cube#structure"),
 				new Variable("dsd1") });
+		
+		// Outputmembers Triples:
+		
+		List<Node[]> inputmembers1 = conversioncorrespondence.getInputmembers1();
 
+		for (Node[] nodes : inputmembers1) {
+			headpatterns.add(new Node[] { outputblanknodevariable, nodes[0], nodes[1]});
+		}
+		
+		// Dimension Triples:
+		
 		// All missing dimensions/measures graph patterns.
 		// XXX: A cleaner way would be to specifically refer to the metadata of
 		// the first input iterator
@@ -298,16 +359,15 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		// We assume dimensions and measures that we go through coming from
 		// first cube (otherwise metadata may not make sense anyway, sometimes).
 		List<Node[]> dimensions = null;
-		List<Node[]> measures = null;
+
 		try {
 			dimensions = this.inputiterator1.getDimensions(restrictions);
-			measures = this.inputiterator1.getMeasures(restrictions);
 		} catch (OlapException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		first = true;
+		boolean first = true;
 		for (Node[] dimension : dimensions) {
 			if (first) {
 				first = false;
@@ -320,7 +380,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				continue;
 			}
 
-			if (!isPatternContained(atoms, new Variable("outputcube"),
+			// This would mean, every dim in inputmembers also has to be in outputmembers
+			if (!isPatternContained(headpatterns, outputblanknodevariable,
 					dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")], null)) {
 				headpatterns.add(new Node[] {
 						outputblanknodevariable,
@@ -332,14 +393,24 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			}
 		}
+		
+		// Measure Triples: 
+		
+		List<Node[]> measures = null;
+		
+		try {
+			measures = this.inputiterator1.getMeasures(restrictions);
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		// ** For each measure add dataset graph pattern if not already
 		// contained in Data-Fu program and not implicit measure
-		first = true;
-		for (Node[] measure : measures) {
-			if (first) {
-				first = false;
-				continue;
-			}
+		// First is header
+		for (int i = 1; i < measures.size(); i++) {
+			Node[] measure = measures.get(i);
+
 			// No extended measures. This means, currently, we are not
 			// considering aggregations.
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
@@ -347,38 +418,17 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				continue;
 			}
 
-			if (!isPatternContained(atoms, new Variable("outputcube"),
+			if (!isPatternContained(headpatterns, outputblanknodevariable,
 					measure[measuremap.get("?MEASURE_UNIQUE_NAME")], null)) {
 				headpatterns.add(new Node[] {
 						outputblanknodevariable,
 						measure[measuremap.get("?MEASURE_UNIQUE_NAME")],
-
-						Olap4ldLinkedDataUtil
-								.makeUriToVariable(measure[measuremap
-										.get("?MEASURE_UNIQUE_NAME")]
-										) });
+						new Variable("outputvalue"+i)
+						});
 			}
 		}
-
-		// Return Data-Fu query
-		String dataFuProgram = "{ \n";
-		for (Node[] nodes : bodypatterns) {
-			dataFuProgram += nodes[0].toN3() + " " + nodes[1].toN3() + " "
-					+ nodes[2].toN3() + " . \n";
-		}
-		dataFuProgram += " } => { \n";
-		for (Node[] nodes : headpatterns) {
-			dataFuProgram += nodes[0].toN3() + " " + nodes[1].toN3() + " "
-					+ nodes[2].toN3() + " . \n";
-		}
-		dataFuProgram += "} ";
-
-		Olap4ldUtil._log.config("Linked-Data-Fu-Program: " + dataFuProgram);
-
-		DataFuProgram dataFuProgramObject = new DataFuProgram(bodypatterns,
-				headpatterns);
-
-		return dataFuProgramObject;
+		
+		return headpatterns;
 	}
 
 	private void executeSPARQLSelectQuery() {
@@ -1267,7 +1317,6 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	}
 
 	private void prepareMetadata() {
-		Restrictions restrictions = new Restrictions();
 
 		this.dataset1 = null;
 		this.dataset2 = null;
@@ -1277,29 +1326,10 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		try {
 			Restrictions restriction = new Restrictions();
 
-			// First dataset(s) to convert
-			cubemap = Olap4ldLinkedDataUtil.getNodeResultFields(inputiterator1
-					.getCubes(restrictions).get(0));
-
-			try {
-				// Assume cube to be index 1
-				dataset1 = inputiterator1.getCubes(restrictions).get(1)[cubemap
-						.get("?CUBE_NAME")].toString();
-				if (inputiterator2 != null) {
-					dataset2 = inputiterator2.getCubes(restrictions).get(1)[cubemap
-							.get("?CUBE_NAME")].toString();
-				}
-			} catch (OlapException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			}
-
-			// We use hash of combination conversionfunction + datasets
-			newdataset = domainUri + "dataset"
-					+ (dataset1 + dataset2).hashCode() + "/conversionfunction"
-					+ conversioncorrespondence.getname().hashCode();
-
+			// Cubes will be new cube
 			this.cubes = new ArrayList<Node[]>();
+			cubemap = Olap4ldLinkedDataUtil.getNodeResultFields(inputiterator1
+					.getCubes(restriction).get(0));
 			boolean first = true;
 			for (Node[] cube : inputiterator1.getCubes(restriction)) {
 				if (first) {
@@ -1326,10 +1356,12 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				this.cubes.add(newCube);
 
 			}
+			
+			// Measures will be all measures of first cube
 			this.measures = new ArrayList<Node[]>();
 			measuremap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(inputiterator1.getMeasures(
-							restrictions).get(0));
+							restriction).get(0));
 			first = true;
 			for (Node[] node : inputiterator1.getMeasures(restriction)) {
 				if (first) {
@@ -1367,10 +1399,12 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 				this.measures.add(newnode);
 			}
+			
+			// Dimensions will be all dimensions from first cube
 			this.dimensions = new ArrayList<Node[]>();
 			dimensionmap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(inputiterator1.getDimensions(
-							restrictions).get(0));
+							restriction).get(0));
 			first = true;
 			for (Node[] node : inputiterator1.getDimensions(restriction)) {
 				if (first) {
@@ -1405,10 +1439,12 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 				this.dimensions.add(newnode);
 			}
+			
+			// Hierarchies will be all hierarchies from first cube
+			this.hierarchies = new ArrayList<Node[]>();
 			hierarchymap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(inputiterator1.getHierarchies(
-							restrictions).get(0));
-			this.hierarchies = new ArrayList<Node[]>();
+							restriction).get(0));
 			first = true;
 			for (Node[] node : inputiterator1.getHierarchies(restriction)) {
 				if (first) {
@@ -1443,10 +1479,11 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 				this.hierarchies.add(newnode);
 			}
-			levelmap = Olap4ldLinkedDataUtil.getNodeResultFields(inputiterator1
-					.getLevels(restrictions).get(0));
 
+			// Levels will be all levels from first cube
 			this.levels = new ArrayList<Node[]>();
+			levelmap = Olap4ldLinkedDataUtil.getNodeResultFields(inputiterator1
+					.getLevels(restriction).get(0));
 			first = true;
 			for (Node[] node : inputiterator1.getLevels(restriction)) {
 				if (first) {
@@ -1486,10 +1523,12 @@ public class ConvertSparqlDerivedDatasetIterator implements
 						.get("?LEVEL_TYPE")];
 				this.levels.add(newnode);
 			}
+
+			// Members will be all members of first cube
+			this.members = new ArrayList<Node[]>();
 			membermap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(inputiterator1
-							.getMembers(restrictions).get(0));
-			this.members = new ArrayList<Node[]>();
+							.getMembers(restriction).get(0));
 			first = true;
 			for (Node[] node : inputiterator1.getMembers(restriction)) {
 				if (first) {

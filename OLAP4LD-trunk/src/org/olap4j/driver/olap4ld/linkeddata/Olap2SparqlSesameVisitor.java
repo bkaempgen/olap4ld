@@ -55,7 +55,7 @@ public class Olap2SparqlSesameVisitor implements
 	 * For now, we assume exactly two children.
 	 */
 	public void visit(DrillAcrossOp op) throws QueryException {
-		// not supported in this implementation
+		throw new UnsupportedOperationException("Drill-Across is not supported by the Olap2SparqlSesameVisitor!");
 	}
 
 	public void visit(RollupOp o) throws QueryException {
