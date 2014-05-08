@@ -12,7 +12,7 @@ public class ConvertCubeOp implements LogicalOlapOp {
 	public LogicalOlapOp inputOp1;
 	public LogicalOlapOp inputOp2;
 	public String domainUri;
-	public ReconciliationCorrespondence reconciliationcorrespondence;
+	public ReconciliationCorrespondence conversioncorrespondence;
 
 	/**
 	 * 
@@ -25,7 +25,7 @@ public class ConvertCubeOp implements LogicalOlapOp {
 			ReconciliationCorrespondence conversioncorrespondence, String domainUri) {
 		this.inputOp1 = inputOp;
 		this.inputOp2 = null;
-		this.reconciliationcorrespondence = conversioncorrespondence;
+		this.conversioncorrespondence = conversioncorrespondence;
 		this.domainUri = domainUri;
 	}
 
@@ -33,17 +33,17 @@ public class ConvertCubeOp implements LogicalOlapOp {
 			ReconciliationCorrespondence conversioncorrespondence, String domainUri) {
 		this.inputOp1 = inputOp1;
 		this.inputOp2 = inputOp2;
-		this.reconciliationcorrespondence = conversioncorrespondence;
+		this.conversioncorrespondence = conversioncorrespondence;
 		this.domainUri = domainUri;
 	}
 
-	public String toString() {
+	public String toString() {	
 		if (inputOp2 == null) {
 			return "Convert-Cube (" + inputOp1.toString() + ", "
-					+ reconciliationcorrespondence.toString() + ")";
+					+ conversioncorrespondence.toString() + ")";
 		} else {
 			return "Merge-Cubes (" + inputOp1.toString() + ", " + inputOp2.toString() + ", "
-					+ reconciliationcorrespondence.toString() + ")";
+					+ conversioncorrespondence.toString() + ")";
 		}
 	}
 

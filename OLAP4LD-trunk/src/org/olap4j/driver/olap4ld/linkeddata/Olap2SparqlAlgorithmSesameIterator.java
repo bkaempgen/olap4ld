@@ -275,14 +275,16 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 						.makeUriToVariable(measure[measuremap
 								.get("?MEASURE_UNIQUE_NAME")]);
 
-				String aggregationfunction = measure[measuremap
-						.get("?MEASURE_AGGREGATOR")].toString().replace(
-						"http://purl.org/olap#", "");
+				String aggregationfunction;
 
 				if (measure[measuremap.get("?MEASURE_AGGREGATOR")].toString()
 						.equals("null")) {
 					// In this case, we can only use top
 					aggregationfunction = "Max";
+				} else {
+					aggregationfunction = measure[measuremap
+								.get("?MEASURE_AGGREGATOR")].toString().replace(
+								"http://purl.org/olap#", "");
 				}
 
 				// We take the aggregator from the measure
@@ -1060,7 +1062,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	 * Returns String representation of op.
 	 */
 	public String toString() {
-		return "SparqlSesame: " + query;
+		return "OLAP-2-SPARQL query (SparqlSesame): " + query;
 	}
 
 	@Override

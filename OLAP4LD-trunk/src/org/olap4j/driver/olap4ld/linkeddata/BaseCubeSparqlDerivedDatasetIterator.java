@@ -30,9 +30,10 @@ import org.semanticweb.yars.nx.parser.NxParser;
 /**
  * 
  * @author benedikt
- *
+ * 
  */
-public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterator {
+public class BaseCubeSparqlDerivedDatasetIterator implements
+		PhysicalOlapIterator {
 
 	public List<Node[]> cubes;
 	public List<Node[]> measures;
@@ -42,10 +43,11 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 	public List<Node[]> members;
 
 	private SailRepository repo;
-	private Iterator<Node[]> iterator;
+	private Iterator<Node[]> outputiterator;
+	private String query;
 
-	public BaseCubeSparqlDerivedDatasetIterator(SailRepository repo, List<Node[]> cubes,
-			List<Node[]> measures, List<Node[]> dimensions,
+	public BaseCubeSparqlDerivedDatasetIterator(SailRepository repo,
+			List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
 			List<Node[]> hierarchies, List<Node[]> levels, List<Node[]> members) {
 		// We assume that basecube has a repo with populated according to
 		// metadata
@@ -79,16 +81,23 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 		// We could also make obs a variable.
 		whereClause += "?obs qb:dataSet <" + ds + ">. ";
 
+		// 2. Dimension triple patterns
+
 		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(dimensions.get(0));
+		// First is header
 		for (int i = 1; i < dimensions.size(); i++) {
 			Node dimensionProperty = dimensions.get(i)[dimensionmap
 					.get("?DIMENSION_UNIQUE_NAME")];
 
-			if (dimensionProperty
-					.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+			// As always disregard measure dimension.
+			// Since we do not know how Measure Dimension is encoded as Node, we
+			// compare the strings.
+			if (dimensionProperty.toString().equals(
+					Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
 				continue;
 			}
+
 			Node dimensionPropertyVariable = Olap4ldLinkedDataUtil
 					.makeUriToVariable(dimensionProperty);
 			whereClause += " ?obs <" + dimensionProperty + "> "
@@ -96,8 +105,11 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 			selectClause += " ?" + dimensionPropertyVariable;
 		}
 
+		// 3. Measure triple patterns
+
 		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(measures.get(0));
+		// First is header
 		for (int i = 1; i < measures.size(); i++) {
 			Node[] measure = measures.get(i);
 			// As always, remove Aggregation Function from Measure Name
@@ -108,6 +120,8 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 									.toString()
 									.replace("http://purl.org/olap#", "")
 									.toUpperCase(), "");
+			
+			// XXX: Will not work, currently, since measure names are defined by: measureProperty, dataset, Aggregation function. See OLAP-2-SPARQL algorithm iterator.
 
 			// We also remove aggregation function from Measure Property
 			// Variable so
@@ -116,9 +130,9 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 					.makeUriToVariable(new Resource(measureProperty));
 
 			// Unique name for variable
-//			Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
-//					.makeUriToVariable(measure[measuremap
-//							.get("?MEASURE_UNIQUE_NAME")].toString());
+			// Node uniqueMeasurePropertyVariable = Olap4ldLinkedDataUtil
+			// .makeUriToVariable(measure[measuremap
+			// .get("?MEASURE_UNIQUE_NAME")].toString());
 
 			// We take the aggregator from the measure
 			// Since we use OPTIONAL, there might be empty columns,
@@ -136,22 +150,38 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 					+ measurePropertyVariable.toN3() + ".";
 		}
 
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes() + "select "
+		this.query = Olap4ldLinkedDataUtil.getStandardPrefixes() + "select "
 				+ selectClause + " where { " + whereClause + " } ";
 
-		this.iterator = sparql(query).iterator();
 	}
 
 	/**
 	 * We only return always the same thing.
 	 */
 	public boolean hasNext() {
-		return iterator.hasNext();
+		if (this.outputiterator == null) {
+			try {
+				init();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		return outputiterator.hasNext();
 	}
 
 	@Override
 	public Object next() {
-		return iterator.next();
+		if (this.outputiterator == null) {
+			try {
+				init();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return outputiterator.next();
 	}
 
 	/**
@@ -243,14 +273,23 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 
 	@Override
 	public void remove() {
-		// TODO Auto-generated method stub
+		// nothing to do?
+	}
 
+	public String toString() {
+		Map<String, Integer> map = Olap4ldLinkedDataUtil
+				.getNodeResultFields(cubes.get(0));
+
+		Node[] cubeNodes = cubes.get(1);
+		int index = map.get("?CUBE_NAME");
+		String cubename = cubeNodes[index].toString();
+
+		return "BaseCube (" + cubename + "," + query + ")";
 	}
 
 	@Override
 	public void init() throws Exception {
-		// TODO Auto-generated method stub
-
+		this.outputiterator = sparql(this.query).iterator();
 	}
 
 	@Override
@@ -265,7 +304,7 @@ public class BaseCubeSparqlDerivedDatasetIterator implements PhysicalOlapIterato
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	@Override
 	public List<Node[]> getCubes(Restrictions restrictions)
 			throws OlapException {
