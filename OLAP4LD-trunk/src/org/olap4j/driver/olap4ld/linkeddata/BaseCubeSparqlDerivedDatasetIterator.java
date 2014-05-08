@@ -289,6 +289,9 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 
 	@Override
 	public void init() throws Exception {
+		
+		// Does not have input operators, therefore no other init necessary.
+		
 		this.outputiterator = sparql(this.query).iterator();
 	}
 

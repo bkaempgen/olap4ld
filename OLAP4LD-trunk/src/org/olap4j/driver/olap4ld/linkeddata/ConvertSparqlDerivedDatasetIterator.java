@@ -1829,6 +1829,12 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	public void init() throws Exception {
 		// From bodypatterns and headpatterns of data-fu program, create SPARQL
 		// query.
+		
+		// Need to make sure that I also init the input operators.
+		inputiterator1.init();
+		if (inputiterator2 != null) {
+			inputiterator2.init();
+		}
 
 		executeSPARQLConstructQuery();
 

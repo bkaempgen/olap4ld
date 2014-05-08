@@ -1043,6 +1043,9 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 	@Override
 	public void init() throws Exception {
+		
+		// Does not have input operators, therefore no other init necessary.
+		
 		this.iterator = this.result.iterator();
 	}
 

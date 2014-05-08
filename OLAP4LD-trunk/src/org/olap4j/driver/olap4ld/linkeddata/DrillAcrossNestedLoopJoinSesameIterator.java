@@ -39,8 +39,13 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 
 		createData(root1, root2);
 		
-		// Init
+		// Init	
 		try {
+			
+			// Does have input operators, therefore other init necessary.
+			root1.init();
+			root2.init();
+			
 			init();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -361,7 +366,7 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 	}
 
 	@Override
-	public void init() throws Exception {
+	public void init() throws Exception {		
 		this.iterator = results.iterator();
 	}
 
