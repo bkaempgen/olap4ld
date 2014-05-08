@@ -33,18 +33,19 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 	public DrillAcrossNestedLoopJoinSesameIterator(
 			PhysicalOlapIterator root1, PhysicalOlapIterator root2) {
 
-		// We simply assume two cubes
-
-		createMetadata(root1, root2);
-
-		createData(root1, root2);
-		
+	
 		// Init	
 		try {
 			
 			// Does have input operators, therefore other init necessary.
 			root1.init();
 			root2.init();
+			
+			// We simply assume two cubes
+
+			createMetadata(root1, root2);
+
+			createData(root1, root2);
 			
 			init();
 		} catch (Exception e) {

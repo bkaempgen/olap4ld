@@ -39,6 +39,11 @@ public class OlapDrillAcross2JoinSesameVisitor implements
 		if (op.inputop1 instanceof DrillAcrossOp) {
 			// Do nothing, since we will go through the entire tree, anyway.
 			//op.inputop1.accept(this);
+		} else if (op.inputop1 instanceof ConvertCubeOp || op.inputop1 instanceof BaseCubeOp) {
+			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this.engine.repo);
+			op.inputop1.accept(r2a);
+			iteratorlist.add((PhysicalOlapIterator) r2a.getNewRoot());
+			
 		} else {
 			// Now, we can assume that the subtree does not contain Drill-Across.
 			// Therefore, we can directly create an iterator from that subtree.
@@ -51,6 +56,11 @@ public class OlapDrillAcross2JoinSesameVisitor implements
 		if (op.inputop2 instanceof DrillAcrossOp) {
 			// Do nothing, since we will go through the entire tree, anyway.
 			//op.inputop1.accept(this);
+		} else if (op.inputop2 instanceof ConvertCubeOp || op.inputop2 instanceof BaseCubeOp) {
+			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this.engine.repo);
+			op.inputop2.accept(r2a);
+			iteratorlist.add((PhysicalOlapIterator) r2a.getNewRoot());
+			
 		} else {
 			// Now, we can assume that the subtree does not contain Drill-Across.
 			// Therefore, we can directly create an iterator from that subtree.

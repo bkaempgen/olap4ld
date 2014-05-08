@@ -76,6 +76,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	private String dataset1;
 	private String dataset2;
 	private DataFuProgram dataFuProgram;
+	private List<Node[]> results;
 
 	public ConvertSparqlDerivedDatasetIterator(SailRepository repo,
 			PhysicalOlapIterator inputiterator1,
@@ -199,13 +200,14 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		for (Node[] nodes : inputmembers1) {
 			bodypatterns.add(new Node[] { obsvariable, nodes[0], nodes[1] });
 		}
-		
+
 		if (dataset2 != null) {
 			List<Node[]> inputmembers2 = conversioncorrespondence
 					.getInputmembers2();
 
 			for (Node[] nodes : inputmembers2) {
-				bodypatterns.add(new Node[] { obsvariable2, nodes[0], nodes[1] });
+				bodypatterns
+						.add(new Node[] { obsvariable2, nodes[0], nodes[1] });
 			}
 		}
 
@@ -315,8 +317,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			if (dataset2 == null) {
 				function = function.replace("x", "?inputvalue" + i);
 			} else {
-				function = function.replace("x1", "?input1value" + i)
-						.replace("x2", "?input2value" + i);
+				function = function.replace("x1", "?input1value" + i).replace(
+						"x2", "?input2value" + i);
 			}
 
 			bodypatterns
@@ -647,7 +649,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			e1.printStackTrace();
 		}
 
-		this.outputiterator = myBindings.iterator();
+		this.results = myBindings;
 	}
 
 	private void executeSPARQLConstructQuery() {
@@ -749,11 +751,11 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			this.triples = stringout.toString();
 
-			 if (Olap4ldUtil._isDebug) {
+			if (Olap4ldUtil._isDebug) {
 
-                 Olap4ldUtil._log.config("Loaded triples: " + triples);
+				Olap4ldUtil._log.config("Loaded triples: " + triples);
 
-			 }
+			}
 
 			// Insert query to load triples
 			// String insertquery =
@@ -1795,7 +1797,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	 * Always true.
 	 */
 	public boolean hasNext() {
-		if (this.outputiterator == null) {
+		if (this.results == null) {
 			try {
 				init();
 			} catch (Exception e) {
@@ -1807,7 +1809,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	}
 
 	public Object next() {
-		if (this.outputiterator == null) {
+		if (this.results == null) {
 			try {
 				init();
 			} catch (Exception e) {
@@ -1829,16 +1831,22 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	public void init() throws Exception {
 		// From bodypatterns and headpatterns of data-fu program, create SPARQL
 		// query.
-		
-		// Need to make sure that I also init the input operators.
-		inputiterator1.init();
-		if (inputiterator2 != null) {
-			inputiterator2.init();
+
+		// Should not be run every time again.
+		if (this.results == null) {
+
+			// Need to make sure that I also init the input operators.
+			inputiterator1.init();
+			if (inputiterator2 != null) {
+				inputiterator2.init();
+			}
+
+			executeSPARQLConstructQuery();
+
+			executeSPARQLSelectQuery();
+
 		}
-
-		executeSPARQLConstructQuery();
-
-		executeSPARQLSelectQuery();
+		this.outputiterator = this.results.iterator();
 	}
 
 	@Override
@@ -1880,7 +1888,28 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	@Override
 	public List<Node[]> getMeasures(Restrictions restrictions)
 			throws OlapException {
-		return measures;
+
+		// Convert-Cube would only take the non-aggregated measures
+		List<Node[]> newmeasures = new ArrayList<Node[]>();
+		newmeasures.add(measures.get(0));
+		for (int i = 1; i < measures.size(); i++) {
+			Node[] measure = measures.get(i);
+
+			/*
+			 * Here we deal with the problem that cubes coming in will possibly
+			 * have many "implicit" measures. For now, we assume those to be
+			 * disregarded.
+			 */
+
+			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+					.contains("AGGFUNC")) {
+				continue;
+			}
+
+			newmeasures.add(measure);
+		}
+
+		return newmeasures;
 	}
 
 	@Override

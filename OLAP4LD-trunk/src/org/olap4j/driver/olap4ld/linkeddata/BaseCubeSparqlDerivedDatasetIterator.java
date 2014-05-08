@@ -55,8 +55,32 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 		// We assume that cubes to BaseCubeOp always refer to one single cube
 		assert cubes.size() <= 2;
 
-		this.cubes = cubes;
+		this.cubes = cubes;	
+
+		// Base-Cube would only take the non-aggregated measures
+		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(measures.get(0));
+		List<Node[]> newmeasures = new ArrayList<Node[]>();
+		newmeasures.add(measures.get(0));
+		for (int i = 1; i < measures.size(); i++) {
+			Node[] measure = measures.get(i);
+
+			/*
+			 * Here we deal with the problem that cubes coming in will possibly
+			 * have many "implicit" measures. For now, we assume those to be
+			 * disregarded.
+			 */
+
+			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+					.contains("AGGFUNC")) {
+				continue;
+			}
+			
+			newmeasures.add(measure);
+		}
+		measures = newmeasures;
 		this.measures = measures;
+		
 		this.dimensions = dimensions;
 		this.hierarchies = hierarchies;
 		this.levels = levels;
@@ -107,8 +131,6 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 
 		// 3. Measure triple patterns
 
-		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(measures.get(0));
 		// First is header
 		for (int i = 1; i < measures.size(); i++) {
 			Node[] measure = measures.get(i);

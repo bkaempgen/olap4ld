@@ -35,20 +35,19 @@ import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
-import org.olap4j.driver.olap4ld.linkeddata.ReconciliationCorrespondence;
 import org.olap4j.driver.olap4ld.linkeddata.ConvertCubeOp;
+import org.olap4j.driver.olap4ld.linkeddata.DrillAcrossOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LinkedDataCubesEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.PhysicalOlapQueryPlan;
+import org.olap4j.driver.olap4ld.linkeddata.ReconciliationCorrespondence;
 import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
-import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Resource;
-import org.semanticweb.yars.nx.Variable;
 
 /**
  * Tests on executing drill-across.
@@ -205,9 +204,9 @@ public class Convert_Cube_QueryTest extends TestCase {
 	 * First try of a pipeline. Using Estatwrap data. Computes GDP per capita.
 	 * 
 	 * @throws OlapException
-	 */
-	public void test_GDP_per_Capita_Calculation() throws OlapException {
-
+	 */	
+	public void test_GDP_Per_Capita_Compared() throws OlapException {
+		
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
 		// First: GDP and main components - Current prices dataset
@@ -500,20 +499,60 @@ public class Convert_Cube_QueryTest extends TestCase {
 		LogicalOlapOp computegdppercapita_op = new ConvertCubeOp(computegdp_op,
 				populationbasecube, computegdppercapita_correspondence,
 				domainUri);
+		
+		// XXX: Complex: Compare with:
+		// http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds
+		
+		// Third: GDP per Capita
+		Node gdpalreadycomputeduri = new Resource(
+				"http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds");
+		Restrictions gdpalreadycomputedrestrictions = new Restrictions();
+		gdpalreadycomputedrestrictions.cubeNamePattern = gdpalreadycomputeduri;
 
+		// Base-cube
+		// XXX: We need to make sure that only the lowest members are queried
+		// from each cube.
+
+		// In order to fill the engine with data
+		// XXX: Should be part of base-cube operator
+		List<Node[]> gdpalreadycomputedcube = lde.getCubes(gdpalreadycomputedrestrictions);
+		assertEquals(2, gdpalreadycomputedcube.size());
+		Map<String, Integer> gdpalreadycomputedcubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(gdpalreadycomputedcube.get(0));
+		System.out.println("CUBE_NAME: "
+				+ gdpalreadycomputedcube.get(1)[gdpalreadycomputedcubemap.get("?CUBE_NAME")]);
+
+		List<Node[]> gdpalreadycomputedcubemeasures = lde
+				.getMeasures(gdpalreadycomputedrestrictions);
+
+		List<Node[]> gdpalreadycomputedcubedimensions = lde
+				.getDimensions(gdpalreadycomputedrestrictions);
+		assertEquals(true, gdpalreadycomputedcubedimensions.size() > 1);
+
+		List<Node[]> gdpalreadycomputedcubehierarchies = lde
+				.getHierarchies(gdpalreadycomputedrestrictions);
+
+		List<Node[]> gdpalreadycomputedcubelevels = lde
+				.getLevels(gdpalreadycomputedrestrictions);
+
+		List<Node[]> gdpalreadycomputedcubemembers = lde
+				.getMembers(gdpalreadycomputedrestrictions);
+
+		BaseCubeOp gdpalreadycomputedbasecube = new BaseCubeOp(gdpalreadycomputedcube,
+				gdpalreadycomputedcubemeasures, gdpalreadycomputedcubedimensions,
+				gdpalreadycomputedcubehierarchies, gdpalreadycomputedcubelevels,
+				gdpalreadycomputedcubemembers);
+
+		DrillAcrossOp comparegdppercapita_op = new DrillAcrossOp(computegdppercapita_op, gdpalreadycomputedbasecube);
+		
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
-				computegdppercapita_op);
+				comparegdppercapita_op);
 
 		String result = executeStatement(myplan);
-
-		// XXX: Compare with:
-		// http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds
-
-		// According to GDP per capita - annual Data [nama_aux_gph] correct.
+		
 		assertContains(
-				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803;",
+				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27800; 27704.423967820803;",
 				result);
-
 	}
 
 	/**
@@ -561,7 +600,11 @@ public class Convert_Cube_QueryTest extends TestCase {
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(gdpbasecube);
 
-		executeStatement(myplan);
+		String result = executeStatement(myplan);
+		
+		assertContains(
+				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803;",
+				result);
 	}
 
 	private void assertContains(String seek, String s) {

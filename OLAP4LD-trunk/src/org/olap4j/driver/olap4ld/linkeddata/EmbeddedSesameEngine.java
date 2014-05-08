@@ -100,7 +100,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	/**
 	 * The Sesame repository (triple store). Gets filled when asking for cubes.
 	 */
-	private SailRepository repo;
+	public SailRepository repo;
 
 	private Integer MAX_LOAD_TRIPLE_SIZE = 10000000;
 
@@ -136,7 +136,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Heuristics of how to select the right visitor.
 			if (queryplan._root instanceof DrillAcrossOp) {
 				r2a = new OlapDrillAcross2JoinSesameVisitor(this);
-			} else if (queryplan._root instanceof ConvertCubeOp) {
+			} else if (queryplan._root instanceof ConvertCubeOp || queryplan._root instanceof BaseCubeOp) {
 				// We create visitor to translate logical into physical
 				r2a = new Olap2SparqlSesameDerivedDatasetVisitor(repo);
 			} else {
