@@ -140,8 +140,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 								.replace(
 										"org.olap4j.driver.olap4ld.Olap4ldStatement executeOlapQuery",
 										"");
-						complete = false;
-						continue;
 					}
 
 					// INFO: Parse MDX: SELECT /* $session:
@@ -167,7 +165,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 									"$session: ldcx_performance_evaluation_",
 									"");
 						}
-						continue;
 					}
 
 					// INFO: Parse MDX: finished in 97ms.
@@ -180,7 +177,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 							System.out.println(m.group(1));
 							query.parsemdxtime = new Integer(m.group(1));
 						}
-						continue;
 					}
 
 					// INFO: Execute metadata query on Linked Data Engine:
@@ -205,7 +201,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 							}
 
 						}
-						continue;
 					}
 
 					// INFO: Load dataset: 2 datasets to load.
@@ -217,7 +212,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 						if (query.datasetscount < (new Integer(mym.group(1)))) {
 							query.datasetscount = new Integer(mym.group(1));
 						}
-						continue;
 					}
 
 					// INFO: Load dataset: loading 175 triples finished in
@@ -268,7 +262,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 										m.group(1));
 							}
 						}
-						continue;
 					}
 
 					// INFO: Check integrity constraints on dataset: finished in
@@ -289,7 +282,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 										m.group(1));
 							}
 						}
-						continue;
 					}
 
 					// INFO: Lookup on resource: http://
@@ -306,7 +298,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 								query.lookupscount++;
 							}
 						}
-						continue;
 					}
 
 					// INFO: Load datasets: Number of loaded triples for all
@@ -322,7 +313,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 							// At the end will be largest one
 							query.triplescount = new Integer(m.group(1));
 						}
-						continue;
 					}
 
 					// INFO: Load datasets: Number of observations for all
@@ -337,7 +327,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
 							query.observationscount = new Integer(m.group(1));
 						}
-						continue;
 					}
 
 					// INFO: Transform MDX parse tree: finished in 5131ms.
@@ -375,8 +364,9 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 							query.executephysicalqueryplantime = new Integer(
 									m.group(1));
 						}
+						
+						complete = true;
 
-						continue;
 					}
 
 					if (line.contains("Execute logical query plan: Cache results finished in")) {
@@ -391,7 +381,6 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
 						complete = true;
 
-						continue;
 					}
 
 					// // This information is not available from olap4ld log
@@ -419,6 +408,7 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 						// Now, we can create a new query log
 						queryloglist.add(query);
 						query = new QueryLog();
+						complete = false;
 					}
 
 				}
@@ -525,48 +515,48 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 	 */
 	public static class QueryLog {
 		// Ordered as happening in stream
-		String querytime = "none";
+		String querytime = "Default";
 
 		// Name of query
-		String queryname = "none";
+		String queryname = "Default";
 
 		// Time parsing MDX
-		int parsemdxtime = -1;
+		int parsemdxtime = 0;
 
 		// Metadata queries
-		int executemetadataqueriestime = -1;
-		int executemetadataqueriescount = -1;
+		int executemetadataqueriestime = 0;
+		int executemetadataqueriescount = 0;
 
 		// Datasets
-		int datasetscount = -1;
+		int datasetscount = 0;
 
 		// Crawling
-		int directedcrawlingdatasetstime = -1;
+		int directedcrawlingdatasetstime = 0;
 
 		// Normalisation
-		int normalisationtime = -1;
+		int normalisationtime = 0;
 
 		// Validation
-		int integrityconstraintstime = -1;
+		int integrityconstraintstime = 0;
 
 		// Lookups
-		int lookupscount = -1;
+		int lookupscount = 0;
 
 		// Triples
-		int triplescount = -1;
+		int triplescount = 0;
 
 		// Observations
-		int observationscount = -1;
+		int observationscount = 0;
 
 		// Transform MDX parse tree to logical query plan
-		int transformmdxparsetreetime = -1;
+		int transformmdxparsetreetime = 0;
 
 		// Execute logical query plan
-		int generatephysicalqueryplantime = -1;
+		int generatephysicalqueryplantime = 0;
 
-		int executephysicalqueryplantime = -1;
+		int executephysicalqueryplantime = 0;
 
-		int cacheresultstime = -1;
+		int cacheresultstime = 0;
 	}
 
 	private static final File SCANNEDFILE = new File(

@@ -99,7 +99,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 
 	}
 
-	public void test_GDP_Mioeur2eur() throws OlapException {
+	public void executeGDP_Mioeur2eur() throws OlapException {
 
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri";
 
@@ -205,7 +205,9 @@ public class Convert_Cube_QueryTest extends TestCase {
 	 * 
 	 * @throws OlapException
 	 */	
-	public void test_GDP_Per_Capita_Compared() throws OlapException {
+	public void executeGDP_Per_Capita_Compared() {
+		
+		try {
 		
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
@@ -548,11 +550,18 @@ public class Convert_Cube_QueryTest extends TestCase {
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 				comparegdppercapita_op);
 
+		System.out.println("Logical Query Plan:"+myplan.toString());
+		
 		String result = executeStatement(myplan);
 		
 		assertContains(
 				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27800; 27704.423967820803;",
 				result);
+		
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -560,7 +569,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 	 * 
 	 * @throws OlapException
 	 */
-	public void test_GDP_per_Capita_Worldbank() throws OlapException {
+	public void executeGDP_per_Capita_Worldbank() throws OlapException {
 
 		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
@@ -605,6 +614,42 @@ public class Convert_Cube_QueryTest extends TestCase {
 		assertContains(
 				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803;",
 				result);
+	}
+	
+	public void test1() {
+		
+		executeGDP_Per_Capita_Compared();
+		
+	}
+	
+	public void test2() {
+		
+		executeGDP_Per_Capita_Compared();
+		
+	}
+	
+	public void test3() {
+		
+		executeGDP_Per_Capita_Compared();
+		
+	}
+	
+	public void test4() {
+		
+		executeGDP_Per_Capita_Compared();
+		
+	}
+	
+	public void test5() {
+		
+		executeGDP_Per_Capita_Compared();
+		
+	}
+	
+	public void test6() {
+		
+		executeGDP_Per_Capita_Compared();
+		
 	}
 
 	private void assertContains(String seek, String s) {

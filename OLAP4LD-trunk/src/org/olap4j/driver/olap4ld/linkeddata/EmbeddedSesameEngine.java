@@ -966,31 +966,31 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 				}
 
-//				// If loading ds, also load dimension values (if resources) - done similar as for degenerated members
-//				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?member WHERE {<"
-//						+ uri
-//						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?obs qb:dataSet ?ds. ?obs ?dimension ?member}";
-//				List<Node[]> member = sparql(query, true);
-//				// There should be a dsd
-//				// Note in spec:
-//				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-//				if (member.size() <= 1) {
-//					;
-//				} else {
-//					first = true;
-//					// So far, members are not crawled.
-//					for (Node[] nodes : member) {
-//						if (first) {
-//							first = false;
-//							continue;
-//						}
-//
-//						if (nodes[0] instanceof Resource) {
-//							URL memberuri = new URL(nodes[0].toString());
-//							loadInStore(memberuri);
-//						}
-//					}
-//				}
+				// If loading ds, also load dimension values (if resources) - done similar as for degenerated members
+				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?member WHERE {<"
+						+ uri
+						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?obs qb:dataSet ?ds. ?obs ?dimension ?member}";
+				List<Node[]> member = sparql(query, true);
+				// There should be a dsd
+				// Note in spec:
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+				if (member.size() <= 1) {
+					;
+				} else {
+					first = true;
+					// So far, members are not crawled.
+					for (Node[] nodes : member) {
+						if (first) {
+							first = false;
+							continue;
+						}
+
+						if (nodes[0] instanceof Resource) {
+							URL memberuri = new URL(nodes[0].toString());
+							loadInStore(memberuri);
+						}
+					}
+				}
 				
 			}
 		} catch (MalformedURLException e) {

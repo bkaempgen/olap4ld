@@ -227,6 +227,11 @@ public class Olap4ldLinkedDataUtil {
 		}
 	}
 
+	/**
+	 * 
+	 * @param mdx
+	 * @return
+	 */
 	public static Node convertMDXtoURI(String mdx) {
 		if (mdx.equals("Measures")) {
 			// No conversion needed.
@@ -235,7 +240,12 @@ public class Olap4ldLinkedDataUtil {
 		// First, we remove the square brackets
 		mdx = removeSquareBrackets(mdx);
 
-		return decodeUriWithPrefix(mdx);
+		Node decoded = decodeUriWithPrefix(mdx);
+
+		// Convert to canonical value. No, since internal value means within Linked Data store. 
+		// Node canonical = 
+		
+		return decoded;
 	}
 
 	public static String readInQueryTemplate(String name) {

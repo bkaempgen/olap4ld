@@ -17,6 +17,11 @@ We now would like to extend this.
 
 ==2014-05-08==
 * Convert-Cube / Merge-Cubes implemented.
+* Problem: For Drill-Across, we have added several measures. As name, we use the measure property, the dataset URI and the aggregation function string. However, the select query contains a triple pattern for the Measures dimension and triple patterns for those additional measures that we have created. 
+* Solution: getString() had to be used!
+* Problem: The physical query plan is executed, immediately? Can we not return it first? 
+* Now all iterators only fire if needed (init() also implemented)
+* Remaining: Weakness with current execution. If below convert cube is a query tree, if I call getXXX(), I might get bogus. If I did it right, I would make sure that with getXXX() either iterator is executed or at least made sure that correct metadata is returned.
 
 ==2014-05-07==
 * Problem: So far we only supported one Drill-Across per query. 

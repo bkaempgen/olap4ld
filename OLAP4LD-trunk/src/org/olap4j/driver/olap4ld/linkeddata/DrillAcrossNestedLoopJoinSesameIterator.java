@@ -29,34 +29,22 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 
 	private Iterator<Node[]> iterator;
 	private List<Node[]> results;
+	private PhysicalOlapIterator root1;
+	private PhysicalOlapIterator root2;
 
-	public DrillAcrossNestedLoopJoinSesameIterator(
-			PhysicalOlapIterator root1, PhysicalOlapIterator root2) {
+	public DrillAcrossNestedLoopJoinSesameIterator(PhysicalOlapIterator root1,
+			PhysicalOlapIterator root2) {
+		
+		this.root1 = root1;
+		this.root2 = root2;
 
-	
-		// Init	
-		try {
-			
-			// Does have input operators, therefore other init necessary.
-			root1.init();
-			root2.init();
-			
-			// We simply assume two cubes
-
-			createMetadata(root1, root2);
-
-			createData(root1, root2);
-			
-			init();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// We simply assume two cubes
+		// Metadata we do directly.
+		createMetadata();
 
 	}
 
-	private void createMetadata(PhysicalOlapIterator root1,
-			PhysicalOlapIterator root2) {
+	private void createMetadata() {
 		// We assume that there is at least one input iterator that we can use
 		// the metadata from.
 
@@ -112,7 +100,7 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 			// Now, add Measures
 
 			// Also add measure to global cube
-			
+
 			// From first cube
 			Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
 					.getNodeResultFields(root1.getMeasures(restrictions).get(0));
@@ -155,17 +143,17 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 
 				measures.add(newnode);
 			}
-			
+
 			// From second cube
-			measuremap = Olap4ldLinkedDataUtil
-					.getNodeResultFields(root2.getMeasures(restrictions).get(0));
+			measuremap = Olap4ldLinkedDataUtil.getNodeResultFields(root2
+					.getMeasures(restrictions).get(0));
 
 			// Add to result from first cube
 			first = true;
 			for (Node[] anIntermediaryresult : root2.getMeasures(restrictions)) {
 				if (first) {
 					// Do not add header twice.
-					//measures.add(anIntermediaryresult);
+					// measures.add(anIntermediaryresult);
 					first = false;
 					continue;
 				}
@@ -205,10 +193,10 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 			this.dimensions = root1.getDimensions(restrictions);
 			this.hierarchies = root1.getHierarchies(restrictions);
 			this.levels = root1.getLevels(restrictions);
-			
+
 			// Can we use members?
 			// One problem could be that this may be a huge number of members
-			
+
 			this.members = root1.getMembers(restrictions);
 
 		} catch (OlapException e1) {
@@ -352,11 +340,29 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 
 	@Override
 	public boolean hasNext() {
+		if (this.results == null) {
+			try {
+				init();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		return iterator.hasNext();
 	}
 
 	@Override
 	public Object next() {
+		if (this.results == null) {
+			try {
+				init();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		return iterator.next();
 	}
 
@@ -367,13 +373,34 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 	}
 
 	@Override
-	public void init() throws Exception {		
+	public void init() throws Exception {
+
+		if (this.results == null) {
+			// Init
+			try {
+
+				// Does have input operators, therefore other init necessary.
+				root1.init();
+				root2.init();
+
+				createData(root1, root2);
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		this.iterator = results.iterator();
 	}
 
 	@Override
 	public void close() throws Exception {
 		// something to do?
+	}
+	
+	@Override
+	public String toString() {
+		return "Nested-Loop over ("+root1 + ","+root2+")";
 	}
 
 	@Override
