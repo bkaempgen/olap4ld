@@ -48,6 +48,7 @@ import org.openrdf.query.TupleQueryResultHandlerException;
 import org.openrdf.query.Update;
 import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -100,9 +101,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	/**
 	 * The Sesame repository (triple store). Gets filled when asking for cubes.
 	 */
-	public SailRepository repo;
+	public Repository repo;
 
-	private Integer MAX_LOAD_TRIPLE_SIZE = 10000000;
+	private Integer MAX_LOAD_TRIPLE_SIZE = 1000000000;
 
 	private Integer MAX_COMPLEX_CONSTRAINTS_TRIPLE_SIZE = 5000;
 
@@ -136,7 +137,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Heuristics of how to select the right visitor.
 			if (queryplan._root instanceof DrillAcrossOp) {
 				r2a = new OlapDrillAcross2JoinSesameVisitor(this);
-			} else if (queryplan._root instanceof ConvertCubeOp || queryplan._root instanceof BaseCubeOp) {
+			} else if (queryplan._root instanceof ConvertCubeOp
+					|| queryplan._root instanceof BaseCubeOp) {
 				// We create visitor to translate logical into physical
 				r2a = new Olap2SparqlSesameDerivedDatasetVisitor(repo);
 			} else {
@@ -475,25 +477,28 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 * @throws OlapException
 	 */
 	private void loadInStore(URL resource) throws OlapException {
-		SailRepositoryConnection con = null;
+		RepositoryConnection con = null;
 
-		if (loadedMap.get(resource.hashCode()) != null && loadedMap.get(resource.hashCode()) == true) {
+		if (loadedMap.get(resource.hashCode()) != null
+				&& loadedMap.get(resource.hashCode()) == true) {
 			// Already loaded
 			return;
-		} 
+		}
 		// Mark as loaded
 		loadedMap.put(resource.hashCode(), true);
 
 		try {
-						
+
 			URL location = Olap4ldLinkedDataUtil.askForLocation(resource);
-			if (loadedMap.get(location.hashCode()) != null && loadedMap.get(location.hashCode()) == true) {
+			// If resource is the same as location, we will never load otherwise
+			if (loadedMap.get(location.hashCode()) != null
+					&& loadedMap.get(location.hashCode()) == true && location.hashCode() != resource.hashCode()) {
 				// Already loaded
 				return;
 			}
 			// Mark as loaded
 			loadedMap.put(location.hashCode(), true);
-			
+
 			// Check max loaded
 			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
 			List<Node[]> result = sparql(query, false);
@@ -733,6 +738,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// Own normalization and inferencing.
 
+			RepositoryConnection con = repo.getConnection();
+
 			/*
 			 * SKOS:
 			 * 
@@ -749,6 +756,14 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// QueryLanguage.SPARQL, updateQuery);
 			// updateQueryQuery.execute();
 
+			String updateQuery = TYPICALPREFIXES
+					+ " INSERT { ?dimension rdfs:range ?range.} WHERE { ?dimension rdfs:subPropertyOf ?superdimension. ?superdimension rdfs:range ?range. }; ";
+			Update updateQueryQuery = con.prepareUpdate(QueryLanguage.SPARQL,
+					updateQuery);
+			updateQueryQuery.execute();
+
+			con.close();
+
 			time = System.currentTimeMillis() - time;
 			Olap4ldUtil._log
 					.info("Run normalisation algorithm on dataset: finished in "
@@ -763,7 +778,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			checkIntegrityConstraints();
 
 			// Own checks:
-			SailRepositoryConnection con = repo.getConnection();
+			con = repo.getConnection();
 
 			String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
 
@@ -802,6 +817,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		} catch (MalformedQueryException e) {
 			throw new OlapException("Problem with malformed query: "
 					+ e.getMessage());
+		} catch (UpdateExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -853,6 +871,22 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 				}
 
+				boolean first;
+				// If loading ds, also load seeAlso
+				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?seeAlso WHERE {<"
+						+ uri + "> rdfs:seeAlso ?seeAlso.}";
+				List<Node[]> seeAlso = sparql(query, true);
+
+				first = true;
+				for (Node[] nodes : seeAlso) {
+					if (first) {
+						first = false;
+						continue;
+					}
+					URL componenturi = new URL(nodes[0].toString());
+					loadInStore(componenturi);
+				}
+
 				// If loading ds, also load components
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?comp WHERE {<"
 						+ uri
@@ -861,7 +895,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-				boolean first = true;
+				first = true;
 				for (Node[] nodes : components) {
 					if (first) {
 						first = false;
@@ -916,6 +950,23 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 				}
 
+				// If loading dimensions, also load rdfs:subPropertyOf
+				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?superdimension WHERE {<"
+						+ uri
+						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:subPropertyOf ?superdimension. }";
+				List<Node[]> superdimensions = sparql(query, true);
+
+				first = true;
+				for (Node[] nodes : superdimensions) {
+					if (first) {
+						first = false;
+						continue;
+					}
+					URL dimensionuri = new URL(nodes[0].toString());
+
+					loadInStore(dimensionuri);
+				}
+
 				// If loading ds, also load codelists
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?codelist WHERE {<"
 						+ uri
@@ -966,7 +1017,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 				}
 
-				// If loading ds, also load dimension values (if resources) - done similar as for degenerated members
+				// If loading ds, also load dimension values (if resources) -
+				// done similar as for degenerated members
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?member WHERE {<"
 						+ uri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?obs qb:dataSet ?ds. ?obs ?dimension ?member}";
@@ -991,7 +1043,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						}
 					}
 				}
-				
+
 			}
 		} catch (MalformedURLException e) {
 			throw new OlapException("Problem with malformed url: "
@@ -1368,6 +1420,20 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			if (booleanQuery.evaluate() == true) {
 				error = true;
 				status = "Failed specification check: IC-4. Dimensions have range. Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range.\n";
+
+				// Find out what went wrong:
+				String query = TYPICALPREFIXES
+						+ "SELECT ?dim { ?dim a qb:DimensionProperty . FILTER NOT EXISTS { ?dim rdfs:range [] }}";
+				List<Node[]> errordimensions = sparql(query, true);
+				// There should be a dsd
+				// Note in spec:
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+				status += "Wrong dimensions: ";
+				for (Node[] nodes : errordimensions) {
+					// Get the second
+					status += nodes[0].toString() + " ";
+				}
+
 				Olap4ldUtil._log.config(status);
 				overview += status;
 			} else {

@@ -15,6 +15,9 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-05-09==
+* Changed Sail to Repository.
+
 ==2014-05-08==
 * Convert-Cube / Merge-Cubes implemented.
 * Problem: For Drill-Across, we have added several measures. As name, we use the measure property, the dataset URI and the aggregation function string. However, the select query contains a triple pattern for the Measures dimension and triple patterns for those additional measures that we have created. 

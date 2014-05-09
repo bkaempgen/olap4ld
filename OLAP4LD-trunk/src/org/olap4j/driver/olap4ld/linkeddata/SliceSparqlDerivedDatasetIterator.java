@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
 import org.semanticweb.yars.nx.Node;
 
@@ -27,9 +28,9 @@ public class SliceSparqlDerivedDatasetIterator implements PhysicalOlapIterator {
 	private List<Node[]> members;
 
 	private Iterator<Node[]> iterator;
-	private SailRepository repo;
+	private Repository repo;
 
-	public SliceSparqlDerivedDatasetIterator(SailRepository repo, PhysicalOlapIterator inputiterator,
+	public SliceSparqlDerivedDatasetIterator(Repository repo, PhysicalOlapIterator inputiterator,
 			List<Node[]> slicedDimensions) {
 		
 		this.repo = repo;

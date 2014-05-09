@@ -1,5 +1,6 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.sail.SailRepository;
 
 /**
@@ -21,7 +22,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 	PhysicalOlapIterator _root;
 
 	// For the moment, we know the repo (we could wrap it also)
-	private SailRepository repo;
+	private Repository repo;
 
 	/**
 	 * 
@@ -44,7 +45,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 	 * http://olap4ld.googlecode.com/dic/indic_na#VI_PPS_EU28_HAB; 2012; 149;
 	 * 
 	 */
-	public Olap2SparqlSesameDerivedDatasetVisitor(SailRepository repo) {
+	public Olap2SparqlSesameDerivedDatasetVisitor(Repository repo) {
 		this.repo = repo;
 	}
 

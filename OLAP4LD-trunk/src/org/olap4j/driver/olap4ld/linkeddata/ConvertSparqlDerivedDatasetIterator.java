@@ -24,9 +24,9 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResultHandlerException;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -69,7 +69,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	// private String conversionfunction;
 	private ReconciliationCorrespondence conversioncorrespondence;
 
-	private SailRepository repo;
+	private Repository repo;
 	private String triples;
 	private String domainUri;
 	private String newdataset;
@@ -78,7 +78,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	private DataFuProgram dataFuProgram;
 	private List<Node[]> results;
 
-	public ConvertSparqlDerivedDatasetIterator(SailRepository repo,
+	public ConvertSparqlDerivedDatasetIterator(Repository repo,
 			PhysicalOlapIterator inputiterator1,
 			PhysicalOlapIterator inputiterator2,
 			ReconciliationCorrespondence conversioncorrespondence,

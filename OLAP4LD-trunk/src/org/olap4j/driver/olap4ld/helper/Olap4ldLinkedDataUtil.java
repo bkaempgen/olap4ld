@@ -32,9 +32,9 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.Update;
 import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.Rio;
@@ -684,7 +684,7 @@ public class Olap4ldLinkedDataUtil {
 	 *            the RDF serialization format for the dump
 	 * @return
 	 */
-	public static void dumpRDF(SailRepository repo, String file,
+	public static void dumpRDF(Repository repo, String file,
 			RDFFormat outform) {
 		try {
 			// dump the graph in the specified format
@@ -708,7 +708,7 @@ public class Olap4ldLinkedDataUtil {
 	 * @param query
 	 * @param caching
 	 */
-	public static void sparqlRepoUpdate(SailRepository repo, String query,
+	public static void sparqlRepoUpdate(Repository repo, String query,
 			boolean caching) {
 		Olap4ldUtil._log.config("SPARQL update query: " + query);
 

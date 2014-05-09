@@ -576,6 +576,8 @@ public class Convert_Cube_QueryTest extends TestCase {
 		// First: GDP current dataset
 		Node gdpdsuri = new Resource(
 				"http://worldbank.270a.info/dataset/NY.GDP.MKTP.CD");
+		gdpdsuri = new Resource("http://imf.270a.info/dataset/PGI");
+		
 		Restrictions gdprestrictions = new Restrictions();
 		gdprestrictions.cubeNamePattern = gdpdsuri;
 

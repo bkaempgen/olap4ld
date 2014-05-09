@@ -96,6 +96,29 @@ public class Drill_across_QueryTest extends TestCase {
 
 	public void test_Example_GDP_per_capita_in_PPS_vs_Employment_rate_by_sex()
 			throws OlapException {
+		
+		// for now, we simply assume equivalence statements given
+		EmbeddedSesameEngine.equivs.add(new Node[] {
+				new Resource(
+						"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
+				new Resource(
+						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
+
+		// Hierarchy gesis-geo:list = estatwrap:geo
+		EmbeddedSesameEngine.equivs.add(new Node[] {
+				new Resource(
+						"http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list"),
+				new Resource(
+						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
+
+		// Could also for the olap
+		EmbeddedSesameEngine.equivs.add(new Node[] {
+		new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
+		new Resource("http://estatwrap.ontologycentral.com/dic/geo#DE") });
+
+		EmbeddedSesameEngine.equivs.add(new Node[] {
+				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
+				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
 
 		// We query one integrated dataset from GDP per capita dataset and
 		// Employment rate, by sex dataset.
@@ -261,7 +284,7 @@ public class Drill_across_QueryTest extends TestCase {
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(drillacross);
 
 		String result = executeStatement(myplan);
-		assertContains("http://olap4ld.googlecode.com/dic/geo#US; 2011; 148.0; 1; 148.0; 148; 70.433333333333333333333333;", result);
+		assertContains("http://olap4ld.googlecode.com/dic/geo#US; 2011; 70.433333333333333333333333; 148.0; 1; 148.0; 148.0; 148;", result);
 	}
 
 	private void assertContains(String seek, String s) {

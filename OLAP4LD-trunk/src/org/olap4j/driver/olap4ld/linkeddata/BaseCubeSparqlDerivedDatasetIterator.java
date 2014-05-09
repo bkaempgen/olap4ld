@@ -19,9 +19,9 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResultHandlerException;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
@@ -42,11 +42,11 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 	public List<Node[]> levels;
 	public List<Node[]> members;
 
-	private SailRepository repo;
+	private Repository repo;
 	private Iterator<Node[]> outputiterator;
 	private String query;
 
-	public BaseCubeSparqlDerivedDatasetIterator(SailRepository repo,
+	public BaseCubeSparqlDerivedDatasetIterator(Repository repo,
 			List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
 			List<Node[]> hierarchies, List<Node[]> levels, List<Node[]> members) {
 		// We assume that basecube has a repo with populated according to
