@@ -1,9 +1,5 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,7 +52,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		this.levels = levels;
 		// One problem could be that this may be a huge number of members.
 		this.members = members;
-
+		
 		// Maybe first check that every metadata element at least has one
 		// header?
 
@@ -101,7 +97,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			orderByClause = " order by " + orderByClause;
 		}
 
-		query = Olap4ldLinkedDataUtil.getStandardPrefixes() + "select "
+		this.query = Olap4ldLinkedDataUtil.getStandardPrefixes() + "select "
 				+ selectClause + askForFrom(false) + askForFrom(true)
 				+ "where { " + whereClause + "}" + groupByClause
 				+ orderByClause;
@@ -109,11 +105,6 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		// At initialisation, we execute the sparql query.
 		// XXX: Should we not do this only if next() or hasNext()?
 
-		this.result = engine.sparql(query, false);
-
-		this.result = this.engine.replaceIdentifiersWithCanonical(this.result);
-
-		this.iterator = result.iterator();
 	}
 
 	/**
@@ -1023,6 +1014,15 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	}
 
 	public boolean hasNext() {
+		// Init?
+		if (result == null) {
+			try {
+				init();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		return iterator.hasNext();
 	}
 
@@ -1033,6 +1033,16 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	 * (List<Node[]>) with each
 	 */
 	public Object next() {
+		
+		// Init?
+		if (result == null) {
+			try {
+				init();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		return iterator.next();
 	}
 
@@ -1044,9 +1054,17 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	@Override
 	public void init() throws Exception {
 		
+		if (result == null) {
+
+			this.result = engine.sparql(query, false);
+
+			this.result = this.engine.replaceIdentifiersWithCanonical(this.result);
+		}
+		
 		// Does not have input operators, therefore no other init necessary.
 		
 		this.iterator = this.result.iterator();
+		
 	}
 
 	@Override
@@ -1116,48 +1134,6 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	 */
 	private String askForFrom(boolean isDsdQuery) {
 		return " ";
-	}
-
-	/**
-	 * Helper Method for asking for location
-	 * 
-	 * @param uri
-	 * @return
-	 * @throws MalformedURLException
-	 * @throws IOException
-	 */
-	@SuppressWarnings("unused")
-	private String askForLocation(String uri) throws MalformedURLException {
-		URL url;
-		url = new URL(uri);
-
-		HttpURLConnection.setFollowRedirects(false);
-		HttpURLConnection connection;
-		try {
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestProperty("Accept", "application/rdf+xml");
-			String header = connection.getHeaderField("location");
-			// TODO: Could be that we need to check whether bogus comes out
-			// (e.g., Not found).
-			if (header != null) {
-
-				if (header.startsWith("http:")) {
-					uri = header;
-				} else {
-					// Header only contains the local uri
-					// Cut all off until first / from the back
-					int index = uri.lastIndexOf("/");
-					uri = uri.substring(0, index + 1) + header;
-				}
-			}
-		} catch (IOException e) {
-			throw new MalformedURLException(e.getMessage());
-		}
-		if (uri.endsWith(".ttl")) {
-			throw new MalformedURLException(
-					"Qcrumb cannot handle non-rdf files, yet");
-		}
-		return uri;
 	}
 
 }

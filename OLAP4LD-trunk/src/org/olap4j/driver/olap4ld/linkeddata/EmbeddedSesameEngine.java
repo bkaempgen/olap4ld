@@ -21,6 +21,7 @@ package org.olap4j.driver.olap4ld.linkeddata;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -56,6 +57,7 @@ import org.openrdf.repository.sail.SailRepositoryConnection;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.memory.MemoryStore;
+import org.openrdf.sail.nativerdf.NativeStore;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Resource;
@@ -177,8 +179,19 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				e.printStackTrace();
 			}
 		} else {
-			this.repo = new SailRepository(new MemoryStore());
+						
 			try {
+				
+				this.repo = new SailRepository(new MemoryStore());
+				
+//				File dataDir = new File("/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/NativeSesameStore/");
+//				// Try another store
+				/*
+				 * See http://rivuli-development.com/further-reading/sesame-cookbook/loading-large-file-in-sesame-native/
+				 * for chunk-loading of data and the NativeStore.
+				 */
+//				this.repo = new SailRepository(new NativeStore(dataDir));
+				
 				repo.initialize();
 
 				// do something interesting with the values here...
@@ -574,6 +587,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				}
 
 				// Error
+				// Had to comment for NativeSesameStore
 				if (responsecode >= 400) {
 					is = connection.getErrorStream();
 
