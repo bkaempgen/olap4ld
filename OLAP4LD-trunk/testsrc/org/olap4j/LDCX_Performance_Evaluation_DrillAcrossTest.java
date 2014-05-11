@@ -157,13 +157,13 @@ public class LDCX_Performance_Evaluation_DrillAcrossTest extends TestCase {
 				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
 				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
 		
-		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
+		executeDrillAcrossEu2020indicators8();
 		
 	}
 	
 	public void test2() {
 		
-		executeDrillAcrossEu2020indicators4();
+		executeDrillAcrossEu2020indicators8();
 		
 	}
 	

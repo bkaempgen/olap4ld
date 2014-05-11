@@ -587,23 +587,23 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				}
 
 				// Error
-				// Had to comment for NativeSesameStore
+				// Seems to not work, anymore, since we use Repository.
 				if (responsecode >= 400) {
-					is = connection.getErrorStream();
-
-					BufferedReader rd = new BufferedReader(
-							new InputStreamReader(is));
-
-					String response = "";
-					String line;
-					while ((line = rd.readLine()) != null) {
-						response += line;
-					}
-					Olap4ldUtil._log
-							.warning("Warning: URL not possible to load: "
-									+ response);
-					rd.close();
-					is.close();
+//					is = connection.getErrorStream();
+//
+//					BufferedReader rd = new BufferedReader(
+//							new InputStreamReader(is));
+//
+//					String response = "";
+//					String line;
+//					while ((line = rd.readLine()) != null) {
+//						response += line;
+//					}
+//					Olap4ldUtil._log
+//							.warning("Warning: URL not possible to load: "
+//									+ response);
+//					rd.close();
+//					is.close();
 				} else {
 					// is = connection.getInputStream();
 					//

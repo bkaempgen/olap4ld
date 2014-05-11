@@ -365,7 +365,8 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 									m.group(1));
 						}
 						
-						complete = true;
+						// XXX Has to be added for LQP test since no caching 
+						//complete = true;
 
 					}
 
@@ -414,9 +415,9 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 				}
 
 				// Store all that has been collected, so far.
-				if (!complete) {
-					queryloglist.add(query);
-				}
+				// if (!complete) {
+				// queryloglist.add(query);
+				// }
 
 				s.close();
 
@@ -521,42 +522,42 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 		String queryname = "Default";
 
 		// Time parsing MDX
-		int parsemdxtime = 0;
+		long parsemdxtime = 0;
 
 		// Metadata queries
-		int executemetadataqueriestime = 0;
-		int executemetadataqueriescount = 0;
+		long executemetadataqueriestime = 0;
+		long executemetadataqueriescount = 0;
 
 		// Datasets
-		int datasetscount = 0;
+		long datasetscount = 0;
 
 		// Crawling
-		int directedcrawlingdatasetstime = 0;
+		long directedcrawlingdatasetstime = 0;
 
 		// Normalisation
-		int normalisationtime = 0;
+		long normalisationtime = 0;
 
 		// Validation
-		int integrityconstraintstime = 0;
+		long integrityconstraintstime = 0;
 
 		// Lookups
-		int lookupscount = 0;
+		long lookupscount = 0;
 
 		// Triples
-		int triplescount = 0;
+		long triplescount = 0;
 
 		// Observations
-		int observationscount = 0;
+		long observationscount = 0;
 
 		// Transform MDX parse tree to logical query plan
-		int transformmdxparsetreetime = 0;
+		long transformmdxparsetreetime = 0;
 
 		// Execute logical query plan
-		int generatephysicalqueryplantime = 0;
+		long generatephysicalqueryplantime = 0;
 
-		int executephysicalqueryplantime = 0;
+		long executephysicalqueryplantime = 0;
 
-		int cacheresultstime = 0;
+		long cacheresultstime = 0;
 	}
 
 	private static final File SCANNEDFILE = new File(
