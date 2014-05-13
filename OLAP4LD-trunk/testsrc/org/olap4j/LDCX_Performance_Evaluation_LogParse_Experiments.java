@@ -24,6 +24,17 @@ import edu.kit.aifb.exrunner.model.attribute.StringAttribute;
 
 /**
  * Parse an Apache log file with StringTokenizer
+ * 
+ * Results in sqlite can be queried as follows:
+ * 
+ * sqlite3 -header /home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/testresources/bottleneck.db 'select querytime,queryname,avg(triplescount),avg(lookupscount),avg(loadvalidatedatasetstime),avg(executemetadataqueriestime),avg(generatelogicalqueryplantime),avg(generatephysicalqueryplantime),avg(executephysicalqueryplantime) from bottleneck group by queryname order by triplescount, queryname desc'
+ * 
+ * If there is an MDX query, the logs look different. 
+ * 
+ * If there is not, we need to add/remove an earlier complete = true.
+ * 
+ * An error with the sqlite may be because of "incomplete" query logs loaded.
+ * 
  */
 public class LDCX_Performance_Evaluation_LogParse_Experiments {
 
@@ -366,7 +377,7 @@ public class LDCX_Performance_Evaluation_LogParse_Experiments {
 						}
 						
 						// XXX Has to be added for LQP test since no caching 
-						//complete = true;
+						complete = true;
 
 					}
 

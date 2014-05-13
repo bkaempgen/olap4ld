@@ -1841,7 +1841,17 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				inputiterator2.init();
 			}
 
+			Olap4ldUtil._log
+					.info("Execute logical query plan: Create and load derived dataset.");
+			long time = System.currentTimeMillis();
+
 			executeSPARQLConstructQuery();
+
+			time = System.currentTimeMillis() - time;
+			
+			Olap4ldUtil._log
+			.info("Execute logical query plan: Create and load derived dataset finished in "
+					+ time + "ms.");
 
 			executeSPARQLSelectQuery();
 
