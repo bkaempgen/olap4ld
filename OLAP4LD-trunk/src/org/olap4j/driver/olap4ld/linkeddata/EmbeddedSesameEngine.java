@@ -880,7 +880,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				} else {
 					// Get the second
 					URL dsduri = new URL(dsd.get(1)[0].toString());
-
 					loadInStore(dsduri);
 
 				}
@@ -897,8 +896,10 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
+					if (nodes[0] instanceof Resource) {
 					URL componenturi = new URL(nodes[0].toString());
 					loadInStore(componenturi);
+					}
 				}
 
 				// If loading ds, also load components
@@ -915,10 +916,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-					try {
+					if (nodes[0] instanceof Resource) {
 						URL componenturi = new URL(nodes[0].toString());
 						loadInStore(componenturi);
-					} catch (MalformedURLException e) {
 					}
 				}
 
@@ -937,8 +937,10 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						continue;
 					}
 
+					if (nodes[0] instanceof Resource) {
 					URL measureuri = new URL(nodes[0].toString());
 					loadInStore(measureuri);
+					}
 				}
 
 				// If loading ds, also load dimensions
@@ -958,9 +960,12 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 							first = false;
 							continue;
 						}
+						
+						if (nodes[0] instanceof Resource) {
 						URL dimensionuri = new URL(nodes[0].toString());
 
 						loadInStore(dimensionuri);
+						}
 					}
 				}
 
@@ -976,9 +981,12 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
+					
+					if (nodes[0] instanceof Resource) {
 					URL dimensionuri = new URL(nodes[0].toString());
 
 					loadInStore(dimensionuri);
+					}
 				}
 
 				// If loading ds, also load codelists
@@ -1000,8 +1008,10 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 							continue;
 						}
 
+						if (nodes[0] instanceof Resource) {
 						URL codelisturi = new URL(nodes[0].toString());
 						loadInStore(codelisturi);
+						}
 					}
 				}
 

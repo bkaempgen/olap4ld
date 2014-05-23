@@ -56,9 +56,11 @@ public class LDCX_User_Study_Evaluation_XmlaTest extends TestCase {
 			Olap4ldUtil.prepareLogging();
 
 			// For this test, we need to run a server.
-			 this.xmlauri = new URL(
-			 "http://localhost:8080/xmlaserver-trunk/xmla");
-			// this.xmlauri = new URL(
+//			 this.xmlauri = new URL(
+//			 "http://localhost:8080/xmlaserver-trunk/xmla");
+			 //this.xmlauri = new URL("http://aifbkos.aifb.uni-karlsruhe.de:8080/xmlaserver-trunk/xmla");
+			 this.xmlauri = new URL("http://km.aifb.kit.edu/services/xmlaserver-trunk/xmla");
+//			 this.xmlauri = new URL(
 			// "http://141.52.218.137:8000/xmlaserver-trunk/xmla");
 //			this.xmlauri = new URL(
 //					"http://www.ldcx.linked-data-cubes.org:8000/xmlaserver-trunk/xmla");
