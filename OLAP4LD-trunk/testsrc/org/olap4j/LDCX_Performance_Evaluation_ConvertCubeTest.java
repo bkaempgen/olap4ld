@@ -85,10 +85,6 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// For now, we strictly separate Convert-Cube and Drill-Across with
-		// equivalence classes.
-		EmbeddedSesameEngine.equivs = new ArrayList<Node[]>();
 	}
 
 	protected void setUp() throws SQLException {

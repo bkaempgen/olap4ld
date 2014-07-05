@@ -52,7 +52,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 		this.levels = levels;
 		// One problem could be that this may be a huge number of members.
 		this.members = members;
-		
+
 		// Maybe first check that every metadata element at least has one
 		// header?
 
@@ -274,8 +274,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					aggregationfunction = "Max";
 				} else {
 					aggregationfunction = measure[measuremap
-								.get("?MEASURE_AGGREGATOR")].toString().replace(
-								"http://purl.org/olap#", "");
+							.get("?MEASURE_AGGREGATOR")].toString().replace(
+							"http://purl.org/olap#", "");
 				}
 
 				// We take the aggregator from the measure
@@ -337,7 +337,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 								.get("?HIERARCHY_MAX_LEVEL_NUMBER")].toString());
 				// We should be testing whether diceslevelHeight higher than
 				// slicesRollupsLevelHeight
-				// Since level_number counts from the root (ALL level) to compute Dices Level Height, we need the levelmaxnumber of
+				// Since level_number counts from the root (ALL level) to
+				// compute Dices Level Height, we need the levelmaxnumber of
 				// the hierarchy. Thus, we also have the hierarchysignature.
 				Integer diceslevelHeight = levelmaxnumber - levelnumber;
 				Node dimensionProperty = membercombinations.get(0).get(i)[map
@@ -415,10 +416,13 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					// andList.add(" ?" + dimensionPropertyVariable
 					// + diceslevelHeight + " = " + "?"
 					// + memberResourceVariable + " ");
-					andList.add(this.engine.createConditionConsiderEquivalences(
-							memberResource, new Variable(
-									dimensionPropertyVariable.toString()
-											+ diceslevelHeight.toString())));
+					// andList.add(this.engine.createConditionConsiderEquivalences(
+					// memberResource, new Variable(
+					// dimensionPropertyVariable.toString()
+					// + diceslevelHeight.toString())));
+					andList.add("?" + dimensionPropertyVariable.toString()
+							+ diceslevelHeight.toString() + " = " + "<"
+							+ memberResource.toString() + ">");
 
 				}
 				// For sesame, instead of AND is &&
@@ -974,12 +978,14 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 					.makeUriToVariable(new Resource(dimensionProperty
 							+ "Dimension"));
 
-			String condition = engine.createConditionConsiderEquivalences(
-					dimensionProperty, dimensionPropertyDimensionVariable);
+			// String condition = engine.createConditionConsiderEquivalences(
+			// dimensionProperty, dimensionPropertyDimensionVariable);
+			String condition = "?" + dimensionPropertyDimensionVariable.toString()
+					+ " = <" + dimensionProperty + ">";
 
 			whereClause += "?obs ?" + dimensionPropertyDimensionVariable + " ?"
 					+ dimensionPropertyVariable + levelHeight + ". ";
-			whereClause += " filter("+condition+") ";
+			whereClause += " filter(" + condition + ") ";
 
 		} else {
 
@@ -1033,7 +1039,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	 * (List<Node[]>) with each
 	 */
 	public Object next() {
-		
+
 		// Init?
 		if (result == null) {
 			try {
@@ -1053,19 +1059,21 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 	@Override
 	public void init() throws Exception {
-		
+
 		if (result == null) {
 
 			this.result = engine.sparql(query, false);
 
+			// Not done, anymore.
 			// After evaluation, we do "entity-consolidation"
-			this.result = this.engine.replaceIdentifiersWithCanonical(this.result);
+//			this.result = this.engine
+//					.replaceIdentifiersWithCanonical(this.result);
 		}
-		
+
 		// Does not have input operators, therefore no other init necessary.
-		
+
 		this.iterator = this.result.iterator();
-		
+
 	}
 
 	@Override

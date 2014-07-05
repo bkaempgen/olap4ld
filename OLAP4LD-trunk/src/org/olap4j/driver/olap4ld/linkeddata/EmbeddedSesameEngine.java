@@ -37,6 +37,7 @@ import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
+import org.openrdf.model.BNode;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -108,7 +109,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	private PhysicalOlapQueryPlan execplan;
 
-	private List<List<Node>> equivalenceList;
+	// Not needed any more since we use materialisation.
+	// private List<List<Node>> equivalenceList;
 
 	public EmbeddedSesameEngine(URL serverUrlObject,
 			List<String> datastructuredefinitions, List<String> datasets,
@@ -1056,60 +1058,67 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				}
 
 				// Loading members
-				// Not done for now since takes a long time and was not done for ISEM either.
-				
-//				// If loading ds, also load ranges of dimensions
-//				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?range WHERE {<"
-//						+ uri
-//						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:range ?range}";
-//				List<Node[]> ranges = sparql(query, true);
-//				// There should be a dsd
-//				// Note in spec:
-//				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-//				if (ranges.size() <= 1) {
-//					;
-//				} else {
-//					first = true;
-//					// So far, members are not crawled.
-//					for (Node[] nodes : ranges) {
-//						if (first) {
-//							first = false;
-//							continue;
-//						}
-//
-//						if (nodes[0] instanceof Resource) {
-//							URL rangesuri = new URL(nodes[0].toString());
-//							loadInStore(rangesuri);
-//						}
-//					}
-//				}
-//
-//				// If loading ds, also load dimension values (if resources) -
-//				// done similar as for degenerated members
-//				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?member WHERE {<"
-//						+ uri
-//						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?obs qb:dataSet ?ds. ?obs ?dimension ?member}";
-//				List<Node[]> member = sparql(query, true);
-//				// There should be a dsd
-//				// Note in spec:
-//				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-//				if (member.size() <= 1) {
-//					;
-//				} else {
-//					first = true;
-//					// So far, members are not crawled.
-//					for (Node[] nodes : member) {
-//						if (first) {
-//							first = false;
-//							continue;
-//						}
-//
-//						if (nodes[0] instanceof Resource) {
-//							URL memberuri = new URL(nodes[0].toString());
-//							loadInStore(memberuri);
-//						}
-//					}
-//				}
+				// Not done for now since takes a long time and was not done for
+				// ISEM either.
+
+				// // If loading ds, also load ranges of dimensions
+				// query =
+				// "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?range WHERE {<"
+				// + uri
+				// +
+				// "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:range ?range}";
+				// List<Node[]> ranges = sparql(query, true);
+				// // There should be a dsd
+				// // Note in spec:
+				// //
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+				// if (ranges.size() <= 1) {
+				// ;
+				// } else {
+				// first = true;
+				// // So far, members are not crawled.
+				// for (Node[] nodes : ranges) {
+				// if (first) {
+				// first = false;
+				// continue;
+				// }
+				//
+				// if (nodes[0] instanceof Resource) {
+				// URL rangesuri = new URL(nodes[0].toString());
+				// loadInStore(rangesuri);
+				// }
+				// }
+				// }
+				//
+				// // If loading ds, also load dimension values (if resources) -
+				// // done similar as for degenerated members
+				// query =
+				// "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?member WHERE {<"
+				// + uri
+				// +
+				// "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?obs qb:dataSet ?ds. ?obs ?dimension ?member}";
+				// List<Node[]> member = sparql(query, true);
+				// // There should be a dsd
+				// // Note in spec:
+				// //
+				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+				// if (member.size() <= 1) {
+				// ;
+				// } else {
+				// first = true;
+				// // So far, members are not crawled.
+				// for (Node[] nodes : member) {
+				// if (first) {
+				// first = false;
+				// continue;
+				// }
+				//
+				// if (nodes[0] instanceof Resource) {
+				// URL memberuri = new URL(nodes[0].toString());
+				// loadInStore(memberuri);
+				// }
+				// }
+				// }
 
 			}
 		} catch (MalformedURLException e) {
@@ -1312,23 +1321,24 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// result.add(nodes);
 		// }
 
+		// We do not do that anymore but use materialisation.
 		// Now that we have loaded all data cubes, we can compute the
 		// equivalence list.
 		/*
 		 * Load equivalence statements from triple store
 		 */
 
-		Olap4ldUtil._log.info("Load dataset: create equivalence list started.");
-		long time = System.currentTimeMillis();
-
-		List<Node[]> equivs = getEquivalenceStatements();
-
-		this.equivalenceList = createEquivalenceList(equivs);
-
-		time = System.currentTimeMillis() - time;
-		Olap4ldUtil._log
-				.info("Load dataset: create equivalence list finished in "
-						+ time + "ms.");
+		// Olap4ldUtil._log.info("Load dataset: create equivalence list started.");
+		// long time = System.currentTimeMillis();
+		//
+		// List<Node[]> equivs = getEquivalenceStatements();
+		//
+		// this.equivalenceList = createEquivalenceList(equivs);
+		//
+		// time = System.currentTimeMillis() - time;
+		// Olap4ldUtil._log
+		// .info("Load dataset: create equivalence list finished in "
+		// + time + "ms.");
 
 		// Now, add "virtual cube"
 		// ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
@@ -1809,27 +1819,32 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// IC-19. Codes from code list
 				// Probably takes very long since involves property chain and
 				// going through all observations.
-				
-				// Commented, because would not fit with equivalence reasoning (duplication strategy)
-//				testquery = TYPICALPREFIXES
-//						+ "ASK { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
-//				String testquery2 = TYPICALPREFIXES
-//						+ "ASK {   ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:Collection .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept . ?list skos:member+ ?v }}";
-//				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-//						testquery);
-//				BooleanQuery booleanQuery2 = con.prepareBooleanQuery(
-//						QueryLanguage.SPARQL, testquery2);
-//				if (booleanQuery.evaluate() == true
-//						|| booleanQuery2.evaluate() == true) {
-//					error = true;
-//					status = "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
-//					Olap4ldUtil._log.config(status);
-//					overview += status;
-//				} else {
-//					status = "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
-//					Olap4ldUtil._log.config(status);
-//					overview += status;
-//				}
+
+				// Commented, because would not fit with equivalence reasoning
+				// (duplication strategy)
+				// testquery = TYPICALPREFIXES
+				// +
+				// "ASK { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
+				// String testquery2 = TYPICALPREFIXES
+				// +
+				// "ASK {   ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:Collection .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept . ?list skos:member+ ?v }}";
+				// booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+				// testquery);
+				// BooleanQuery booleanQuery2 = con.prepareBooleanQuery(
+				// QueryLanguage.SPARQL, testquery2);
+				// if (booleanQuery.evaluate() == true
+				// || booleanQuery2.evaluate() == true) {
+				// error = true;
+				// status =
+				// "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+				// Olap4ldUtil._log.config(status);
+				// overview += status;
+				// } else {
+				// status =
+				// "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+				// Olap4ldUtil._log.config(status);
+				// overview += status;
+				// }
 
 			}
 
@@ -1963,26 +1978,144 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		}
 	}
 
+	/**
+	 * Returns canonical for a node.
+	 * 
+	 * If none is found, simply the node is returned.
+	 * 
+	 * @param canonical
+	 * @return
+	 */
+	@Deprecated
+	private Node getCanonical(Node canonical) {
+		// for (List<Node> equivalenceClass : equivalenceList) {
+		// for (Node node : equivalenceClass) {
+		//
+		// if (node.equals(canonical)) {
+		// canonical = equivalenceClass.get(0);
+		// break;
+		// }
+		// }
+		// }
+		// return canonical;
+		return null;
+	}
+
+	/**
+	 * 
+	 * @param equivs
+	 *            - equiv[0] first same as and equiv[1] second same as entity.
+	 * @return
+	 */
+	@Deprecated
+	private List<List<Node>> createEquivalenceList(List<Node[]> equivs) {
+		List<List<Node>> newequivalenceList = new ArrayList<List<Node>>();
+
+		// HashMap<String, Integer> invertedindex = new HashMap<String,
+		// Integer>();
+		//
+		// boolean first = true;
+		// for (Node[] equiv : equivs) {
+		//
+		// // First is header
+		// if (first) {
+		// first = false;
+		// continue;
+		// }
+		//
+		// String A = equiv[0].toString();
+		// String B = equiv[1].toString();
+		//
+		// // Store equiv
+		//
+		// // Find A
+		// Integer rA = invertedindex.get(A);
+		//
+		// // Find B
+		// Integer rB = invertedindex.get(B);
+		//
+		// if (rA == null && rB == null) {
+		// // new row rAB
+		//
+		//
+		// ArrayList<Node> newEquivalenceClass = new ArrayList<Node>();
+		// newEquivalenceClass.add(A);
+		// newEquivalenceClass.add(B);
+		// newequivalenceList.add(newEquivalenceClass);
+		//
+		// } else if (rA != null && rB != null) {
+		// // merge rA and rB
+		//
+		// // We create new list
+		//
+		// List<Node> rAB = new ArrayList<Node>();
+		//
+		// for (Node node : rB) {
+		// rAB.add(node);
+		// }
+		// for (Node node : rA) {
+		// rAB.add(node);
+		// }
+		// newequivalenceList.remove(rB);
+		// newequivalenceList.remove(rA);
+		// newequivalenceList.add(rAB);
+		//
+		// } else if (rA != null) {
+		// // add B to rA
+		//
+		// rA.add(B);
+		//
+		// } else if (rB != null) {
+		// // add A to rB
+		//
+		// rB.add(A);
+		// }
+		//
+		// }
+
+		return newequivalenceList;
+	}
+
+	@Deprecated
+	private List<Node> getEquivalenceClassOfNode(Node resource) {
+		// List<Node> equivalenceClass = new ArrayList<Node>();
+		// equivalenceClass.add(resource);
+		// for (List<Node> iterable_element : this.equivalenceList) {
+		// for (Node node : iterable_element) {
+		// if (resource.equals(node)) {
+		// equivalenceClass = iterable_element;
+		// break;
+		// }
+		// }
+		// }
+		// return equivalenceClass;
+		return null;
+	}
+
+	@Deprecated
 	public List<Node[]> getEquivalenceStatements() {
 
-		/*
-		 * More directed better?
-		 * 
-		 * {$this->getStandardPrefixes()} select ?same1 ?same2
-		 * {$this->getStandardFrom()} where { ?dsd qb:component ?comp. ?comp
-		 * ?componentProp ?same1. ?same1 owl:sameAs ?same2 }
-		 */
-
-		// Same as between dimensions and members.
-		String query = "PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX qb: <http://purl.org/linked-data/cube#> select ?same1 ?same2 where "
-				+ "{ { ?dsd qb:component ?comp. ?comp ?componentProp ?same1. ?same1 owl:sameAs ?same2 } UNION { ?obs a qb:Observation. ?obs ?dimension ?same1. ?same1 owl:sameAs ?same2 } }	";
-
-		List<Node[]> myresult = sparql(query, true);
-
-		Olap4ldUtil._log.info("Number of equivalence statements: "
-				+ (myresult.size() - 1));
-
-		return myresult;
+		// /*
+		// * More directed better?
+		// *
+		// * {$this->getStandardPrefixes()} select ?same1 ?same2
+		// * {$this->getStandardFrom()} where { ?dsd qb:component ?comp. ?comp
+		// * ?componentProp ?same1. ?same1 owl:sameAs ?same2 }
+		// */
+		//
+		// // Same as between dimensions and members.
+		// String query =
+		// "PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX qb: <http://purl.org/linked-data/cube#> select ?same1 ?same2 where "
+		// +
+		// "{ { ?dsd qb:component ?comp. ?comp ?componentProp ?same1. ?same1 owl:sameAs ?same2 } UNION { ?obs a qb:Observation. ?obs ?dimension ?same1. ?same1 owl:sameAs ?same2 } }	";
+		//
+		// List<Node[]> myresult = sparql(query, true);
+		//
+		// Olap4ldUtil._log.info("Number of equivalence statements: "
+		// + (myresult.size() - 1));
+		//
+		// return myresult;
+		return null;
 	}
 
 	/**
@@ -2120,101 +2253,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		return result;
 	}
 
-	/**
-	 * Returns canonical for a node.
-	 * 
-	 * If none is found, simply the node is returned.
-	 * 
-	 * @param canonical
-	 * @return
-	 */
-	private Node getCanonical(Node canonical) {
-		for (List<Node> equivalenceClass : equivalenceList) {
-			for (Node node : equivalenceClass) {
-
-				if (node.equals(canonical)) {
-					canonical = equivalenceClass.get(0);
-					break;
-				}
-			}
-		}
-		return canonical;
-	}
-
-	/**
-	 * 
-	 * @param equivs
-	 *            - equiv[0] first same as and equiv[1] second same as entity.
-	 * @return
-	 */
-	private List<List<Node>> createEquivalenceList(List<Node[]> equivs) {
-		List<List<Node>> newequivalenceList = new ArrayList<List<Node>>();
-
-		// HashMap<String, Integer> invertedindex = new HashMap<String,
-		// Integer>();
-		//
-		// boolean first = true;
-		// for (Node[] equiv : equivs) {
-		//
-		// // First is header
-		// if (first) {
-		// first = false;
-		// continue;
-		// }
-		//
-		// String A = equiv[0].toString();
-		// String B = equiv[1].toString();
-		//
-		// // Store equiv
-		//
-		// // Find A
-		// Integer rA = invertedindex.get(A);
-		//
-		// // Find B
-		// Integer rB = invertedindex.get(B);
-		//
-		// if (rA == null && rB == null) {
-		// // new row rAB
-		//
-		//
-		// ArrayList<Node> newEquivalenceClass = new ArrayList<Node>();
-		// newEquivalenceClass.add(A);
-		// newEquivalenceClass.add(B);
-		// newequivalenceList.add(newEquivalenceClass);
-		//
-		// } else if (rA != null && rB != null) {
-		// // merge rA and rB
-		//
-		// // We create new list
-		//
-		// List<Node> rAB = new ArrayList<Node>();
-		//
-		// for (Node node : rB) {
-		// rAB.add(node);
-		// }
-		// for (Node node : rA) {
-		// rAB.add(node);
-		// }
-		// newequivalenceList.remove(rB);
-		// newequivalenceList.remove(rA);
-		// newequivalenceList.add(rAB);
-		//
-		// } else if (rA != null) {
-		// // add B to rA
-		//
-		// rA.add(B);
-		//
-		// } else if (rB != null) {
-		// // add A to rB
-		//
-		// rB.add(A);
-		// }
-		//
-		// }
-
-		return newequivalenceList;
-	}
-
 	private List<Node[]> getDimensionsPerDataSet(Restrictions restrictions) {
 		String additionalFilters = createFilterForRestrictions(restrictions);
 		List<Node[]> result = new ArrayList<Node[]>();
@@ -2286,7 +2324,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		}
 
 		// Use canonical identifier
-		result = replaceIdentifiersWithCanonical(result);
+		// result = replaceIdentifiersWithCanonical(result);
 
 		return result;
 	}
@@ -2455,7 +2493,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		}
 
 		// Use canonical identifier
-		result = replaceIdentifiersWithCanonical(result);
+		// result = replaceIdentifiersWithCanonical(result);
 
 		return result;
 	}
@@ -2707,24 +2745,26 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		}
 
 		// Use canonical identifier
-		result = replaceIdentifiersWithCanonical(result);
+		// result = replaceIdentifiersWithCanonical(result);
 
 		return result;
 	}
 
+	@Deprecated
 	public List<Node[]> replaceIdentifiersWithCanonical(List<Node[]> result) {
-
-		List<Node[]> newresult = new ArrayList<Node[]>();
-
-		for (Node[] anIntermediaryresult : result) {
-			Node[] newnode = new Node[anIntermediaryresult.length];
-			for (int i = 0; i < anIntermediaryresult.length; i++) {
-				newnode[i] = getCanonical(anIntermediaryresult[i]);
-			}
-			newresult.add(newnode);
-		}
-
-		return newresult;
+		//
+		// List<Node[]> newresult = new ArrayList<Node[]>();
+		//
+		// for (Node[] anIntermediaryresult : result) {
+		// Node[] newnode = new Node[anIntermediaryresult.length];
+		// for (int i = 0; i < anIntermediaryresult.length; i++) {
+		// newnode[i] = getCanonical(anIntermediaryresult[i]);
+		// }
+		// newresult.add(newnode);
+		// }
+		//
+		// return newresult;
+		return null;
 	}
 
 	/**
@@ -2966,7 +3006,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		}
 
 		// Use canonical identifier
-		result = replaceIdentifiersWithCanonical(result);
+		// result = replaceIdentifiersWithCanonical(result);
 
 		return result;
 	}
@@ -3165,7 +3205,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		}
 
 		// Use canonical identifier
-		result = replaceIdentifiersWithCanonical(result);
+		// result = replaceIdentifiersWithCanonical(result);
 
 		return result;
 	}
@@ -3470,44 +3510,66 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				: "";
 
 		if (restrictions.dimensionUniqueName != null
-				&& !restrictions.dimensionUniqueName
-						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
-			filter += " filter("
-					+ createConditionConsiderEquivalences(
-							restrictions.dimensionUniqueName, new Variable(
-									"DIMENSION_UNIQUE_NAME")) + ") ";
+				&& !restrictions.dimensionUniqueName.toString().equals(
+						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+			// filter += " filter("
+			// + createConditionConsiderEquivalences(
+			// restrictions.dimensionUniqueName, new Variable(
+			// "DIMENSION_UNIQUE_NAME")) + ") ";
+			filter += " filter(str(?DIMENSION_UNIQUE_NAME) = \""
+					+ restrictions.dimensionUniqueName + "\") ";
 		}
 
 		if (restrictions.hierarchyUniqueName != null
-				&& !restrictions.hierarchyUniqueName
-						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+				&& !restrictions.hierarchyUniqueName.toString().equals(
+						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
 
-			filter += " filter("
-					+ createConditionConsiderEquivalences(
-							restrictions.hierarchyUniqueName, new Variable(
-									"HIERARCHY_UNIQUE_NAME")) + ") ";
+			// This we do since ranges may be blank nodes, e.g., of ical:dtend
+			// XXX: Workaround
+			if (restrictions.hierarchyUniqueName.toString().startsWith("node")) {
+				filter += "";
+			} else {
+				// filter += " filter("
+				// + createConditionConsiderEquivalences(
+				// restrictions.hierarchyUniqueName, new Variable(
+				// "HIERARCHY_UNIQUE_NAME")) + ") ";
+				filter += " filter(str(?HIERARCHY_UNIQUE_NAME) = \""
+						+ restrictions.hierarchyUniqueName + "\") ";
+			}
 
 		}
 
 		if (restrictions.levelUniqueName != null
-				&& !restrictions.levelUniqueName
-						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+				&& !restrictions.levelUniqueName.toString().equals(
+						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
 
-			filter += " filter("
-					+ createConditionConsiderEquivalences(
-							restrictions.levelUniqueName, new Variable(
-									"LEVEL_UNIQUE_NAME")) + ") ";
+			// This we do since ranges may be blank nodes, e.g., of ical:dtend
+			// XXX: Workaround
+			if (restrictions.hierarchyUniqueName.toString().startsWith("node")) {
+				filter += "";
+			} else {
+
+				// filter += " filter("
+				// + createConditionConsiderEquivalences(
+				// restrictions.levelUniqueName, new Variable(
+				// "LEVEL_UNIQUE_NAME")) + ") ";
+				filter += " filter(str(?LEVEL_UNIQUE_NAME) = \""
+						+ restrictions.levelUniqueName + "\") ";
+
+			}
 
 		}
 
 		if (restrictions.memberUniqueName != null
-				&& !restrictions.memberUniqueName
-						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+				&& !restrictions.memberUniqueName.toString().equals(
+						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
 
-			filter += " filter("
-					+ createConditionConsiderEquivalences(
-							restrictions.memberUniqueName, new Variable(
-									"MEMBER_UNIQUE_NAME")) + ") ";
+			// filter += " filter("
+			// + createConditionConsiderEquivalences(
+			// restrictions.memberUniqueName, new Variable(
+			// "MEMBER_UNIQUE_NAME")) + ") ";
+			filter += " filter(str(?MEMBER_UNIQUE_NAME) = \""
+					+ restrictions.memberUniqueName + "\") ";
 		}
 
 		return filter;
@@ -3521,7 +3583,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 * @param variableName
 	 * @return
 	 */
-	public String createConditionConsiderEquivalences(Node canonicalResource,
+	@Deprecated
+	private String createConditionConsiderEquivalences(Node canonicalResource,
 			Variable variable) {
 
 		List<Node> equivalenceClass = getEquivalenceClassOfNode(canonicalResource);
@@ -3536,20 +3599,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		return "(" + Olap4ldLinkedDataUtil.implodeArray(filterString, " || ")
 				+ ")";
-	}
-
-	private List<Node> getEquivalenceClassOfNode(Node resource) {
-		List<Node> equivalenceClass = new ArrayList<Node>();
-		equivalenceClass.add(resource);
-		for (List<Node> iterable_element : this.equivalenceList) {
-			for (Node node : iterable_element) {
-				if (resource.equals(node)) {
-					equivalenceClass = iterable_element;
-					break;
-				}
-			}
-		}
-		return equivalenceClass;
 	}
 
 	/**

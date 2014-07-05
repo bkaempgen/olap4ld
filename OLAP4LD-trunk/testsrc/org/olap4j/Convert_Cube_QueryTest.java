@@ -86,9 +86,6 @@ public class Convert_Cube_QueryTest extends TestCase {
 			e.printStackTrace();
 		}
 
-		// For now, we strictly separate Convert-Cube and Drill-Across with
-		// equivalence classes.
-		EmbeddedSesameEngine.equivs = new ArrayList<Node[]>();
 	}
 
 	protected void setUp() throws SQLException {

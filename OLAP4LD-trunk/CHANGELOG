@@ -15,6 +15,115 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-07-05 XXX==
+XXX: Does it work without global cube definition?
+
+XXX: Does it work with all Drill-Across queries so that we can now have Evaluation?
+
+XXX: Can I now have one SPARQL query? Can I define behaviour if measures are the same (for convert-cube?)
+
+XXX: Extension to Compound measures?
+
+XXX: Extension to Convert Cube / Merge Cubes?
+
+
+
+==2014-07-05==
+Working on Drill-Across: Entity consolidation: 
+* In Weller 2012 we do traditional entity consolidation with HashSets in a HashMap.
+* In ISEM, we created items list mapping from resource to canonical. Then, going through sameAses, I create closure from dimension to canonical. Then, for each canonical I create exactly one dimension/member.
+* In Drill-Across, 
+** getCanonical for a node
+** replaceIdentifiersWithCanonical(List<Node[]> result)
+** XXX: I also need to remove duplicates
+** After Olap2SparqlAlgorithm is executed, I replace identifiers (thus, Drill-Across does not need to be equivalence aware)
+
+* What shall I do?
+** Andreas recommended to do proper entity consolidation over the RDF.
+** Or do "duplication", but this would result in duplicate results of "dimensions".
+** Or use reasoning capability of Sesame.
+
+* XXX: What about this "damn" global elements? Do I really need them? 
+
+1) Let's try:
+
+* Remove global elements.
+
+* Remove replaceIdentifiersWithCanonical
+
+* Setup Sesame to do reasoning? Does not work. I have no idea how Sesame reacts on what reasoning statements. 
+
+Example_QB_Datasets_Query_Test.java: 28/28, Errors 3, Failures 12
+
+2) Let's try
+
+* Duplication strategy / owl:sameAs equivalence rules from http://www.w3.org/TR/owl2-profiles/ and http://semanticweb.org/OWLLD/
+
+Problem: Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>
+
+Solution: Probably because the restriction would need to be different in case several codeLists are existing? Or even if degenerate dimension, also. For now, we simply disable IC.
+
+Problem: LQP does not look good. 
+
+Drill-across(Rollup (Slice (Dice (Projection (BaseCube (http://estatwrap.ontologycentral.com/id/tec00115#ds), {http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://estatwrap.ontologycentral.com/id/tec00115#dsAGGFUNCAVG, http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://estatwrap.ontologycentral.com/id/tec00115#dsAGGFUNCAVG}), (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00)), {http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list, http://ontologycentral.com/2009/01/eurostat/ns#geo, http://ontologycentral.com/2009/01/eurostat/ns#unit}), {}), Rollup (Slice (Dice (Projection (BaseCube (http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds), {http://purl.org/linked-data/sdmx/2009/measure#obsValuehttp://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#dsAGGFUNCAVG}), (http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list = http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00)), {http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list, http://ontologycentral.com/2009/01/eurostat/ns#geo, http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable}), {}))
+
+Solution: Maybe we need to remove "duplicates" explicitly? - Maybe distinct?
+
+Solution: It was wrong to say:
+
+<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://ontologycentral.com/2009/01/eurostat/ns#geo>.
+
+We now say:
+
+<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://rdfdata.eionet.europa.eu/ramon/ontology/NUTSRegion>.
+
+Also, dimension is now never used as a name for the hierararchy, but we use the range for the hierarchy. Same for the level.
+
+Question: Do we then have a valid query?
+
+SELECT
+{[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23dsAGGFUNCAVG]} ON COLUMNS,
+CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]), Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS
+FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds]
+WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}
+
+Works, but:
+
+Measures were duplicated (probably because of owl:sameAs reasoning), thus we had to switch on "distinct" in query.
+
+Similarly, in the output, we have several members, probably because they are also returned several times. Thus, also distinct? Hogan already stated that duplicate results may confuse people.
+
+XXX Also, is result correct?
+
+|  |      |  |  00      |      461.33 |         1.1 |
+
+|      461.33 |         1.1 |",
+
+Yes!
+
+XXX: Does it also work with example datasets?
+
+Example_QB_Datasets_Query_Test.java: 28/28, Errors 4, Failures 8
+
+* Problem with Eurostat: Apparently allbus geo needs to be used (why? maybe because not complete reasoning)
+
+httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo
+
+* Problem with ical:dtend. Apparently we cannot use it directly as hierarchy name since it is a blank node.
+
+Solution: We can still filter for it if we only filter for strings in all our queries.
+
+XXX: Can I also remove replacement of canonical?
+
+Problem: node18s3pb4llx1221 some hierarchies are blanknodes
+
+Solution: Check on "blank node" before filtering.
+
+XXX: Does it work without global cube definition?
+
+XXX: Does it work with all Drill-Across queries so that we can now have Evaluation?
+
+
 ==2014-05-11/12/13==
 * Finished experiments.
 

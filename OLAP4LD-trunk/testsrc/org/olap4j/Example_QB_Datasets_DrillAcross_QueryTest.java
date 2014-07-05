@@ -27,12 +27,9 @@ import junit.framework.TestCase;
 
 import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
-import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.olap4j.test.TestContext;
-import org.semanticweb.yars.nx.Node;
-import org.semanticweb.yars.nx.Resource;
 
 /**
  * Unit test for OLAP4LD Queries on external example data and Drill-Across operator.
@@ -101,29 +98,6 @@ public class Example_QB_Datasets_DrillAcross_QueryTest extends TestCase {
 	 * Generic Query
 	 */
 	public void testDrillAcrossEstatwrapGDPpercapitainPPS_EurostatEmploymentRate() {
-
-		// for now, we simply assume equivalence statements given
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-				new Resource(
-						"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
-				new Resource(
-						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-		// Hierarchy gesis-geo:list = estatwrap:geo
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-				new Resource(
-						"http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list"),
-				new Resource(
-						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-		// Could also for the olap
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-		new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-		new Resource("http://estatwrap.ontologycentral.com/dic/geo#DE") });
-
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
 		
 		// Problem:
 		// Make sure: , = XXX2C
