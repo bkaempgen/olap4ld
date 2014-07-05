@@ -88,28 +88,28 @@ public class LDCX_Performance_Evaluation_DrillAcrossTest extends TestCase {
 	
 	public void executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany() {
 
-		// for now, we simply assume equivalence statements given
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-				new Resource(
-						"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
-				new Resource(
-						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-		// Hierarchy gesis-geo:list = estatwrap:geo
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-				new Resource(
-						"http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list"),
-				new Resource(
-						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-		// Could also for the olap
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-		new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-		new Resource("http://estatwrap.ontologycentral.com/dic/geo#DE") });
-
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
+//		// for now, we simply assume equivalence statements given
+//		EmbeddedSesameEngine.equivs.add(new Node[] {
+//				new Resource(
+//						"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
+//				new Resource(
+//						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
+//
+//		// Hierarchy gesis-geo:list = estatwrap:geo
+//		EmbeddedSesameEngine.equivs.add(new Node[] {
+//				new Resource(
+//						"http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list"),
+//				new Resource(
+//						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
+//
+//		// Could also for the olap
+//		EmbeddedSesameEngine.equivs.add(new Node[] {
+//		new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
+//		new Resource("http://estatwrap.ontologycentral.com/dic/geo#DE") });
+//
+//		EmbeddedSesameEngine.equivs.add(new Node[] {
+//				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
+//				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
 		
 		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23dsAGGFUNCAVG]} ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
 
@@ -156,29 +156,6 @@ public class LDCX_Performance_Evaluation_DrillAcrossTest extends TestCase {
 	}
 	
 	public void test1() {
-		
-		// for now, we simply assume equivalence statements given
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-				new Resource(
-						"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
-				new Resource(
-						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-		// Hierarchy gesis-geo:list = estatwrap:geo
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-				new Resource(
-						"http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list"),
-				new Resource(
-						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-
-		// Could also for the olap
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-		new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-		new Resource("http://estatwrap.ontologycentral.com/dic/geo#DE") });
-
-		EmbeddedSesameEngine.equivs.add(new Node[] {
-				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
 		
 		executeDrillAcrossEu2020indicators8();
 		

@@ -189,14 +189,13 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * and 2) an initial logical olap query plan to populate the pivot table
 	 * cells.
 	 * 
-	 * 
 	 * We create: this.metaData = metadata; this.axisList = axisList;
 	 * this.immutableAxisList =
 	 * Olap4jUtil.cast(Collections.unmodifiableList(axisList)); this.filterAxis
 	 * = filterCellSetAxis;
 	 * 
-	 * Basically, an OLAP query (cube, SlicesRollups, Dices, Projections) is
-	 * created.
+	 * From this metadata, we can then create a nested set of OLAP operations (= OLAP query)
+	 * 
 	 * 
 	 * @param selectNode
 	 * @throws OlapException
@@ -329,6 +328,8 @@ abstract class Olap4ldCellSet implements CellSet {
 				}
 			}
 		}
+		
+		// Rows
 
 		for (Position position : rowPositions) {
 			List<Member> positionmembers = position.getMembers();
@@ -395,6 +396,7 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * Here, we create an initial logical olap query plan from the retrieved
 	 * metadata.
 	 * 
+	 * 
 	 * @return
 	 */
 	private LogicalOlapQueryPlan createInitialLogicalOlapQueryPlan() {
@@ -421,6 +423,16 @@ abstract class Olap4ldCellSet implements CellSet {
 
 			LogicalOlapOp queryplanroot = null;
 
+			/*
+			 * The set of "available datasets" is given by the FROM clause.
+			 * 
+			 * For every dataset, we create an own logical query plan.
+			 * 
+			 * In case there are several datasets, we drill-across all the resulting data cubes.
+			 * 
+			 * I think, this process, we need to "formalise". What exactly do we do here?
+			 */
+			
 			if (restrictions.cubeNamePattern.toString().contains(",")) {
 
 				String[] datasets = restrictions.cubeNamePattern.toString().split(",");
@@ -562,6 +574,7 @@ abstract class Olap4ldCellSet implements CellSet {
 		// Dice operator
 		// XXX: Note: For now, the RollUp operator needs to be higher than Dice
 		// operator
+		// XXX: We only consider filterAxis for dice, for now.
 
 		// Watch out: We do not want to have measure positions in the dice,
 		// since measures are projected
@@ -675,6 +688,8 @@ abstract class Olap4ldCellSet implements CellSet {
 		/*
 		 * For now, we assume that for each hierarchy, we query for members of
 		 * one specific level, only.
+		 * 
+		 * Note, also members could be diced, here also, we do not recognise it.
 		 */
 		Position position = axisList.get(0).getPositions().get(0);
 
@@ -721,6 +736,8 @@ abstract class Olap4ldCellSet implements CellSet {
 		/*
 		 * For now, we assume that for each hierarchy, we query for members of
 		 * one specific level, only.
+		 * 
+		 * Again, note, also members could be diced, here also, we do not recognise it.
 		 */
 		position = axisList.get(1).getPositions().get(0);
 

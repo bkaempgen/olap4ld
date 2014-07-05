@@ -330,7 +330,8 @@ class Olap4ldStatement implements OlapStatement {
 
 	/**
 	 * 
-	 * 1) Creates and fills cellSetMetadata 2) Creates and fills cellSet
+	 * 1) Creates and fills cellSetMetadata 2) Creates and fills cellSet.
+	 * 
 	 * 
 	 * @param selectNode
 	 * @return

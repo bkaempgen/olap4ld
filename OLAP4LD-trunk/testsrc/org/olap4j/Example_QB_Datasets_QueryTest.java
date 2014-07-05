@@ -486,6 +486,11 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 	/**
 	 * Queries on smartdbwrap.
+	 * 
+	 * Here, we see the problem that every locationdataset is inside a dataset (qb:dataSet is 
+	 * sufficient due to normalisation algorithm)
+	 * representing the location. This location however does not have a data structure definition.
+	 * 
 	 */
 	public void testSmartDbWrapMetadata() {
 

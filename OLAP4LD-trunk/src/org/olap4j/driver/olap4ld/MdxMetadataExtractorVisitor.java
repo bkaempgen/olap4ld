@@ -159,6 +159,8 @@ public class MdxMetadataExtractorVisitor<Object> implements ParseTreeVisitor<Obj
 			/*
 			 * From the method visitor, we get a list of (possible list of)
 			 * members
+			 * 
+			 * This means, we either get one tuple (position) or a list of positions.
 			 */
 			filterPositions = this.createPositionsList(listResult);
 

@@ -18,13 +18,10 @@
  */
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -53,11 +50,9 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.repository.sail.SailRepositoryConnection;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.memory.MemoryStore;
-import org.openrdf.sail.nativerdf.NativeStore;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Resource;
@@ -114,8 +109,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	private PhysicalOlapQueryPlan execplan;
 
 	private List<List<Node>> equivalenceList;
-
-	public static List<Node[]> equivs = new ArrayList<Node[]>();
 
 	public EmbeddedSesameEngine(URL serverUrlObject,
 			List<String> datastructuredefinitions, List<String> datasets,
@@ -179,19 +172,26 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				e.printStackTrace();
 			}
 		} else {
-						
+
 			try {
-				
+
 				this.repo = new SailRepository(new MemoryStore());
-				
-//				File dataDir = new File("/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/NativeSesameStore/");
-//				// Try another store
+
+				// With inferencing
+				// this.repo = new SailRepository(new
+				// ForwardChainingRDFSInferencer(new MemoryStore()));
+
+				// File dataDir = new
+				// File("/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/NativeSesameStore/");
+				// // Try another store
 				/*
-				 * See http://rivuli-development.com/further-reading/sesame-cookbook/loading-large-file-in-sesame-native/
-				 * for chunk-loading of data and the NativeStore.
+				 * See
+				 * http://rivuli-development.com/further-reading/sesame-cookbook
+				 * /loading-large-file-in-sesame-native/ for chunk-loading of
+				 * data and the NativeStore.
 				 */
-//				this.repo = new SailRepository(new NativeStore(dataDir));
-				
+				// this.repo = new SailRepository(new NativeStore(dataDir));
+
 				repo.initialize();
 
 				// do something interesting with the values here...
@@ -219,6 +219,15 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	private void preload() throws OlapException {
 
 		try {
+
+			// Load links
+			loadInStore(new URL(
+					"http://people.aifb.kit.edu/bka/Public/cube_additionalRDF.rdf"));
+
+			String triples = "<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://ontologycentral.com/2009/01/eurostat/ns#geo>. ";
+
+			insertTriples(triples);
+
 			// First, we load everything that Data-Fu can create
 			// loadInStore(new URL(
 			// "http://127.0.0.1:8080/Data-Fu-Engine/data-fu/gdp_per_capita_experiment/triples"));
@@ -279,7 +288,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// Problem: dcterms:date could not be resolved.
 
-			String triples = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/dsd/tgs00003>. "
+			triples = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/dsd/tgs00003>. "
 					+ "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> _:comp. "
 					+ "_:comp <http://purl.org/linked-data/cube#measure> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. "
 					+ "<http://purl.org/dc/terms/date> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2000/01/rdf-schema#Literal>. ";
@@ -351,7 +360,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	}
 
-	@SuppressWarnings("unused")
 	private void insertTriples(String triples) {
 		String query = "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
 				+ triples + " } }";
@@ -505,7 +513,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			URL location = Olap4ldLinkedDataUtil.askForLocation(resource);
 			// If resource is the same as location, we will never load otherwise
 			if (loadedMap.get(location.hashCode()) != null
-					&& loadedMap.get(location.hashCode()) == true && location.hashCode() != resource.hashCode()) {
+					&& loadedMap.get(location.hashCode()) == true
+					&& location.hashCode() != resource.hashCode()) {
 				// Already loaded
 				return;
 			}
@@ -566,7 +575,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			} else {
 				// Heuristics
 
-				InputStream is;
+				// InputStream is;
 				HttpURLConnection connection = (HttpURLConnection) location
 						.openConnection();
 				// We always try to get rdf/xml
@@ -589,21 +598,21 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// Error
 				// Seems to not work, anymore, since we use Repository.
 				if (responsecode >= 400) {
-//					is = connection.getErrorStream();
-//
-//					BufferedReader rd = new BufferedReader(
-//							new InputStreamReader(is));
-//
-//					String response = "";
-//					String line;
-//					while ((line = rd.readLine()) != null) {
-//						response += line;
-//					}
-//					Olap4ldUtil._log
-//							.warning("Warning: URL not possible to load: "
-//									+ response);
-//					rd.close();
-//					is.close();
+					// is = connection.getErrorStream();
+					//
+					// BufferedReader rd = new BufferedReader(
+					// new InputStreamReader(is));
+					//
+					// String response = "";
+					// String line;
+					// while ((line = rd.readLine()) != null) {
+					// response += line;
+					// }
+					// Olap4ldUtil._log
+					// .warning("Warning: URL not possible to load: "
+					// + response);
+					// rd.close();
+					// is.close();
 				} else {
 					// is = connection.getInputStream();
 					//
@@ -722,13 +731,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 */
 	private void loadCube(Node cubeNamePattern) throws OlapException {
 
-		if (cubeNamePattern == null) {
-			// There is nothing to load
-			Olap4ldUtil._log
-					.config("If no cubeNamePattern is given, we cannot load a cube.");
-			return;
-		}
-
 		try {
 			// We crawl the data
 			Olap4ldUtil._log
@@ -770,11 +772,49 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// QueryLanguage.SPARQL, updateQuery);
 			// updateQueryQuery.execute();
 
+			// Here, subPropertyOf reasoning is done.
 			String updateQuery = TYPICALPREFIXES
 					+ " INSERT { ?dimension rdfs:range ?range.} WHERE { ?dimension rdfs:subPropertyOf ?superdimension. ?superdimension rdfs:range ?range. }; ";
 			Update updateQueryQuery = con.prepareUpdate(QueryLanguage.SPARQL,
 					updateQuery);
 			updateQueryQuery.execute();
+
+			// Here, owl:sameAs reasoning is done.
+
+			// eq-sym
+			String updateQueryEqSym = TYPICALPREFIXES
+					+ " INSERT { ?y owl:sameAs ?x.} WHERE { ?x owl:sameAs ?y }; ";
+			Update updateQueryQueryEqSym = con.prepareUpdate(
+					QueryLanguage.SPARQL, updateQueryEqSym);
+			updateQueryQueryEqSym.execute();
+
+			// eq-trans
+			String updateQueryEqTrans = TYPICALPREFIXES
+					+ " INSERT { ?x owl:sameAs ?z . } WHERE { ?x owl:sameAs ?y . ?y owl:sameAs ?z . }; ";
+			Update updateQueryQueryEqTrans = con.prepareUpdate(
+					QueryLanguage.SPARQL, updateQueryEqTrans);
+			updateQueryQueryEqTrans.execute();
+
+			// eq-rep-s
+			String updateQueryEqRepS = TYPICALPREFIXES
+					+ " INSERT { ?s0 ?p ?o . } WHERE { ?s owl:sameAs ?s0 . ?s ?p ?o . }; ";
+			Update updateQueryQueryEqRepS = con.prepareUpdate(
+					QueryLanguage.SPARQL, updateQueryEqRepS);
+			updateQueryQueryEqRepS.execute();
+
+			// eq-rep-p
+			String updateQueryEqRepP = TYPICALPREFIXES
+					+ " INSERT { ?s ?p0 ?o . } WHERE { ?p owl:sameAs ?p0 . ?s ?p ?o . }; ";
+			Update updateQueryQueryEqRepP = con.prepareUpdate(
+					QueryLanguage.SPARQL, updateQueryEqRepP);
+			updateQueryQueryEqRepP.execute();
+
+			// eq-rep-o
+			String updateQueryEqRepO = TYPICALPREFIXES
+					+ " INSERT { ?s ?p ?o0 . } WHERE { ?o owl:sameAs ?o0 . ?s ?p ?o . }; ";
+			Update updateQueryQueryEqRepO = con.prepareUpdate(
+					QueryLanguage.SPARQL, updateQueryEqRepO);
+			updateQueryQueryEqRepO.execute();
 
 			con.close();
 
@@ -897,8 +937,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						continue;
 					}
 					if (nodes[0] instanceof Resource) {
-					URL componenturi = new URL(nodes[0].toString());
-					loadInStore(componenturi);
+						URL componenturi = new URL(nodes[0].toString());
+						loadInStore(componenturi);
 					}
 				}
 
@@ -938,8 +978,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 
 					if (nodes[0] instanceof Resource) {
-					URL measureuri = new URL(nodes[0].toString());
-					loadInStore(measureuri);
+						URL measureuri = new URL(nodes[0].toString());
+						loadInStore(measureuri);
 					}
 				}
 
@@ -960,11 +1000,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 							first = false;
 							continue;
 						}
-						
-						if (nodes[0] instanceof Resource) {
-						URL dimensionuri = new URL(nodes[0].toString());
 
-						loadInStore(dimensionuri);
+						if (nodes[0] instanceof Resource) {
+							URL dimensionuri = new URL(nodes[0].toString());
+
+							loadInStore(dimensionuri);
 						}
 					}
 				}
@@ -981,11 +1021,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-					
-					if (nodes[0] instanceof Resource) {
-					URL dimensionuri = new URL(nodes[0].toString());
 
-					loadInStore(dimensionuri);
+					if (nodes[0] instanceof Resource) {
+						URL dimensionuri = new URL(nodes[0].toString());
+
+						loadInStore(dimensionuri);
 					}
 				}
 
@@ -1009,64 +1049,67 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						}
 
 						if (nodes[0] instanceof Resource) {
-						URL codelisturi = new URL(nodes[0].toString());
-						loadInStore(codelisturi);
+							URL codelisturi = new URL(nodes[0].toString());
+							loadInStore(codelisturi);
 						}
 					}
 				}
 
-				// If loading ds, also load ranges of dimensions
-				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?range WHERE {<"
-						+ uri
-						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:range ?range}";
-				List<Node[]> ranges = sparql(query, true);
-				// There should be a dsd
-				// Note in spec:
-				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-				if (ranges.size() <= 1) {
-					;
-				} else {
-					first = true;
-					// So far, members are not crawled.
-					for (Node[] nodes : ranges) {
-						if (first) {
-							first = false;
-							continue;
-						}
-
-						if (nodes[0] instanceof Resource) {
-							URL rangesuri = new URL(nodes[0].toString());
-							loadInStore(rangesuri);
-						}
-					}
-				}
-
-				// If loading ds, also load dimension values (if resources) -
-				// done similar as for degenerated members
-				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?member WHERE {<"
-						+ uri
-						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?obs qb:dataSet ?ds. ?obs ?dimension ?member}";
-				List<Node[]> member = sparql(query, true);
-				// There should be a dsd
-				// Note in spec:
-				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
-				if (member.size() <= 1) {
-					;
-				} else {
-					first = true;
-					// So far, members are not crawled.
-					for (Node[] nodes : member) {
-						if (first) {
-							first = false;
-							continue;
-						}
-
-						if (nodes[0] instanceof Resource) {
-							URL memberuri = new URL(nodes[0].toString());
-							loadInStore(memberuri);
-						}
-					}
-				}
+				// Loading members
+				// Not done for now since takes a long time and was not done for ISEM either.
+				
+//				// If loading ds, also load ranges of dimensions
+//				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?range WHERE {<"
+//						+ uri
+//						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:range ?range}";
+//				List<Node[]> ranges = sparql(query, true);
+//				// There should be a dsd
+//				// Note in spec:
+//				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+//				if (ranges.size() <= 1) {
+//					;
+//				} else {
+//					first = true;
+//					// So far, members are not crawled.
+//					for (Node[] nodes : ranges) {
+//						if (first) {
+//							first = false;
+//							continue;
+//						}
+//
+//						if (nodes[0] instanceof Resource) {
+//							URL rangesuri = new URL(nodes[0].toString());
+//							loadInStore(rangesuri);
+//						}
+//					}
+//				}
+//
+//				// If loading ds, also load dimension values (if resources) -
+//				// done similar as for degenerated members
+//				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?member WHERE {<"
+//						+ uri
+//						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?obs qb:dataSet ?ds. ?obs ?dimension ?member}";
+//				List<Node[]> member = sparql(query, true);
+//				// There should be a dsd
+//				// Note in spec:
+//				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
+//				if (member.size() <= 1) {
+//					;
+//				} else {
+//					first = true;
+//					// So far, members are not crawled.
+//					for (Node[] nodes : member) {
+//						if (first) {
+//							first = false;
+//							continue;
+//						}
+//
+//						if (nodes[0] instanceof Resource) {
+//							URL memberuri = new URL(nodes[0].toString());
+//							loadInStore(memberuri);
+//						}
+//					}
+//				}
 
 			}
 		} catch (MalformedURLException e) {
@@ -1203,12 +1246,12 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// defining an information need. Although we might also just be
 		// interested in all
 		// possible derived datasets of a set of datasets.
-		// try {
-		// preload();
-		// } catch (OlapException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+		try {
+			preload();
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		List<Node[]> result = new ArrayList<Node[]>();
 		// Check whether Drill-across query
@@ -1269,7 +1312,23 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// result.add(nodes);
 		// }
 
+		// Now that we have loaded all data cubes, we can compute the
+		// equivalence list.
+		/*
+		 * Load equivalence statements from triple store
+		 */
+
+		Olap4ldUtil._log.info("Load dataset: create equivalence list started.");
+		long time = System.currentTimeMillis();
+
+		List<Node[]> equivs = getEquivalenceStatements();
+
 		this.equivalenceList = createEquivalenceList(equivs);
+
+		time = System.currentTimeMillis() - time;
+		Olap4ldUtil._log
+				.info("Load dataset: create equivalence list finished in "
+						+ time + "ms.");
 
 		// Now, add "virtual cube"
 		// ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
@@ -1335,9 +1394,30 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	private List<Node[]> getCubesPerDataSet(Restrictions restrictions)
 			throws OlapException {
 		List<Node[]> result = new ArrayList<Node[]>();
-		// For now, we simply preload.
 
-		loadCube(restrictions.cubeNamePattern);
+		// Before loading, I should check first, whether already loaded.
+		URL resource;
+
+		try {
+			if (restrictions.cubeNamePattern == null) {
+				// There is nothing to load
+				Olap4ldUtil._log
+						.config("If no cubeNamePattern is given, we cannot load a cube.");
+			} else {
+				resource = new URL(restrictions.cubeNamePattern.toString());
+				if (loadedMap.get(resource.hashCode()) == null
+						|| loadedMap.get(resource.hashCode()) == false) {
+
+					// For now, we simply preload.
+					loadCube(restrictions.cubeNamePattern);
+
+				}
+			}
+
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
@@ -1729,25 +1809,27 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// IC-19. Codes from code list
 				// Probably takes very long since involves property chain and
 				// going through all observations.
-				testquery = TYPICALPREFIXES
-						+ "ASK { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
-				String testquery2 = TYPICALPREFIXES
-						+ "ASK {   ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:Collection .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept . ?list skos:member+ ?v }}";
-				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
-						testquery);
-				BooleanQuery booleanQuery2 = con.prepareBooleanQuery(
-						QueryLanguage.SPARQL, testquery2);
-				if (booleanQuery.evaluate() == true
-						|| booleanQuery2.evaluate() == true) {
-					error = true;
-					status = "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
-					Olap4ldUtil._log.config(status);
-					overview += status;
-				} else {
-					status = "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
-					Olap4ldUtil._log.config(status);
-					overview += status;
-				}
+				
+				// Commented, because would not fit with equivalence reasoning (duplication strategy)
+//				testquery = TYPICALPREFIXES
+//						+ "ASK { ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:ConceptScheme .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }}";
+//				String testquery2 = TYPICALPREFIXES
+//						+ "ASK {   ?obs qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .    ?dim a qb:DimensionProperty ;        qb:codeList ?list .    ?list a skos:Collection .    ?obs ?dim ?v .    FILTER NOT EXISTS { ?v a skos:Concept . ?list skos:member+ ?v }}";
+//				booleanQuery = con.prepareBooleanQuery(QueryLanguage.SPARQL,
+//						testquery);
+//				BooleanQuery booleanQuery2 = con.prepareBooleanQuery(
+//						QueryLanguage.SPARQL, testquery2);
+//				if (booleanQuery.evaluate() == true
+//						|| booleanQuery2.evaluate() == true) {
+//					error = true;
+//					status = "Failed specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+//					Olap4ldUtil._log.config(status);
+//					overview += status;
+//				} else {
+//					status = "Successful specification check: IC-19. If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list.  <br/>";
+//					Olap4ldUtil._log.config(status);
+//					overview += status;
+//				}
 
 			}
 
@@ -1879,6 +1961,28 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			throw new OlapException("Problem with update execution: "
 					+ e.getMessage());
 		}
+	}
+
+	public List<Node[]> getEquivalenceStatements() {
+
+		/*
+		 * More directed better?
+		 * 
+		 * {$this->getStandardPrefixes()} select ?same1 ?same2
+		 * {$this->getStandardFrom()} where { ?dsd qb:component ?comp. ?comp
+		 * ?componentProp ?same1. ?same1 owl:sameAs ?same2 }
+		 */
+
+		// Same as between dimensions and members.
+		String query = "PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX qb: <http://purl.org/linked-data/cube#> select ?same1 ?same2 where "
+				+ "{ { ?dsd qb:component ?comp. ?comp ?componentProp ?same1. ?same1 owl:sameAs ?same2 } UNION { ?obs a qb:Observation. ?obs ?dimension ?same1. ?same1 owl:sameAs ?same2 } }	";
+
+		List<Node[]> myresult = sparql(query, true);
+
+		Olap4ldUtil._log.info("Number of equivalence statements: "
+				+ (myresult.size() - 1));
+
+		return myresult;
 	}
 
 	/**
@@ -2016,6 +2120,14 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		return result;
 	}
 
+	/**
+	 * Returns canonical for a node.
+	 * 
+	 * If none is found, simply the node is returned.
+	 * 
+	 * @param canonical
+	 * @return
+	 */
 	private Node getCanonical(Node canonical) {
 		for (List<Node> equivalenceClass : equivalenceList) {
 			for (Node node : equivalenceClass) {
@@ -2036,64 +2148,71 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 * @return
 	 */
 	private List<List<Node>> createEquivalenceList(List<Node[]> equivs) {
-		List<List<Node>> equivalenceList = new ArrayList<List<Node>>();
+		List<List<Node>> newequivalenceList = new ArrayList<List<Node>>();
 
-		for (Node[] equiv : equivs) {
+		// HashMap<String, Integer> invertedindex = new HashMap<String,
+		// Integer>();
+		//
+		// boolean first = true;
+		// for (Node[] equiv : equivs) {
+		//
+		// // First is header
+		// if (first) {
+		// first = false;
+		// continue;
+		// }
+		//
+		// String A = equiv[0].toString();
+		// String B = equiv[1].toString();
+		//
+		// // Store equiv
+		//
+		// // Find A
+		// Integer rA = invertedindex.get(A);
+		//
+		// // Find B
+		// Integer rB = invertedindex.get(B);
+		//
+		// if (rA == null && rB == null) {
+		// // new row rAB
+		//
+		//
+		// ArrayList<Node> newEquivalenceClass = new ArrayList<Node>();
+		// newEquivalenceClass.add(A);
+		// newEquivalenceClass.add(B);
+		// newequivalenceList.add(newEquivalenceClass);
+		//
+		// } else if (rA != null && rB != null) {
+		// // merge rA and rB
+		//
+		// // We create new list
+		//
+		// List<Node> rAB = new ArrayList<Node>();
+		//
+		// for (Node node : rB) {
+		// rAB.add(node);
+		// }
+		// for (Node node : rA) {
+		// rAB.add(node);
+		// }
+		// newequivalenceList.remove(rB);
+		// newequivalenceList.remove(rA);
+		// newequivalenceList.add(rAB);
+		//
+		// } else if (rA != null) {
+		// // add B to rA
+		//
+		// rA.add(B);
+		//
+		// } else if (rB != null) {
+		// // add A to rB
+		//
+		// rB.add(A);
+		// }
+		//
+		// }
 
-			Node A = equiv[0];
-			Node B = equiv[1];
-
-			// Store equiv
-			List<Node> rA = null;
-			for (List<Node> equivalenceClass : equivalenceList) {
-				for (Node node : equivalenceClass) {
-					if (node.equals(A)) {
-						rA = equivalenceClass;
-					}
-				}
-				if (rA != null) {
-					break;
-				}
-			}
-			List<Node> rB = null;
-			for (List<Node> equivalenceClass : equivalenceList) {
-				for (Node node : equivalenceClass) {
-					if (node.equals(B)) {
-						rB = equivalenceClass;
-					}
-				}
-				if (rB != null) {
-					break;
-				}
-			}
-
-			if (rA == null && rB == null) {
-				ArrayList<Node> newEquivalenceClass = new ArrayList<Node>();
-				newEquivalenceClass.add(A);
-				newEquivalenceClass.add(B);
-				equivalenceList.add(newEquivalenceClass);
-			} else if (rA != null && rB != null) {
-				// merge rA and rB
-
-				for (Node node : rB) {
-					rA.add(node);
-				}
-				equivalenceList.remove(rB);
-
-			} else if (rA != null) {
-				// add B to rA
-
-				rA.add(B);
-
-			} else if (rB != null) {
-				// add A to rB
-
-				rB.add(A);
-			}
-
-		}
-
-		return equivalenceList;
+		return newequivalenceList;
 	}
 
 	private List<Node[]> getDimensionsPerDataSet(Restrictions restrictions) {

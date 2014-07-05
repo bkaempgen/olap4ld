@@ -337,7 +337,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 								.get("?HIERARCHY_MAX_LEVEL_NUMBER")].toString());
 				// We should be testing whether diceslevelHeight higher than
 				// slicesRollupsLevelHeight
-				// To compute Dices Level Height, we need the levelmaxnumber of
+				// Since level_number counts from the root (ALL level) to compute Dices Level Height, we need the levelmaxnumber of
 				// the hierarchy. Thus, we also have the hierarchysignature.
 				Integer diceslevelHeight = levelmaxnumber - levelnumber;
 				Node dimensionProperty = membercombinations.get(0).get(i)[map
@@ -1058,6 +1058,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 			this.result = engine.sparql(query, false);
 
+			// After evaluation, we do "entity-consolidation"
 			this.result = this.engine.replaceIdentifiersWithCanonical(this.result);
 		}
 		
