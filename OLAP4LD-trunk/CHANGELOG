@@ -18,6 +18,8 @@ We now would like to extend this.
 ==2014-07-05 XXX==
 XXX: Does it work without global cube definition?
 
+Yes. Seems for single cube test cases.
+
 XXX: Does it work with all Drill-Across queries so that we can now have Evaluation?
 
 XXX: Can I now have one SPARQL query? Can I define behaviour if measures are the same (for convert-cube?)
@@ -26,7 +28,7 @@ XXX: Extension to Compound measures?
 
 XXX: Extension to Convert Cube / Merge Cubes?
 
-
+XXX: Demo with free MDX field?
 
 ==2014-07-05==
 Working on Drill-Across: Entity consolidation: 
