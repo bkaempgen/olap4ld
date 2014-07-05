@@ -783,13 +783,13 @@ abstract class Olap4ldCellSet implements CellSet {
 		// Find out which Dimensions to slice
 		// Those that are not mentioned in the axes.
 		List<Node[]> slicedDimensions = new ArrayList<Node[]>();
-		NamedList<Dimension> realdimensions = metaData.cube.getDimensions();
+		//NamedList<Dimension> realdimensions = metaData.cube.getDimensions();
+		List<Node[]> realdimensions = dimensions;
 
 		// No first necessary since we go through realdimensions
 		// Just take first.
-		slicedDimensions.add(((Olap4ldDimension) realdimensions.get(0))
-				.transformMetadataObject2NxNodes().get(0));
-		for (Dimension realdimension : realdimensions) {
+		slicedDimensions.add(realdimensions.get(0));
+		for (Node[] realdimension : realdimensions) {
 			// Olap4ldDimension olapdimension = (Olap4ldDimension)
 			// realdimension;
 
@@ -803,12 +803,11 @@ abstract class Olap4ldCellSet implements CellSet {
 
 			boolean containedincube = false;
 
-			Node dimensionnameuri = Olap4ldLinkedDataUtil
-					.convertMDXtoURI(realdimension.getUniqueName());
+			Node dimensionnameuri = realdimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")];
 
 			for (Node[] aDimension : dimensions) {
-				if (aDimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
-						.equals(dimensionnameuri)) {
+				if (aDimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")].toString()
+						.equals(dimensionnameuri.toString())) {
 					dimension = aDimension;
 					containedincube = true;
 				}
@@ -826,8 +825,8 @@ abstract class Olap4ldCellSet implements CellSet {
 						.getNodeResultFields(notslicedhierarchies.get(0));
 
 				if (notslicedhierarchy[notslicedhierarchymap
-						.get("?DIMENSION_UNIQUE_NAME")].equals(
-						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")])) {
+						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
+						dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")].toString())) {
 					contained = true;
 				}
 			}

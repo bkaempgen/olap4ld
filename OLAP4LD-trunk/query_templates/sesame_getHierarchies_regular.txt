@@ -8,7 +8,7 @@ PREFIX skosclass: <http://ddialliance.org/ontologies/skosclass#>
 PREFIX xkos: <http://purl.org/linked-data/xkos#> 
 PREFIX owl: <http://www.w3.org/2002/07/owl#> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
-SELECT 
+SELECT DISTINCT 
 ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_NAME ?HIERARCHY_CAPTION ?DESCRIPTION ?HIERARCHY_MAX_LEVEL_NUMBER  
 {{{STANDARDFROM}}}
 WHERE {

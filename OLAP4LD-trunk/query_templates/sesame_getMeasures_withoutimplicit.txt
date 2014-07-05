@@ -8,7 +8,7 @@ PREFIX qb4o: <http://purl.org/olap#>
 PREFIX xkos: <http://purl.org/linked-data/xkos#> 
 PREFIX owl: <http://www.w3.org/2002/07/owl#> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
-SELECT 
+SELECT DISTINCT 
 ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME ?MEASURE_NAME ?MEASURE_CAPTION ?DATA_TYPE ?MEASURE_IS_VISIBLE ?MEASURE_AGGREGATOR ?EXPRESSION 
 {{{STANDARDFROM}}}
 WHERE {
@@ -20,6 +20,7 @@ BIND('http://www.w3.org/2001/XMLSchema#decimal' as ?DATA_TYPE).
 OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = "en" ) } 
 
 FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR }
+
 OPTIONAL {?compSpec qb:expression ?EXPRESSION }
  
 BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 

@@ -172,7 +172,8 @@ public class Olap2SparqlSesameVisitor implements
 								rolluplevel[levelmap
 										.get("?DIMENSION_UNIQUE_NAME")]
 										.toString())) {
-					slicesrollups.add(dimension);
+					contained = true;
+					slicesrollups.add(rolluplevel);
 					
 					/*
 					 * This is how you get levelHeight: HIERARCHY_MAX_LEVEL_NUMBER - LEVEL_NUMBER.

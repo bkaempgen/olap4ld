@@ -224,7 +224,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			loadInStore(new URL(
 					"http://people.aifb.kit.edu/bka/Public/cube_additionalRDF.rdf"));
 
-			String triples = "<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://ontologycentral.com/2009/01/eurostat/ns#geo>. ";
+			String triples = "<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://rdfdata.eionet.europa.eu/ramon/ontology/NUTSRegion>. ";
 
 			insertTriples(triples);
 
