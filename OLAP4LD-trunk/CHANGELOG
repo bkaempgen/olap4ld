@@ -15,10 +15,41 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
-==2014-07-05 XXX==
+==2014-07-06==
 XXX: Does it work without global cube definition?
 
 Yes. Seems for single cube test cases.
+
+? for multi cube test cases.
+
+Problem: The system is looking for the multicube which is not existing.
+
+Solution: We manage a list of cubes, instead.
+
+* Remove global cube definition = define queried datasets (14:30)
+
+Solution:
+
+* Olap4ldCellSetMetadata: list of cubes?
+
+* Olap4ldCellSet.createLogicalQueryPlan: list of cubes?
+
+* Olap4ldCellSet -> instead of the one single cube, the correct cube.
+
+* Olap4ldCellSet.createMetadata -> instead of metaData.cube.getMeasures, we simply take the first measure of the first cube.
+
+* CellSetMetadata.getCube() -> a CellSet has exactly one cube. That was the reason for creating the "Global cube". This is because we implicitly define a "global cube" with all dimensions and members. 
+
+Final solution:
+
+No, we have to return "global cube", since this is how MDX works. The question is how the global
+cube is defined and how the logical query plan is created.  
+
+? for ldcx visualisation.
+
+Let us try whether our new reasoning strategy can be visualised properly.
+
+*no f** idea since I cannot debug and apparently the MDX (generateMDX) is not done properly.*
 
 XXX: Does it work with all Drill-Across queries so that we can now have Evaluation?
 

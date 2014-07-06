@@ -57,7 +57,9 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	// private static final String TESTURL = "http://estatwrap.ontologycentral.com/id/tec00114#ds,http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds";
 	//private static final String TESTURL = "http://eurostat.linked-statistics.org/data/tec00114";
 	// private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds,http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds";
-	private static final String TESTURL = "http://estatwrap.ontologycentral.com/id/tec00115#ds";
+	//private static final String TESTURL = "http://estatwrap.ontologycentral.com/id/tec00115#ds";
+	//private static final String TESTURL = "http://pastebin.com/raw.php?i=839G2u72#ds";
+	private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
 	
 	// "http://data.webfoundation.org/webindex/dataset/ITUA-Imputed";
 

@@ -1048,7 +1048,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 					// We do not want to have the single datasets returned.
 					// We always have only one cube, the global cube.
-					result.add(nodes);
+					//result.add(nodes);
 				}
 			}
 
@@ -1099,38 +1099,38 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// Now, add "virtual cube"
 		// ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
 		// ?DESCRIPTION
-//		String globalcubename = "";
-//		if (restrictions.cubeNamePattern == null) {
-//
-//			Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
-//					.getNodeResultFields(result.get(0));
-//
-//			// Concatenate all cubes.
-//			boolean first = true;
-//			for (Node[] nodes : result) {
-//				if (first) {
-//					// First header;
-//					first = false;
-//					continue;
-//				}
-//
-//				if (!globalcubename.equals("")) {
-//					globalcubename += ",";
-//				}
-//				globalcubename += nodes[cubemap.get("?CUBE_NAME")].toString();
-//			}
-//
-//		} else {
-//			globalcubename = restrictions.cubeNamePattern.toString();
-//		}
-//
-//		// XXX: The virtual cube should actually not be given to users. Users
-//		// simply issue queries over available datasets.
-//		Node[] virtualcube = new Node[] { new Literal(TABLE_CAT),
-//				new Literal(TABLE_SCHEM), new Resource(globalcubename),
-//				new Literal("CUBE"), new Literal("Global Cube"),
-//				new Literal("This is the global cube.") };
-//		result.add(virtualcube);
+		String globalcubename = "";
+		if (restrictions.cubeNamePattern == null) {
+
+			Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(result.get(0));
+
+			// Concatenate all cubes.
+			boolean first = true;
+			for (Node[] nodes : result) {
+				if (first) {
+					// First header;
+					first = false;
+					continue;
+				}
+
+				if (!globalcubename.equals("")) {
+					globalcubename += ",";
+				}
+				globalcubename += nodes[cubemap.get("?CUBE_NAME")].toString();
+			}
+
+		} else {
+			globalcubename = restrictions.cubeNamePattern.toString();
+		}
+
+		// XXX: The virtual cube should actually not be given to users. Users
+		// simply issue queries over available datasets.
+		Node[] virtualcube = new Node[] { new Literal(TABLE_CAT),
+				new Literal(TABLE_SCHEM), new Resource(globalcubename),
+				new Literal("CUBE"), new Literal("Global Cube"),
+				new Literal("This is the global cube.") };
+		result.add(virtualcube);
 
 		Olap4ldUtil._log
 				.info("Load datasets: Number of loaded triples for all datasets: "
@@ -2180,7 +2180,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						continue;
 					}
 
-					// We also add the single dimensions of the datasets.
+					// Add the single dimensions of the datasets to be transformed with createGlobalDimensions.
 					result.add(anIntermediaryresult);
 				}
 			}
@@ -2191,9 +2191,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		// Create global cube which is intersection of all dimensions and new
 		// cube name
-		//return createGlobalDimensions(restrictions, result);
-		
-		return result;
+		return createGlobalDimensions(restrictions, result);
 	}
 
 	private List<Node[]> createGlobalDimensions(Restrictions restrictions,
@@ -2399,32 +2397,32 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 
 					// We do not want to have the single datasets returned.
-					result.add(anIntermediaryresult);
+					// result.add(anIntermediaryresult);
 
-//					// Also add measure to global cube
-//					Map<String, Integer> map = Olap4ldLinkedDataUtil
-//							.getNodeResultFields(intermediaryresult.get(0));
-//
-//					Node[] newnode = new Node[10];
-//					newnode[map.get("?CATALOG_NAME")] = anIntermediaryresult[map
-//							.get("?CATALOG_NAME")];
-//					newnode[map.get("?SCHEMA_NAME")] = anIntermediaryresult[map
-//							.get("?SCHEMA_NAME")];
-//					newnode[map.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
-//					newnode[map.get("?MEASURE_UNIQUE_NAME")] = anIntermediaryresult[map
-//							.get("?MEASURE_UNIQUE_NAME")];
-//					newnode[map.get("?MEASURE_NAME")] = anIntermediaryresult[map
-//							.get("?MEASURE_NAME")];
-//					newnode[map.get("?MEASURE_CAPTION")] = anIntermediaryresult[map
-//							.get("?MEASURE_CAPTION")];
-//					newnode[map.get("?DATA_TYPE")] = anIntermediaryresult[map
-//							.get("?DATA_TYPE")];
-//					newnode[map.get("?MEASURE_IS_VISIBLE")] = anIntermediaryresult[map
-//							.get("?MEASURE_IS_VISIBLE")];
-//					newnode[map.get("?MEASURE_AGGREGATOR")] = anIntermediaryresult[map
-//							.get("?MEASURE_AGGREGATOR")];
-//					newnode[map.get("?EXPRESSION")] = anIntermediaryresult[map
-//							.get("?EXPRESSION")];
+					// Also add measure to global cube
+					Map<String, Integer> map = Olap4ldLinkedDataUtil
+							.getNodeResultFields(intermediaryresult.get(0));
+
+					Node[] newnode = new Node[10];
+					newnode[map.get("?CATALOG_NAME")] = anIntermediaryresult[map
+							.get("?CATALOG_NAME")];
+					newnode[map.get("?SCHEMA_NAME")] = anIntermediaryresult[map
+							.get("?SCHEMA_NAME")];
+					newnode[map.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
+					newnode[map.get("?MEASURE_UNIQUE_NAME")] = anIntermediaryresult[map
+							.get("?MEASURE_UNIQUE_NAME")];
+					newnode[map.get("?MEASURE_NAME")] = anIntermediaryresult[map
+							.get("?MEASURE_NAME")];
+					newnode[map.get("?MEASURE_CAPTION")] = anIntermediaryresult[map
+							.get("?MEASURE_CAPTION")];
+					newnode[map.get("?DATA_TYPE")] = anIntermediaryresult[map
+							.get("?DATA_TYPE")];
+					newnode[map.get("?MEASURE_IS_VISIBLE")] = anIntermediaryresult[map
+							.get("?MEASURE_IS_VISIBLE")];
+					newnode[map.get("?MEASURE_AGGREGATOR")] = anIntermediaryresult[map
+							.get("?MEASURE_AGGREGATOR")];
+					newnode[map.get("?EXPRESSION")] = anIntermediaryresult[map
+							.get("?EXPRESSION")];
 
 					// Only add if not already contained.
 					// For measures, we add them all.
@@ -2448,7 +2446,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					// if (!contained) {
 					// result.add(newnode);
 					// }
-//					result.add(newnode);
+					
+					result.add(newnode);
 				}
 
 			}
@@ -2558,7 +2557,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						continue;
 					}
 
-					// We do not want to have the single datasets returned.
+					// Add the single hierarchies of the datasets to be transformed with createGlobalHierarchies.
 					result.add(anIntermediaryresult);
 				}
 
@@ -2573,9 +2572,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		// Create global hierarchies which is intersection of all hierarchies
 		// and new
 		// cube name
-		//return createGlobalHierarchies(restrictions, result);
-		
-		return result;
+		return createGlobalHierarchies(restrictions, result);
 	}
 
 	private List<Node[]> createGlobalHierarchies(Restrictions restrictions,
@@ -2827,57 +2824,57 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						continue;
 					}
 					// We do not want to have the single datasets returned.
-					result.add(anIntermediaryresult);
+					// result.add(anIntermediaryresult);
 
 					// Also add dimension to global cube
-//					Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
-//							.getNodeResultFields(intermediaryresult.get(0));
-//
-//					Node[] newnode = new Node[12];
-//					newnode[levelmap.get("?CATALOG_NAME")] = anIntermediaryresult[levelmap
-//							.get("?CATALOG_NAME")];
-//					newnode[levelmap.get("?SCHEMA_NAME")] = anIntermediaryresult[levelmap
-//							.get("?SCHEMA_NAME")];
-//					newnode[levelmap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
-//					newnode[levelmap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[levelmap
-//							.get("?DIMENSION_UNIQUE_NAME")];
-//					newnode[levelmap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[levelmap
-//							.get("?HIERARCHY_UNIQUE_NAME")];
-//					newnode[levelmap.get("?LEVEL_UNIQUE_NAME")] = anIntermediaryresult[levelmap
-//							.get("?LEVEL_UNIQUE_NAME")];
-//					newnode[levelmap.get("?LEVEL_CAPTION")] = anIntermediaryresult[levelmap
-//							.get("?LEVEL_CAPTION")];
-//					newnode[levelmap.get("?LEVEL_NAME")] = anIntermediaryresult[levelmap
-//							.get("?LEVEL_NAME")];
-//					newnode[levelmap.get("?DESCRIPTION")] = anIntermediaryresult[levelmap
-//							.get("?DESCRIPTION")];
-//					newnode[levelmap.get("?LEVEL_NUMBER")] = anIntermediaryresult[levelmap
-//							.get("?LEVEL_NUMBER")];
-//					newnode[levelmap.get("?LEVEL_CARDINALITY")] = anIntermediaryresult[levelmap
-//							.get("?LEVEL_CARDINALITY")];
-//					newnode[levelmap.get("?LEVEL_TYPE")] = anIntermediaryresult[levelmap
-//							.get("?LEVEL_TYPE")];
-//
-//					// Only add if not already contained.
-//					boolean contained = false;
-//					for (Node[] aResult : result) {
-//						boolean sameDimension = aResult[levelmap
-//								.get("?LEVEL_UNIQUE_NAME")].toString().equals(
-//								newnode[levelmap.get("?LEVEL_UNIQUE_NAME")]
-//										.toString());
-//						boolean sameCube = aResult[levelmap.get("?CUBE_NAME")]
-//								.toString().equals(
-//										newnode[levelmap.get("?CUBE_NAME")]
-//												.toString());
-//
-//						if (sameDimension && sameCube) {
-//							contained = true;
-//						}
-//					}
-//
-//					if (!contained) {
-//						result.add(newnode);
-//					}
+					Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
+							.getNodeResultFields(intermediaryresult.get(0));
+
+					Node[] newnode = new Node[12];
+					newnode[levelmap.get("?CATALOG_NAME")] = anIntermediaryresult[levelmap
+							.get("?CATALOG_NAME")];
+					newnode[levelmap.get("?SCHEMA_NAME")] = anIntermediaryresult[levelmap
+							.get("?SCHEMA_NAME")];
+					newnode[levelmap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
+					newnode[levelmap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[levelmap
+							.get("?DIMENSION_UNIQUE_NAME")];
+					newnode[levelmap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[levelmap
+							.get("?HIERARCHY_UNIQUE_NAME")];
+					newnode[levelmap.get("?LEVEL_UNIQUE_NAME")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_UNIQUE_NAME")];
+					newnode[levelmap.get("?LEVEL_CAPTION")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_CAPTION")];
+					newnode[levelmap.get("?LEVEL_NAME")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_NAME")];
+					newnode[levelmap.get("?DESCRIPTION")] = anIntermediaryresult[levelmap
+							.get("?DESCRIPTION")];
+					newnode[levelmap.get("?LEVEL_NUMBER")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_NUMBER")];
+					newnode[levelmap.get("?LEVEL_CARDINALITY")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_CARDINALITY")];
+					newnode[levelmap.get("?LEVEL_TYPE")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_TYPE")];
+
+					// Only add if not already contained.
+					boolean contained = false;
+					for (Node[] aResult : result) {
+						boolean sameDimension = aResult[levelmap
+								.get("?LEVEL_UNIQUE_NAME")].toString().equals(
+								newnode[levelmap.get("?LEVEL_UNIQUE_NAME")]
+										.toString());
+						boolean sameCube = aResult[levelmap.get("?CUBE_NAME")]
+								.toString().equals(
+										newnode[levelmap.get("?CUBE_NAME")]
+												.toString());
+
+						if (sameDimension && sameCube) {
+							contained = true;
+						}
+					}
+
+					if (!contained) {
+						result.add(newnode);
+					}
 				}
 
 			}
@@ -3101,59 +3098,59 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 
 					// We do not want to have the single datasets returned.
-					result.add(anIntermediaryresult);
+					// result.add(anIntermediaryresult);
 
-//					// Also add dimension to global cube
-//					Map<String, Integer> membermap = Olap4ldLinkedDataUtil
-//							.getNodeResultFields(intermediaryresult.get(0));
-//
-//					Node[] newnode = new Node[13];
-//					newnode[membermap.get("?CATALOG_NAME")] = anIntermediaryresult[membermap
-//							.get("?CATALOG_NAME")];
-//					newnode[membermap.get("?SCHEMA_NAME")] = anIntermediaryresult[membermap
-//							.get("?SCHEMA_NAME")];
-//					newnode[membermap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
-//					newnode[membermap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[membermap
-//							.get("?DIMENSION_UNIQUE_NAME")];
-//					newnode[membermap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[membermap
-//							.get("?HIERARCHY_UNIQUE_NAME")];
-//					newnode[membermap.get("?LEVEL_UNIQUE_NAME")] = anIntermediaryresult[membermap
-//							.get("?LEVEL_UNIQUE_NAME")];
-//					newnode[membermap.get("?LEVEL_NUMBER")] = anIntermediaryresult[membermap
-//							.get("?LEVEL_NUMBER")];
-//					newnode[membermap.get("?MEMBER_UNIQUE_NAME")] = anIntermediaryresult[membermap
-//							.get("?MEMBER_UNIQUE_NAME")];
-//					newnode[membermap.get("?MEMBER_NAME")] = anIntermediaryresult[membermap
-//							.get("?MEMBER_NAME")];
-//					newnode[membermap.get("?MEMBER_CAPTION")] = anIntermediaryresult[membermap
-//							.get("?MEMBER_CAPTION")];
-//					newnode[membermap.get("?MEMBER_TYPE")] = anIntermediaryresult[membermap
-//							.get("?MEMBER_TYPE")];
-//					newnode[membermap.get("?PARENT_UNIQUE_NAME")] = anIntermediaryresult[membermap
-//							.get("?PARENT_UNIQUE_NAME")];
-//					newnode[membermap.get("?PARENT_LEVEL")] = anIntermediaryresult[membermap
-//							.get("?PARENT_LEVEL")];
-//
-//					// Only add if not already contained.
-//					boolean contained = false;
-//					for (Node[] aResult : result) {
-//						boolean sameDimension = aResult[membermap
-//								.get("?MEMBER_UNIQUE_NAME")].toString().equals(
-//								newnode[membermap.get("?MEMBER_UNIQUE_NAME")]
-//										.toString());
-//						boolean sameCube = aResult[membermap.get("?CUBE_NAME")]
-//								.toString().equals(
-//										newnode[membermap.get("?CUBE_NAME")]
-//												.toString());
-//
-//						if (sameDimension && sameCube) {
-//							contained = true;
-//						}
-//					}
-//
-//					if (!contained) {
-//						result.add(newnode);
-//					}
+					// Also add dimension to global cube
+					Map<String, Integer> membermap = Olap4ldLinkedDataUtil
+							.getNodeResultFields(intermediaryresult.get(0));
+
+					Node[] newnode = new Node[13];
+					newnode[membermap.get("?CATALOG_NAME")] = anIntermediaryresult[membermap
+							.get("?CATALOG_NAME")];
+					newnode[membermap.get("?SCHEMA_NAME")] = anIntermediaryresult[membermap
+							.get("?SCHEMA_NAME")];
+					newnode[membermap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
+					newnode[membermap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?DIMENSION_UNIQUE_NAME")];
+					newnode[membermap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?HIERARCHY_UNIQUE_NAME")];
+					newnode[membermap.get("?LEVEL_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?LEVEL_UNIQUE_NAME")];
+					newnode[membermap.get("?LEVEL_NUMBER")] = anIntermediaryresult[membermap
+							.get("?LEVEL_NUMBER")];
+					newnode[membermap.get("?MEMBER_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?MEMBER_UNIQUE_NAME")];
+					newnode[membermap.get("?MEMBER_NAME")] = anIntermediaryresult[membermap
+							.get("?MEMBER_NAME")];
+					newnode[membermap.get("?MEMBER_CAPTION")] = anIntermediaryresult[membermap
+							.get("?MEMBER_CAPTION")];
+					newnode[membermap.get("?MEMBER_TYPE")] = anIntermediaryresult[membermap
+							.get("?MEMBER_TYPE")];
+					newnode[membermap.get("?PARENT_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?PARENT_UNIQUE_NAME")];
+					newnode[membermap.get("?PARENT_LEVEL")] = anIntermediaryresult[membermap
+							.get("?PARENT_LEVEL")];
+
+					// Only add if not already contained.
+					boolean contained = false;
+					for (Node[] aResult : result) {
+						boolean sameDimension = aResult[membermap
+								.get("?MEMBER_UNIQUE_NAME")].toString().equals(
+								newnode[membermap.get("?MEMBER_UNIQUE_NAME")]
+										.toString());
+						boolean sameCube = aResult[membermap.get("?CUBE_NAME")]
+								.toString().equals(
+										newnode[membermap.get("?CUBE_NAME")]
+												.toString());
+
+						if (sameDimension && sameCube) {
+							contained = true;
+						}
+					}
+
+					if (!contained) {
+						result.add(newnode);
+					}
 				}
 
 			}
@@ -3564,7 +3561,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// This we do since ranges may be blank nodes, e.g., of ical:dtend
 			// XXX: Workaround
-			if (restrictions.hierarchyUniqueName.toString().startsWith("node")) {
+			if (restrictions.hierarchyUniqueName != null && restrictions.hierarchyUniqueName.toString().startsWith("node")) {
 				filter += "";
 			} else {
 
