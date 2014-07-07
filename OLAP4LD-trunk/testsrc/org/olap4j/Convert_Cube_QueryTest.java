@@ -44,6 +44,7 @@ import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.PhysicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.ReconciliationCorrespondence;
 import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
+import org.olap4j.driver.olap4ld.linkeddata.SliceOp;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.semanticweb.yars.nx.Node;
@@ -543,6 +544,241 @@ public class Convert_Cube_QueryTest extends TestCase {
 				gdpalreadycomputedcubemembers);
 
 		DrillAcrossOp comparegdppercapita_op = new DrillAcrossOp(computegdppercapita_op, gdpalreadycomputedbasecube);
+		
+		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
+				comparegdppercapita_op);
+
+		System.out.println("Logical Query Plan:"+myplan.toString());
+		
+		String result = executeStatement(myplan);
+		
+		assertContains(
+				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27800; 27704.423967820803;",
+				result);
+		
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * To execute this query would require me to implement "with member" to be both drill-across and 
+	 * compound measure. In MDX, we "declaratively" define "percentage of nos". This I want to do
+	 * with convert-cube/merge-cubes declarations, which would be "equivalent" to the MDX query 
+	 * and which would simply be a declarative definition of new datasets from existing datasets 
+	 * (though for now without reasoning capability thus merge-cubes requires explicit sharing).
+	 * 
+	 * @throws OlapException
+	 */	
+	public void test_GdpGrowthRate_vs_EmploymentFearMetric() {
+		
+		try {
+		
+		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
+
+		// First: Real GDP Growth Rate
+		Node gdpgrowthdsuri = new Resource(
+				"http://estatwrap.ontologycentral.com/id/tec00115#ds");
+		Restrictions gdprestrictions = new Restrictions();
+		gdprestrictions.cubeNamePattern = gdpgrowthdsuri;
+
+		// Base-cube
+		// We need to make sure that only the lowest members are queried
+		// from each cube. We assume a "lean" dataset.
+
+		// In order to fill the engine with data
+		List<Node[]> gdpcube = lde.getCubes(gdprestrictions);
+		assertEquals(2, gdpcube.size());
+		Map<String, Integer> gdpcubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(gdpcube.get(0));
+		System.out.println("CUBE_NAME: "
+				+ gdpcube.get(1)[gdpcubemap.get("?CUBE_NAME")]);
+
+		List<Node[]> gdpcubemeasures = lde.getMeasures(gdprestrictions);
+
+		List<Node[]> gdpcubedimensions = lde.getDimensions(gdprestrictions);
+		assertEquals(true, gdpcubedimensions.size() > 1);
+
+		List<Node[]> gdpcubehierarchies = lde.getHierarchies(gdprestrictions);
+
+		List<Node[]> gdpcubelevels = lde.getLevels(gdprestrictions);
+
+		List<Node[]> gdpcubemembers = lde.getMembers(gdprestrictions);
+
+		// Base-cube
+		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpcube, gdpcubemeasures,
+				gdpcubedimensions, gdpcubehierarchies, gdpcubelevels,
+				gdpcubemembers);
+		
+		// Convert-Cube / Merge-Cubes
+		// XXX: Not yet needed since manual drill-across.
+
+		// Slice	
+		List<Node[]> gdpsliceddimensions = new ArrayList<Node[]>();
+
+		System.out.println("DIMENSION_UNIQUE_NAMES:");
+		Map<String, Integer> gdpdimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(gdpcubedimensions.get(0));
+		// Header
+		gdpsliceddimensions.add(gdpcubedimensions.get(0));
+		for (Node[] nodes : gdpcubedimensions) {
+			String dimensionname = nodes[gdpdimensionmap
+					.get("?DIMENSION_UNIQUE_NAME")].toString();
+			System.out.println(dimensionname);
+			if (dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#unit")) {
+				gdpsliceddimensions.add(nodes);
+			}
+		}
+				
+		SliceOp gdpsliced = new SliceOp(gdpbasecube, gdpsliceddimensions);
+		
+
+		// Second: Unemployment dataset
+		Node unemploymentdsuri = new Resource(
+				"http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds");
+		Restrictions unemploymentdsrestrictions = new Restrictions();
+		unemploymentdsrestrictions.cubeNamePattern = unemploymentdsuri;
+
+		// Base-cube
+
+		// Here, the data will be loaded. In order to fill the engine with data
+		List<Node[]> unemploymentcube = lde.getCubes(unemploymentdsrestrictions);
+		assertEquals(2, unemploymentcube.size());
+		Map<String, Integer> unemploymentcubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(unemploymentcube.get(0));
+		System.out.println("CUBE_NAME: "
+				+ unemploymentcube.get(1)[unemploymentcubemap.get("?CUBE_NAME")]);
+
+		List<Node[]> unemploymentcubemeasures = lde
+				.getMeasures(unemploymentdsrestrictions);
+
+		List<Node[]> unemploymentcubedimensions = lde
+				.getDimensions(unemploymentdsrestrictions);
+		assertEquals(true, unemploymentcubedimensions.size() > 1);
+
+		List<Node[]> unemploymentcubehierarchies = lde
+				.getHierarchies(unemploymentdsrestrictions);
+
+		List<Node[]> unemploymentcubelevels = lde
+				.getLevels(unemploymentdsrestrictions);
+
+		List<Node[]> unemploymentcubemembers = lde
+				.getMembers(unemploymentdsrestrictions);
+
+		BaseCubeOp unemploymentbasecube = new BaseCubeOp(unemploymentcube,
+				unemploymentcubemeasures, unemploymentcubedimensions,
+				unemploymentcubehierarchies, unemploymentcubelevels,
+				unemploymentcubemembers);
+
+		// First pre-processing
+		
+		// Convert-Cube / Merge-Cubes
+		
+		// COMPUTE_YES
+		ReconciliationCorrespondence computeyes_correspondence;
+		List<Node[]> computeyes_inputmembers1 = new ArrayList<Node[]>();
+		computeyes_inputmembers1
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2") });
+
+		List<Node[]> computeyes_inputmembers2 = new ArrayList<Node[]>();
+		computeyes_inputmembers2
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_3") });
+
+		List<Node[]> computeyes_outputmembers = new ArrayList<Node[]>();
+		computeyes_outputmembers
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+
+		String computeyes_function = "(x1 + x2)";
+
+		computeyes_correspondence = new ReconciliationCorrespondence(
+				"computeyes", computeyes_inputmembers1,
+				computeyes_inputmembers2,
+				computeyes_outputmembers, computeyes_function);
+
+		// Compute GDP per Capita from GDP and Population
+		LogicalOlapOp computeyes_op = new ConvertCubeOp(unemploymentbasecube,
+				unemploymentbasecube, computeyes_correspondence,
+				domainUri);
+		
+		// COMPUTE\_PERCENTAGENOS
+		ReconciliationCorrespondence computepercentagenos_correspondence;
+		List<Node[]> computepercentagenos_inputmembers1 = new ArrayList<Node[]>();
+		computepercentagenos_inputmembers1
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1") });
+
+		List<Node[]> computepercentagenos_inputmembers2 = new ArrayList<Node[]>();
+		computepercentagenos_inputmembers2
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+
+		List<Node[]> computepercentagenos_outputmembers = new ArrayList<Node[]>();
+		computepercentagenos_outputmembers
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+// Not yet needed since manual drill-across:
+//		computepercentagenos_outputmembers
+//				.add(new Node[] {
+//						new Resource(
+//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+//						new Resource(
+//								"http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
+		
+		String computepercentagenos_function = "(x2 / (x_1 + x2))";
+
+		computepercentagenos_correspondence = new ReconciliationCorrespondence(
+				"computepercentagenos", computepercentagenos_inputmembers1,
+				computepercentagenos_inputmembers2,
+				computepercentagenos_outputmembers, computepercentagenos_function);
+
+		// Compute GDP per Capita from GDP and Population
+		LogicalOlapOp computepercentagenos_op = new ConvertCubeOp(unemploymentbasecube,
+				computeyes_op, computepercentagenos_correspondence,
+				domainUri);
+		
+		// Slice	
+		List<Node[]> computepercentagenosslicesliceddimensions = new ArrayList<Node[]>();
+
+		System.out.println("DIMENSION_UNIQUE_NAMES:");
+		Map<String, Integer> computepercentagenosslicedimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(unemploymentcubedimensions.get(0));
+		// Header
+		computepercentagenosslicesliceddimensions.add(unemploymentcubedimensions.get(0));
+		for (Node[] nodes : unemploymentcubedimensions) {
+			String dimensionname = nodes[computepercentagenosslicedimensionmap
+					.get("?DIMENSION_UNIQUE_NAME")].toString();
+			System.out.println(dimensionname);
+			if (dimensionname.equals("http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable")) {
+				computepercentagenosslicesliceddimensions.add(nodes);
+			}
+		}
+				
+		SliceOp computepercentagenosslicesliced = new SliceOp(computepercentagenos_op, computepercentagenosslicesliceddimensions);
+		
+		// Drill-across gdp and unemployment dataset
+		DrillAcrossOp comparegdppercapita_op = new DrillAcrossOp(gdpsliced, computepercentagenosslicesliced);
 		
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 				comparegdppercapita_op);

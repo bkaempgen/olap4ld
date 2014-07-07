@@ -24,7 +24,7 @@ public class Olap2SparqlSesameVisitor implements
 	private List<Node[]> cubes = new ArrayList<Node[]>();
 	private List<Node[]> measures = new ArrayList<Node[]>();
 	private List<Node[]> dimensions = new ArrayList<Node[]>();
-	private List<Node[]> hierarchies;
+	private List<Node[]> hierarchies = new ArrayList<Node[]>();
 	private List<Node[]> levels = new ArrayList<Node[]>();
 	private List<Node[]> members;
 

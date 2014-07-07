@@ -57,6 +57,8 @@ public class SliceSparqlDerivedDatasetIterator implements PhysicalOlapIterator {
 		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(slicedDimensions.get(0));
 
+		// XXX: Not implemented, yet.
+		
 		// Wanted result
 		List<Node[]> results = new ArrayList<Node[]>();
 		

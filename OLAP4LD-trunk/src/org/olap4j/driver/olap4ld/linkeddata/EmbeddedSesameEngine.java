@@ -129,6 +129,18 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	private PhysicalOlapQueryPlan createExecplan(LogicalOlapQueryPlan queryplan)
 			throws OlapException {
 
+		/*
+		 * Currently, I distinguish:
+		 * 
+		 * Drill-Across for queries with Drill-Across at the top, OLAP-to-SPARQL queries below.
+		 * 
+		 * DerivedDataset for queries with Convert-Cube or BaseCubeOp.
+		 * 
+		 * OLAP-to-SPARQL for queries with OLAP-to-SPARQL queries 
+		 * 
+		 * I want to have Drill-Across for queries with Drill-Across at the top, OLAP-to-SPARQL queries below,
+		 * and Convert-Cube or Merge-Cubes at the end.
+		 */
 		try {
 			LogicalOlapOperatorQueryPlanVisitor r2a;
 			// Heuristics of how to select the right visitor.
@@ -2622,15 +2634,19 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			boolean contained = false;
 			for (Node[] aResult : result) {
 				boolean sameDimension = aResult[hierarchymap
-						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
-						newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")]
+						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
+						newnode[hierarchymap.get("?DIMENSION_UNIQUE_NAME")]
 								.toString());
+				boolean sameHierarchy = aResult[hierarchymap
+				        						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
+				        						newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")]
+				        								.toString());
 				boolean sameCube = aResult[hierarchymap.get("?CUBE_NAME")]
 						.toString().equals(
 								newnode[hierarchymap.get("?CUBE_NAME")]
 										.toString());
 
-				if (sameDimension && sameCube) {
+				if (sameDimension && sameHierarchy && sameCube) {
 					contained = true;
 				}
 			}
@@ -2859,15 +2875,26 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					boolean contained = false;
 					for (Node[] aResult : result) {
 						boolean sameDimension = aResult[levelmap
+						        						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
+						        						newnode[levelmap.get("?DIMENSION_UNIQUE_NAME")]
+						        								.toString());
+						
+						boolean sameHierarchy = aResult[levelmap
+						        						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
+						        						newnode[levelmap.get("?HIERARCHY_UNIQUE_NAME")]
+						        								.toString());
+						
+						boolean sameLevel = aResult[levelmap
 								.get("?LEVEL_UNIQUE_NAME")].toString().equals(
 								newnode[levelmap.get("?LEVEL_UNIQUE_NAME")]
 										.toString());
+						
 						boolean sameCube = aResult[levelmap.get("?CUBE_NAME")]
 								.toString().equals(
 										newnode[levelmap.get("?CUBE_NAME")]
 												.toString());
 
-						if (sameDimension && sameCube) {
+						if (sameDimension && sameHierarchy && sameLevel && sameCube) {
 							contained = true;
 						}
 					}
@@ -3135,6 +3162,21 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					boolean contained = false;
 					for (Node[] aResult : result) {
 						boolean sameDimension = aResult[membermap
+						        						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
+						        						newnode[membermap.get("?DIMENSION_UNIQUE_NAME")]
+						        								.toString());
+						
+						boolean sameHierarchy = aResult[membermap
+						        						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
+						        						newnode[membermap.get("?HIERARCHY_UNIQUE_NAME")]
+						        								.toString());
+						
+						boolean sameLevel = aResult[membermap
+								.get("?LEVEL_UNIQUE_NAME")].toString().equals(
+								newnode[membermap.get("?LEVEL_UNIQUE_NAME")]
+										.toString());
+						
+						boolean sameMember = aResult[membermap
 								.get("?MEMBER_UNIQUE_NAME")].toString().equals(
 								newnode[membermap.get("?MEMBER_UNIQUE_NAME")]
 										.toString());
@@ -3143,7 +3185,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 										newnode[membermap.get("?CUBE_NAME")]
 												.toString());
 
-						if (sameDimension && sameCube) {
+						if (sameDimension && sameHierarchy && sameLevel && sameMember && sameCube) {
 							contained = true;
 						}
 					}

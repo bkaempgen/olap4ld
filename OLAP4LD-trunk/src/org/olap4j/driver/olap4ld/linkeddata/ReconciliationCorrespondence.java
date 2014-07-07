@@ -65,8 +65,8 @@ public class ReconciliationCorrespondence {
 		if (inputmembers2 != null) {
 			for (int i = 0; i < inputmembers2.size(); i++) {
 				reconciliationcorrespondenceString += "("
-						+ inputmembers1.get(i)[0] + ","
-						+ inputmembers1.get(i)[1] + ")";
+						+ inputmembers2.get(i)[0] + ","
+						+ inputmembers2.get(i)[1] + ")";
 			}
 		}
 		

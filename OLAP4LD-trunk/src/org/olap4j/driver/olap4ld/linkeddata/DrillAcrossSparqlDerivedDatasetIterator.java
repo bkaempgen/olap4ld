@@ -57,7 +57,7 @@ public class DrillAcrossSparqlDerivedDatasetIterator implements PhysicalOlapIter
 			result2.add(node);
 		}
 		
-		// Two datasets are joined. For now, just return the first
+		// XXX Two datasets are joined. For now, just return the first
 		
 		this.iterator = result1.iterator();
 	}
