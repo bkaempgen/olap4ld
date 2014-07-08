@@ -136,9 +136,7 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 		List<Node[]> gdpcubemembers = lde.getMembers(gdprestrictions);
 
 		// Base-cube
-		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpcube, gdpcubemeasures,
-				gdpcubedimensions, gdpcubehierarchies, gdpcubelevels,
-				gdpcubemembers);
+		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpdsuri.toString());
 
 		// Projection
 		// Since we do not remove any measure from the cubes, we do not need
@@ -326,10 +324,7 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 		List<Node[]> populationcubemembers = lde
 				.getMembers(populationrestrictions);
 
-		BaseCubeOp populationbasecube = new BaseCubeOp(populationcube,
-				populationcubemeasures, populationcubedimensions,
-				populationcubehierarchies, populationcubelevels,
-				populationcubemembers);
+		BaseCubeOp populationbasecube = new BaseCubeOp(populationuri.toString());
 
 		// XXX Would I need to add: Add indicator and unit to population dataset
 
@@ -435,10 +430,7 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 		List<Node[]> gdpalreadycomputedcubemembers = lde
 				.getMembers(gdpalreadycomputedrestrictions);
 
-		BaseCubeOp gdpalreadycomputedbasecube = new BaseCubeOp(gdpalreadycomputedcube,
-				gdpalreadycomputedcubemeasures, gdpalreadycomputedcubedimensions,
-				gdpalreadycomputedcubehierarchies, gdpalreadycomputedcubelevels,
-				gdpalreadycomputedcubemembers);
+		BaseCubeOp gdpalreadycomputedbasecube = new BaseCubeOp(gdpalreadycomputeduri.toString());
 
 		DrillAcrossOp comparegdppercapita_op = new DrillAcrossOp(computegdppercapita_op, gdpalreadycomputedbasecube);
 		

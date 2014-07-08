@@ -495,6 +495,9 @@ abstract class Olap4ldCellSet implements CellSet {
 
 		Restrictions restrictions = new Restrictions();
 		restrictions.cubeNamePattern = cube.get(1)[cubemap.get("?CUBE_NAME")];
+		
+		// Cube from (cube, SlicesRollups, Dices, Projections)
+		LogicalOlapOp basecube = new BaseCubeOp(restrictions.cubeNamePattern.toString());
 
 		List<Node[]> measures = new ArrayList<Node[]>();
 		List<Node[]> dimensions = new ArrayList<Node[]>();
@@ -529,10 +532,6 @@ abstract class Olap4ldCellSet implements CellSet {
 
 		Map<String, Integer> membermap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(members.get(0));
-
-		// Cube from (cube, SlicesRollups, Dices, Projections)
-		LogicalOlapOp basecube = new BaseCubeOp(cube, measures, dimensions,
-				hierarchies, levels, members);
 
 		// Projections from (cube, SlicesRollups, Dices, Projections)
 		ArrayList<Node[]> projections = new ArrayList<Node[]>();

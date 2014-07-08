@@ -1,10 +1,5 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,19 +8,9 @@ import java.util.Map;
 import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
-import org.semanticweb.yars.nx.parser.NxParser;
 
 /**
  * 
@@ -37,30 +22,52 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 
 	public List<Node[]> cubes;
 	public List<Node[]> measures;
+	public List<Node[]> newmeasures;
 	public List<Node[]> dimensions;
 	public List<Node[]> hierarchies;
 	public List<Node[]> levels;
 	public List<Node[]> members;
 
-	private Repository repo;
+	private EmbeddedSesameEngine engine;
 	private Iterator<Node[]> outputiterator;
 	private String query;
 
-	public BaseCubeSparqlDerivedDatasetIterator(Repository repo,
-			List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
-			List<Node[]> hierarchies, List<Node[]> levels, List<Node[]> members) {
-		// We assume that basecube has a repo with populated according to
-		// metadata
-		this.repo = repo;
-		// We assume that cubes to BaseCubeOp always refer to one single cube
-		assert cubes.size() <= 2;
+	public BaseCubeSparqlDerivedDatasetIterator(EmbeddedSesameEngine engine, String dataseturi) {
 
-		this.cubes = cubes;	
+		this.engine = engine;
+		
+		// First: GDP and main components - Current prices dataset
+		Node gdpdsuri = new Resource(dataseturi);
+		Restrictions gdprestrictions = new Restrictions();
+		gdprestrictions.cubeNamePattern = gdpdsuri;
+
+		// Base-cube
+		// XXX: We need to make sure that only the lowest members are queried
+		// from each cube.
+
+		// In order to fill the engine with data
+		try {
+			cubes = engine.getCubes(gdprestrictions);
+
+			measures = engine.getMeasures(gdprestrictions);
+
+			dimensions = engine.getDimensions(gdprestrictions);
+
+			hierarchies = engine.getHierarchies(gdprestrictions);
+
+			levels = engine.getLevels(gdprestrictions);
+
+			members = engine.getMembers(gdprestrictions);
+
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		// Base-Cube would only take the non-aggregated measures
+		newmeasures = new ArrayList<Node[]>();
 		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
 				.getNodeResultFields(measures.get(0));
-		List<Node[]> newmeasures = new ArrayList<Node[]>();
 		newmeasures.add(measures.get(0));
 		for (int i = 1; i < measures.size(); i++) {
 			Node[] measure = measures.get(i);
@@ -75,16 +82,12 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 					.contains("AGGFUNC")) {
 				continue;
 			}
-			
+
 			newmeasures.add(measure);
 		}
-		measures = newmeasures;
-		this.measures = measures;
-		
-		this.dimensions = dimensions;
-		this.hierarchies = hierarchies;
-		this.levels = levels;
-		this.members = members;
+
+		// We assume that cubes to BaseCubeOp always refer to one single cube
+		assert cubes.size() <= 2;
 
 		// Instead of simply returning the metadata, we can return the
 		// List of List of nodes representing the observations.
@@ -142,8 +145,10 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 									.toString()
 									.replace("http://purl.org/olap#", "")
 									.toUpperCase(), "");
-			
-			// XXX: Will not work, currently, since measure names are defined by: measureProperty, dataset, Aggregation function. See OLAP-2-SPARQL algorithm iterator.
+
+			// XXX: Will not work, currently, since measure names are defined
+			// by: measureProperty, dataset, Aggregation function. See
+			// OLAP-2-SPARQL algorithm iterator.
 
 			// We also remove aggregation function from Measure Property
 			// Variable so
@@ -218,77 +223,8 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 		Olap4ldUtil._log.config("SPARQL query: " + query);
 
 		List<Node[]> myBindings = new ArrayList<Node[]>();
-
-		try {
-			RepositoryConnection con = repo.getConnection();
-
-			ByteArrayOutputStream boas = new ByteArrayOutputStream();
-			// FileOutputStream fos = new
-			// FileOutputStream("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/resources/result.srx");
-
-			SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
-					boas);
-
-			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
-					query);
-			tupleQuery.evaluate(sparqlWriter);
-
-			ByteArrayInputStream bais = new ByteArrayInputStream(
-					boas.toByteArray());
-
-			// String xmlwriterstreamString =
-			// Olap4ldLinkedDataUtil.convertStreamToString(bais);
-			// System.out.println(xmlwriterstreamString);
-			// Transform sparql xml to nx
-			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(bais);
-
-			// Only log if needed
-			if (Olap4ldUtil._isDebug) {
-				String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
-				Olap4ldUtil._log.config("NX output: " + test2);
-				nx.reset();
-			}
-
-			NxParser nxp = new NxParser(nx);
-
-			Node[] nxx;
-			while (nxp.hasNext()) {
-				try {
-					nxx = nxp.next();
-					myBindings.add(nxx);
-				} catch (Exception e) {
-
-					// Might happen often, therefore config only
-					Olap4ldUtil._log
-							.config("NxParser: Could not parse properly: "
-									+ e.getMessage());
-				}
-				;
-			}
-
-			boas.close();
-			con.close();
-			// do something interesting with the values here...
-			// con.close();
-		} catch (RepositoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedQueryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (QueryEvaluationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TupleQueryResultHandlerException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		
+		myBindings = engine.sparql(query, false);
 
 		return myBindings;
 	}
@@ -311,9 +247,9 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 
 	@Override
 	public void init() throws Exception {
-		
+
 		// Does not have input operators, therefore no other init necessary.
-		
+
 		this.outputiterator = sparql(this.query).iterator();
 	}
 

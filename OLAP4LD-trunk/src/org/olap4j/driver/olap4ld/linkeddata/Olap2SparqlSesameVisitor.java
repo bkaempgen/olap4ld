@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.semanticweb.yars.nx.Node;
 
@@ -20,14 +21,7 @@ import org.semanticweb.yars.nx.Node;
 public class Olap2SparqlSesameVisitor implements
 		LogicalOlapOperatorQueryPlanVisitor {
 
-	// Input to OLAP operators
-	private List<Node[]> cubes = new ArrayList<Node[]>();
-	private List<Node[]> measures = new ArrayList<Node[]>();
-	private List<Node[]> dimensions = new ArrayList<Node[]>();
-	private List<Node[]> hierarchies = new ArrayList<Node[]>();
-	private List<Node[]> levels = new ArrayList<Node[]>();
-	private List<Node[]> members;
-
+	// Input to OLAP operator
 	private List<Node[]> slicedDimensions = new ArrayList<Node[]>();
 	private List<Node[]> rollupslevels = new ArrayList<Node[]>();
 	private List<Node[]> rollupshierarchies = new ArrayList<Node[]>();
@@ -37,6 +31,7 @@ public class Olap2SparqlSesameVisitor implements
 
 	// For the moment, we know the repo (we could wrap it also)
 	private EmbeddedSesameEngine engine;
+	private PhysicalOlapIterator _root;
 
 	/**
 	 * Constructor.
@@ -100,23 +95,18 @@ public class Olap2SparqlSesameVisitor implements
 	}
 
 	public void visit(BaseCubeOp o) throws QueryException {
-		BaseCubeOp so = (BaseCubeOp) o;
-
-		// Cube gives us the URI of the dataset that we want to resolve
-		this.cubes = so.cubes;
-		this.measures = so.measures;
-		this.dimensions = so.dimensions;
-		this.hierarchies = so.hierarchies;
-		this.levels = so.levels;
-		// One problem could be that this may be a huge number of members.
-		this.members = so.members;
+		LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this.engine);
+		o.accept(r2a);
+		this._root = (PhysicalOlapIterator) r2a.getNewRoot();
 	}
 
 	@Override
 	public void visit(ConvertCubeOp op) throws QueryException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException(
-				"visit(ConvertContextOp op) not implemented!");
+		
+		LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this.engine);
+		op.accept(r2a);
+		this._root = (PhysicalOlapIterator) r2a.getNewRoot();
+		
 	}
 
 	@Override
@@ -131,6 +121,15 @@ public class Olap2SparqlSesameVisitor implements
 	 * load RDF to store.
 	 */
 	public Object getNewRoot() {
+
+		try {
+		Restrictions restrictions = new Restrictions();
+
+		List<Node[]> measures = _root.getMeasures(restrictions);
+		List<Node[]> dimensions = _root.getDimensions(restrictions);
+		//List<Node[]> hierarchies = _root.getHierarchies(restrictions);
+		List<Node[]> levels = _root.getLevels(restrictions);
+		//List<Node[]> members = _root.getMembers(restrictions);
 
 		// Build slicesrollups
 		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
@@ -266,11 +265,16 @@ public class Olap2SparqlSesameVisitor implements
 		// Currently, we should have retrieved the data, already, therefore, we
 		// only have one node.
 		// We use the OLAP-2-SPARQL algorithm.
-		PhysicalOlapIterator _root = new Olap2SparqlAlgorithmSesameIterator(
-				this.engine, cubes, measures, dimensions, hierarchies, levels, members, slicesrollups,
+		this._root = new Olap2SparqlAlgorithmSesameIterator(this._root,
+				this.engine, slicesrollups,
 				levelheights, projections, membercombinations,
 				hierarchysignature);
 
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return _root;
 	}
 }

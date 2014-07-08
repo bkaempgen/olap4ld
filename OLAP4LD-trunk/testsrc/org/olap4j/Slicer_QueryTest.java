@@ -66,8 +66,6 @@ public class Slicer_QueryTest extends TestCase {
 	private List<Node[]> measures;
 	private List<Node[]> cubes;
 	private List<Node[]> hierarchies;
-	private List<Node[]> levels;
-	private List<Node[]> members;
 
 	public Slicer_QueryTest() throws SQLException {
 
@@ -286,9 +284,9 @@ public class Slicer_QueryTest extends TestCase {
 
 			this.hierarchies = lde.getHierarchies(restrictions);
 
-			this.levels = lde.getLevels(restrictions);
+//			this.levels = lde.getLevels(restrictions);
 
-			this.members = lde.getMembers(restrictions);
+//			this.members = lde.getMembers(restrictions);
 
 			// Collect members
 			this.membersofdimensions = new HashMap<Integer, List<Node[]>>();
@@ -445,9 +443,12 @@ public class Slicer_QueryTest extends TestCase {
 		// One member combination contains a header and a list of
 		// members (= one combination)
 		// each combination will have the same signature
-
-		LogicalOlapOp basecube = new BaseCubeOp(cubes, measures, dimensions,
-				hierarchies, levels, members);
+		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(cubes.get(0));
+		System.out.println("CUBE_NAME: "
+				+ cubes.get(1)[cubemap.get("?CUBE_NAME")]);
+		
+		LogicalOlapOp basecube = new BaseCubeOp(cubes.get(1)[cubemap.get("?CUBE_NAME")].toString());
 		LogicalOlapOp projection = new ProjectionOp(basecube, measures);
 		List<List<Node[]>> aMembercombinations = new ArrayList<List<Node[]>>();
 		aMembercombinations.add(membercombination);

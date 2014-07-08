@@ -32,26 +32,33 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	private EmbeddedSesameEngine engine;
 	private String query;
 	private List<Node[]> result;
-	private Iterator<Node[]> iterator;
+	private Iterator<Node[]> outputiterator;
 	private HashMap<Integer, Integer> levelHeightMap;
 	private ArrayList<Node[]> newmeasures;
 
-	public Olap2SparqlAlgorithmSesameIterator(EmbeddedSesameEngine engine,
-			List<Node[]> cubes, List<Node[]> measures, List<Node[]> dimensions,
-			List<Node[]> hierarchies, List<Node[]> levels,
-			List<Node[]> members, List<Node[]> slicesrollups,
-			List<Integer> levelheights, List<Node[]> projections,
-			List<List<Node[]>> membercombinations,
+	public Olap2SparqlAlgorithmSesameIterator(
+			PhysicalOlapIterator inputiterator, EmbeddedSesameEngine engine,
+			List<Node[]> slicesrollups, List<Integer> levelheights,
+			List<Node[]> projections, List<List<Node[]>> membercombinations,
 			List<Node[]> hierarchysignature) {
 		this.engine = engine;
 
-		this.cubes = cubes;
-		this.measures = measures;
-		this.dimensions = dimensions;
-		this.hierarchies = hierarchies;
-		this.levels = levels;
-		// One problem could be that this may be a huge number of members.
-		this.members = members;
+		Restrictions restrictions = new Restrictions();
+
+		try {
+			this.cubes = inputiterator.getCubes(restrictions);
+
+			this.measures = inputiterator.getMeasures(restrictions);
+			this.dimensions = inputiterator.getDimensions(restrictions);
+			this.hierarchies = inputiterator.getHierarchies(restrictions);
+			this.levels = inputiterator.getLevels(restrictions);
+			// One problem could be that this may be a huge number of members.
+			this.members = inputiterator.getCubes(restrictions);
+
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		// Maybe first check that every metadata element at least has one
 		// header?
@@ -980,8 +987,9 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 			// String condition = engine.createConditionConsiderEquivalences(
 			// dimensionProperty, dimensionPropertyDimensionVariable);
-			String condition = "?" + dimensionPropertyDimensionVariable.toString()
-					+ " = <" + dimensionProperty + ">";
+			String condition = "?"
+					+ dimensionPropertyDimensionVariable.toString() + " = <"
+					+ dimensionProperty + ">";
 
 			whereClause += "?obs ?" + dimensionPropertyDimensionVariable + " ?"
 					+ dimensionPropertyVariable + levelHeight + ". ";
@@ -1029,7 +1037,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				e.printStackTrace();
 			}
 		}
-		return iterator.hasNext();
+		return outputiterator.hasNext();
 	}
 
 	/**
@@ -1049,7 +1057,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				e.printStackTrace();
 			}
 		}
-		return iterator.next();
+		return outputiterator.next();
 	}
 
 	@Override
@@ -1066,13 +1074,13 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 			// Not done, anymore.
 			// After evaluation, we do "entity-consolidation"
-//			this.result = this.engine
-//					.replaceIdentifiersWithCanonical(this.result);
+			// this.result = this.engine
+			// .replaceIdentifiersWithCanonical(this.result);
 		}
 
 		// Does not have input operators, therefore no other init necessary.
 
-		this.iterator = this.result.iterator();
+		this.outputiterator = this.result.iterator();
 
 	}
 

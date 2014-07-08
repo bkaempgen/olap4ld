@@ -40,7 +40,7 @@ public class OlapDrillAcross2JoinSesameVisitor implements
 			// Do nothing, since we will go through the entire tree, anyway.
 			//op.inputop1.accept(this);
 		} else if (op.inputop1 instanceof ConvertCubeOp || op.inputop1 instanceof BaseCubeOp) {
-			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this.engine.repo);
+			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this.engine);
 			op.inputop1.accept(r2a);
 			iteratorlist.add((PhysicalOlapIterator) r2a.getNewRoot());
 			
@@ -57,7 +57,7 @@ public class OlapDrillAcross2JoinSesameVisitor implements
 			// Do nothing, since we will go through the entire tree, anyway.
 			//op.inputop1.accept(this);
 		} else if (op.inputop2 instanceof ConvertCubeOp || op.inputop2 instanceof BaseCubeOp) {
-			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this.engine.repo);
+			LogicalOlapOperatorQueryPlanVisitor r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this.engine);
 			op.inputop2.accept(r2a);
 			iteratorlist.add((PhysicalOlapIterator) r2a.getNewRoot());
 			

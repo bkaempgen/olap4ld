@@ -1,7 +1,5 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.sail.SailRepository;
 
 /**
  * This visitor creates a physical query plan. It is different from
@@ -21,8 +19,8 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 	// the new root node
 	PhysicalOlapIterator _root;
 
-	// For the moment, we know the repo (we could wrap it also)
-	private Repository repo;
+	// For the moment, we know the engine
+	private EmbeddedSesameEngine engine;
 
 	/**
 	 * 
@@ -45,8 +43,8 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 	 * http://olap4ld.googlecode.com/dic/indic_na#VI_PPS_EU28_HAB; 2012; 149;
 	 * 
 	 */
-	public Olap2SparqlSesameDerivedDatasetVisitor(Repository repo) {
-		this.repo = repo;
+	public Olap2SparqlSesameDerivedDatasetVisitor(EmbeddedSesameEngine engine) {
+		this.engine = engine;
 	}
 
 	/**
@@ -247,19 +245,23 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 
 	@Override
 	public void visit(DrillAcrossOp op) throws QueryException {
-		DrillAcrossOp so = (DrillAcrossOp) op;
-
-		// Most probable, the _root will be null
-		so.inputop1.accept(this);
-		PhysicalOlapIterator root1 = _root;
-
-		so.inputop2.accept(this);
-		PhysicalOlapIterator root2 = _root;
-
-		DrillAcrossSparqlDerivedDatasetIterator resultiterator = new DrillAcrossSparqlDerivedDatasetIterator(
-				root1, root2);
-
-		_root = resultiterator;
+		
+		throw new UnsupportedOperationException(
+				"visit(DrillAcrossOp op) not implemented!");
+		
+//		DrillAcrossOp so = (DrillAcrossOp) op;
+//
+//		// Most probable, the _root will be null
+//		so.inputop1.accept(this);
+//		PhysicalOlapIterator root1 = _root;
+//
+//		so.inputop2.accept(this);
+//		PhysicalOlapIterator root2 = _root;
+//
+//		DrillAcrossSparqlDerivedDatasetIterator resultiterator = new DrillAcrossSparqlDerivedDatasetIterator(
+//				root1, root2);
+//
+//		_root = resultiterator;
 	}
 
 	@Override
@@ -270,14 +272,19 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 
 	@Override
 	public void visit(SliceOp op) throws QueryException {
-		SliceOp so = (SliceOp) op;
-
-		so.inputOp.accept(this);
-
-		SliceSparqlDerivedDatasetIterator slicecube = new SliceSparqlDerivedDatasetIterator(repo, _root,
-				so.slicedDimensions);
-
-		_root = slicecube;
+		
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException(
+				"visit(SliceOp op) not implemented!");
+		
+//		SliceOp so = (SliceOp) op;
+//
+//		so.inputOp.accept(this);
+//
+//		SliceSparqlDerivedDatasetIterator slicecube = new SliceSparqlDerivedDatasetIterator(engine, _root,
+//				so.slicedDimensions);
+//
+//		_root = slicecube;
 	}
 
 	@Override
@@ -304,9 +311,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 
 		// We do not need to change those metadata.
 
-		BaseCubeSparqlDerivedDatasetIterator basecube = new BaseCubeSparqlDerivedDatasetIterator(repo,
-				so.cubes, so.measures, so.dimensions, so.hierarchies,
-				so.levels, so.members);
+		BaseCubeSparqlDerivedDatasetIterator basecube = new BaseCubeSparqlDerivedDatasetIterator(engine, so.dataseturi);
 		_root = basecube;
 	}
 
@@ -319,7 +324,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 			
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root = _root;
-			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root,
+			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(engine, root,
 					null, so.conversioncorrespondence, so.domainUri);
 		} else if (so.inputOp1 == so.inputOp2) {
 			// If both operators are the same, we can reuse the iterator.
@@ -332,7 +337,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 			// previous operators and reusing them if needed.
 			so.inputOp1.accept(this);
 			PhysicalOlapIterator root = _root;
-			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root,
+			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(engine, root,
 					root, so.conversioncorrespondence, so.domainUri);
 		} else {
 			so.inputOp1.accept(this);
@@ -340,7 +345,7 @@ public class Olap2SparqlSesameDerivedDatasetVisitor implements
 			so.inputOp2.accept(this);
 			PhysicalOlapIterator root2 = _root;
 
-			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(repo, root1,
+			convertcontextcube = new ConvertSparqlDerivedDatasetIterator(engine, root1,
 					root2, so.conversioncorrespondence, so.domainUri);
 		}
 

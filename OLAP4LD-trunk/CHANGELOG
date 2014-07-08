@@ -15,6 +15,11 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-07-08==
+* Refactored operators and interators to allow combination of OLAP-to-SPARQL and Convert-Cube.
+* See https://intra.b-kaempgen.de/dawiki/index.php/Resubmission_of_Convert-Cube_Paper#Is_there_an_.22equivalent.22_description_of_the_query_in_ISEM_paper.3F
+* Status: Examples: Failures 10.
+
 ==2014-07-07==
 * Filtering for duplicates at getDimensions(), getHierarchies()... on all "unique" attributes,
 now that we have duplication strategy.

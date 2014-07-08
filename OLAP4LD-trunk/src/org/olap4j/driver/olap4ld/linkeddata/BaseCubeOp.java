@@ -14,42 +14,21 @@ import org.semanticweb.yars.nx.Node;
  */
 public class BaseCubeOp implements LogicalOlapOp {
 
-	// XXX: Should be removed after we have transformed metadata queries to iterators.
-	public List<Node[]> cubes;
-	public List<Node[]> measures;
-	public List<Node[]> dimensions;
-	public List<Node[]> hierarchies;
-	public List<Node[]> levels;
-	public List<Node[]> members;
+	public String dataseturi;
 
 	/**
 	 * 
 	 * @param list
 	 *            with header and one cube
 	 */
-	public BaseCubeOp(List<Node[]> cubes, List<Node[]> measures,
-			List<Node[]> dimensions, List<Node[]> hierarchies,
-			List<Node[]> levels, List<Node[]> members) {
+	public BaseCubeOp(String dataseturi) {
 		// We assume that cubes to BaseCubeOp always refer to one single cube
-		assert cubes.size() <= 2;
-		this.cubes = cubes;
-		this.measures = measures;
-		this.dimensions = dimensions;
-		this.hierarchies = hierarchies;
-		this.levels = levels;
-		this.members = members;
+		this.dataseturi = dataseturi;
 	}
 
 	public String toString() {
 
-		Map<String, Integer> map = Olap4ldLinkedDataUtil
-				.getNodeResultFields(cubes.get(0));
-
-		Node[] cubeNodes = cubes.get(1);
-		int index = map.get("?CUBE_NAME");
-		String cubename = cubeNodes[index].toString();
-
-		return "BaseCube (" + cubename + ")";
+		return "BaseCube (" + dataseturi + ")";
 	}
 
 	public void accept(LogicalOlapOperatorQueryPlanVisitor v)

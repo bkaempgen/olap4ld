@@ -132,9 +132,7 @@ public class Drill_across_QueryTest extends TestCase {
 
 		List<Node[]> gdpcubemembers = lde.getMembers(gdprestrictions);
 
-		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpcube, gdpcubemeasures,
-				gdpcubedimensions, gdpcubehierarchies, gdpcubelevels,
-				gdpcubemembers);
+		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpdsuri.toString());
 
 		// Projection
 		// Since we do not remove any measure from the cubes, we do not need
@@ -208,10 +206,7 @@ public class Drill_across_QueryTest extends TestCase {
 
 		List<Node[]> emplratecubemembers = lde.getMembers(emplraterestrictions);
 
-		BaseCubeOp emplratebasecube = new BaseCubeOp(emplratecube,
-				emplratecubemeasures, emplratecubedimensions,
-				emplratecubehierarchies, emplratecubelevels,
-				emplratecubemembers);
+		BaseCubeOp emplratebasecube = new BaseCubeOp(emplratedsuri.toString());
 
 		// Projection
 		// Since we do not remove any measure from the cubes, we do not need

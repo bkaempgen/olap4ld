@@ -130,9 +130,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 
 		List<Node[]> gdpcubemembers = lde.getMembers(gdprestrictions);
 
-		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpcube, gdpcubemeasures,
-				gdpcubedimensions, gdpcubehierarchies, gdpcubelevels,
-				gdpcubemembers);
+		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpdsuri.toString());
 
 		// Projection
 		// Since we do not remove any measure from the cubes, we do not need
@@ -239,9 +237,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 		List<Node[]> gdpcubemembers = lde.getMembers(gdprestrictions);
 
 		// Base-cube
-		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpcube, gdpcubemeasures,
-				gdpcubedimensions, gdpcubehierarchies, gdpcubelevels,
-				gdpcubemembers);
+		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpdsuri.toString());
 
 		// Projection
 		// Since we do not remove any measure from the cubes, we do not need
@@ -429,10 +425,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 		List<Node[]> populationcubemembers = lde
 				.getMembers(populationrestrictions);
 
-		BaseCubeOp populationbasecube = new BaseCubeOp(populationcube,
-				populationcubemeasures, populationcubedimensions,
-				populationcubehierarchies, populationcubelevels,
-				populationcubemembers);
+		BaseCubeOp populationbasecube = new BaseCubeOp(populationuri.toString());
 
 		// XXX Would I need to add: Add indicator and unit to population dataset
 
@@ -538,10 +531,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 		List<Node[]> gdpalreadycomputedcubemembers = lde
 				.getMembers(gdpalreadycomputedrestrictions);
 
-		BaseCubeOp gdpalreadycomputedbasecube = new BaseCubeOp(gdpalreadycomputedcube,
-				gdpalreadycomputedcubemeasures, gdpalreadycomputedcubedimensions,
-				gdpalreadycomputedcubehierarchies, gdpalreadycomputedcubelevels,
-				gdpalreadycomputedcubemembers);
+		BaseCubeOp gdpalreadycomputedbasecube = new BaseCubeOp(gdpalreadycomputeduri.toString());
 
 		DrillAcrossOp comparegdppercapita_op = new DrillAcrossOp(computegdppercapita_op, gdpalreadycomputedbasecube);
 		
@@ -607,9 +597,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 		List<Node[]> gdpcubemembers = lde.getMembers(gdprestrictions);
 
 		// Base-cube
-		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpcube, gdpcubemeasures,
-				gdpcubedimensions, gdpcubehierarchies, gdpcubelevels,
-				gdpcubemembers);
+		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpgrowthdsuri.toString());
 		
 		// Convert-Cube / Merge-Cubes
 		// XXX: Not yet needed since manual drill-across.
@@ -666,10 +654,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 		List<Node[]> unemploymentcubemembers = lde
 				.getMembers(unemploymentdsrestrictions);
 
-		BaseCubeOp unemploymentbasecube = new BaseCubeOp(unemploymentcube,
-				unemploymentcubemeasures, unemploymentcubedimensions,
-				unemploymentcubehierarchies, unemploymentcubelevels,
-				unemploymentcubemembers);
+		BaseCubeOp unemploymentbasecube = new BaseCubeOp(unemploymentdsuri.toString());
 
 		// First pre-processing
 		
@@ -838,9 +823,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 		List<Node[]> gdpcubemembers = lde.getMembers(gdprestrictions);
 
 		// Base-cube
-		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpcube, gdpcubemeasures,
-				gdpcubedimensions, gdpcubehierarchies, gdpcubelevels,
-				gdpcubemembers);
+		BaseCubeOp gdpbasecube = new BaseCubeOp(gdpdsuri.toString());
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(gdpbasecube);
 

@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,6 +40,7 @@ import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
 import org.openrdf.model.BNode;
 import org.openrdf.query.BooleanQuery;
+import org.openrdf.query.GraphQuery;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
@@ -52,7 +54,10 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
+import org.openrdf.rio.RDFWriter;
+import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
@@ -149,7 +154,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			} else if (queryplan._root instanceof ConvertCubeOp
 					|| queryplan._root instanceof BaseCubeOp) {
 				// We create visitor to translate logical into physical
-				r2a = new Olap2SparqlSesameDerivedDatasetVisitor(repo);
+				r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this);
 			} else {
 				r2a = new Olap2SparqlSesameVisitor(this);
 			}
@@ -407,6 +412,86 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	@Deprecated
 	private String askForFrom(boolean isDsdQuery) {
 		return "";
+	}
+	
+	public void executeCONSTRUCTQuery(String constructquery) {
+		// We assume one or two cubes, only.
+		
+		try {
+
+		RepositoryConnection con = this.repo.getConnection();
+		
+		GraphQuery graphquery = con.prepareGraphQuery(
+				org.openrdf.query.QueryLanguage.SPARQL, constructquery);
+
+		StringWriter stringout = new StringWriter();
+		RDFWriter w = Rio.createWriter(RDFFormat.RDFXML, stringout);
+		graphquery.evaluate(w);
+
+		String triples = stringout.toString();
+
+		if (Olap4ldUtil._isDebug) {
+
+			Olap4ldUtil._log.config("Loaded triples: " + triples);
+
+		}
+
+		// Insert query to load triples
+		// String insertquery =
+		// "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
+		// + triples + " } }";
+		//
+		// Olap4ldUtil._log.config("SPARQL query: " + insertquery);
+		//
+		// Update updateQuery = con.prepareUpdate(QueryLanguage.SPARQL,
+		// insertquery);
+		// updateQuery.execute();
+
+		// Would not work: prolog error
+		// ByteArrayInputStream inputstream = new
+		// ByteArrayInputStream(w.toString().getBytes());
+
+		// UTF-8 encoding seems important
+		InputStream stream = new ByteArrayInputStream(
+				triples.getBytes("UTF-8"));
+
+		// Add to triple store
+		con.add(stream, "", RDFFormat.RDFXML);
+
+		// Loaded really?
+		if (Olap4ldUtil._isDebug) {
+			String filename = "/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/"+"dataset" + constructquery.hashCode()+"n3";
+
+			Olap4ldLinkedDataUtil
+					.dumpRDF(
+							repo,			
+									filename, RDFFormat.NTRIPLES);
+		}
+
+		con.close();
+		
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedQueryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (QueryEvaluationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RDFHandlerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (RDFParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
 	/**
