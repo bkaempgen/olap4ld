@@ -20,6 +20,7 @@ We now would like to extend this.
 * Now NestedLoopJoin does Concat in case all measures are the same.
 * We should make sure that in case all measures are the same, it suffices to have one value
 from either cubes.
+* Currently does not work, try again!
 
 ==2014-07-09==
 * Finished refactoring of logical2physical operator plan:

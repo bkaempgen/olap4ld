@@ -262,6 +262,18 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 				Map<String, Integer> measurenmap = Olap4ldLinkedDataUtil
 						.getNodeResultFields(root1_measures.get(0));
 
+				// We check if all measures are the same
+				boolean allmeasuresthesame = true;
+
+				for (int i = 0; i < root1_measures.size(); i++) {
+					if (!root1_measures.get(0)[measurenmap
+							.get("?MEASURE_UNIQUE_NAME")].toString().equals(
+							root2_measures.get(0)[measurenmap
+									.get("?MEASURE_UNIQUE_NAME")].toString())) {
+						allmeasuresthesame = false;
+					}
+				}
+
 				// Nested-loop
 				while (root1.hasNext()) {
 					Node[] root1_node = (Node[]) root1.next();
@@ -302,27 +314,20 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 								result.add(root1_node[i]);
 							}
 
-							// We check if all measures are the same
-							boolean allmeasuresthesame = true;
-
-							for (int i = 0; i < root1_measures.size(); i++) {
-								if (!root1_measures.get(0)[measurenmap
-										.get("?MEASURE_UNIQUE_NAME")]
-										.toString()
-										.equals(root2_measures.get(0)[measurenmap
-												.get("?MEASURE_UNIQUE_NAME")]
-												.toString())) {
-									allmeasuresthesame = false;
-								}
-							}
-
 							if (allmeasuresthesame) {
 								// Concat measures of both cubes
-								for (int i = root1_dimensions.size() - 2; i < root1_dimensions
-										.size() - 2 + root1_measures.size() - 1; i++) {
+								// Under assumptions both cubes have the same measures.
+								for (int i = 0; i < root1_measures.size(); i++) {
 									// Need to create new node
 									Resource newnode = new Resource(
-											root1_node[i] + "," + root2_node[i]);
+											root1_node[root1_dimensions.size()
+													- 2 + i]
+													+ ","
+													+ root2_node[root1_dimensions
+															.size()
+															- 2
+															+ root1_measures
+																	.size() + i]);
 									result.add(newnode);
 								}
 
@@ -366,6 +371,159 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 					}
 				}
 
+				// Outer join
+				if (allmeasuresthesame) {
+
+					try {
+						root1.init();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					while (root1.hasNext()) {
+						Node[] root1_node = (Node[]) root1.next();
+						List<Node> result = new ArrayList<Node>();
+						try {
+							root2.init();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						while (root2.hasNext()) {
+							Node[] root2_node = (Node[]) root2.next();
+
+							// Consider measure dimension and header
+							equal = false;
+							// XXX: Check whether root1_node = root2_node if so,
+							// then...
+							// Currently we assume same dimension ordering and
+							// same
+							// members.
+							String concat1 = "";
+							String concat2 = "";
+							for (int i = 0; i < root1_dimensions.size() - 2; i++) {
+								concat1 += root1_node[i].toString();
+							}
+							for (int i = 0; i < root2_dimensions.size() - 2; i++) {
+								concat2 += root2_node[i].toString();
+							}
+
+							if (concat1.hashCode() == concat2.hashCode()) {
+								equal = true;
+							}
+
+							if (equal) {
+								/*
+								 * Performance optimisation: Shall we have an
+								 * outer loop join? The problem would be that
+								 * then for the same dimension members, we would
+								 * have several facts. Can we be sure that this
+								 * really is the case? Yes, if we have integrity
+								 * constraint checks on the original data.
+								 * Therefore, we assume it.
+								 */
+								break;
+
+							}
+
+						}
+						if (!equal) {
+
+							// Add dimensions
+							for (int i = 0; i < root1_dimensions.size() - 2; i++) {
+								result.add(root1_node[i]);
+							}
+
+							// Add measures of cube one
+							for (int i = root1_dimensions.size() - 2; i < root1_dimensions
+									.size() - 2 + root1_measures.size() - 1; i++) {
+								result.add(root1_node[i]);
+							}
+
+							// Status: Why geo?
+							results.add(result.toArray(new Node[1]));
+						}
+					}
+
+					try {
+						root2.init();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					while (root2.hasNext()) {
+						Node[] root2_node = (Node[]) root2.next();
+						List<Node> result = new ArrayList<Node>();
+						try {
+							root1.init();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						while (root1.hasNext()) {
+							Node[] root1_node = (Node[]) root1.next();
+
+							// Consider measure dimension and header
+							equal = false;
+							// XXX: Check whether root1_node = root2_node if so,
+							// then...
+							// Currently we assume same dimension ordering and
+							// same
+							// members.
+							String concat1 = "";
+							String concat2 = "";
+							for (int i = 0; i < root1_dimensions.size() - 2; i++) {
+								concat1 += root1_node[i].toString();
+							}
+							for (int i = 0; i < root2_dimensions.size() - 2; i++) {
+								concat2 += root2_node[i].toString();
+							}
+
+							if (concat1.hashCode() == concat2.hashCode()) {
+								equal = true;
+							}
+
+							if (equal) {
+
+								/*
+								 * Performance optimisation: Shall we have an
+								 * outer loop join? The problem would be that
+								 * then for the same dimension members, we would
+								 * have several facts. Can we be sure that this
+								 * really is the case? Yes, if we have integrity
+								 * constraint checks on the original data.
+								 * Therefore, we assume it.
+								 */
+								break;
+
+							}
+
+						}
+						if (!equal) {
+
+							// Add dimensions
+							for (int i = 0; i < root2_dimensions.size() - 2; i++) {
+								result.add(root2_node[i]);
+							}
+
+							// Add measures of cube two
+							for (int i = root1_dimensions.size() - 2
+									+ root1_measures.size() - 1; i < root1_dimensions
+									.size()
+									- 2
+									+ root1_measures.size()
+									- 1
+									+ root2_measures.size() - 1; i++) {
+								result.add(root2_node[i - root1_measures.size()
+										+ 1]);
+							}
+
+							// Status: Why geo?
+							results.add(result.toArray(new Node[1]));
+						}
+					}
+
+				}
 			}
 
 		} catch (OlapException e) {
