@@ -276,9 +276,10 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 				String aggregationfunction;
 
 				if (measure[measuremap.get("?MEASURE_AGGREGATOR")].toString()
-						.equals("null")) {
+						.equals("null") || measure[measuremap.get("?MEASURE_AGGREGATOR")].toString()
+						.equals("")) {
 					// In this case, we can only use top
-					aggregationfunction = "Max";
+					aggregationfunction = "GROUP_CONCAT";
 				} else {
 					aggregationfunction = measure[measuremap
 							.get("?MEASURE_AGGREGATOR")].toString().replace(

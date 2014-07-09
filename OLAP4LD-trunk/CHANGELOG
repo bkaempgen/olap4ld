@@ -16,6 +16,9 @@ In ISEM paper, we had with respect to size of datasets:
 We now would like to extend this.
 
 ==2014-07-09==
+* Changed "default" measures, see http://linked-data-cubes.org/index.php/EmbeddedSesameEngine#Default_Measure_Strategies
+
+==2014-07-09==
 * Finished refactoring of logical2physical operator plan:
 
 ===LogicalToPhysical Query Plan Strategy===
