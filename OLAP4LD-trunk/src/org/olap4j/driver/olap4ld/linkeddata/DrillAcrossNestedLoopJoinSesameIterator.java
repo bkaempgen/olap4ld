@@ -9,6 +9,7 @@ import org.olap4j.OlapException;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
 
 /**
  * This iterator simply computes the nested-loop join of input iterators
@@ -34,7 +35,7 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 
 	public DrillAcrossNestedLoopJoinSesameIterator(PhysicalOlapIterator root1,
 			PhysicalOlapIterator root2) {
-		
+
 		this.root1 = root1;
 		this.root2 = root2;
 
@@ -258,6 +259,9 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 				List<Node[]> root2_measures = root2
 						.getMeasures(emptyrestrictions);
 
+				Map<String, Integer> measurenmap = Olap4ldLinkedDataUtil
+						.getNodeResultFields(root1_measures.get(0));
+
 				// Nested-loop
 				while (root1.hasNext()) {
 					Node[] root1_node = (Node[]) root1.next();
@@ -292,22 +296,56 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 
 						if (equal) {
 							// Add to result
+
+							// Add dimensions
 							for (int i = 0; i < root1_dimensions.size() - 2; i++) {
 								result.add(root1_node[i]);
 							}
-							for (int i = root1_dimensions.size() - 2; i < root1_dimensions
-									.size() - 2 + root1_measures.size() - 1; i++) {
-								result.add(root1_node[i]);
+
+							// We check if all measures are the same
+							boolean allmeasuresthesame = true;
+
+							for (int i = 0; i < root1_measures.size(); i++) {
+								if (!root1_measures.get(0)[measurenmap
+										.get("?MEASURE_UNIQUE_NAME")]
+										.toString()
+										.equals(root2_measures.get(0)[measurenmap
+												.get("?MEASURE_UNIQUE_NAME")]
+												.toString())) {
+									allmeasuresthesame = false;
+								}
 							}
-							for (int i = root1_dimensions.size() - 2
-									+ root1_measures.size() - 1; i < root1_dimensions
-									.size()
-									- 2
-									+ root1_measures.size()
-									- 1
-									+ root2_measures.size() - 1; i++) {
-								result.add(root2_node[i - root1_measures.size()
-										+ 1]);
+
+							if (allmeasuresthesame) {
+								// Concat measures of both cubes
+								for (int i = root1_dimensions.size() - 2; i < root1_dimensions
+										.size() - 2 + root1_measures.size() - 1; i++) {
+									// Need to create new node
+									Resource newnode = new Resource(
+											root1_node[i] + "," + root2_node[i]);
+									result.add(newnode);
+								}
+
+							} else {
+
+								// Add measures of cube one
+								for (int i = root1_dimensions.size() - 2; i < root1_dimensions
+										.size() - 2 + root1_measures.size() - 1; i++) {
+									result.add(root1_node[i]);
+								}
+
+								// Add measures of cube two
+								for (int i = root1_dimensions.size() - 2
+										+ root1_measures.size() - 1; i < root1_dimensions
+										.size()
+										- 2
+										+ root1_measures.size()
+										- 1
+										+ root2_measures.size() - 1; i++) {
+									result.add(root2_node[i
+											- root1_measures.size() + 1]);
+								}
+
 							}
 
 							// Status: Why geo?
@@ -348,7 +386,7 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 				e.printStackTrace();
 			}
 		}
-		
+
 		return iterator.hasNext();
 	}
 
@@ -362,7 +400,7 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 				e.printStackTrace();
 			}
 		}
-		
+
 		return iterator.next();
 	}
 
@@ -397,10 +435,10 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 	public void close() throws Exception {
 		// something to do?
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Nested-Loop over ("+root1 + ","+root2+")";
+		return "Nested-Loop over (" + root1 + "," + root2 + ")";
 	}
 
 	@Override
