@@ -1,6 +1,5 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-
 public class DrillAcrossOp implements LogicalOlapOp {
 
 	public LogicalOlapOp inputop1;
@@ -17,15 +16,20 @@ public class DrillAcrossOp implements LogicalOlapOp {
 	}
 
 	@Override
-	public void accept(LogicalOlapOperatorQueryPlanVisitor v) throws QueryException {
+	public void accept(LogicalOlapOperatorQueryPlanVisitor v)
+			throws QueryException {
 		v.visit(this);
 
-		if (v instanceof Olap2SparqlSesameDerivedDatasetVisitor) {
-			// nothing more to visit
-		} else {
-			// visit the projection input op
-			inputop1.accept(v);
-			inputop2.accept(v);
-		}
+		// I do not use vistor pattern but depth-first search to compile query
+		// if (v instanceof Olap2SparqlSesameDerivedDatasetVisitor) {
+		// // nothing more to visit
+		// } else {
+		// // visit the projection input op
+		// inputop1.accept(v);
+		// inputop2.accept(v);
+		// }
+		// visit the projection input op
+		inputop1.accept(v);
+		inputop2.accept(v);
 	}
 }

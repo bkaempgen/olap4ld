@@ -456,9 +456,18 @@ abstract class Olap4ldCellSet implements CellSet {
 					}
 
 					queryplanroot = null;
-					// queryplanroot is simply (XXX: can we make it bushy?)
-					// query
-					// plan with Drill-across operators.
+					// queryplanroot is simply 
+					// XXX: can we make it bushy?
+					// XXX: Currently, every single dataset is queried, however, not every
+					// dataset fits the query.
+					
+					/*
+					 * In theory, here we are evaluating the views, i.e., the definition of the
+					 * global dataset by the single datasets and the automatic derivation of more
+					 * single datasets.
+					 * 
+					 */
+					
 					for (LogicalOlapOp logicalOlapOp : singlecubequeryplans) {
 						if (queryplanroot == null) {
 							queryplanroot = logicalOlapOp;

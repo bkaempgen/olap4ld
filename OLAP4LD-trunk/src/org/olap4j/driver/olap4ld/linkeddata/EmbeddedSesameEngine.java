@@ -137,41 +137,27 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		/*
 		 * Currently, I distinguish:
 		 * 
-		 * Drill-Across for queries with Drill-Across at the top, OLAP-to-SPARQL queries below.
+		 * Drill-Across for queries with Drill-Across at the top, OLAP-to-SPARQL
+		 * queries below.
 		 * 
 		 * DerivedDataset for queries with Convert-Cube or BaseCubeOp.
 		 * 
-		 * OLAP-to-SPARQL for queries with OLAP-to-SPARQL queries 
+		 * OLAP-to-SPARQL for queries with OLAP-to-SPARQL queries
 		 * 
-		 * I want to have Drill-Across for queries with Drill-Across at the top, OLAP-to-SPARQL queries below,
-		 * and Convert-Cube or Merge-Cubes at the end.
+		 * I want to have Drill-Across for queries with Drill-Across at the top,
+		 * OLAP-to-SPARQL queries below, and Convert-Cube or Merge-Cubes at the
+		 * end.
 		 */
-		try {
-			LogicalOlapOperatorQueryPlanVisitor r2a;
-			// Heuristics of how to select the right visitor.
-			if (queryplan._root instanceof DrillAcrossOp) {
-				r2a = new OlapDrillAcross2JoinSesameVisitor(this);
-			} else if (queryplan._root instanceof ConvertCubeOp
-					|| queryplan._root instanceof BaseCubeOp) {
-				// We create visitor to translate logical into physical
-				r2a = new Olap2SparqlSesameDerivedDatasetVisitor(this);
-			} else {
-				r2a = new Olap2SparqlSesameVisitor(this);
-			}
 
-			PhysicalOlapIterator newRoot;
-			// Transform into physical query plan
-			newRoot = (PhysicalOlapIterator) queryplan.visitAll(r2a);
-			PhysicalOlapQueryPlan execplan = new PhysicalOlapQueryPlan(newRoot);
+		LogicalToPhysical logicaltophysical = new LogicalToPhysical(this);
 
-			return execplan;
+		PhysicalOlapIterator newRoot;
+		// Transform into physical query plan
+		newRoot = (PhysicalOlapIterator) logicaltophysical
+				.compile(queryplan._root);
+		PhysicalOlapQueryPlan execplan = new PhysicalOlapQueryPlan(newRoot);
 
-		} catch (QueryException e) {
-			Olap4ldUtil._log.warning("Olap query execution went wrong: "
-					+ e.getMessage());
-			throw new OlapException("Olap query execution went wrong: "
-					+ e.getMessage());
-		}
+		return execplan;
 	}
 
 	public PhysicalOlapQueryPlan getExecplan() {
@@ -413,63 +399,62 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	private String askForFrom(boolean isDsdQuery) {
 		return "";
 	}
-	
+
 	public void executeCONSTRUCTQuery(String constructquery) {
 		// We assume one or two cubes, only.
-		
+
 		try {
 
-		RepositoryConnection con = this.repo.getConnection();
-		
-		GraphQuery graphquery = con.prepareGraphQuery(
-				org.openrdf.query.QueryLanguage.SPARQL, constructquery);
+			RepositoryConnection con = this.repo.getConnection();
 
-		StringWriter stringout = new StringWriter();
-		RDFWriter w = Rio.createWriter(RDFFormat.RDFXML, stringout);
-		graphquery.evaluate(w);
+			GraphQuery graphquery = con.prepareGraphQuery(
+					org.openrdf.query.QueryLanguage.SPARQL, constructquery);
 
-		String triples = stringout.toString();
+			StringWriter stringout = new StringWriter();
+			RDFWriter w = Rio.createWriter(RDFFormat.RDFXML, stringout);
+			graphquery.evaluate(w);
 
-		if (Olap4ldUtil._isDebug) {
+			String triples = stringout.toString();
 
-			Olap4ldUtil._log.config("Loaded triples: " + triples);
+			if (Olap4ldUtil._isDebug) {
 
-		}
+				Olap4ldUtil._log.config("Loaded triples: " + triples);
 
-		// Insert query to load triples
-		// String insertquery =
-		// "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
-		// + triples + " } }";
-		//
-		// Olap4ldUtil._log.config("SPARQL query: " + insertquery);
-		//
-		// Update updateQuery = con.prepareUpdate(QueryLanguage.SPARQL,
-		// insertquery);
-		// updateQuery.execute();
+			}
 
-		// Would not work: prolog error
-		// ByteArrayInputStream inputstream = new
-		// ByteArrayInputStream(w.toString().getBytes());
+			// Insert query to load triples
+			// String insertquery =
+			// "PREFIX olap4ld:<http://purl.org/olap4ld/> INSERT DATA { GRAPH <http://manually> { "
+			// + triples + " } }";
+			//
+			// Olap4ldUtil._log.config("SPARQL query: " + insertquery);
+			//
+			// Update updateQuery = con.prepareUpdate(QueryLanguage.SPARQL,
+			// insertquery);
+			// updateQuery.execute();
 
-		// UTF-8 encoding seems important
-		InputStream stream = new ByteArrayInputStream(
-				triples.getBytes("UTF-8"));
+			// Would not work: prolog error
+			// ByteArrayInputStream inputstream = new
+			// ByteArrayInputStream(w.toString().getBytes());
 
-		// Add to triple store
-		con.add(stream, "", RDFFormat.RDFXML);
+			// UTF-8 encoding seems important
+			InputStream stream = new ByteArrayInputStream(
+					triples.getBytes("UTF-8"));
 
-		// Loaded really?
-		if (Olap4ldUtil._isDebug) {
-			String filename = "/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/"+"dataset" + constructquery.hashCode()+"n3";
+			// Add to triple store
+			con.add(stream, "", RDFFormat.RDFXML);
 
-			Olap4ldLinkedDataUtil
-					.dumpRDF(
-							repo,			
-									filename, RDFFormat.NTRIPLES);
-		}
+			// Loaded really?
+			if (Olap4ldUtil._isDebug) {
+				String filename = "/media/84F01919F0191352/Projects/2014/paper/paper-macro-modelling/experiments/"
+						+ "dataset" + constructquery.hashCode() + "n3";
 
-		con.close();
-		
+				Olap4ldLinkedDataUtil.dumpRDF(repo, filename,
+						RDFFormat.NTRIPLES);
+			}
+
+			con.close();
+
 		} catch (RepositoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -588,9 +573,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		return myBindings;
 	}
-	
+
 	private boolean isLoaded(URL resource) {
-		
+
 		if (loadedMap.get(resource.hashCode()) != null
 				&& loadedMap.get(resource.hashCode()) == true) {
 			return true;
@@ -598,7 +583,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			return false;
 		}
 	}
-	
+
 	private void setLoaded(URL resource) {
 		loadedMap.put(resource.hashCode(), true);
 	}
@@ -616,23 +601,23 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		if (isLoaded(resource)) {
 			// Already loaded
 			return;
-		} 
-
+		}
 
 		try {
 
 			URL location = Olap4ldLinkedDataUtil.askForLocation(resource);
 			if (isLoaded(location)) {
 				// Mark as loaded for next tries
-				setLoaded(resource);				
+				setLoaded(resource);
 				// Already loaded
 				return;
-				
+
 			} else {
-				// Now: If resource is the same as location, we will never load otherwise Mark as loaded
+				// Now: If resource is the same as location, we will never load
+				// otherwise Mark as loaded
 				setLoaded(resource);
 			}
-			
+
 			// Mark as loaded
 			setLoaded(location);
 
@@ -1145,7 +1130,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 					// We do not want to have the single datasets returned.
 					// We always have only one cube, the global cube.
-					//result.add(nodes);
+					// result.add(nodes);
 				}
 			}
 
@@ -1299,19 +1284,19 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	private void runDirectedCrawlingAlgorithm(Node cubeNamePattern)
 			throws OlapException {
-	
+
 		try {
 			URL uri = new URL(cubeNamePattern.toString());
-	
+
 			// If we have cube uri and location is not loaded, yet, we start
 			// collecting all information
-	
+
 			loadInStore(uri);
-	
+
 			// For everything else: Check whether really cube
 			RepositoryConnection con;
 			con = repo.getConnection();
-	
+
 			// qb:structure is more robust than a qb:DataSet.
 			String testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> ASK { ?CUBE_NAME qb:structure ?dsd. FILTER (?CUBE_NAME = <"
 					+ uri + ">)}";
@@ -1319,13 +1304,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					QueryLanguage.SPARQL, testquery);
 			boolean isDataset = booleanQuery.evaluate();
 			con.close();
-	
+
 			if (!isDataset) {
 				throw new OlapException(
 						"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "
 								+ uri + "!");
 			} else {
-	
+
 				// If loading ds, also load dsd. Ask for DSD URI and
 				// load
 				String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
@@ -1341,15 +1326,15 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					// Get the second
 					URL dsduri = new URL(dsd.get(1)[0].toString());
 					loadInStore(dsduri);
-	
+
 				}
-	
+
 				boolean first;
 				// If loading ds, also load seeAlso
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?seeAlso WHERE {<"
 						+ uri + "> rdfs:seeAlso ?seeAlso.}";
 				List<Node[]> seeAlso = sparql(query, true);
-	
+
 				first = true;
 				for (Node[] nodes : seeAlso) {
 					if (first) {
@@ -1361,7 +1346,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						loadInStore(componenturi);
 					}
 				}
-	
+
 				// If loading ds, also load components
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?comp WHERE {<"
 						+ uri
@@ -1381,7 +1366,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						loadInStore(componenturi);
 					}
 				}
-	
+
 				// If loading ds, also load measures
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?measure WHERE {<"
 						+ uri
@@ -1396,13 +1381,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						first = false;
 						continue;
 					}
-	
+
 					if (nodes[0] instanceof Resource) {
 						URL measureuri = new URL(nodes[0].toString());
 						loadInStore(measureuri);
 					}
 				}
-	
+
 				// If loading ds, also load dimensions
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dimension WHERE {<"
 						+ uri
@@ -1420,35 +1405,35 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 							first = false;
 							continue;
 						}
-	
+
 						if (nodes[0] instanceof Resource) {
 							URL dimensionuri = new URL(nodes[0].toString());
-	
+
 							loadInStore(dimensionuri);
 						}
 					}
 				}
-	
+
 				// If loading dimensions, also load rdfs:subPropertyOf
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?superdimension WHERE {<"
 						+ uri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:subPropertyOf ?superdimension. }";
 				List<Node[]> superdimensions = sparql(query, true);
-	
+
 				first = true;
 				for (Node[] nodes : superdimensions) {
 					if (first) {
 						first = false;
 						continue;
 					}
-	
+
 					if (nodes[0] instanceof Resource) {
 						URL dimensionuri = new URL(nodes[0].toString());
-	
+
 						loadInStore(dimensionuri);
 					}
 				}
-	
+
 				// If loading ds, also load codelists
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?codelist WHERE {<"
 						+ uri
@@ -1467,18 +1452,18 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 							first = false;
 							continue;
 						}
-	
+
 						if (nodes[0] instanceof Resource) {
 							URL codelisturi = new URL(nodes[0].toString());
 							loadInStore(codelisturi);
 						}
 					}
 				}
-	
+
 				// Loading members
 				// Not done for now since takes a long time and was not done for
 				// ISEM either.
-	
+
 				// // If loading ds, also load ranges of dimensions
 				// query =
 				// "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>  SELECT ?range WHERE {<"
@@ -1537,7 +1522,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// }
 				// }
 				// }
-	
+
 			}
 		} catch (MalformedURLException e) {
 			throw new OlapException("Problem with malformed url: "
@@ -2277,7 +2262,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						continue;
 					}
 
-					// Add the single dimensions of the datasets to be transformed with createGlobalDimensions.
+					// Add the single dimensions of the datasets to be
+					// transformed with createGlobalDimensions.
 					result.add(anIntermediaryresult);
 				}
 			}
@@ -2543,7 +2529,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					// if (!contained) {
 					// result.add(newnode);
 					// }
-					
+
 					result.add(newnode);
 				}
 
@@ -2654,7 +2640,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						continue;
 					}
 
-					// Add the single hierarchies of the datasets to be transformed with createGlobalHierarchies.
+					// Add the single hierarchies of the datasets to be
+					// transformed with createGlobalHierarchies.
 					result.add(anIntermediaryresult);
 				}
 
@@ -2723,9 +2710,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						newnode[hierarchymap.get("?DIMENSION_UNIQUE_NAME")]
 								.toString());
 				boolean sameHierarchy = aResult[hierarchymap
-				        						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
-				        						newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")]
-				        								.toString());
+						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
+						newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")]
+								.toString());
 				boolean sameCube = aResult[hierarchymap.get("?CUBE_NAME")]
 						.toString().equals(
 								newnode[hierarchymap.get("?CUBE_NAME")]
@@ -2960,26 +2947,29 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					boolean contained = false;
 					for (Node[] aResult : result) {
 						boolean sameDimension = aResult[levelmap
-						        						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
-						        						newnode[levelmap.get("?DIMENSION_UNIQUE_NAME")]
-						        								.toString());
-						
+								.get("?DIMENSION_UNIQUE_NAME")].toString()
+								.equals(newnode[levelmap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString());
+
 						boolean sameHierarchy = aResult[levelmap
-						        						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
-						        						newnode[levelmap.get("?HIERARCHY_UNIQUE_NAME")]
-						        								.toString());
-						
+								.get("?HIERARCHY_UNIQUE_NAME")].toString()
+								.equals(newnode[levelmap
+										.get("?HIERARCHY_UNIQUE_NAME")]
+										.toString());
+
 						boolean sameLevel = aResult[levelmap
 								.get("?LEVEL_UNIQUE_NAME")].toString().equals(
 								newnode[levelmap.get("?LEVEL_UNIQUE_NAME")]
 										.toString());
-						
+
 						boolean sameCube = aResult[levelmap.get("?CUBE_NAME")]
 								.toString().equals(
 										newnode[levelmap.get("?CUBE_NAME")]
 												.toString());
 
-						if (sameDimension && sameHierarchy && sameLevel && sameCube) {
+						if (sameDimension && sameHierarchy && sameLevel
+								&& sameCube) {
 							contained = true;
 						}
 					}
@@ -3247,20 +3237,22 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					boolean contained = false;
 					for (Node[] aResult : result) {
 						boolean sameDimension = aResult[membermap
-						        						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
-						        						newnode[membermap.get("?DIMENSION_UNIQUE_NAME")]
-						        								.toString());
-						
+								.get("?DIMENSION_UNIQUE_NAME")].toString()
+								.equals(newnode[membermap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString());
+
 						boolean sameHierarchy = aResult[membermap
-						        						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
-						        						newnode[membermap.get("?HIERARCHY_UNIQUE_NAME")]
-						        								.toString());
-						
+								.get("?HIERARCHY_UNIQUE_NAME")].toString()
+								.equals(newnode[membermap
+										.get("?HIERARCHY_UNIQUE_NAME")]
+										.toString());
+
 						boolean sameLevel = aResult[membermap
 								.get("?LEVEL_UNIQUE_NAME")].toString().equals(
 								newnode[membermap.get("?LEVEL_UNIQUE_NAME")]
 										.toString());
-						
+
 						boolean sameMember = aResult[membermap
 								.get("?MEMBER_UNIQUE_NAME")].toString().equals(
 								newnode[membermap.get("?MEMBER_UNIQUE_NAME")]
@@ -3270,7 +3262,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 										newnode[membermap.get("?CUBE_NAME")]
 												.toString());
 
-						if (sameDimension && sameHierarchy && sameLevel && sameMember && sameCube) {
+						if (sameDimension && sameHierarchy && sameLevel
+								&& sameMember && sameCube) {
 							contained = true;
 						}
 					}
@@ -3688,7 +3681,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// This we do since ranges may be blank nodes, e.g., of ical:dtend
 			// XXX: Workaround
-			if (restrictions.hierarchyUniqueName != null && restrictions.hierarchyUniqueName.toString().startsWith("node")) {
+			if (restrictions.hierarchyUniqueName != null
+					&& restrictions.hierarchyUniqueName.toString().startsWith(
+							"node")) {
 				filter += "";
 			} else {
 

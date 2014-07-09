@@ -15,6 +15,210 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-07-09==
+* Finished refactoring of logical2physical operator plan:
+
+===LogicalToPhysical Query Plan Strategy===
+* See also: http://linked-data-cubes.org/index.php/EmbeddedSesameEngine#LogicalToPhysical_Query_Plan_Strategy
+* Short: First used Vistor Pattern, now use Depth-first strategy
+
+<pre>
+
+==2014-07-07==
+
+* Filtering for duplicates at getDimensions(), getHierarchies()... on all "unique" attributes,
+
+now that we have duplication strategy.
+
+* Problem: I have never combined OLAP-to-SPARQL with Convert-Cube/Merge-Cubes.
+
+* Solution: Why can I not implement Convert-Cube/Merge-Cubes using SPARQL in an extended OLAP-to-SPARQL
+
+algorithm? Since 1) Convert-Cube/Merge-Cubes represent "implicit" datasets that I may want to materialise
+
+for faster query processing, 2) whereas Projection, Dice, Slice are issued by the user explicitly,
+
+Convert-Cube / Merge-Cubes are run automatically by the system to increase the number of answers to
+
+an OLAP query (OLAP-to-SPARQL query is fixed on one dataset, OLAP query issues drill-across over all
+
+possible datasets, returning several answers to a query.
+
+* To do OLAP-to-SPARQL over Convert-Cube/Merge-Cubes, I need to execute Convert-Cube/Merge-Cubes separately
+
+and only feed the data cube URI.
+
+Problem:
+
+What operators do we have:
+
+BaseCube
+
+Projection
+
+Dice
+
+Slice
+
+Roll-Up
+
+Drill-Across
+
+What iterators do we have:
+
+GetCubesSparqlIterator <= Not implemented - at all.
+
+OlapDrillAcross2JoinSesameVisitor
+
+DrillAcrossNestedLoopJoinSesameIterator <= works over every iterator that returns tuples: Olap2SparqlAlgorithmSesameIterator (OLAP-to-SPARQL), Convert-Cube (ConvertSparqlDerivedDatasetIterator), Base-Cube (BaseCubeSparqlDerivedDatasetIterator). Requires 2 input iterators (that return tuples).
+
+Iterator x Iterator -> Tuples
+
+For query trees without Drill-Across and Convert-Cube
+
+* Olap2SparqlSesameVisitor
+
+Olap2SparqlAlgorithmSesameIterator <= OLAP-to-SPARQL algorithm. Works only over engine that provides SPARQL functionality + No input iterators.
+
+Engine -> Tuples
+
+For query trees with Convert-Cube / Base-Cube
+
+* Olap2SparqlSesameDerivedDatasetVisitor
+
+BaseCubeSparqlDerivedDatasetIterator <= Works, but simply returns tuple representation (since data is already loaded by then from: calling getCubes on EmbeddedSesameEngine). Requires repository + No input iterators.
+
+(Repo) -> Tuples (Repo)
+
+ConvertSparqlDerivedDatasetIterator <= Convert-Cube implementation. Requires repository + 1-2 input iterators.
+
+Iterator x Iterator (Repo) -> Tuples (Repo)
+
+SliceSparqlDerivedDatasetIterator <= Not implemented, yet.
+
+DrillAcrossSparqlDerivedDatasetIterator <= Not implemented, yet: Two datasets are joined. For now, just return the first
+
+Solution:
+
+* Make BaseCube only gets QB dataset URI *todo still, errors*
+
+* Make BaseCubeSparqlDerivedDatasetIterator to only get QB dataset URI
+
+(Engine) -> Tuple (Engine)
+
+* Make Olap2SparqlAlgorithmSesameIterator to take in engine and iterator for cube name.
+
+Iterator (Engine) -> Tuple (Engine)
+
+* Leave ConvertSparqlDerivedDatasetIterator
+
+Iterator x Iterator (Engine) -> Tuples (Engine)
+
+* Reduce number of visitors?
+
+** Only works with LQPs that have 1) any number of Drill-Across at the beginning (for joining, comparison, merging with DrillAcrossNestedLoopJoinSesameIterator), 2) one set of Projection, Dice, Slice, Roll-Up (for OLAP operations with Olap2SparqlAlgorithmSesameIterator), 3) any number of Convert-Cube / Merge-Cubes (for ConvertSparqlDerivedDatasetIterator), and 4) any number of Base-Cube (for BaseCubeSparqlDerivedDatasetIterator).
+
+** Convert-Cube / Merge-Cubes / Base-Cube may be added automatically.
+
+Then, we can have DrillAcrossNestedLoopJoinSesameIterator -> Olap2SparqlAlgorithmSesameIterator -> ConvertSparqlDerivedDatasetIterator -> BaseCubeSparqlDerivedDatasetIterator.
+
+Before, only ConvertSparqlDerivedDatasetIterator -> BaseCubeSparqlDerivedDatasetIterator OR ConvertSparqlDerivedDatasetIterator -> ConvertSparqlDerivedDatasetIterator OR DrillAcrossNestedLoopJoinSesameIterator on top of everything (yes, Drill-Across worked for both kinds of trees) was possible.
+
+==Problem: How to build the Visitor? How to create Phyical Iterator Plan?==
+
+* How will the Logical Query Plan look like? 1) any number of Drill-Across at the beginning (for joining, comparison, merging with DrillAcrossNestedLoopJoinSesameIterator), 2) one set of Projection, Dice, Slice, Roll-Up (for OLAP operations with Olap2SparqlAlgorithmSesameIterator), 3) any number of Convert-Cube / Merge-Cubes (for ConvertSparqlDerivedDatasetIterator), and 4) any number of Base-Cube (for BaseCubeSparqlDerivedDatasetIterator).
+
+** Convert-Cube / Merge-Cubes / Base-Cube may be added automatically.
+
+* How about:
+
+** Visitor Pattern
+
+** If Drill-Across: Recursive Application of new Visitor Pattern, taking in two Iterators that are connected in a new Iterator (DrillAcrossNestedLoopJoinSesameIterator)
+
+** If Projection, Dice, Slice, Roll-Up: Collection of information from these operators.
+
+** If Base-Cube: Using dataseturi and connecting a new BaseCubeSparqlDerivedDatasetIterator to one or more ConvertSparqlDerivedDatasetIterator Olap2SparqlAlgorithmSesameIterator
+
+** If Convert-Cube:
+
+Collection of information from these operators.
+
+One possibility: Go through tree. For Convert-Cube / Base-Cube use Olap2SparqlSesameDerivedDatasetVisitor and for all else use Olap2SparqlSesameVisitor and each result add to iterator list that then will be drilled-across with own Iterator.
+
+One could keep that assuming that after Convert-Cube and Base-Cube only Convert-Cube or Base-Cube can show up.
+
+However, what about Olap2SparqlSesameVisitor? For Convert-Cube / Base-Cube, one could use Olap2SparqlSesameDerivedDatasetVisitor and the result will then be used as input to the OLAP-to-SPARQL iterator.
+
+Try it!
+
+Problem: Iterators need SPARQL functionality from the LDE. *implemented, refactored*
+
+Can I go depth-first through the logical query plan to "build" the physical query plan?
+
+Pseudo-code:
+
+compile(Node node) {
+
+Iterator theIterator;
+
+if (node instanceof Drill-Across) {
+
+    //recursively go through children
+
+    Iterator iterator1 = compile(node.getInput1());
+
+    Iterator iterator2 = compile(node.getInput2());
+
+    theIterator = new Drill-Across-Iterator(iterator1, iterator2);
+
+}
+
+if (node instanceof Roll-Up, Slice, Dice, Projection) {
+
+    //recursively go through cildren
+
+    store data about Roll-Up, Slice, Dice, Projection;
+
+    if (node.getInput() instanceof Base-Cube/Convert-Cube) {
+
+        Iterator iterator1 = compile(node.getInput());
+
+        theIterator = new OLAP-to-SPARQL(iterator1)
+
+    } else {
+
+        theIterator1 = compile(node.getInput());
+
+    }
+
+}
+
+if (node instanceof Convert-Cube) {
+
+    //recursively
+
+    Iterator iterator1 = compile(node.getInput1());
+
+    Iterator iterator2 = compile(node.getInput2());
+
+    theIterator = new Convert-Cube-Iterator(iterator1, iterator2);
+
+}
+
+if (node instanceof Base-Cube) {
+
+    theIterator = new Base-Cube-Iterator(dataseturi)
+
+}
+
+return theIterator;
+
+}
+
+</pre>
+
+
 ==2014-07-08==
 * Refactored operators and interators to allow combination of OLAP-to-SPARQL and Convert-Cube.
 * See https://intra.b-kaempgen.de/dawiki/index.php/Resubmission_of_Convert-Cube_Paper#Is_there_an_.22equivalent.22_description_of_the_query_in_ISEM_paper.3F

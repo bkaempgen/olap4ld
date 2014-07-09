@@ -668,7 +668,8 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 
 			if (!isDataset) {
 				throw new OlapException(
-						"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "+uri+"!");
+						"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "
+								+ uri + "!");
 			} else {
 
 				// If loading ds, also load dsd. Ask for DSD URI and
@@ -1061,8 +1062,8 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			con.close();
 
 			// Logging
-			Olap4ldUtil._log
-					.config("Integrity constraints overview: " + overview);
+			Olap4ldUtil._log.config("Integrity constraints overview: "
+					+ overview);
 
 			if (error) {
 				throw new UnsupportedOperationException(
@@ -1671,8 +1672,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 
 				if (restrictions.cubeNamePattern != null) {
 					additionalFilters += " FILTER (?CUBE_NAME = <"
-							+ restrictions.cubeNamePattern
-							+ ">) ";
+							+ restrictions.cubeNamePattern + ">) ";
 				}
 			}
 			if ((restrictions.tree & 4) == 4) {
@@ -1740,8 +1740,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 
 				// Here, we need a specific filter
 				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
-						+ restrictions.memberUniqueName
-						+ ">) ";
+						+ restrictions.memberUniqueName + ">) ";
 
 			}
 			if ((restrictions.tree & 2) == 2) {
@@ -1942,12 +1941,12 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 				: "";
 		String dimensionUniqueNameFilter = (restrictions.dimensionUniqueName != null && !restrictions.dimensionUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?DIMENSION_UNIQUE_NAME = <"
-				+ restrictions.dimensionUniqueName
-				+ ">) " : "";
+				+ restrictions.dimensionUniqueName + ">) "
+				: "";
 		String hierarchyUniqueNameFilter = (restrictions.hierarchyUniqueName != null && !restrictions.hierarchyUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?HIERARCHY_UNIQUE_NAME = <"
-				+ restrictions.hierarchyUniqueName
-				+ ">) " : "";
+				+ restrictions.hierarchyUniqueName + ">) "
+				: "";
 		String levelUniqueNameFilter = (restrictions.levelUniqueName != null && !restrictions.levelUniqueName
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) ? " FILTER (?LEVEL_UNIQUE_NAME = <"
 				+ restrictions.levelUniqueName + ">) "
@@ -1996,35 +1995,31 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 	}
 
 	@Override
-	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) throws OlapException {
+	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
 		// Log logical query plan
 		Olap4ldUtil._log.config("Logical query plan to string: "
 				+ queryplan.toString());
 
-		Olap2SparqlSesameVisitor r2a = new Olap2SparqlSesameVisitor(null);
+		LogicalToPhysical logicaltophysical = new LogicalToPhysical(null);
 
 		PhysicalOlapIterator newRoot;
-		try {
-			newRoot = (PhysicalOlapIterator) queryplan.visitAll(r2a);
+		newRoot = logicaltophysical.compile(queryplan._root);
 
-			Olap4ldUtil._log.config("bytes iterator " + newRoot);
+		Olap4ldUtil._log.config("bytes iterator " + newRoot);
 
-			PhysicalOlapQueryPlan ap = new PhysicalOlapQueryPlan(newRoot);
+		PhysicalOlapQueryPlan ap = new PhysicalOlapQueryPlan(newRoot);
 
-			PhysicalOlapIterator resultIterator = ap.getIterator();
+		PhysicalOlapIterator resultIterator = ap.getIterator();
 
-			List<Node[]> result = new ArrayList<Node[]>();
-			while (resultIterator.hasNext()) {
-				Object nextObject = resultIterator.next();
-				// Will be Node[]
-				Node[] node = (Node[]) nextObject;
-				result.add(node);
-			}
-			return result;
-
-		} catch (QueryException e) {
-			throw new OlapException("Olap query execution went wrong: "+e.getMessage());
+		List<Node[]> result = new ArrayList<Node[]>();
+		while (resultIterator.hasNext()) {
+			Object nextObject = resultIterator.next();
+			// Will be Node[]
+			Node[] node = (Node[]) nextObject;
+			result.add(node);
 		}
+		return result;
 	}
 
 	@Override
@@ -2058,8 +2053,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 	}
 
 	@Override
-	public PhysicalOlapQueryPlan getExecplan()
-			throws OlapException {
+	public PhysicalOlapQueryPlan getExecplan() throws OlapException {
 		// TODO Auto-generated method stub
 		return null;
 	}

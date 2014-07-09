@@ -860,8 +860,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters = " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern
-						+ ">) ";
+						+ restrictions.cubeNamePattern + ">) ";
 			}
 
 			// In this case, we do ask for a measure dimension.
@@ -965,8 +964,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters = " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern
-						+ ">) ";
+						+ restrictions.cubeNamePattern + ">) ";
 			}
 
 			// In this case, we do ask for a measure hierarchy.
@@ -1108,8 +1106,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters = " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern
-						+ ">) ";
+						+ restrictions.cubeNamePattern + ">) ";
 			}
 
 			// In this case, we do ask for a measure dimension.
@@ -1152,13 +1149,11 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters += " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern
-						+ ">) ";
+						+ restrictions.cubeNamePattern + ">) ";
 			}
 			if (restrictions.dimensionUniqueName != null) {
 				specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
-						+ restrictions.dimensionUniqueName
-						+ ">) ";
+						+ restrictions.dimensionUniqueName + ">) ";
 			}
 
 			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
@@ -1320,8 +1315,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 				if (restrictions.cubeNamePattern != null) {
 					additionalFilters += " FILTER (?CUBE_NAME = <"
-							+ restrictions.cubeNamePattern
-							+ ">) ";
+							+ restrictions.cubeNamePattern + ">) ";
 				}
 			}
 			if ((restrictions.tree & 4) == 4) {
@@ -1344,13 +1338,11 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 			if (restrictions.cubeNamePattern != null) {
 				additionalFilters += " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern
-						+ ">) ";
+						+ restrictions.cubeNamePattern + ">) ";
 			}
 			if (restrictions.memberUniqueName != null) {
 				additionalFilters += " FILTER (?MEASURE_UNIQUE_NAME = <"
-						+ restrictions.memberUniqueName
-						+ ">) ";
+						+ restrictions.memberUniqueName + ">) ";
 			}
 
 		}
@@ -1405,8 +1397,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 				// Here, we need a specific filter
 				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
-						+ restrictions.memberUniqueName
-						+ ">) ";
+						+ restrictions.memberUniqueName + ">) ";
 
 				query = Olap4ldLinkedDataUtil.getStandardPrefixes()
 						+ "Select \""
@@ -1535,13 +1526,11 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String specificFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				specificFilters += " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern
-						+ ">) ";
+						+ restrictions.cubeNamePattern + ">) ";
 			}
 			if (restrictions.dimensionUniqueName != null) {
 				specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
-						+ restrictions.dimensionUniqueName
-						+ ">) ";
+						+ restrictions.dimensionUniqueName + ">) ";
 			}
 
 			// First, ask for all members
@@ -1620,11 +1609,14 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			// First we ask for the dimensionWithoutHierarchies
 			String dimensionWithoutHierarchies = null;
 			if (restrictions.dimensionUniqueName != null) {
-				dimensionWithoutHierarchies = restrictions.dimensionUniqueName.toString();
+				dimensionWithoutHierarchies = restrictions.dimensionUniqueName
+						.toString();
 			} else if (restrictions.hierarchyUniqueName != null) {
-				dimensionWithoutHierarchies = restrictions.hierarchyUniqueName.toString();
+				dimensionWithoutHierarchies = restrictions.hierarchyUniqueName
+						.toString();
 			} else if (restrictions.levelUniqueName != null) {
-				dimensionWithoutHierarchies = restrictions.levelUniqueName.toString();
+				dimensionWithoutHierarchies = restrictions.levelUniqueName
+						.toString();
 			}
 
 			// Here, we need specific filters, since only cube and dimension
@@ -1632,8 +1624,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			String alteredadditionalFilters = "";
 			if (restrictions.cubeNamePattern != null) {
 				alteredadditionalFilters += " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern
-						+ ">) ";
+						+ restrictions.cubeNamePattern + ">) ";
 			}
 			if (restrictions.memberUniqueName != null) {
 				// Check whether uri or Literal
@@ -1726,17 +1717,17 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 				+ restrictions.cubeNamePattern + ">) "
 				: "";
 		String dimensionUniqueNameFilter = (restrictions.dimensionUniqueName != null) ? " FILTER (?DIMENSION_UNIQUE_NAME = <"
-				+ restrictions.dimensionUniqueName
-				+ ">) " : "";
+				+ restrictions.dimensionUniqueName + ">) "
+				: "";
 		String hierarchyUniqueNameFilter = (restrictions.hierarchyUniqueName != null) ? " FILTER (?HIERARCHY_UNIQUE_NAME = <"
-				+ restrictions.hierarchyUniqueName
-				+ ">) " : "";
+				+ restrictions.hierarchyUniqueName + ">) "
+				: "";
 		String levelUniqueNameFilter = (restrictions.levelUniqueName != null) ? " FILTER (?LEVEL_UNIQUE_NAME = <"
 				+ restrictions.levelUniqueName + ">) "
 				: "";
 		String memberUniqueNameFilter = (restrictions.memberUniqueName != null) ? " FILTER (str(?MEMBER_UNIQUE_NAME) = str(<"
-				+ restrictions.memberUniqueName
-				+ ">)) " : "";
+				+ restrictions.memberUniqueName + ">)) "
+				: "";
 
 		return cubeNamePatternFilter + dimensionUniqueNameFilter
 				+ hierarchyUniqueNameFilter + levelUniqueNameFilter
@@ -1779,8 +1770,8 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 		// cube is olap4ld
 		Cube mycube = (Cube) cube;
 
-		Node dsd = Olap4ldLinkedDataUtil.convertMDXtoURI(mycube
-				.getUniqueName());
+		Node dsd = Olap4ldLinkedDataUtil
+				.convertMDXtoURI(mycube.getUniqueName());
 
 		// Now, we have all neccessary data
 		String selectClause = "";
@@ -2324,15 +2315,13 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 				// We do not encode the aggregation function in the measure, any
 				// more.
 				Node measurePropertyVariable1 = makeUriToParameter(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure1
-						.getUniqueName()));
+						.convertMDXtoURI(measure1.getUniqueName()));
 
 				Node measureProperty2 = Olap4ldLinkedDataUtil
 						.convertMDXtoURI(measure2.getUniqueName().replace(
 								" " + measure.getAggregator().name(), ""));
 				Node measurePropertyVariable2 = makeUriToParameter(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure2
-						.getUniqueName()));
+						.convertMDXtoURI(measure2.getUniqueName()));
 
 				// We take the aggregator from the measure
 				selectClause += " " + measure1.getAggregator().name() + "(?"
@@ -2355,11 +2344,11 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			} else {
 
 				// Measure
-				Node measureProperty = Olap4ldLinkedDataUtil.convertMDXtoURI(
-						measure.getUniqueName().replace(
+				Node measureProperty = Olap4ldLinkedDataUtil
+						.convertMDXtoURI(measure.getUniqueName().replace(
 								" " + measure.getAggregator().name(), ""));
-				Node measurePropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil.convertMDXtoURI(measure
-						.getUniqueName()));
+				Node measurePropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil
+						.convertMDXtoURI(measure.getUniqueName()));
 
 				// We take the aggregator from the measure
 				// Since we use OPTIONAL, there might be empty columns, which is
@@ -2457,39 +2446,32 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 */
 	private Node makeUriToParameter(Node uriRepresentation) {
 		// We simply remove all special characters
-		return new Variable(uriRepresentation.toString().replaceAll("[^a-zA-Z0-9]+", ""));
+		return new Variable(uriRepresentation.toString().replaceAll(
+				"[^a-zA-Z0-9]+", ""));
 	}
 
 	@Override
 	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) {
 		// XXX: Will not work, since OV uses different syntax than Sesame
-		Olap2SparqlSesameVisitor r2a = new Olap2SparqlSesameVisitor(
-				null);
+		LogicalToPhysical logicaltophysical = new LogicalToPhysical(null);
 
 		PhysicalOlapIterator newRoot;
-		try {
-			newRoot = (PhysicalOlapIterator) queryplan.visitAll(r2a);
+		newRoot = logicaltophysical.compile(queryplan._root);
 
-			Olap4ldUtil._log.info("Physical query plan: " + newRoot);
+		Olap4ldUtil._log.info("Physical query plan: " + newRoot);
 
-			PhysicalOlapQueryPlan ap = new PhysicalOlapQueryPlan(newRoot);
+		PhysicalOlapQueryPlan ap = new PhysicalOlapQueryPlan(newRoot);
 
-			PhysicalOlapIterator resultIterator = ap.getIterator();
+		PhysicalOlapIterator resultIterator = ap.getIterator();
 
-			List<Node[]> result = new ArrayList<Node[]>();
-			while (resultIterator.hasNext()) {
-				Object nextObject = resultIterator.next();
-				// Will be Node[]
-				Node[] node = (Node[]) nextObject;
-				result.add(node);
-			}
-			return result;
-
-		} catch (QueryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		List<Node[]> result = new ArrayList<Node[]>();
+		while (resultIterator.hasNext()) {
+			Object nextObject = resultIterator.next();
+			// Will be Node[]
+			Node[] node = (Node[]) nextObject;
+			result.add(node);
 		}
-		return null;
+		return result;
 	}
 
 	@Override
@@ -2515,7 +2497,8 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 			con.setRequestProperty("Accept", "text/plain");
 			// con.setRequestProperty("Accept", "text/n3");
-			//con.setRequestProperty("Accept", "application/sparql-results+xml");
+			// con.setRequestProperty("Accept",
+			// "application/sparql-results+xml");
 			con.setRequestMethod("POST");
 
 			if (con.getResponseCode() != 200) {
@@ -2523,36 +2506,39 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 						+ " resulted HTTP in status code "
 						+ con.getResponseCode());
 			}
-			
+
 			InputStream xml = con.getInputStream();
 
-//			// Transform sparql xml to nx
-//			javax.xml.transform.TransformerFactory tf = javax.xml.transform.TransformerFactory
-//					.newInstance("net.sf.saxon.TransformerFactoryImpl", Thread
-//							.currentThread().getContextClassLoader());
-//
-//			Transformer t;
-//
-//			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//
-//			t = tf.newTransformer(new StreamSource(Olap4ldLinkedDataUtil.class
-//					.getResourceAsStream("/xml2nx.xsl")));
-//
-//			StreamSource ssource = new StreamSource(xml);
-//			StreamResult sresult = new StreamResult(baos);
-//
-//			t.transform(ssource, sresult);
-//
-//			// We need to make InputStream out of OutputStream
-//			ByteArrayInputStream nx = new ByteArrayInputStream(
-//					baos.toByteArray());
-//
-//			// String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
-//
-//			nx.reset();
-//
-//			NxParser nxp = new NxParser(nx);
-			
+			// // Transform sparql xml to nx
+			// javax.xml.transform.TransformerFactory tf =
+			// javax.xml.transform.TransformerFactory
+			// .newInstance("net.sf.saxon.TransformerFactoryImpl", Thread
+			// .currentThread().getContextClassLoader());
+			//
+			// Transformer t;
+			//
+			// ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			//
+			// t = tf.newTransformer(new
+			// StreamSource(Olap4ldLinkedDataUtil.class
+			// .getResourceAsStream("/xml2nx.xsl")));
+			//
+			// StreamSource ssource = new StreamSource(xml);
+			// StreamResult sresult = new StreamResult(baos);
+			//
+			// t.transform(ssource, sresult);
+			//
+			// // We need to make InputStream out of OutputStream
+			// ByteArrayInputStream nx = new ByteArrayInputStream(
+			// baos.toByteArray());
+			//
+			// // String test2 =
+			// Olap4ldLinkedDataUtil.convertStreamToString(nx);
+			//
+			// nx.reset();
+			//
+			// NxParser nxp = new NxParser(nx);
+
 			NxParser nxp = new NxParser(xml);
 
 			Node[] nxx;
@@ -2583,8 +2569,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	}
 
 	@Override
-	public PhysicalOlapQueryPlan getExecplan()
-			throws OlapException {
+	public PhysicalOlapQueryPlan getExecplan() throws OlapException {
 		// TODO Auto-generated method stub
 		return null;
 	}
