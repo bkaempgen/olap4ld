@@ -35,12 +35,14 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	private Iterator<Node[]> outputiterator;
 	private HashMap<Integer, Integer> levelHeightMap;
 	private ArrayList<Node[]> newmeasures;
+	private PhysicalOlapIterator inputiterator;
 
 	public Olap2SparqlAlgorithmSesameIterator(
 			PhysicalOlapIterator inputiterator, EmbeddedSesameEngine engine,
 			List<Node[]> slicesrollups, List<Integer> levelheights,
 			List<Node[]> projections, List<List<Node[]>> membercombinations,
 			List<Node[]> hierarchysignature) {
+		this.inputiterator = inputiterator;
 		this.engine = engine;
 
 		Restrictions restrictions = new Restrictions();
@@ -1068,9 +1070,12 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 
 	@Override
 	public void init() throws Exception {
-
+		
 		if (result == null) {
 
+			// We have to init also the input iterators.
+			this.inputiterator.init();
+			
 			this.result = engine.sparql(query, false);
 
 			// Not done, anymore.

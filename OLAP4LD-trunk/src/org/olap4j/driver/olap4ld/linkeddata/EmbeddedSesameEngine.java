@@ -275,9 +275,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// (Estatwrap)
 			// <http://estatwrap.ontologycentral.com/id/tgs00003#ds> rdf:type
 			// qb:DataSet.
-			dataset = new URL(
-					"http://estatwrap.ontologycentral.com/id/tgs00003#ds");
-			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			
+			// XXX Needed?
+//			dataset = new URL(
+//					"http://estatwrap.ontologycentral.com/id/tgs00003#ds");
+//			Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 
 			// ----------------
@@ -292,28 +294,28 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// manually add the triple beforehand.
 
 			// Problem: dcterms:date could not be resolved.
+			// XXX Needed?
+//			String triples2 = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/dsd/tgs00003>. "
+//					+ "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> _:comp. "
+//					+ "_:comp <http://purl.org/linked-data/cube#measure> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. "
+//					+ "<http://purl.org/dc/terms/date> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2000/01/rdf-schema#Literal>. ";
 
-			triples = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/dsd/tgs00003>. "
-					+ "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> _:comp. "
-					+ "_:comp <http://purl.org/linked-data/cube#measure> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. "
-					+ "<http://purl.org/dc/terms/date> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2000/01/rdf-schema#Literal>. ";
-
-			// insertTriples(triples);
-
-			dataset = new URL(
-					"http://eurostat.linked-statistics.org/data/tgs00003");
-			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// insertTriples(triples2);
+			// XXX Needed?
+//			dataset = new URL(
+//					"http://eurostat.linked-statistics.org/data/tgs00003");
+//			Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 
 			// Problem: Wrong dsd has to be removed
-			triples = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/../dsd/tgs00003>. ";
+//			triples2 = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/../dsd/tgs00003>. ";
 
-			// deleteTriples(triples);
+			// deleteTriples(triples2);
 
-			triples = "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> ?comp. "
-					+ "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
-			String where = "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
-			// deleteTriplesWhere(triples, where);
+//			triples2 = "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> ?comp. "
+//					+ "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
+//			String where = "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
+			// deleteTriplesWhere(triples2, where);
 
 			// ----------------
 			// # Population on 1 January by age and sex [demo_pjan] (Estatwrap)
@@ -324,9 +326,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// loadInStore(new
 			// URL("http://localhost:8080/Data-Fu-Engine/datasets/demo_pjan_ds_v3.rdf"));
 
-			dataset = new URL(
-					"http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
-			Olap4ldUtil._log.info("Load dataset: " + dataset);
+//			dataset = new URL(
+//					"http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
+//			Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 			// Shortcut
 			// loadInStore(new
@@ -336,9 +338,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// # Population on 1 January by age and sex [demo_pjan] (Eurstat LD)
 			// <http://eurostat.linked-statistics.org/data/demo_pjan> rdf:type
 			// qb:DataSet.
-			dataset = new URL(
-					"http://eurostat.linked-statistics.org/data/demo_pjan");
-			Olap4ldUtil._log.info("Load dataset: " + dataset);
+//			dataset = new URL(
+//					"http://eurostat.linked-statistics.org/data/demo_pjan");
+//			Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 			// # Real GDP per Capita (real local currency units, various base
 			// years)
@@ -351,14 +353,14 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// "http://worldbank.270a.info/dataset/world-bank-indicators/structure"));
 
 			// dataset = new URL("http://worldbank.270a.info/dataset/GDPPCKN");
-			Olap4ldUtil._log.info("Load dataset: " + dataset);
+//			Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 
 			// Olap4ldLinkedDataUtil.dumpRDF(repo,
 			// "/media/84F01919F0191352/Projects/2014/paper/Link to paper-drill-across/Link to task-data-fu/drill-across-paper/gdp_per_capita_experiment_load_cubes.n3",
 			// RDFFormat.NTRIPLES);
 
-		} catch (MalformedURLException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

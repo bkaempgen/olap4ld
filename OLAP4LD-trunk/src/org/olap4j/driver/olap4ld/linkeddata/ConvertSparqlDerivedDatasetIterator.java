@@ -646,7 +646,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				+ " } where { { select " + select + " where {" + body
 				+ " } } }";
 
-		Olap4ldUtil._log.config("SPARQL CONSTRUCT query: " + constructquery);
+		Olap4ldUtil._log.info("SPARQL CONSTRUCT query: " + constructquery);
 
 		this.engine.executeCONSTRUCTQuery(constructquery);
 	}

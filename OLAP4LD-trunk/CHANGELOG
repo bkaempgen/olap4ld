@@ -29,6 +29,24 @@ Solution: done
 Problem: Again, what does the convert-cube operation do? I think, it removes the implicit measures.
 Solution: As soon as we use convert-cube, we only work with the non-implicit measures. 
 
+* Outer-join in case all measures are the same (is that really the case?)
+* We should be querying over all datasets (scenario).
+* Do I have a case where I only need information from a subset of datasets?
+* E.g., if I query EU2020 with specific measures and take allbus into account. 
+
+* Features that we need to "evaluate"
+** Concrete measures (UNEMPLOY) <= Here, we only need information from a subset of datasets.
+** Not concrete measures (UNEMPLOY)
+** Concrete measures (EU2020 4/8)
+** Compound measure (UNEMPLOY)
+
+What do we have:
+
+* EMPLOY with two datasets, specific measures
+* EMPLOY with several datasets, specific measures <= use all datasets.
+* EMPLOY with several datasets, unspecific measure <= shows "problem"
+* EMPLOY with compound measure "Unemployment Fear Measure" <= try to solve "problem" and find Metric: 00, 2010, 0.82658; and 00, 1980, 0.92751235584 (as in ISEM paper!)
+
 ==2014-07-09==
 * Changed "default" measures, see http://linked-data-cubes.org/index.php/EmbeddedSesameEngine#Default_Measure_Strategies
 * Now NestedLoopJoin does Concat in case all measures are the same.

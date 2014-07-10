@@ -65,10 +65,10 @@ public class Convert_Cube_QueryTest extends TestCase {
 		Olap4ldUtil.prepareLogging();
 		// Logging
 		// For debugging purposes
-		// Olap4ldUtil._log.setLevel(Level.INFO);
+		Olap4ldUtil._log.setLevel(Level.CONFIG);
 
 		// For monitoring usage
-		Olap4ldUtil._log.setLevel(Level.CONFIG);
+		//Olap4ldUtil._log.setLevel(Level.INFO);
 
 		// For warnings (and errors) only
 		// Olap4ldUtil._log.setLevel(Level.WARNING);
@@ -542,6 +542,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 		
 		String result = executeStatement(myplan);
 		
+		// We see that reasoning is done, since there are both dimensions geo and allbus still in the data.
 		assertContains(
 				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803,27800;",
 				result);
@@ -731,7 +732,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 //						new Resource(
 //								"http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
 		
-		String computepercentagenos_function = "(x2 / (x_1 + x2))";
+		String computepercentagenos_function = "(x1 / (x1 + x2))";
 
 		computepercentagenos_correspondence = new ReconciliationCorrespondence(
 				"computepercentagenos", computepercentagenos_inputmembers1,
@@ -762,6 +763,17 @@ public class Convert_Cube_QueryTest extends TestCase {
 				
 		SliceOp computepercentagenosslicesliced = new SliceOp(computepercentagenos_op, computepercentagenosslicesliceddimensions);
 		
+//		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
+//				computepercentagenosslicesliced);
+//
+//		System.out.println("Logical Query Plan:"+myplan.toString());
+//		
+//		String result = executeStatement(myplan);
+//		
+//		assertContains(
+//				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27800; 27704.423967820803;",
+//				result);
+		
 		// Drill-across gdp and unemployment dataset
 		DrillAcrossOp comparegdppercapita_op = new DrillAcrossOp(gdpsliced, computepercentagenosslicesliced);
 		
@@ -772,8 +784,14 @@ public class Convert_Cube_QueryTest extends TestCase {
 		
 		String result = executeStatement(myplan);
 		
+		// Result as in ISEM paper		
 		assertContains(
-				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27800; 27704.423967820803;",
+				"http://dbpedia.org/resource/Germany; http://dbpedia.org/resource/Germany; 1980; 0.927512355848434925864909;",
+				result);
+		
+		// Result as manually computed
+		assertContains(
+				"http://estatwrap.ontologycentral.com/dic/geo#DE; http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00; 2008; 1.1,0.826589595375722543352601;",
 				result);
 		
 		} catch (OlapException e) {
