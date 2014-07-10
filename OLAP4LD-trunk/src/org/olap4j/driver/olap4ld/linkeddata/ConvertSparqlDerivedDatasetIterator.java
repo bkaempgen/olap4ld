@@ -246,7 +246,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			 * have many "implicit" measures. For now, we assume those to be
 			 * disregarded.
 			 */
-
+			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -286,6 +286,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			// No extended measures. This means, currently, we are not
 			// considering aggregations.
+			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -409,6 +410,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			// No extended measures. This means, currently, we are not
 			// considering aggregations.
+			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -470,6 +472,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				first = false;
 				continue;
 			}
+			
+			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -534,6 +538,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				first = false;
 				continue;
 			}
+			
+			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -1377,6 +1383,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		}
 	}
 
+	@Deprecated
 	private void executeSelectQueryForOutput(List<Node[]> bodypatterns,
 			List<Node[]> headpatterns) {
 
@@ -1424,6 +1431,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				first = false;
 				continue;
 			}
+			
+			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -1488,6 +1497,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				first = false;
 				continue;
 			}
+			
+			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;

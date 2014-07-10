@@ -24,6 +24,10 @@ Hint: This is quite important. The datasets in the FROM clause do NOT indicate a
 * Now using "definition" of global cube, i.e., drill-across of all fitting datasets.
 
 Problem: We should not concat header if all measures are the same. We should update metadata accordingly.
+Solution: done
+
+Problem: Again, what does the convert-cube operation do? I think, it removes the implicit measures.
+Solution: As soon as we use convert-cube, we only work with the non-implicit measures. 
 
 ==2014-07-09==
 * Changed "default" measures, see http://linked-data-cubes.org/index.php/EmbeddedSesameEngine#Default_Measure_Strategies

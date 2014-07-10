@@ -20,22 +20,23 @@ import org.semanticweb.yars.nx.Variable;
 public class BaseCubeSparqlDerivedDatasetIterator implements
 		PhysicalOlapIterator {
 
-	public List<Node[]> cubes;
-	public List<Node[]> measures;
-	public List<Node[]> newmeasures;
-	public List<Node[]> dimensions;
-	public List<Node[]> hierarchies;
-	public List<Node[]> levels;
-	public List<Node[]> members;
+	private List<Node[]> cubes;
+	private List<Node[]> measures;
+	private List<Node[]> newmeasures;
+	private List<Node[]> dimensions;
+	private List<Node[]> hierarchies;
+	private List<Node[]> levels;
+	private List<Node[]> members;
 
 	private EmbeddedSesameEngine engine;
 	private Iterator<Node[]> outputiterator;
 	private String query;
 
-	public BaseCubeSparqlDerivedDatasetIterator(EmbeddedSesameEngine engine, String dataseturi) {
+	public BaseCubeSparqlDerivedDatasetIterator(EmbeddedSesameEngine engine,
+			String dataseturi) {
 
 		this.engine = engine;
-		
+
 		// First: GDP and main components - Current prices dataset
 		Node gdpdsuri = new Resource(dataseturi);
 		Restrictions gdprestrictions = new Restrictions();
@@ -85,6 +86,9 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 
 			newmeasures.add(measure);
 		}
+
+		// I think we missed to set newmeasures = measures
+		this.measures = newmeasures;
 
 		// We assume that cubes to BaseCubeOp always refer to one single cube
 		assert cubes.size() <= 2;
@@ -136,6 +140,7 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 
 		// First is header
 		for (int i = 1; i < measures.size(); i++) {
+
 			Node[] measure = measures.get(i);
 			// As always, remove Aggregation Function from Measure Name
 			String measureProperty = measure[measuremap
@@ -223,7 +228,7 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 		Olap4ldUtil._log.config("SPARQL query: " + query);
 
 		List<Node[]> myBindings = new ArrayList<Node[]>();
-		
+
 		myBindings = engine.sparql(query, false);
 
 		return myBindings;
