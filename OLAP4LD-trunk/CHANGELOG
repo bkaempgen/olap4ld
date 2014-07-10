@@ -15,6 +15,14 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-07-10==
+Problem: Starting from the query over the global dataset, we currently do not properly "unfold" the query given the "available datasets". 
+Solution: We should: Only drill-across over datasets that 1) show one of the queried measures, 2) does have all the "inquired dimensions" 3) dices only available dimensions.
+Hint: This is quite important. The datasets in the FROM clause do NOT indicate a drill-across over the datasets, since the drill-across will most likely be empty. Instead, we are querying a global cube that can be build from those single cubes.
+
+* Refactored building of Logical Query Plan.
+* Now using "definition" of global cube, i.e., drill-across of all fitting datasets.
+
 ==2014-07-09==
 * Changed "default" measures, see http://linked-data-cubes.org/index.php/EmbeddedSesameEngine#Default_Measure_Strategies
 * Now NestedLoopJoin does Concat in case all measures are the same.

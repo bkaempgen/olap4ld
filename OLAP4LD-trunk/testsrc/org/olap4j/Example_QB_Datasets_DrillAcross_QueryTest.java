@@ -94,8 +94,58 @@ public class Example_QB_Datasets_DrillAcross_QueryTest extends TestCase {
 		}
 	}
 
+	
+	// Variations of the UNEMPLOY query
+	
 	/**
-	 * Generic Query
+	 * Specific measures from two datasets. 
+	 */
+	public void executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany() {
+		
+		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23dsAGGFUNCAVG]} ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
+
+		// Should be correct: obsValue (?), gesis:sum (461.33), estatwrap:sum (116) Dice: Germany, 2008
+		assertContains("|  |      |  |  00      |      461.33 |         1.1 |",
+				result);
+	}
+	
+	/**
+	 * Same as above but here we are querying additional datasets. The query does not serve more information, though.
+	 * 
+	 * One can see here that the order the datasets are given in the FROM clause determines the order measures
+	 * are returned from the Drill-Across, since at Drill-Across, a mapping to the respective measure
+	 * is not done, yet.
+	 * 
+	 * What I will be investigating is the difference in time between the one above and this one. 
+	 * I have to take into account any possible dataset, probably.
+	 */
+	public void executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany_moreDatasets() {
+		
+		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23dsAGGFUNCAVG]} ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec360XXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
+
+		// Should be correct: obsValue (?), gesis:sum (461.33), estatwrap:sum (116) Dice: Germany, 2008
+		assertContains("|  |      |  |  00      |                                                                    461.33 |                                                                    1.1 |",
+				result);
+	}
+	
+	/**
+	 * Same as above but here we are querying one unspecific measure. The query will provide more information since it will take
+	 * into account the additional datasets since the query (and the datasets) are not specific enough.
+	 * 
+	 */
+	public void executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany_moreDatasets_UnspecificMeasure() {
+		
+		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]} ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec360XXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
+
+		// Should be correct: obsValue (?), gesis:sum (461.33), estatwrap:sum (116) Dice: Germany, 2008
+		assertContains("|  |      |  |  00      |      461.33 |         1.1 |",
+				result);
+	}
+	
+	// General queries
+	
+	/**
+	 * Mixture of specific and unspecific measures (although not really). 
 	 */
 	public void testDrillAcrossEstatwrapGDPpercapitainPPS_EurostatEmploymentRate() {
 		
@@ -110,6 +160,8 @@ public class Example_QB_Datasets_DrillAcross_QueryTest extends TestCase {
 
 	/**
 	 * Query towards ISEM paper.
+	 * 
+	 * (date, {obsValue AVG, gesis SUM, estatwrap SUM})
 	 * 
 	 * Correctly returns:
 	 * 
@@ -131,6 +183,9 @@ public class Example_QB_Datasets_DrillAcross_QueryTest extends TestCase {
 	}
 	
 	/**
+	 * 
+	 * (date, geo, {obsValue AVG, gesis SUM, estatwrap SUM})
+	 * 
 	 * Integration, but without dice. XXX: I should clean up the example queries one day.
 	 */
 	public void testDrillAcrossTowardsUnemploymentFearAndEmploymentRateExampleDatasetsGeoDimension() {
@@ -143,21 +198,9 @@ public class Example_QB_Datasets_DrillAcross_QueryTest extends TestCase {
 	}
 
 	/**
-	 * Similar than above but with three datasets (and three measures).
 	 * 
-	 * XXX: Shows error. Array out of bound.
-	 */
-	public void testThreeDataSetsGdpGesisEmploymentrate() {
-
-		String result = executeStatement("SELECT /* $session: 2fc2ccae-67f1-6594-712a-6277e201ee4a */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsAGGFUNCSUM],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec420XXX23dsAGGFUNCSUM],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCSUM]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00114XXX23dsXXX2ChttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec420XXX23ds]");
-
-		// estatwrap:sum, (no dice, 2008)
-		assertContains(
-				"|  | 2008 |      1384.0 |      8293.1 |      4097.0 |",
-				result);
-	}
-
-	/**
+	 * More dice query
+	 * 
 	 * Should be correct, since I ask for GESIS average for Germany only, which
 	 * is the same as for all.
 	 * 

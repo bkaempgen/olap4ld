@@ -265,12 +265,18 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 				// We check if all measures are the same
 				boolean allmeasuresthesame = true;
 
-				for (int i = 0; i < root1_measures.size(); i++) {
-					if (!root1_measures.get(0)[measurenmap
-							.get("?MEASURE_UNIQUE_NAME")].toString().equals(
-							root2_measures.get(0)[measurenmap
-									.get("?MEASURE_UNIQUE_NAME")].toString())) {
-						allmeasuresthesame = false;
+				if (root1_measures.size() != root2_measures.size()) {
+					allmeasuresthesame = false;
+				} else {
+
+					for (int i = 1; i < root1_measures.size(); i++) {
+						if (!root1_measures.get(i)[measurenmap
+								.get("?MEASURE_UNIQUE_NAME")].toString()
+								.equals(root2_measures.get(i)[measurenmap
+										.get("?MEASURE_UNIQUE_NAME")]
+										.toString())) {
+							allmeasuresthesame = false;
+						}
 					}
 				}
 
@@ -316,18 +322,16 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 
 							if (allmeasuresthesame) {
 								// Concat measures of both cubes
-								// Under assumptions both cubes have the same measures.
-								for (int i = 0; i < root1_measures.size(); i++) {
+								// Under assumptions both cubes have the same
+								// measures.
+								for (int i = 0; i < root1_measures.size() - 1; i++) {
 									// Need to create new node
 									Resource newnode = new Resource(
 											root1_node[root1_dimensions.size()
 													- 2 + i]
 													+ ","
 													+ root2_node[root1_dimensions
-															.size()
-															- 2
-															+ root1_measures
-																	.size() + i]);
+															.size() - 2 + i]);
 									result.add(newnode);
 								}
 
@@ -353,7 +357,6 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 
 							}
 
-							// Status: Why geo?
 							results.add(result.toArray(new Node[1]));
 
 							/*
