@@ -833,42 +833,6 @@ public class Convert_Cube_QueryTest extends TestCase {
 				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803;",
 				result);
 	}
-	
-	public void test1() {
-		
-		executeGDP_Per_Capita_Compared();
-		
-	}
-	
-	public void test2() {
-		
-		executeGDP_Per_Capita_Compared();
-		
-	}
-	
-	public void test3() {
-		
-		executeGDP_Per_Capita_Compared();
-		
-	}
-	
-	public void test4() {
-		
-		executeGDP_Per_Capita_Compared();
-		
-	}
-	
-	public void test5() {
-		
-		executeGDP_Per_Capita_Compared();
-		
-	}
-	
-	public void test6() {
-		
-		executeGDP_Per_Capita_Compared();
-		
-	}
 
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
