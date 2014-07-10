@@ -145,48 +145,62 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 				measures.add(newnode);
 			}
 
-			// From second cube
-			measuremap = Olap4ldLinkedDataUtil.getNodeResultFields(root2
-					.getMeasures(restrictions).get(0));
+			// Do join
+			Restrictions emptyrestrictions = new Restrictions();
+			List<Node[]> root1_measures = root1.getMeasures(emptyrestrictions);
+			List<Node[]> root2_measures = root2.getMeasures(emptyrestrictions);
 
-			// Add to result from first cube
-			first = true;
-			for (Node[] anIntermediaryresult : root2.getMeasures(restrictions)) {
-				if (first) {
-					// Do not add header twice.
-					// measures.add(anIntermediaryresult);
-					first = false;
-					continue;
+			// We check if all measures are the same
+			boolean allmeasuresthesame = areAllMeasuresTheSame(root1_measures,
+					root2_measures);
+
+			// If all the same then we do not need to add any more.
+			if (!allmeasuresthesame) {
+				// From second cube
+				measuremap = Olap4ldLinkedDataUtil.getNodeResultFields(root2
+						.getMeasures(restrictions).get(0));
+
+				// Add to result from first cube
+				first = true;
+				for (Node[] anIntermediaryresult : root2
+						.getMeasures(restrictions)) {
+					if (first) {
+						// Do not add header twice.
+						// measures.add(anIntermediaryresult);
+						first = false;
+						continue;
+					}
+
+					// We do not want to have the single datasets returned.
+					// result.add(anIntermediaryresult);
+
+					newnode = new Node[10];
+					newnode[measuremap.get("?CATALOG_NAME")] = anIntermediaryresult[measuremap
+							.get("?CATALOG_NAME")];
+					newnode[measuremap.get("?SCHEMA_NAME")] = anIntermediaryresult[measuremap
+							.get("?SCHEMA_NAME")];
+					newnode[measuremap.get("?CUBE_NAME")] = new Literal(
+							cubename);
+					newnode[measuremap.get("?MEASURE_UNIQUE_NAME")] = anIntermediaryresult[measuremap
+							.get("?MEASURE_UNIQUE_NAME")];
+					newnode[measuremap.get("?MEASURE_NAME")] = anIntermediaryresult[measuremap
+							.get("?MEASURE_NAME")];
+					newnode[measuremap.get("?MEASURE_CAPTION")] = anIntermediaryresult[measuremap
+							.get("?MEASURE_CAPTION")];
+					newnode[measuremap.get("?DATA_TYPE")] = anIntermediaryresult[measuremap
+							.get("?DATA_TYPE")];
+					newnode[measuremap.get("?MEASURE_IS_VISIBLE")] = anIntermediaryresult[measuremap
+							.get("?MEASURE_IS_VISIBLE")];
+					newnode[measuremap.get("?MEASURE_AGGREGATOR")] = anIntermediaryresult[measuremap
+							.get("?MEASURE_AGGREGATOR")];
+					newnode[measuremap.get("?EXPRESSION")] = anIntermediaryresult[measuremap
+							.get("?EXPRESSION")];
+
+					// Only add if not already contained.
+					// For measures, we add them all.
+
+					measures.add(newnode);
 				}
-
-				// We do not want to have the single datasets returned.
-				// result.add(anIntermediaryresult);
-
-				newnode = new Node[10];
-				newnode[measuremap.get("?CATALOG_NAME")] = anIntermediaryresult[measuremap
-						.get("?CATALOG_NAME")];
-				newnode[measuremap.get("?SCHEMA_NAME")] = anIntermediaryresult[measuremap
-						.get("?SCHEMA_NAME")];
-				newnode[measuremap.get("?CUBE_NAME")] = new Literal(cubename);
-				newnode[measuremap.get("?MEASURE_UNIQUE_NAME")] = anIntermediaryresult[measuremap
-						.get("?MEASURE_UNIQUE_NAME")];
-				newnode[measuremap.get("?MEASURE_NAME")] = anIntermediaryresult[measuremap
-						.get("?MEASURE_NAME")];
-				newnode[measuremap.get("?MEASURE_CAPTION")] = anIntermediaryresult[measuremap
-						.get("?MEASURE_CAPTION")];
-				newnode[measuremap.get("?DATA_TYPE")] = anIntermediaryresult[measuremap
-						.get("?DATA_TYPE")];
-				newnode[measuremap.get("?MEASURE_IS_VISIBLE")] = anIntermediaryresult[measuremap
-						.get("?MEASURE_IS_VISIBLE")];
-				newnode[measuremap.get("?MEASURE_AGGREGATOR")] = anIntermediaryresult[measuremap
-						.get("?MEASURE_AGGREGATOR")];
-				newnode[measuremap.get("?EXPRESSION")] = anIntermediaryresult[measuremap
-						.get("?EXPRESSION")];
-
-				// Only add if not already contained.
-				// For measures, we add them all.
-
-				measures.add(newnode);
 			}
 
 			// Assume dimensions / hierarchies / levels to be used from first
@@ -259,28 +273,12 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 				List<Node[]> root2_measures = root2
 						.getMeasures(emptyrestrictions);
 
-				Map<String, Integer> measurenmap = Olap4ldLinkedDataUtil
-						.getNodeResultFields(root1_measures.get(0));
-
 				// We check if all measures are the same
-				boolean allmeasuresthesame = true;
-
-				if (root1_measures.size() != root2_measures.size()) {
-					allmeasuresthesame = false;
-				} else {
-
-					for (int i = 1; i < root1_measures.size(); i++) {
-						if (!root1_measures.get(i)[measurenmap
-								.get("?MEASURE_UNIQUE_NAME")].toString()
-								.equals(root2_measures.get(i)[measurenmap
-										.get("?MEASURE_UNIQUE_NAME")]
-										.toString())) {
-							allmeasuresthesame = false;
-						}
-					}
-				}
+				boolean allmeasuresthesame = areAllMeasuresTheSame(
+						root1_measures, root2_measures);
 
 				// Nested-loop
+				boolean firstroot1 = true;
 				while (root1.hasNext()) {
 					Node[] root1_node = (Node[]) root1.next();
 					List<Node> result = new ArrayList<Node>();
@@ -325,17 +323,31 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 								// Under assumptions both cubes have the same
 								// measures.
 								for (int i = 0; i < root1_measures.size() - 1; i++) {
-									// Need to create new node
-									Resource newnode = new Resource(
-											root1_node[root1_dimensions.size()
-													- 2 + i]
-													+ ","
-													+ root2_node[root1_dimensions
-															.size() - 2 + i]);
+									Resource newnode;
+									// Here, header is different, we do not want to concat.
+									if (firstroot1 == true) {
+										newnode = new Resource(
+												root1_node[root1_dimensions
+														.size() - 2 + i]
+														.toString());
+										firstroot1 = false;
+									} else {
+
+										// Need to create new node
+										newnode = new Resource(
+												root1_node[root1_dimensions
+														.size() - 2 + i]
+														+ ","
+														+ root2_node[root1_dimensions
+																.size() - 2 + i]);
+
+									}
 									result.add(newnode);
 								}
 
 							} else {
+
+								// Here first (header) is same as all other.
 
 								// Add measures of cube one
 								for (int i = root1_dimensions.size() - 2; i < root1_dimensions
@@ -535,6 +547,27 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 		}
 
 		this.results = results;
+	}
+
+	private boolean areAllMeasuresTheSame(List<Node[]> root1_measures,
+			List<Node[]> root2_measures) {
+		Map<String, Integer> measurenmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(root1_measures.get(0));
+		boolean allmeasuresthesame = true;
+		if (root1_measures.size() != root2_measures.size()) {
+			allmeasuresthesame = false;
+		} else {
+
+			for (int i = 1; i < root1_measures.size(); i++) {
+				if (!root1_measures.get(i)[measurenmap
+						.get("?MEASURE_UNIQUE_NAME")].toString().equals(
+						root2_measures.get(i)[measurenmap
+								.get("?MEASURE_UNIQUE_NAME")].toString())) {
+					allmeasuresthesame = false;
+				}
+			}
+		}
+		return allmeasuresthesame;
 	}
 
 	@Override

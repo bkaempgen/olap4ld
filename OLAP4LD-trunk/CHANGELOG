@@ -23,6 +23,8 @@ Hint: This is quite important. The datasets in the FROM clause do NOT indicate a
 * Refactored building of Logical Query Plan.
 * Now using "definition" of global cube, i.e., drill-across of all fitting datasets.
 
+Problem: We should not concat header if all measures are the same. We should update metadata accordingly.
+
 ==2014-07-09==
 * Changed "default" measures, see http://linked-data-cubes.org/index.php/EmbeddedSesameEngine#Default_Measure_Strategies
 * Now NestedLoopJoin does Concat in case all measures are the same.
