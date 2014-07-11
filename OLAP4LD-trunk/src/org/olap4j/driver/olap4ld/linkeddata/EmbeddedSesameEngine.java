@@ -955,6 +955,10 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Code list empty
 			// No member
 
+			// Now, I create all possible derived datasets
+			
+			List<ReconciliationCorrespondence> correspondences = getReconciliationCorrespondences();
+			
 			// Important!
 
 			con.close();
@@ -977,6 +981,48 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private List<ReconciliationCorrespondence> getReconciliationCorrespondences() {
+		
+		List<ReconciliationCorrespondence> correspondences = new ArrayList<ReconciliationCorrespondence>();
+		
+		// COMPUTE_YES
+		ReconciliationCorrespondence computeyes_correspondence;
+		List<Node[]> computeyes_inputmembers1 = new ArrayList<Node[]>();
+		computeyes_inputmembers1
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2") });
+
+		List<Node[]> computeyes_inputmembers2 = new ArrayList<Node[]>();
+		computeyes_inputmembers2
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_3") });
+
+		List<Node[]> computeyes_outputmembers = new ArrayList<Node[]>();
+		computeyes_outputmembers
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+
+		String computeyes_function = "(x1 + x2)";
+
+		computeyes_correspondence = new ReconciliationCorrespondence(
+				"computeyes", computeyes_inputmembers1,
+				computeyes_inputmembers2,
+				computeyes_outputmembers, computeyes_function);
+		
+		correspondences.add(computeyes_correspondence);
+		
+		return correspondences;
 	}
 
 	/**
