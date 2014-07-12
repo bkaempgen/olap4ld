@@ -389,6 +389,7 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 				// Outer join
 				if (allmeasuresthesame) {
 
+					// Left outer
 					try {
 						root1.init();
 					} catch (Exception e1) {
@@ -460,6 +461,7 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 						}
 					}
 
+					// Right outer
 					try {
 						root2.init();
 					} catch (Exception e1) {

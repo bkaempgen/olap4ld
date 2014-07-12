@@ -468,6 +468,8 @@ abstract class Olap4ldCellSet implements CellSet {
 						// here, also.
 
 						// Now, I create all possible derived datasets
+						
+						
 
 						List<ReconciliationCorrespondence> correspondences = ((EmbeddedSesameEngine) this.olap4jStatement.olap4jConnection.myLinkedData)
 								.getReconciliationCorrespondences();
