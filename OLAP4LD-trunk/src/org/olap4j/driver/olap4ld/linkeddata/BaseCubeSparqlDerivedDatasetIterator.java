@@ -22,7 +22,6 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 
 	private List<Node[]> cubes;
 	private List<Node[]> measures;
-	private List<Node[]> newmeasures;
 	private List<Node[]> dimensions;
 	private List<Node[]> hierarchies;
 	private List<Node[]> levels;
@@ -64,31 +63,6 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// Base-Cube would only take the non-aggregated measures
-		newmeasures = new ArrayList<Node[]>();
-		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(measures.get(0));
-		newmeasures.add(measures.get(0));
-		for (int i = 1; i < measures.size(); i++) {
-			Node[] measure = measures.get(i);
-
-			/*
-			 * Here we deal with the problem that cubes coming in will possibly
-			 * have many "implicit" measures. For now, we assume those to be
-			 * disregarded.
-			 */
-
-			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
-					.contains("AGGFUNC")) {
-				continue;
-			}
-
-			newmeasures.add(measure);
-		}
-
-		// I think we missed to set newmeasures = measures
-		this.measures = newmeasures;
 
 		// We assume that cubes to BaseCubeOp always refer to one single cube
 		assert cubes.size() <= 2;
@@ -137,11 +111,26 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 		}
 
 		// 3. Measure triple patterns
+		Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(measures.get(0));
 
 		// First is header
 		for (int i = 1; i < measures.size(); i++) {
 
 			Node[] measure = measures.get(i);
+
+			/*
+			 * Here we deal with the problem that cubes coming in will possibly
+			 * have many "implicit" measures. For now, we assume those to be
+			 * disregarded.
+			 */
+
+			// XXX: I think, this will make problems, later.
+			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+					.contains("AGGFUNC")) {
+				continue;
+			}
+			
 			// As always, remove Aggregation Function from Measure Name
 			String measureProperty = measure[measuremap
 					.get("?MEASURE_UNIQUE_NAME")].toString().replace(

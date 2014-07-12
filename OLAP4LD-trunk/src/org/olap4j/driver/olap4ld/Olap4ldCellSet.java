@@ -69,9 +69,11 @@ import org.olap4j.driver.olap4ld.helper.PreprocessMdxVisitor;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.DiceOp;
 import org.olap4j.driver.olap4ld.linkeddata.DrillAcrossOp;
+import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.ProjectionOp;
+import org.olap4j.driver.olap4ld.linkeddata.ReconciliationCorrespondence;
 import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.driver.olap4ld.linkeddata.RollupOp;
 import org.olap4j.driver.olap4ld.linkeddata.SliceOp;
@@ -464,7 +466,14 @@ abstract class Olap4ldCellSet implements CellSet {
 						// directly. Soon, we
 						// should automatically derive new datasets to query
 						// here, also.
-						//
+
+						// Now, I create all possible derived datasets
+
+						List<ReconciliationCorrespondence> correspondences = ((EmbeddedSesameEngine) this.olap4jStatement.olap4jConnection.myLinkedData)
+								.getReconciliationCorrespondences();
+
+						// For every correspondence
+
 						LogicalOlapOp singlequeryplan = createInitialQueryPlanPerDataSet(singlecube);
 						if (singlequeryplan != null) {
 							singlecubequeryplans.add(singlequeryplan);
@@ -605,7 +614,8 @@ abstract class Olap4ldCellSet implements CellSet {
 			}
 		}
 
-		// If projections empty (only contains header), return null since cube will be "empty".
+		// If projections empty (only contains header), return null since cube
+		// will be "empty".
 
 		if (projections.size() == 1) {
 			return null;
@@ -681,7 +691,8 @@ abstract class Olap4ldCellSet implements CellSet {
 							containedInCube = true;
 						}
 					}
-					// If hierarchy is not contained in dimensions of cube, cube will be "empty".
+					// If hierarchy is not contained in dimensions of cube, cube
+					// will be "empty".
 					if (!containedInCube) {
 						return null;
 					}
@@ -695,6 +706,7 @@ abstract class Olap4ldCellSet implements CellSet {
 			boolean first1 = true;
 			for (Member member : filterpositionmembers) {
 				Olap4ldMember olapmember = (Olap4ldMember) member;
+
 				// No measures
 				if (member.getMemberType() != Member.Type.MEASURE) {
 
@@ -709,7 +721,8 @@ abstract class Olap4ldCellSet implements CellSet {
 					newMembers.add(membernodes.get(1));
 				}
 			}
-			// Only if not empty (apart from header), we create and add the position
+			// Only if not empty (apart from header), we create and add the
+			// position
 			if (newMembers.size() != 1) {
 				// Ordinal important?
 				// Olap4ldPosition aPosition = new Olap4ldPosition(newMembers,
@@ -718,9 +731,18 @@ abstract class Olap4ldCellSet implements CellSet {
 			}
 		}
 
-		// Dices from (cube, SlicesRollups, Dices, Projections)
-		LogicalOlapOp dice = new DiceOp(projection, newfilterAxisSignature,
-				newfilterAxisPositions);
+		// If no dice, no dice
+		LogicalOlapOp dice;
+		if (newfilterAxisSignature.isEmpty()
+				|| newfilterAxisSignature.size() == 1) {
+			dice = projection;
+		} else {
+
+			// Dices from (cube, SlicesRollups, Dices, Projections)
+			dice = new DiceOp(projection, newfilterAxisSignature,
+					newfilterAxisPositions);
+
+		}
 
 		// Slice operator
 

@@ -15,6 +15,13 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-07-12==
+Problem: Queries would not work, anymore. 
+Solution: No dice, no dice.
+
+Problem: Base-Cube would not forward the implicit measures. I should do that, though.
+Solution: Base-Cube now forwards measures, but returned tuples are without (why, again?)
+
 ==2014-07-10==
 Problem: Starting from the query over the global dataset, we currently do not properly "unfold" the query given the "available datasets". 
 Solution: We should: Only drill-across over datasets that 1) show one of the queried measures, 2) does have all the "inquired dimensions" 3) dices only available dimensions.

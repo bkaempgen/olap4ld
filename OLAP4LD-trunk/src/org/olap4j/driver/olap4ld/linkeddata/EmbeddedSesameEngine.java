@@ -228,10 +228,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Load links
 			loadInStore(new URL(
 					"http://people.aifb.kit.edu/bka/Public/cube_additionalRDF.rdf"));
+			loadInStore(new URL("http://pastebin.com/raw.php?i=e1K52uhc"));
 
-			String triples = "<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://rdfdata.eionet.europa.eu/ramon/ontology/NUTSRegion>. ";
+			//String triples = "<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://rdfdata.eionet.europa.eu/ramon/ontology/NUTSRegion>. ";
 
-			insertTriples(triples);
+			//insertTriples(triples);
 
 			// First, we load everything that Data-Fu can create
 			// loadInStore(new URL(
@@ -240,7 +241,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Then, we load everything that Data-Fu cannot create
 
 			// load and validate dataset requires to load cube
-			URL dataset;
+			//URL dataset;
 
 			// ----------------
 			// Load "GDP per capita - annual Data" ds and dsd
@@ -954,10 +955,6 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// No aggregation function
 			// Code list empty
 			// No member
-
-			// Now, I create all possible derived datasets
-			
-			List<ReconciliationCorrespondence> correspondences = getReconciliationCorrespondences();
 			
 			// Important!
 
@@ -983,7 +980,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		}
 	}
 
-	private List<ReconciliationCorrespondence> getReconciliationCorrespondences() {
+	public List<ReconciliationCorrespondence> getReconciliationCorrespondences() {
 		
 		List<ReconciliationCorrespondence> correspondences = new ArrayList<ReconciliationCorrespondence>();
 		
@@ -1021,6 +1018,49 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				computeyes_outputmembers, computeyes_function);
 		
 		correspondences.add(computeyes_correspondence);
+				
+				
+		// COMPUTE\_PERCENTAGENOS
+		ReconciliationCorrespondence computepercentagenos_correspondence;
+		List<Node[]> computepercentagenos_inputmembers1 = new ArrayList<Node[]>();
+		computepercentagenos_inputmembers1
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1") });
+
+		List<Node[]> computepercentagenos_inputmembers2 = new ArrayList<Node[]>();
+		computepercentagenos_inputmembers2
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+
+		List<Node[]> computepercentagenos_outputmembers = new ArrayList<Node[]>();
+		computepercentagenos_outputmembers
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+// Not yet needed since manual drill-across:
+//		computepercentagenos_outputmembers
+//				.add(new Node[] {
+//						new Resource(
+//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+//						new Resource(
+//								"http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
+		
+		String computepercentagenos_function = "(x1 / (x1 + x2))";
+
+		computepercentagenos_correspondence = new ReconciliationCorrespondence(
+				"computepercentagenos", computepercentagenos_inputmembers1,
+				computepercentagenos_inputmembers2,
+				computepercentagenos_outputmembers, computepercentagenos_function);
+				
+		correspondences.add(computepercentagenos_correspondence);		
 		
 		return correspondences;
 	}
