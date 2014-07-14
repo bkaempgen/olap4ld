@@ -34,7 +34,7 @@ public class GraphVizVisualisationVisitor implements
 	@Override
 	public void visit(ConvertCubeOp op) throws QueryException {
 		// nodedefinition
-		nodedefinitions += op.toString().hashCode()+"[label=\"Convert-Cube\"]; \n";
+		nodedefinitions += op.toString().hashCode()+"[label=\"Convert-Cube: "+op.conversioncorrespondence.getname()+"\"]; \n";
 		
 		// edgedefinition
 		edgedefinitions += op.toString().hashCode()+"->"+op.inputOp1.toString().hashCode()+"; \n";

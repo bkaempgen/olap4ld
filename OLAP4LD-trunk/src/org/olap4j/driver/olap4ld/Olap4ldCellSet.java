@@ -455,34 +455,33 @@ abstract class Olap4ldCellSet implements CellSet {
 			String[] datasets = restrictions.cubeNamePattern.toString().split(
 					",");
 			List<LogicalOlapOp> singlecubequeryplans = new ArrayList<LogicalOlapOp>();
-			
-			Olap4ldUtil._log
-			.info("Creating start ops:...");
 
-			int DEPTH = 1;
+			Olap4ldUtil._log.info("Creating start ops:...");
+
+			int DEPTH = 2;
 			List<LogicalOlapOp> startops = new ArrayList<LogicalOlapOp>();
 			for (int i = 0; i <= DEPTH; i++) {
-				List<LogicalOlapOp> intermediaryops = Olap4ldLinkedDataUtil.generateLqpsForDepth(i, datasets, EmbeddedSesameEngine.getReconciliationCorrespondences());
+				List<LogicalOlapOp> intermediaryops = Olap4ldLinkedDataUtil
+						.generateLqpsForDepth(i, datasets, EmbeddedSesameEngine
+								.getReconciliationCorrespondences());
 				for (LogicalOlapOp logicalOlapOp : intermediaryops) {
 					startops.add(logicalOlapOp);
 				}
 			}
-			
 
-			Olap4ldUtil._log
-			.info("Finished creating "+ startops.size() +" start ops.");
-			
-			Olap4ldUtil._log
-			.info("Started collecting non-null query plans.");
+			Olap4ldUtil._log.info("Finished creating " + startops.size()
+					+ " start ops.");
+
+			Olap4ldUtil._log.info("Started collecting non-null query plans.");
 			for (LogicalOlapOp startop : startops) {
 				LogicalOlapOp singlequeryplan = createInitialQueryPlanPerDataSet(startop);
 				if (singlequeryplan != null) {
 					singlecubequeryplans.add(singlequeryplan);
 				}
 			}
-			
-			Olap4ldUtil._log
-			.info("Finished collecting "+ singlecubequeryplans.size() +"non-null query plans.");
+
+			Olap4ldUtil._log.info("Finished collecting "
+					+ singlecubequeryplans.size() + "non-null query plans.");
 
 			// for (int i = 0; i < datasets.length; i++) {
 			// String dataset = datasets[i];
@@ -528,9 +527,8 @@ abstract class Olap4ldCellSet implements CellSet {
 			 * derivation of more single datasets.
 			 */
 
-			Olap4ldUtil._log
-			.info("Started building drill-across query plan.");
-			
+			Olap4ldUtil._log.info("Started building drill-across query plan.");
+
 			for (LogicalOlapOp logicalOlapOp : singlecubequeryplans) {
 				if (queryplanroot == null) {
 					queryplanroot = logicalOlapOp;
@@ -540,21 +538,19 @@ abstract class Olap4ldCellSet implements CellSet {
 					queryplanroot = drillacross;
 				}
 			}
-			
-			Olap4ldUtil._log
-			.info("Finished building drill-across query plan.");
-			
+
+			Olap4ldUtil._log.info("Finished building drill-across query plan.");
+
 			LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 					queryplanroot);
-			
+
 			try {
-				Olap4ldUtil._log
-				.info("DOT: "+myplan.toDOT()+".");
+				Olap4ldUtil._log.info("DOT: " + myplan.toDOT() + ".");
 			} catch (QueryException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			return myplan;
 
 		} catch (OlapException e1) {
@@ -565,9 +561,8 @@ abstract class Olap4ldCellSet implements CellSet {
 	}
 
 	private List<LogicalOlapOp> generateStartOps(String[] datasets) {
-		
-		Olap4ldUtil._log
-		.info("Creating start ops:...");
+
+		Olap4ldUtil._log.info("Creating start ops:...");
 
 		List<LogicalOlapOp> startops = new CopyOnWriteArrayList<LogicalOlapOp>();
 
@@ -595,55 +590,55 @@ abstract class Olap4ldCellSet implements CellSet {
 
 			}
 		}
-		
+
 		// mc
 		for (ReconciliationCorrespondence mergingCorrespondence : correspondences) {
 			// Check whether merge-cubes
 			if (mergingCorrespondence.getInputmembers2() != null) {
-				
+
 				for (LogicalOlapOp olapop1 : startops) {
-					
+
 					for (LogicalOlapOp olapop2 : startops) {
-						
-						if (!derivedBy(olapop1, mergingCorrespondence) && !derivedBy(olapop2, mergingCorrespondence)) {
-							
-							startops.add(new ConvertCubeOp(olapop1, olapop2, mergingCorrespondence));
-							
+
+						if (!derivedBy(olapop1, mergingCorrespondence)
+								&& !derivedBy(olapop2, mergingCorrespondence)) {
+
+							startops.add(new ConvertCubeOp(olapop1, olapop2,
+									mergingCorrespondence));
+
 						}
-						
-						
+
 					}
-					
+
 				}
 			}
 		}
-		
-		Olap4ldUtil._log
-		.info("Finished creating "+ startops.size() +" start ops.");
+
+		Olap4ldUtil._log.info("Finished creating " + startops.size()
+				+ " start ops.");
 
 		return startops;
 	}
 
 	private boolean derivedBy(LogicalOlapOp olapop,
 			ReconciliationCorrespondence reconciliationCorrespondence) {
-		GetFirstOccurrenceVisitor derivedbyvisitor = new GetFirstOccurrenceVisitor(new ConvertCubeOp(null, reconciliationCorrespondence));
-		
+		GetFirstOccurrenceVisitor derivedbyvisitor = new GetFirstOccurrenceVisitor(
+				new ConvertCubeOp(null, reconciliationCorrespondence));
+
 		try {
 			olapop.accept(derivedbyvisitor);
 		} catch (QueryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		if (derivedbyvisitor.getFirstOccurence() != null) {
 			return true;
-			
+
 		} else {
 			return false;
 		}
 	}
-	
-	
 
 	/**
 	 * Here, we try to create an initial query plan if the datasets fits.
@@ -652,9 +647,8 @@ abstract class Olap4ldCellSet implements CellSet {
 	 * @return
 	 */
 	private LogicalOlapOp createInitialQueryPlanPerDataSet(LogicalOlapOp startop) {
-		
-		Olap4ldUtil._log
-		.info("Started creating query plan...");
+
+		Olap4ldUtil._log.info("Started creating query plan...");
 
 		// BaseCube operator
 		boolean first;
@@ -662,18 +656,32 @@ abstract class Olap4ldCellSet implements CellSet {
 		// Cube from (cube, SlicesRollups, Dices, Projections)
 		// LogicalOlapOp basecube = new BaseCubeOp(
 		// restrictions.cubeNamePattern.toString());
-		
-		// Need to search for first cube starting from inputOp1 (which defines the schema).
+
+		// Need to search for first cube starting from inputOp1 (which defines
+		// the schema).
 		LogicalOlapOp convertcube = startop;
-		
+		LogicalOlapOp previouscube = null;
+
 		while (convertcube instanceof ConvertCubeOp) {
-			
-			convertcube = ((ConvertCubeOp) startop).inputOp1;
+
+			// Check whether all inputmembers fit.
+
+			// For now, we do not allow the same merge-cubes operator used
+			// twice.
+			if (previouscube != null && ((ConvertCubeOp) convertcube).conversioncorrespondence
+					.getname()
+					.equals(((ConvertCubeOp) previouscube).conversioncorrespondence
+							.getname())) {
+				return null;
+			}
+
+			previouscube = convertcube;
+			convertcube = ((ConvertCubeOp) convertcube).inputOp1;
+
 		}
-		
-		
+
 		BaseCubeOp basecube = (BaseCubeOp) convertcube;
-		
+
 		Restrictions restrictions = new Restrictions();
 		restrictions.cubeNamePattern = new Resource(basecube.dataseturi);
 
@@ -1101,10 +1109,9 @@ abstract class Olap4ldCellSet implements CellSet {
 			}
 
 		}
-		
-		Olap4ldUtil._log
-		.info("Finished creating "+ rollup +" query plan.");
-		
+
+		Olap4ldUtil._log.info("Finished creating " + rollup + " query plan.");
+
 		return rollup;
 	}
 

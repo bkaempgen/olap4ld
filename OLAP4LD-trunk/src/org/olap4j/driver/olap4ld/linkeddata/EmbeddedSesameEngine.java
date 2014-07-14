@@ -576,7 +576,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		return myBindings;
 	}
 
-	private boolean isLoaded(URL resource) {
+	public boolean isLoaded(URL resource) {
 
 		if (loadedMap.get(resource.hashCode()) != null
 				&& loadedMap.get(resource.hashCode()) == true) {
@@ -586,7 +586,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		}
 	}
 
-	private void setLoaded(URL resource) {
+	public void setLoaded(URL resource) {
 		loadedMap.put(resource.hashCode(), true);
 	}
 
@@ -1010,7 +1010,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 //		String mio_eur2eur_function = "(1000000 * x)";
 //
 //		ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence(
-//				"mio_eur2eur", mio_eur2eur_inputmembers, null,
+//				"MIO2EUR", mio_eur2eur_inputmembers, null,
 //				mio_eur2eur_outputmembers, mio_eur2eur_function);
 //		
 //		correspondences.add(mio_eur2eur_correspondence);
@@ -1044,7 +1044,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 //		String computegdp_function = "(x1 + x2)";
 //
 //		ReconciliationCorrespondence computegdp_correspondence = new ReconciliationCorrespondence(
-//				"computegdp", computegdp_inputmembers1,
+//				"COMP_GDP", computegdp_inputmembers1,
 //				computegdp_inputmembers2, computegdp_outputmembers,
 //				computegdp_function);
 //		
@@ -1096,7 +1096,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 //		String computegdppercapita_function = "(x1 / x2)";
 //
 //		ReconciliationCorrespondence computegdppercapita_correspondence = new ReconciliationCorrespondence(
-//				"computegdppercapita", computegdppercapita_inputmembers1,
+//				"COMP_GDP_CAP", computegdppercapita_inputmembers1,
 //				computegdppercapita_inputmembers2,
 //				computegdppercapita_outputmembers, computegdppercapita_function);
 //		
@@ -1131,7 +1131,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		String computeyes_function = "(x1 + x2)";
 
 		computeyes_correspondence = new ReconciliationCorrespondence(
-				"computeyes", computeyes_inputmembers1,
+				"COMP_YES", computeyes_inputmembers1,
 				computeyes_inputmembers2,
 				computeyes_outputmembers, computeyes_function);
 		
@@ -1174,7 +1174,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		String computepercentagenos_function = "(x1 / (x1 + x2))";
 
 		computepercentagenos_correspondence = new ReconciliationCorrespondence(
-				"computepercentagenos", computepercentagenos_inputmembers1,
+				"COMP_PERCNOS", computepercentagenos_inputmembers1,
 				computepercentagenos_inputmembers2,
 				computepercentagenos_outputmembers, computepercentagenos_function);
 				

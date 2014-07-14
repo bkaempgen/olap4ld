@@ -27,6 +27,15 @@ Note later when "filtering" more logical query plans, we may need the logical op
 
 For now, we go just through them ourselves.
 
+Now convert-cube is tested for isLoaded().
+
+When creating "suitable" query plans, what do we need to check?
+
+Let's see...
+
+Problem: Apparently, Drill-Across results in empty cube. 
+
+
 ==2014-07-12==
 Problem: Queries would not work, anymore. 
 Solution: No dice, no dice.

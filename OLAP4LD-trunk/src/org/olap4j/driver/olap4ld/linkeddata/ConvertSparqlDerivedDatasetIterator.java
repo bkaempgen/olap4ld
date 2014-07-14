@@ -1,6 +1,7 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,7 +20,7 @@ import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
 
 /**
- * Slice operator
+ * Convert operator from paper
  * 
  * @author benedikt
  * 
@@ -85,7 +86,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		
+
 		String domainUri = "http://localhost/deriveddataset/";
 
 		// We use hash of combination conversionfunction + datasets
@@ -245,7 +246,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			 * have many "implicit" measures. For now, we assume those to be
 			 * disregarded.
 			 */
-			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
+			// Note we disregard all implicit measures (since while deriving
+			// datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -285,7 +287,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			// No extended measures. This means, currently, we are not
 			// considering aggregations.
-			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
+			// Note we disregard all implicit measures (since while deriving
+			// datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -409,7 +412,8 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 			// No extended measures. This means, currently, we are not
 			// considering aggregations.
-			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
+			// Note we disregard all implicit measures (since while deriving
+			// datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -471,8 +475,9 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				first = false;
 				continue;
 			}
-			
-			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
+
+			// Note we disregard all implicit measures (since while deriving
+			// datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -537,8 +542,9 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				first = false;
 				continue;
 			}
-			
-			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
+
+			// Note we disregard all implicit measures (since while deriving
+			// datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -1430,8 +1436,9 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				first = false;
 				continue;
 			}
-			
-			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
+
+			// Note we disregard all implicit measures (since while deriving
+			// datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -1496,8 +1503,9 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				first = false;
 				continue;
 			}
-			
-			// Note we disregard all implicit measures (since while deriving datasets, we do not create new ones for them).
+
+			// Note we disregard all implicit measures (since while deriving
+			// datasets, we do not create new ones for them).
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
@@ -1611,17 +1619,22 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				inputiterator2.init();
 			}
 
-			Olap4ldUtil._log
-					.info("Execute logical query plan: Create and load derived dataset.");
-			long time = System.currentTimeMillis();
+			// Check if already existing. If so, do not create again
+			if (!this.engine.isLoaded(new URL(newdataset))) {
 
-			executeSPARQLConstructQuery();
+				Olap4ldUtil._log
+						.info("Execute logical query plan: Create and load derived dataset.");
+				long time = System.currentTimeMillis();
 
-			time = System.currentTimeMillis() - time;
+				executeSPARQLConstructQuery();
 
-			Olap4ldUtil._log
-					.info("Execute logical query plan: Create and load derived dataset finished in "
-							+ time + "ms.");
+				time = System.currentTimeMillis() - time;
+
+				Olap4ldUtil._log
+						.info("Execute logical query plan: Create and load derived dataset finished in "
+								+ time + "ms.");
+				this.engine.setLoaded(new URL(newdataset));
+			}
 
 			executeSPARQLSelectQuery();
 
