@@ -11,7 +11,6 @@ public class ConvertCubeOp implements LogicalOlapOp {
 
 	public LogicalOlapOp inputOp1;
 	public LogicalOlapOp inputOp2;
-	public String domainUri;
 	public ReconciliationCorrespondence conversioncorrespondence;
 
 	/**
@@ -24,21 +23,17 @@ public class ConvertCubeOp implements LogicalOlapOp {
 	 * @param domainUri
 	 */
 	public ConvertCubeOp(LogicalOlapOp inputOp,
-			ReconciliationCorrespondence conversioncorrespondence,
-			String domainUri) {
+			ReconciliationCorrespondence conversioncorrespondence) {
 		this.inputOp1 = inputOp;
 		this.inputOp2 = null;
 		this.conversioncorrespondence = conversioncorrespondence;
-		this.domainUri = domainUri;
 	}
 
 	public ConvertCubeOp(LogicalOlapOp inputOp1, LogicalOlapOp inputOp2,
-			ReconciliationCorrespondence conversioncorrespondence,
-			String domainUri) {
+			ReconciliationCorrespondence conversioncorrespondence) {
 		this.inputOp1 = inputOp1;
 		this.inputOp2 = inputOp2;
 		this.conversioncorrespondence = conversioncorrespondence;
-		this.domainUri = domainUri;
 	}
 
 	public String toString() {

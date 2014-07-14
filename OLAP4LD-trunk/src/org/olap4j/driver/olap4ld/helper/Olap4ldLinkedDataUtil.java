@@ -28,6 +28,10 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
+import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
+import org.olap4j.driver.olap4ld.linkeddata.ConvertCubeOp;
+import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
+import org.olap4j.driver.olap4ld.linkeddata.ReconciliationCorrespondence;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.Update;
@@ -242,9 +246,10 @@ public class Olap4ldLinkedDataUtil {
 
 		Node decoded = decodeUriWithPrefix(mdx);
 
-		// Convert to canonical value. No, since internal value means within Linked Data store. 
-		// Node canonical = 
-		
+		// Convert to canonical value. No, since internal value means within
+		// Linked Data store.
+		// Node canonical =
+
 		return decoded;
 	}
 
@@ -313,7 +318,8 @@ public class Olap4ldLinkedDataUtil {
 	 */
 	public static Variable makeUriToVariable(Node uri) {
 		// We simply remove all special characters
-		String uriRepresentation = uri.toString().replaceAll("[^a-zA-Z0-9]+", "");
+		String uriRepresentation = uri.toString().replaceAll("[^a-zA-Z0-9]+",
+				"");
 		return new Variable("?" + uriRepresentation);
 	}
 
@@ -684,8 +690,7 @@ public class Olap4ldLinkedDataUtil {
 	 *            the RDF serialization format for the dump
 	 * @return
 	 */
-	public static void dumpRDF(Repository repo, String file,
-			RDFFormat outform) {
+	public static void dumpRDF(Repository repo, String file, RDFFormat outform) {
 		try {
 			// dump the graph in the specified format
 			System.out.println("\n==GRAPH DUMP==\n");
@@ -730,6 +735,80 @@ public class Olap4ldLinkedDataUtil {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
+
+	public static int numberForChildren(int depth, int d, int mc) {
+
+		if (depth == 0) {
+
+			return d;
+		}
+
+		int no = 0;
+
+		// Both same depth
+		no += mc * numberForChildren(depth - 1, d, mc)
+				* numberForChildren(depth - 1, d, mc);
+
+		// Left
+		for (int i = 0; i < depth - 1; i++) {
+			no += mc * numberForChildren(depth - 1, d, mc)
+					* numberForChildren(i, d, mc);
+		}
+
+		// Right
+		for (int i = 0; i < depth - 1; i++) {
+			no += mc * numberForChildren(i, d, mc)
+					* numberForChildren(depth - 1, d, mc);
+		}
+		return no;
+	}
+
+	public static List<LogicalOlapOp> generateLqpsForDepth(int depth,
+			String[] datasets,
+			List<ReconciliationCorrespondence> correspondences) {
+
+		List<LogicalOlapOp> newlqps = new ArrayList<LogicalOlapOp>();
+
+		if (depth == 0) {
+
+			for (int i = 0; i < datasets.length; i++) {
+				newlqps.add(new BaseCubeOp(datasets[i]));
+			}
+			return newlqps;
+		}
+
+		// Both same depth.
+		List<LogicalOlapOp> nextdepthlqps = generateLqpsForDepth(depth - 1,
+				datasets, correspondences);
+
+		for (LogicalOlapOp logicalOlapOp1 : nextdepthlqps) {
+			for (LogicalOlapOp logicalOlapOp2 : nextdepthlqps) {
+				for (ReconciliationCorrespondence correspondence : correspondences) {
+					newlqps.add(new ConvertCubeOp(logicalOlapOp1,
+							logicalOlapOp2, correspondence));
+				}
+			}
+		}
+
+		// Recursively other depths of the other.
+		for (int i = 0; i < depth-1; i++) {
+			List<LogicalOlapOp> lowerdepthlqps = generateLqpsForDepth(i, datasets, correspondences);
+			for (LogicalOlapOp logicalOlapOp1 : lowerdepthlqps) {
+				for (LogicalOlapOp logicalOlapOp2 : nextdepthlqps) {
+					for (ReconciliationCorrespondence correspondence : correspondences) {
+						// Left / Right
+						newlqps.add(new ConvertCubeOp(logicalOlapOp1,
+								logicalOlapOp2, correspondence));
+						// Vice-versa
+						newlqps.add(new ConvertCubeOp(logicalOlapOp2,
+								logicalOlapOp1, correspondence));
+					}
+				}
+			}
+		}
+
+		return newlqps;
 	}
 
 }

@@ -52,6 +52,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import org.olap4j.Axis;
@@ -63,16 +64,21 @@ import org.olap4j.CellSetMetaData;
 import org.olap4j.OlapException;
 import org.olap4j.OlapStatement;
 import org.olap4j.Position;
+import org.olap4j.driver.olap4ld.helper.GetFirstOccurrenceVisitor;
+import org.olap4j.driver.olap4ld.helper.GraphVizVisualisationVisitor;
 import org.olap4j.driver.olap4ld.helper.LdHelper;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
 import org.olap4j.driver.olap4ld.helper.PreprocessMdxVisitor;
 import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
+import org.olap4j.driver.olap4ld.linkeddata.ConvertCubeOp;
 import org.olap4j.driver.olap4ld.linkeddata.DiceOp;
 import org.olap4j.driver.olap4ld.linkeddata.DrillAcrossOp;
 import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
+import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOperatorQueryPlanVisitor;
 import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapQueryPlan;
 import org.olap4j.driver.olap4ld.linkeddata.ProjectionOp;
+import org.olap4j.driver.olap4ld.linkeddata.QueryException;
 import org.olap4j.driver.olap4ld.linkeddata.ReconciliationCorrespondence;
 import org.olap4j.driver.olap4ld.linkeddata.Restrictions;
 import org.olap4j.driver.olap4ld.linkeddata.RollupOp;
@@ -446,76 +452,109 @@ abstract class Olap4ldCellSet implements CellSet {
 			 * measures, 2) does have all the "inquired dimensions".
 			 */
 
-			if (restrictions.cubeNamePattern.toString().contains(",")) {
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
+			List<LogicalOlapOp> singlecubequeryplans = new ArrayList<LogicalOlapOp>();
+			
+			Olap4ldUtil._log
+			.info("Creating start ops:...");
 
-				String[] datasets = restrictions.cubeNamePattern.toString()
-						.split(",");
-				List<LogicalOlapOp> singlecubequeryplans = new ArrayList<LogicalOlapOp>();
-				for (int i = 0; i < datasets.length; i++) {
-					String dataset = datasets[i];
-
-					restrictions = new Restrictions();
-					restrictions.cubeNamePattern = new Resource(dataset);
-
-					// Ask for the cube
-					try {
-						List<Node[]> singlecube = this.olap4jStatement.olap4jConnection.myLinkedData
-								.getCubes(restrictions);
-
-						// So far, we only take into account the datasets,
-						// directly. Soon, we
-						// should automatically derive new datasets to query
-						// here, also.
-
-						// Now, I create all possible derived datasets
-						
-						
-
-						List<ReconciliationCorrespondence> correspondences = ((EmbeddedSesameEngine) this.olap4jStatement.olap4jConnection.myLinkedData)
-								.getReconciliationCorrespondences();
-
-						// For every correspondence
-
-						LogicalOlapOp singlequeryplan = createInitialQueryPlanPerDataSet(singlecube);
-						if (singlequeryplan != null) {
-							singlecubequeryplans.add(singlequeryplan);
-						}
-
-					} catch (OlapException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-					queryplanroot = null;
-					// queryplanroot is simply
-					// XXX: can we make it bushy?
-					// XXX: Currently, every single dataset is queried, however,
-					// not every
-					// dataset fits the query.
-
-					/*
-					 * In theory, here we are evaluating the views, i.e., the
-					 * definition of the global dataset by the single datasets
-					 * and the automatic derivation of more single datasets.
-					 */
-
-					for (LogicalOlapOp logicalOlapOp : singlecubequeryplans) {
-						if (queryplanroot == null) {
-							queryplanroot = logicalOlapOp;
-						} else {
-							DrillAcrossOp drillacross = new DrillAcrossOp(
-									queryplanroot, logicalOlapOp);
-							queryplanroot = drillacross;
-						}
-					}
-
+			int DEPTH = 1;
+			List<LogicalOlapOp> startops = new ArrayList<LogicalOlapOp>();
+			for (int i = 0; i <= DEPTH; i++) {
+				List<LogicalOlapOp> intermediaryops = Olap4ldLinkedDataUtil.generateLqpsForDepth(i, datasets, EmbeddedSesameEngine.getReconciliationCorrespondences());
+				for (LogicalOlapOp logicalOlapOp : intermediaryops) {
+					startops.add(logicalOlapOp);
 				}
-			} else {
-				queryplanroot = createInitialQueryPlanPerDataSet(cube);
 			}
+			
 
+			Olap4ldUtil._log
+			.info("Finished creating "+ startops.size() +" start ops.");
+			
+			Olap4ldUtil._log
+			.info("Started collecting non-null query plans.");
+			for (LogicalOlapOp startop : startops) {
+				LogicalOlapOp singlequeryplan = createInitialQueryPlanPerDataSet(startop);
+				if (singlequeryplan != null) {
+					singlecubequeryplans.add(singlequeryplan);
+				}
+			}
+			
+			Olap4ldUtil._log
+			.info("Finished collecting "+ singlecubequeryplans.size() +"non-null query plans.");
+
+			// for (int i = 0; i < datasets.length; i++) {
+			// String dataset = datasets[i];
+			//
+			// restrictions = new Restrictions();
+			// restrictions.cubeNamePattern = new Resource(dataset);
+			//
+			// // Ask for the cube
+			// try {
+			//
+			// // Here, the cubes get loaded.
+			// // XXX: Necessary to do that before execution?
+			// List<Node[]> singlecube =
+			// this.olap4jStatement.olap4jConnection.myLinkedData
+			// .getCubes(restrictions);
+			//
+			// // So far, we only take into account the datasets,
+			// // directly. Soon, we
+			// // should automatically derive new datasets to query
+			// // here, also.
+			//
+			// // Now, I create all possible derived datasets
+			//
+			// // For every correspondence
+			//
+			//
+			//
+			// } catch (OlapException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
+
+			queryplanroot = null;
+			// queryplanroot is simply
+			// XXX: can we make it bushy?
+			// XXX: Currently, every single dataset is queried, however,
+			// not every
+			// dataset fits the query.
+
+			/*
+			 * In theory, here we are evaluating the views, i.e., the definition
+			 * of the global dataset by the single datasets and the automatic
+			 * derivation of more single datasets.
+			 */
+
+			Olap4ldUtil._log
+			.info("Started building drill-across query plan.");
+			
+			for (LogicalOlapOp logicalOlapOp : singlecubequeryplans) {
+				if (queryplanroot == null) {
+					queryplanroot = logicalOlapOp;
+				} else {
+					DrillAcrossOp drillacross = new DrillAcrossOp(
+							queryplanroot, logicalOlapOp);
+					queryplanroot = drillacross;
+				}
+			}
+			
+			Olap4ldUtil._log
+			.info("Finished building drill-across query plan.");
+			
 			LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 					queryplanroot);
+			
+			try {
+				Olap4ldUtil._log
+				.info("DOT: "+myplan.toDOT()+".");
+			} catch (QueryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			return myplan;
 
 		} catch (OlapException e1) {
@@ -525,26 +564,118 @@ abstract class Olap4ldCellSet implements CellSet {
 		return null;
 	}
 
+	private List<LogicalOlapOp> generateStartOps(String[] datasets) {
+		
+		Olap4ldUtil._log
+		.info("Creating start ops:...");
+
+		List<LogicalOlapOp> startops = new CopyOnWriteArrayList<LogicalOlapOp>();
+
+		// Add all datasets
+		for (int i = 0; i < datasets.length; i++) {
+			startops.add(new BaseCubeOp(datasets[i]));
+		}
+
+		List<ReconciliationCorrespondence> correspondences = ((EmbeddedSesameEngine) this.olap4jStatement.olap4jConnection.myLinkedData)
+				.getReconciliationCorrespondences();
+
+		// cc
+		for (ReconciliationCorrespondence convertCorrespondence : correspondences) {
+			// Check whether convert-cube
+			if (convertCorrespondence.getInputmembers2() == null) {
+
+				for (LogicalOlapOp olapop : startops) {
+
+					if (!derivedBy(olapop, convertCorrespondence)) {
+						startops.add(new ConvertCubeOp(olapop,
+								convertCorrespondence));
+					}
+
+				}
+
+			}
+		}
+		
+		// mc
+		for (ReconciliationCorrespondence mergingCorrespondence : correspondences) {
+			// Check whether merge-cubes
+			if (mergingCorrespondence.getInputmembers2() != null) {
+				
+				for (LogicalOlapOp olapop1 : startops) {
+					
+					for (LogicalOlapOp olapop2 : startops) {
+						
+						if (!derivedBy(olapop1, mergingCorrespondence) && !derivedBy(olapop2, mergingCorrespondence)) {
+							
+							startops.add(new ConvertCubeOp(olapop1, olapop2, mergingCorrespondence));
+							
+						}
+						
+						
+					}
+					
+				}
+			}
+		}
+		
+		Olap4ldUtil._log
+		.info("Finished creating "+ startops.size() +" start ops.");
+
+		return startops;
+	}
+
+	private boolean derivedBy(LogicalOlapOp olapop,
+			ReconciliationCorrespondence reconciliationCorrespondence) {
+		GetFirstOccurrenceVisitor derivedbyvisitor = new GetFirstOccurrenceVisitor(new ConvertCubeOp(null, reconciliationCorrespondence));
+		
+		try {
+			olapop.accept(derivedbyvisitor);
+		} catch (QueryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (derivedbyvisitor.getFirstOccurence() != null) {
+			return true;
+			
+		} else {
+			return false;
+		}
+	}
+	
+	
+
 	/**
 	 * Here, we try to create an initial query plan if the datasets fits.
 	 * 
-	 * @param cube
+	 * @param startop
 	 * @return
 	 */
-	private LogicalOlapOp createInitialQueryPlanPerDataSet(List<Node[]> cube) {
+	private LogicalOlapOp createInitialQueryPlanPerDataSet(LogicalOlapOp startop) {
+		
+		Olap4ldUtil._log
+		.info("Started creating query plan...");
 
 		// BaseCube operator
 		boolean first;
 
-		Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
-				.getNodeResultFields(cube.get(0));
-
-		Restrictions restrictions = new Restrictions();
-		restrictions.cubeNamePattern = cube.get(1)[cubemap.get("?CUBE_NAME")];
-
 		// Cube from (cube, SlicesRollups, Dices, Projections)
-		LogicalOlapOp basecube = new BaseCubeOp(
-				restrictions.cubeNamePattern.toString());
+		// LogicalOlapOp basecube = new BaseCubeOp(
+		// restrictions.cubeNamePattern.toString());
+		
+		// Need to search for first cube starting from inputOp1 (which defines the schema).
+		LogicalOlapOp convertcube = startop;
+		
+		while (convertcube instanceof ConvertCubeOp) {
+			
+			convertcube = ((ConvertCubeOp) startop).inputOp1;
+		}
+		
+		
+		BaseCubeOp basecube = (BaseCubeOp) convertcube;
+		
+		Restrictions restrictions = new Restrictions();
+		restrictions.cubeNamePattern = new Resource(basecube.dataseturi);
 
 		List<Node[]> measures = new ArrayList<Node[]>();
 		List<Node[]> dimensions = new ArrayList<Node[]>();
@@ -623,7 +754,7 @@ abstract class Olap4ldCellSet implements CellSet {
 			return null;
 		}
 
-		LogicalOlapOp projection = new ProjectionOp(basecube, projections);
+		LogicalOlapOp projection = new ProjectionOp(startop, projections);
 
 		// Dice operator
 		// XXX: Note: For now, the RollUp operator needs to be higher than Dice
@@ -970,6 +1101,10 @@ abstract class Olap4ldCellSet implements CellSet {
 			}
 
 		}
+		
+		Olap4ldUtil._log
+		.info("Finished creating "+ rollup +" query plan.");
+		
 		return rollup;
 	}
 

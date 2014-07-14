@@ -124,7 +124,7 @@ public class LogicalToPhysical {
 				
 				PhysicalOlapIterator iterator = compile(so.inputOp1);
 				theIterator = new ConvertSparqlDerivedDatasetIterator(engine, iterator,
-						null, so.conversioncorrespondence, so.domainUri);
+						null, so.conversioncorrespondence);
 				
 			} else if (so.inputOp1 == so.inputOp2) {
 				// If both operators are the same, we can reuse the iterator.
@@ -137,13 +137,13 @@ public class LogicalToPhysical {
 				// previous operators and reusing them if needed.
 				PhysicalOlapIterator iterator = compile(so.inputOp1);
 				theIterator = new ConvertSparqlDerivedDatasetIterator(engine, iterator,
-						iterator, so.conversioncorrespondence, so.domainUri);
+						iterator, so.conversioncorrespondence);
 			} else {
 				PhysicalOlapIterator iterator1 = compile(so.inputOp1);
 				PhysicalOlapIterator iterator2 = compile(so.inputOp2);
 				
 				theIterator = new ConvertSparqlDerivedDatasetIterator(engine, iterator1,
-						iterator2, so.conversioncorrespondence, so.domainUri);
+						iterator2, so.conversioncorrespondence);
 			}
 			
 		}

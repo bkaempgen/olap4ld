@@ -15,6 +15,18 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-07-14==
+Problem: When I create the LogicalQueryPlan starting from a (preprocessed) dataset, I look for the "first" occurence of Base-Cube-Op and use that for the "schema".
+Solution: Two possibilities:
+
+1) Logical Olap Op can return the schema even though it is not executed, yet.
+
+2) We really search for the first base-cube (on the left sides of the query plan).
+
+Note later when "filtering" more logical query plans, we may need the logical ops to return the schema.
+
+For now, we go just through them ourselves.
+
 ==2014-07-12==
 Problem: Queries would not work, anymore. 
 Solution: No dice, no dice.

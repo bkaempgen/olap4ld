@@ -50,7 +50,6 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 	private EmbeddedSesameEngine engine;
 	private String triples;
-	private String domainUri;
 	private String newdataset;
 	private String dataset1;
 	private String dataset2;
@@ -60,13 +59,11 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	public ConvertSparqlDerivedDatasetIterator(EmbeddedSesameEngine engine,
 			PhysicalOlapIterator inputiterator1,
 			PhysicalOlapIterator inputiterator2,
-			ReconciliationCorrespondence conversioncorrespondence,
-			String domainUri) {
+			ReconciliationCorrespondence conversioncorrespondence) {
 
 		this.engine = engine;
 		this.inputiterator1 = inputiterator1;
 		this.inputiterator2 = inputiterator2;
-		this.domainUri = domainUri;
 
 		this.conversioncorrespondence = conversioncorrespondence;
 
@@ -88,9 +85,11 @@ public class ConvertSparqlDerivedDatasetIterator implements
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
+		
+		String domainUri = "http://localhost/deriveddataset/";
 
 		// We use hash of combination conversionfunction + datasets
-		newdataset = this.domainUri + "dataset" + (dataset1 + dataset2).hashCode()
+		newdataset = domainUri + "dataset" + (dataset1 + dataset2).hashCode()
 				+ "/conversionfunction"
 				+ conversioncorrespondence.getname().hashCode();
 

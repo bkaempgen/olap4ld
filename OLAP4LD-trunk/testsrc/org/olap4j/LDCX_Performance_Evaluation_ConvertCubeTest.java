@@ -103,8 +103,6 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 	public void executeGDP_Per_Capita_Compared() {
 		
 		try {
-		
-		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
 		// First: GDP and main components - Current prices dataset
 		Node gdpdsuri = new Resource(
@@ -190,7 +188,7 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 
 		// Mioeur2eur(dataset): Converting MIO_EUR to EUR in GDP dataset
 		LogicalOlapOp mio_eur2eur_op = new ConvertCubeOp(gdpbasecube,
-				mio_eur2eur_correspondence, domainUri);
+				mio_eur2eur_correspondence);
 
 		// Dice mioeur2eur for B1G.
 		// No dice necessary, directly possible with convert-context
@@ -277,7 +275,7 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 
 		// Computing Nominal GDP from single parts in new EUR dataset.
 		LogicalOlapOp computegdp_op = new ConvertCubeOp(mio_eur2eur_op,
-				mio_eur2eur_op, computegdp_correspondence, domainUri);
+				mio_eur2eur_op, computegdp_correspondence);
 
 		/*
 		 * Should contain: http://estatwrap.ontologycentral.com/dic/geo#UK;
@@ -389,8 +387,7 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 		// Compute GDP per Capita from GDP and Population
 		// XXX: ComplexMeasureOp
 		LogicalOlapOp computegdppercapita_op = new ConvertCubeOp(computegdp_op,
-				populationbasecube, computegdppercapita_correspondence,
-				domainUri);
+				populationbasecube, computegdppercapita_correspondence);
 		
 		// XXX: Complex: Compare with:
 		// http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds

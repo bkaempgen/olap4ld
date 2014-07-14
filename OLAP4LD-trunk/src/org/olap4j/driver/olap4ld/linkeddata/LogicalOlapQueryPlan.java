@@ -1,6 +1,8 @@
 // (c) 2005 Andreas Harth
 package org.olap4j.driver.olap4ld.linkeddata;
 
+import org.olap4j.driver.olap4ld.helper.GraphVizVisualisationVisitor;
+
 /**
  * A query plan. How to encode the plan is not yet clear is a plan constructed
  * out of a program or a rule? What happens to the program that is the answer to
@@ -47,6 +49,15 @@ public class LogicalOlapQueryPlan {
 		//
 		// return (String)rel2xml.getNewRoot();
 		return null;
+	}
+	
+	public String toDOT() throws QueryException {
+		// Store dot notation
+		GraphVizVisualisationVisitor graphvizvisitor = new GraphVizVisualisationVisitor();
+		_root.accept(graphvizvisitor);
+		
+		return (String) graphvizvisitor.getNewRoot();
+		
 	}
 
 	/**

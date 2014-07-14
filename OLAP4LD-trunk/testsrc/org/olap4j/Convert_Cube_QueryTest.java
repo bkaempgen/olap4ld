@@ -99,8 +99,6 @@ public class Convert_Cube_QueryTest extends TestCase {
 
 	public void executeGDP_Mioeur2eur() throws OlapException {
 
-		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri";
-
 		// First: GDP and main components
 		Node gdpdsuri = new Resource(
 				"http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds");
@@ -184,7 +182,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 
 		// Convert-context
 		LogicalOlapOp convertgdp = new ConvertCubeOp(gdpbasecube,
-				mio_eur2eur_correspondence, domainUri);
+				mio_eur2eur_correspondence);
 
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(convertgdp);
 
@@ -204,8 +202,6 @@ public class Convert_Cube_QueryTest extends TestCase {
 	public void executeGDP_Per_Capita_Compared() {
 		
 		try {
-		
-		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
 		// First: GDP and main components - Current prices dataset
 		Node gdpdsuri = new Resource(
@@ -291,7 +287,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 
 		// Mioeur2eur(dataset): Converting MIO_EUR to EUR in GDP dataset
 		LogicalOlapOp mio_eur2eur_op = new ConvertCubeOp(gdpbasecube,
-				mio_eur2eur_correspondence, domainUri);
+				mio_eur2eur_correspondence);
 
 		// Dice mioeur2eur for B1G.
 		// No dice necessary, directly possible with convert-context
@@ -378,7 +374,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 
 		// Computing Nominal GDP from single parts in new EUR dataset.
 		LogicalOlapOp computegdp_op = new ConvertCubeOp(mio_eur2eur_op,
-				mio_eur2eur_op, computegdp_correspondence, domainUri);
+				mio_eur2eur_op, computegdp_correspondence);
 
 		/*
 		 * Should contain: http://estatwrap.ontologycentral.com/dic/geo#UK;
@@ -490,8 +486,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 		// Compute GDP per Capita from GDP and Population
 		// XXX: ComplexMeasureOp
 		LogicalOlapOp computegdppercapita_op = new ConvertCubeOp(computegdp_op,
-				populationbasecube, computegdppercapita_correspondence,
-				domainUri);
+				populationbasecube, computegdppercapita_correspondence);
 		
 		// XXX: Complex: Compare with:
 		// http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds
@@ -565,8 +560,6 @@ public class Convert_Cube_QueryTest extends TestCase {
 	public void test_GdpGrowthRate_vs_EmploymentFearMetric() {
 		
 		try {
-		
-		String domainUri = "http://141.52.218.13:8080/QB-Slicer/rest/mioeur2eur?dsUri=";
 
 		// First: Real GDP Growth Rate
 		Node gdpgrowthdsuri = new Resource(
@@ -694,10 +687,8 @@ public class Convert_Cube_QueryTest extends TestCase {
 				computeyes_inputmembers2,
 				computeyes_outputmembers, computeyes_function);
 
-		// Compute GDP per Capita from GDP and Population
 		LogicalOlapOp computeyes_op = new ConvertCubeOp(unemploymentbasecube,
-				unemploymentbasecube, computeyes_correspondence,
-				domainUri);
+				unemploymentbasecube, computeyes_correspondence);
 		
 		// COMPUTE\_PERCENTAGENOS
 		ReconciliationCorrespondence computepercentagenos_correspondence;
@@ -741,8 +732,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 
 		// Compute GDP per Capita from GDP and Population
 		LogicalOlapOp computepercentagenos_op = new ConvertCubeOp(unemploymentbasecube,
-				computeyes_op, computepercentagenos_correspondence,
-				domainUri);
+				computeyes_op, computepercentagenos_correspondence);
 		
 		// Slice	
 		List<Node[]> computepercentagenosslicesliceddimensions = new ArrayList<Node[]>();
