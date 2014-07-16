@@ -458,12 +458,16 @@ abstract class Olap4ldCellSet implements CellSet {
 
 			Olap4ldUtil._log.info("Creating start ops:...");
 
+			// Convert-Cube combinations
+			
+			
+			// Merge-Cubes combinations
 			int DEPTH = 2;
 			List<LogicalOlapOp> startops = new ArrayList<LogicalOlapOp>();
 			for (int i = 0; i <= DEPTH; i++) {
 				List<LogicalOlapOp> intermediaryops = Olap4ldLinkedDataUtil
-						.generateLqpsForDepth(i, datasets, EmbeddedSesameEngine
-								.getReconciliationCorrespondences());
+						.generateMergeLqpsForDepth(i, datasets, EmbeddedSesameEngine
+								.getReconciliationCorrespondences(true));
 				for (LogicalOlapOp logicalOlapOp : intermediaryops) {
 					startops.add(logicalOlapOp);
 				}
@@ -571,8 +575,7 @@ abstract class Olap4ldCellSet implements CellSet {
 			startops.add(new BaseCubeOp(datasets[i]));
 		}
 
-		List<ReconciliationCorrespondence> correspondences = ((EmbeddedSesameEngine) this.olap4jStatement.olap4jConnection.myLinkedData)
-				.getReconciliationCorrespondences();
+		List<ReconciliationCorrespondence> correspondences = EmbeddedSesameEngine.getReconciliationCorrespondences(true);
 
 		// cc
 		for (ReconciliationCorrespondence convertCorrespondence : correspondences) {
@@ -833,7 +836,7 @@ abstract class Olap4ldCellSet implements CellSet {
 						}
 					}
 					// If hierarchy is not contained in dimensions of cube, cube
-					// will be "empty".
+					// will be "empty" (since dice on that dimension would not make sense since it is ALL)
 					if (!containedInCube) {
 						return null;
 					}

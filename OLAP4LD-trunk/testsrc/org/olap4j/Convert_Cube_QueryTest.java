@@ -527,8 +527,14 @@ public class Convert_Cube_QueryTest extends TestCase {
 				.getMembers(gdpalreadycomputedrestrictions);
 
 		BaseCubeOp gdpalreadycomputedbasecube = new BaseCubeOp(gdpalreadycomputeduri.toString());
+		
+		// Slice	
+		List<Node[]> gdpalreadycomputedbasecubesliceddimensions = new ArrayList<Node[]>();
+		gdpalreadycomputedbasecubesliceddimensions.add(gdpalreadycomputedcubedimensions.get(0));
+		
+		SliceOp gdpalreadycomputedbasecubesliced = new SliceOp(gdpalreadycomputedbasecube, gdpalreadycomputedbasecubesliceddimensions);
 
-		DrillAcrossOp comparegdppercapita_op = new DrillAcrossOp(computegdppercapita_op, gdpalreadycomputedbasecube);
+		DrillAcrossOp comparegdppercapita_op = new DrillAcrossOp(computegdppercapita_op, gdpalreadycomputedbasecubesliced);
 		
 		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
 				comparegdppercapita_op);
@@ -746,7 +752,7 @@ public class Convert_Cube_QueryTest extends TestCase {
 			String dimensionname = nodes[computepercentagenosslicedimensionmap
 					.get("?DIMENSION_UNIQUE_NAME")].toString();
 			System.out.println(dimensionname);
-			if (dimensionname.equals("http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable")) {
+			if (dimensionname.equals("http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable") || dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#indic_na")) {
 				computepercentagenosslicesliceddimensions.add(nodes);
 			}
 		}

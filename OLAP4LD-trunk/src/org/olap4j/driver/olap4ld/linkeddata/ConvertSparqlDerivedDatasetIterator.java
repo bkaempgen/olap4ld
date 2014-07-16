@@ -1178,6 +1178,12 @@ public class ConvertSparqlDerivedDatasetIterator implements
 					this.measures.add(node);
 					continue;
 				}
+				
+				// Only those which are not implicit.
+				if (node[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+						.contains("AGGFUNC")) {
+					continue;
+				}
 
 				// Schema: (From XMLA/Linked Data Engine)
 				// Measures: ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME
@@ -1527,7 +1533,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				+ where + " }";
 
 		Olap4ldUtil._log.config("SPARQL query: " + observationquery);
-		ByteArrayOutputStream boas = new ByteArrayOutputStream();
+		// ByteArrayOutputStream boas = new ByteArrayOutputStream();
 		// FileOutputStream fos = new
 		// FileOutputStream("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/resources/result.srx");
 
@@ -1630,10 +1636,16 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 				time = System.currentTimeMillis() - time;
 
+				// After loading, we need to all the rest.
+				this.engine.runNormalizationAlgorithm();
+				
+				this.engine.runOWLReasoningAlgorithm();
+				
+				this.engine.setLoaded(new URL(newdataset));
+				
 				Olap4ldUtil._log
 						.info("Execute logical query plan: Create and load derived dataset finished in "
 								+ time + "ms.");
-				this.engine.setLoaded(new URL(newdataset));
 			}
 
 			executeSPARQLSelectQuery();

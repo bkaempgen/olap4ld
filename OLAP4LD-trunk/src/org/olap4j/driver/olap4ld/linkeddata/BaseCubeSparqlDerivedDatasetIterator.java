@@ -214,7 +214,7 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 	 */
 	private List<Node[]> sparql(String query) {
 
-		Olap4ldUtil._log.config("SPARQL query: " + query);
+		Olap4ldUtil._log.info("SPARQL query: " + query);
 
 		List<Node[]> myBindings = new ArrayList<Node[]>();
 

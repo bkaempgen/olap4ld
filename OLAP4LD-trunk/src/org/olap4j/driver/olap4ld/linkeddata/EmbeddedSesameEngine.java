@@ -229,7 +229,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			loadInStore(new URL("http://pastebin.com/raw.php?i=e1K52uhc"));
 
 			String triples = "<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://rdfdata.eionet.europa.eu/ramon/ontology/NUTSRegion>. ";
-			triples += "<http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable> <http://www.w3.org/2002/07/owl#sameAs> <http://ontologycentral.com/2009/01/eurostat/ns#indic_na>. ";
+			//triples += "<http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable> <http://www.w3.org/2002/07/owl#sameAs> <http://ontologycentral.com/2009/01/eurostat/ns#indic_na>. ";
+			//triples += "<http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://estatwrap.ontologycentral.com/dsd/nama_aux_gph#cl_indic_na>. ";
+			//triples += "<http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://estatwrap.ontologycentral.com/dsd/nama_gdp_c#cl_indic_na>. ";
 
 			insertTriples(triples);
 
@@ -240,7 +242,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Then, we load everything that Data-Fu cannot create
 
 			// load and validate dataset requires to load cube
-			//URL dataset;
+			// URL dataset;
 
 			// ----------------
 			// Load "GDP per capita - annual Data" ds and dsd
@@ -275,11 +277,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// (Estatwrap)
 			// <http://estatwrap.ontologycentral.com/id/tgs00003#ds> rdf:type
 			// qb:DataSet.
-			
+
 			// XXX Needed?
-//			dataset = new URL(
-//					"http://estatwrap.ontologycentral.com/id/tgs00003#ds");
-//			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// dataset = new URL(
+			// "http://estatwrap.ontologycentral.com/id/tgs00003#ds");
+			// Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 
 			// ----------------
@@ -295,26 +297,34 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// Problem: dcterms:date could not be resolved.
 			// XXX Needed?
-//			String triples2 = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/dsd/tgs00003>. "
-//					+ "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> _:comp. "
-//					+ "_:comp <http://purl.org/linked-data/cube#measure> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. "
-//					+ "<http://purl.org/dc/terms/date> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2000/01/rdf-schema#Literal>. ";
+			// String triples2 =
+			// "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/dsd/tgs00003>. "
+			// +
+			// "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> _:comp. "
+			// +
+			// "_:comp <http://purl.org/linked-data/cube#measure> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. "
+			// +
+			// "<http://purl.org/dc/terms/date> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2000/01/rdf-schema#Literal>. ";
 
 			// insertTriples(triples2);
 			// XXX Needed?
-//			dataset = new URL(
-//					"http://eurostat.linked-statistics.org/data/tgs00003");
-//			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// dataset = new URL(
+			// "http://eurostat.linked-statistics.org/data/tgs00003");
+			// Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 
 			// Problem: Wrong dsd has to be removed
-//			triples2 = "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/../dsd/tgs00003>. ";
+			// triples2 =
+			// "<http://eurostat.linked-statistics.org/data/tgs00003> <http://purl.org/linked-data/cube#structure> <http://eurostat.linked-statistics.org/../dsd/tgs00003>. ";
 
 			// deleteTriples(triples2);
 
-//			triples2 = "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> ?comp. "
-//					+ "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
-//			String where = "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
+			// triples2 =
+			// "<http://eurostat.linked-statistics.org/dsd/tgs00003> <http://purl.org/linked-data/cube#component> ?comp. "
+			// +
+			// "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
+			// String where =
+			// "?comp <http://purl.org/linked-data/cube#dimension> <http://purl.org/linked-data/sdmx/2009/measure#obsValue>. ";
 			// deleteTriplesWhere(triples2, where);
 
 			// ----------------
@@ -326,9 +336,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// loadInStore(new
 			// URL("http://localhost:8080/Data-Fu-Engine/datasets/demo_pjan_ds_v3.rdf"));
 
-//			dataset = new URL(
-//					"http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
-//			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// dataset = new URL(
+			// "http://estatwrap.ontologycentral.com/id/demo_pjan#ds");
+			// Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 			// Shortcut
 			// loadInStore(new
@@ -338,9 +348,9 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// # Population on 1 January by age and sex [demo_pjan] (Eurstat LD)
 			// <http://eurostat.linked-statistics.org/data/demo_pjan> rdf:type
 			// qb:DataSet.
-//			dataset = new URL(
-//					"http://eurostat.linked-statistics.org/data/demo_pjan");
-//			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// dataset = new URL(
+			// "http://eurostat.linked-statistics.org/data/demo_pjan");
+			// Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 			// # Real GDP per Capita (real local currency units, various base
 			// years)
@@ -353,7 +363,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// "http://worldbank.270a.info/dataset/world-bank-indicators/structure"));
 
 			// dataset = new URL("http://worldbank.270a.info/dataset/GDPPCKN");
-//			Olap4ldUtil._log.info("Load dataset: " + dataset);
+			// Olap4ldUtil._log.info("Load dataset: " + dataset);
 			// loadCube(dataset);
 
 			// Olap4ldLinkedDataUtil.dumpRDF(repo,
@@ -856,6 +866,67 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// Own normalization and inferencing.
 
+			runOWLReasoningAlgorithm();
+
+			time = System.currentTimeMillis() - time;
+			Olap4ldUtil._log
+					.info("Run normalisation algorithm on dataset: finished in "
+							+ time + "ms.");
+
+			// Now that we presumably have loaded all necessary
+			// data, we check integrity constraints
+
+			Olap4ldUtil._log.info("Check integrity constraints on datasets.");
+			time = System.currentTimeMillis();
+
+			checkIntegrityConstraints();
+
+			// Own checks:
+			RepositoryConnection con = repo.getConnection();
+
+			String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
+
+			// Datasets should have at least one
+			// observation
+			String testquery = prefixbindings
+					+ "ASK { ?CUBE_NAME a qb:DataSet. FILTER NOT EXISTS { ?obs qb:dataSet ?CUBE_NAME. } }";
+			BooleanQuery booleanQuery = con.prepareBooleanQuery(
+					QueryLanguage.SPARQL, testquery);
+			if (booleanQuery.evaluate() == true) {
+				throw new OlapException(
+						"Failed own check: Dataset should have at least one observation. ");
+			}
+
+			// XXX Possible other checks
+			// No dimensions
+			// No aggregation function
+			// Code list empty
+			// No member
+
+			// Important!
+
+			con.close();
+
+			time = System.currentTimeMillis() - time;
+			Olap4ldUtil._log
+					.info("Check integrity constraints on dataset: finished in "
+							+ time + "ms.");
+
+		} catch (RepositoryException e) {
+			throw new OlapException("Problem with repository: "
+					+ e.getMessage());
+		} catch (QueryEvaluationException e) {
+			throw new OlapException("Problem with query evaluation: "
+					+ e.getMessage());
+		} catch (MalformedQueryException e) {
+			throw new OlapException("Problem with malformed query: "
+					+ e.getMessage());
+		} 
+	}
+
+	public void runOWLReasoningAlgorithm() throws OlapException {
+
+		try {
 			RepositoryConnection con = repo.getConnection();
 
 			/*
@@ -920,188 +991,154 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			con.close();
 
-			time = System.currentTimeMillis() - time;
-			Olap4ldUtil._log
-					.info("Run normalisation algorithm on dataset: finished in "
-							+ time + "ms.");
-
-			// Now that we presumably have loaded all necessary
-			// data, we check integrity constraints
-
-			Olap4ldUtil._log.info("Check integrity constraints on datasets.");
-			time = System.currentTimeMillis();
-
-			checkIntegrityConstraints();
-
-			// Own checks:
-			con = repo.getConnection();
-
-			String prefixbindings = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
-
-			// Datasets should have at least one
-			// observation
-			String testquery = prefixbindings
-					+ "ASK { ?CUBE_NAME a qb:DataSet. FILTER NOT EXISTS { ?obs qb:dataSet ?CUBE_NAME. } }";
-			BooleanQuery booleanQuery = con.prepareBooleanQuery(
-					QueryLanguage.SPARQL, testquery);
-			if (booleanQuery.evaluate() == true) {
-				throw new OlapException(
-						"Failed own check: Dataset should have at least one observation. ");
-			}
-
-			// XXX Possible other checks
-			// No dimensions
-			// No aggregation function
-			// Code list empty
-			// No member
-			
-			// Important!
-
-			con.close();
-
-			time = System.currentTimeMillis() - time;
-			Olap4ldUtil._log
-					.info("Check integrity constraints on dataset: finished in "
-							+ time + "ms.");
-
 		} catch (RepositoryException e) {
 			throw new OlapException("Problem with repository: "
-					+ e.getMessage());
-		} catch (QueryEvaluationException e) {
-			throw new OlapException("Problem with query evaluation: "
 					+ e.getMessage());
 		} catch (MalformedQueryException e) {
 			throw new OlapException("Problem with malformed query: "
 					+ e.getMessage());
 		} catch (UpdateExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new OlapException("Problem with update execution: "
+					+ e.getMessage());
 		}
 	}
 
-	public static List<ReconciliationCorrespondence> getReconciliationCorrespondences() {
-		
+	public static List<ReconciliationCorrespondence> getReconciliationCorrespondences(
+			boolean askForMergeCorrespondences) {
+
 		List<ReconciliationCorrespondence> correspondences = new ArrayList<ReconciliationCorrespondence>();
-		
-//		// MIO2EUR
-//		List<Node[]> mio_eur2eur_inputmembers = new ArrayList<Node[]>();
-//		mio_eur2eur_inputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR") });
-//
-//		// mio_eur2eur_inputmembers.add(new Node[] {new
-//		// Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
-//		// new Variable("value1")});
-//
-//		List<Node[]> mio_eur2eur_outputmembers = new ArrayList<Node[]>();
-//		mio_eur2eur_outputmembers.add(new Node[] {
-//				new Resource(
-//						"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-//				new Resource(
-//						"http://estatwrap.ontologycentral.com/dic/unit#EUR") });
-//		// mio_eur2eur_outputmembers.add(new Node[] {new Variable("outputcube"),
-//		// new
-//		// Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
-//		// new Variable("value2")});
-//
-//		String mio_eur2eur_function = "(1000000 * x)";
-//
-//		ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence(
-//				"MIO2EUR", mio_eur2eur_inputmembers, null,
-//				mio_eur2eur_outputmembers, mio_eur2eur_function);
-//		
-//		correspondences.add(mio_eur2eur_correspondence);
-		
-//		// COMPUTE_GDP
-//		
-//		List<Node[]> computegdp_inputmembers1 = new ArrayList<Node[]>();
-//		computegdp_inputmembers1
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#B1G") });
-//
-//		List<Node[]> computegdp_inputmembers2 = new ArrayList<Node[]>();
-//		computegdp_inputmembers2
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31") });
-//
-//		List<Node[]> computegdp_outputmembers = new ArrayList<Node[]>();
-//		computegdp_outputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
-//
-//		String computegdp_function = "(x1 + x2)";
-//
-//		ReconciliationCorrespondence computegdp_correspondence = new ReconciliationCorrespondence(
-//				"COMP_GDP", computegdp_inputmembers1,
-//				computegdp_inputmembers2, computegdp_outputmembers,
-//				computegdp_function);
-//		
-//		correspondences.add(computegdp_correspondence);
-//		
-//		// COMPUTE_GDP_PER_CAPITA
-//		
-//		List<Node[]> computegdppercapita_inputmembers1 = new ArrayList<Node[]>();
-//		computegdppercapita_inputmembers1
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
-//		computegdppercapita_inputmembers1.add(new Node[] {
-//				new Resource(
-//						"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-//				new Resource(
-//						"http://estatwrap.ontologycentral.com/dic/unit#EUR") });
-//
-//		List<Node[]> computegdppercapita_inputmembers2 = new ArrayList<Node[]>();
-//		computegdppercapita_inputmembers2
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#sex"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/sex#T") });
-//		computegdppercapita_inputmembers2
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#age"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/age#TOTAL") });
-//
-//		List<Node[]> computegdppercapita_outputmembers = new ArrayList<Node[]>();
-//		computegdppercapita_outputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH") });
-//		computegdppercapita_outputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB") });
-//
-//		String computegdppercapita_function = "(x1 / x2)";
-//
-//		ReconciliationCorrespondence computegdppercapita_correspondence = new ReconciliationCorrespondence(
-//				"COMP_GDP_CAP", computegdppercapita_inputmembers1,
-//				computegdppercapita_inputmembers2,
-//				computegdppercapita_outputmembers, computegdppercapita_function);
-//		
-//		correspondences.add(computegdppercapita_correspondence);
-//		
+
+		// // MIO2EUR
+		// List<Node[]> mio_eur2eur_inputmembers = new ArrayList<Node[]>();
+		// mio_eur2eur_inputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR") });
+		//
+		// // mio_eur2eur_inputmembers.add(new Node[] {new
+		// //
+		// Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
+		// // new Variable("value1")});
+		//
+		// List<Node[]> mio_eur2eur_outputmembers = new ArrayList<Node[]>();
+		// mio_eur2eur_outputmembers.add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#EUR") });
+		// // mio_eur2eur_outputmembers.add(new Node[] {new
+		// Variable("outputcube"),
+		// // new
+		// //
+		// Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
+		// // new Variable("value2")});
+		//
+		// String mio_eur2eur_function = "(1000000 * x)";
+		//
+		// ReconciliationCorrespondence mio_eur2eur_correspondence = new
+		// ReconciliationCorrespondence(
+		// "MIO2EUR", mio_eur2eur_inputmembers, null,
+		// mio_eur2eur_outputmembers, mio_eur2eur_function);
+		// if (!askForMergeCorrespondences) {
+		// correspondences.add(mio_eur2eur_correspondence);
+		// }
+
+		// // COMPUTE_GDP
+		//
+		// List<Node[]> computegdp_inputmembers1 = new ArrayList<Node[]>();
+		// computegdp_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#B1G") });
+		//
+		// List<Node[]> computegdp_inputmembers2 = new ArrayList<Node[]>();
+		// computegdp_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31") });
+		//
+		// List<Node[]> computegdp_outputmembers = new ArrayList<Node[]>();
+		// computegdp_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
+		//
+		// String computegdp_function = "(x1 + x2)";
+		//
+		// ReconciliationCorrespondence computegdp_correspondence = new
+		// ReconciliationCorrespondence(
+		// "COMP_GDP", computegdp_inputmembers1,
+		// computegdp_inputmembers2, computegdp_outputmembers,
+		// computegdp_function);
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computegdp_correspondence);
+		// }
+
+		// // COMPUTE_GDP_PER_CAPITA
+		//
+		// List<Node[]> computegdppercapita_inputmembers1 = new
+		// ArrayList<Node[]>();
+		// computegdppercapita_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
+		// computegdppercapita_inputmembers1.add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#EUR") });
+		//
+		// List<Node[]> computegdppercapita_inputmembers2 = new
+		// ArrayList<Node[]>();
+		// computegdppercapita_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#sex"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/sex#T") });
+		// computegdppercapita_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#age"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/age#TOTAL") });
+		//
+		// List<Node[]> computegdppercapita_outputmembers = new
+		// ArrayList<Node[]>();
+		// computegdppercapita_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH") });
+		// computegdppercapita_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB") });
+		//
+		// String computegdppercapita_function = "(x1 / x2)";
+		//
+		// ReconciliationCorrespondence computegdppercapita_correspondence = new
+		// ReconciliationCorrespondence(
+		// "COMP_GDP_CAP", computegdppercapita_inputmembers1,
+		// computegdppercapita_inputmembers2,
+		// computegdppercapita_outputmembers, computegdppercapita_function);
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computegdppercapita_correspondence);
+		// }
+
 		// COMPUTE_YES
 		ReconciliationCorrespondence computeyes_correspondence;
 		List<Node[]> computeyes_inputmembers1 = new ArrayList<Node[]>();
@@ -1131,13 +1168,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		String computeyes_function = "(x1 + x2)";
 
 		computeyes_correspondence = new ReconciliationCorrespondence(
-				"COMP_YES", computeyes_inputmembers1,
-				computeyes_inputmembers2,
+				"COMP_YES", computeyes_inputmembers1, computeyes_inputmembers2,
 				computeyes_outputmembers, computeyes_function);
-		
-		correspondences.add(computeyes_correspondence);
-				
-				
+
+		if (askForMergeCorrespondences) {
+			correspondences.add(computeyes_correspondence);
+		}
+
 		// COMPUTE\_PERCENTAGENOS
 		ReconciliationCorrespondence computepercentagenos_correspondence;
 		List<Node[]> computepercentagenos_inputmembers1 = new ArrayList<Node[]>();
@@ -1163,23 +1200,26 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
 						new Resource(
 								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
-// Not yet needed since manual drill-across:
-//		computepercentagenos_outputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
-		
+		// Not yet needed since manual drill-across:
+		// computepercentagenos_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
+
 		String computepercentagenos_function = "(x1 / (x1 + x2))";
 
 		computepercentagenos_correspondence = new ReconciliationCorrespondence(
 				"COMP_PERCNOS", computepercentagenos_inputmembers1,
 				computepercentagenos_inputmembers2,
-				computepercentagenos_outputmembers, computepercentagenos_function);
-				
-		correspondences.add(computepercentagenos_correspondence);		
-		
+				computepercentagenos_outputmembers,
+				computepercentagenos_function);
+
+		if (askForMergeCorrespondences) {
+			correspondences.add(computepercentagenos_correspondence);
+		}
+
 		return correspondences;
 	}
 
@@ -2230,7 +2270,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 * 
 	 * @throws OlapException
 	 */
-	private void runNormalizationAlgorithm() throws OlapException {
+	public void runNormalizationAlgorithm() throws OlapException {
 
 		// Logging
 		Olap4ldUtil._log.config("Run normalization algorithm...");

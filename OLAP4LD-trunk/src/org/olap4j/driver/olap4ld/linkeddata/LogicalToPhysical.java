@@ -195,10 +195,17 @@ public class LogicalToPhysical {
 			List<Node[]> basedimensions = new ArrayList<Node[]>();
 			// Header
 			basedimensions.add(dimensions.get(0));
+			
+			boolean first = true;
 			for (Node[] dimension : dimensions) {
+				
+				if (first) {
+					first = false;
+					continue;
+				}
 
 				// If in rollupslevels, add and continue.
-				boolean contained = false;
+				boolean containedInRollupsLevels = false;
 				for (int i = 1; i < rollupslevels.size(); i++) {
 
 					Map<String, Integer> rollupshierarchiesmap = Olap4ldLinkedDataUtil
@@ -211,7 +218,7 @@ public class LogicalToPhysical {
 									rolluplevel[levelmap
 											.get("?DIMENSION_UNIQUE_NAME")]
 											.toString())) {
-						contained = true;
+						containedInRollupsLevels = true;
 						slicesrollups.add(rolluplevel);
 
 						/*
@@ -235,11 +242,11 @@ public class LogicalToPhysical {
 									sliceddimension[dimensionmap
 											.get("?DIMENSION_UNIQUE_NAME")]
 											.toString())) {
-						contained = true;
+						containedInRollupsLevels = true;
 					}
 				}
 				// As usual also check whether Measure dimension.
-				if (!contained
+				if (!containedInRollupsLevels
 						&& !dimension[dimensionmap
 								.get("?DIMENSION_UNIQUE_NAME")]
 								.toString()
@@ -249,7 +256,7 @@ public class LogicalToPhysical {
 			}
 
 			// Find lowest level of basedimensions and add
-			boolean first = true;
+			first = true;
 			for (Node[] basedimension : basedimensions) {
 				if (first) {
 					first = false;

@@ -737,7 +737,20 @@ public class Olap4ldLinkedDataUtil {
 		}
 	}
 
-	public static int numberForChildren(int depth, int d, int mc) {
+	/**
+	 * 
+	 * The ordering of Merge-Cubes is relevant but every Merge-Cube may only be
+	 * used once in a query plan.
+	 * 
+	 * @param depth
+	 *            Depth of query plan
+	 * @param d
+	 *            Number of datasets (converted or not converted)
+	 * @param mc
+	 *            Number of merge-cubes
+	 * @return Number of query plans
+	 */
+	public static int numberForMergeChildren(int depth, int d, int mc) {
 
 		if (depth == 0) {
 
@@ -747,24 +760,36 @@ public class Olap4ldLinkedDataUtil {
 		int no = 0;
 
 		// Both same depth
-		no += mc * numberForChildren(depth - 1, d, mc)
-				* numberForChildren(depth - 1, d, mc);
+		no += mc * numberForMergeChildren(depth - 1, d, mc - 1)
+				* numberForMergeChildren(depth - 1, d, mc - 1);
 
 		// Left
 		for (int i = 0; i < depth - 1; i++) {
-			no += mc * numberForChildren(depth - 1, d, mc)
-					* numberForChildren(i, d, mc);
+			no += mc * numberForMergeChildren(depth - 1, d, mc - 1)
+					* numberForMergeChildren(i, d, mc - 1);
 		}
 
 		// Right
 		for (int i = 0; i < depth - 1; i++) {
-			no += mc * numberForChildren(i, d, mc)
-					* numberForChildren(depth - 1, d, mc);
+			no += mc * numberForMergeChildren(i, d, mc - 1)
+					* numberForMergeChildren(depth - 1, d, mc - 1);
 		}
 		return no;
 	}
 
-	public static List<LogicalOlapOp> generateLqpsForDepth(int depth,
+	/**
+	 * The ordering of Merge-Cubes is relevant but every Merge-Cube may only be
+	 * used once in a query plan.
+	 * 
+	 * @param depth
+	 *            Depth of query plan
+	 * @param datasets
+	 *            Number of datasets
+	 * @param correspondences
+	 *            Merge
+	 * @return
+	 */
+	public static List<LogicalOlapOp> generateMergeLqpsForDepth(int depth,
 			String[] datasets,
 			List<ReconciliationCorrespondence> correspondences) {
 
@@ -779,36 +804,67 @@ public class Olap4ldLinkedDataUtil {
 		}
 
 		// Both same depth.
-		List<LogicalOlapOp> nextdepthlqps = generateLqpsForDepth(depth - 1,
-				datasets, correspondences);
 
-		for (LogicalOlapOp logicalOlapOp1 : nextdepthlqps) {
-			for (LogicalOlapOp logicalOlapOp2 : nextdepthlqps) {
-				for (ReconciliationCorrespondence correspondence : correspondences) {
-					newlqps.add(new ConvertCubeOp(logicalOlapOp1,
-							logicalOlapOp2, correspondence));
+		for (ReconciliationCorrespondence selectedCorrespondence : correspondences) {
+
+			List<ReconciliationCorrespondence> reducedcorrespondences = new ArrayList<ReconciliationCorrespondence>();
+
+			for (ReconciliationCorrespondence aCorrespondence : correspondences) {
+				// Only if not correspondence
+				if (!aCorrespondence.getname().equals(
+						selectedCorrespondence.getname())) {
+					reducedcorrespondences.add(aCorrespondence);
 				}
 			}
-		}
 
-		// Recursively other depths of the other.
-		for (int i = 0; i < depth-1; i++) {
-			List<LogicalOlapOp> lowerdepthlqps = generateLqpsForDepth(i, datasets, correspondences);
-			for (LogicalOlapOp logicalOlapOp1 : lowerdepthlqps) {
+			// Here, the same correspondence is not allowed to be used.
+			List<LogicalOlapOp> nextdepthlqps = generateMergeLqpsForDepth(
+					depth - 1, datasets, reducedcorrespondences);
+
+			for (LogicalOlapOp logicalOlapOp1 : nextdepthlqps) {
 				for (LogicalOlapOp logicalOlapOp2 : nextdepthlqps) {
-					for (ReconciliationCorrespondence correspondence : correspondences) {
+					newlqps.add(new ConvertCubeOp(logicalOlapOp1,
+							logicalOlapOp2, selectedCorrespondence));
+				}
+			}
+
+			// Recursively other depths of the other.
+			for (int i = 0; i < depth - 1; i++) {
+				List<LogicalOlapOp> lowerdepthlqps = generateMergeLqpsForDepth(
+						i, datasets, reducedcorrespondences);
+				for (LogicalOlapOp logicalOlapOp1 : lowerdepthlqps) {
+					for (LogicalOlapOp logicalOlapOp2 : nextdepthlqps) {
+
 						// Left / Right
 						newlqps.add(new ConvertCubeOp(logicalOlapOp1,
-								logicalOlapOp2, correspondence));
+								logicalOlapOp2, selectedCorrespondence));
 						// Vice-versa
 						newlqps.add(new ConvertCubeOp(logicalOlapOp2,
-								logicalOlapOp1, correspondence));
+								logicalOlapOp1, selectedCorrespondence));
 					}
 				}
 			}
+
 		}
 
 		return newlqps;
+	}
+
+	/**
+	 * The ordering of ccs is relevant but every cc can only be used once in a
+	 * query plan.
+	 * 
+	 * @param depth
+	 * @param d
+	 * @param cc
+	 * @return
+	 */
+	public static int numberForConvertChildren(int depth, int d, int cc) {
+		if (depth == 0) {
+			return d;
+		}
+
+		return cc * numberForConvertChildren(depth - 1, d, cc - 1);
 	}
 
 }
