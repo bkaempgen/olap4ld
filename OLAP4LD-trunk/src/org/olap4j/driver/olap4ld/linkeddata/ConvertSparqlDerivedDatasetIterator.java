@@ -201,6 +201,19 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		 * fixed since otherwise the metadata of the result cube would not be
 		 * correct
 		 */
+		// We assume dimensions and measures that we go through coming from
+		// first cube (otherwise metadata may not make sense anyway, sometimes).
+		Restrictions restrictions = new Restrictions();
+		
+		List<Node[]> dimensions = null;
+
+		try {
+			dimensions = this.inputiterator1.getDimensions(restrictions);
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		Boolean first = true;
 		for (Node[] dimension : dimensions) {
 			if (first) {
@@ -236,6 +249,15 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		}
 
 		// Measure Triples:
+		
+		List<Node[]> measures = null;
+
+		try {
+			measures = this.inputiterator1.getMeasures(restrictions);
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		// First is header
 		for (int i = 1; i < measures.size(); i++) {
@@ -348,10 +370,6 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		}
 
 		// Dimension Triples:
-
-		// All missing dimensions/measures graph patterns.
-		// XXX: A cleaner way would be to specifically refer to the metadata of
-		// the first input iterator
 		Restrictions restrictions = new Restrictions();
 
 		// We assume dimensions and measures that we go through coming from
@@ -1634,14 +1652,14 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 				executeSPARQLConstructQuery();
 
-				time = System.currentTimeMillis() - time;
-
 				// After loading, we need to all the rest.
 				this.engine.runNormalizationAlgorithm();
 				
-				this.engine.runOWLReasoningAlgorithm();
+				//this.engine.runOWLReasoningAlgorithm();
 				
 				this.engine.setLoaded(new URL(newdataset));
+
+				time = System.currentTimeMillis() - time;
 				
 				Olap4ldUtil._log
 						.info("Execute logical query plan: Create and load derived dataset finished in "

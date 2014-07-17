@@ -15,9 +15,25 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-07-17==
+Problem: SPARQL construct query is not properly created, as is the N3 rule.
+
+If we create the triple patterns for the measures. We once use the measures of inputcube1 (with more) and filter and once we use the already filtered measures which will result in a different measure number. 
+	
+I think, metadata should be created but not be used in querying if possible. *done*
+
+Problem: Many duplicates in results of Convert-Cube operations. Problem is that we use shared dimensions
+in query so that all possible combinations of shared dimension member combinations are used by newly
+created observations.  
+
+Solution: For any one combination should there not be only one possibility? No, since afterwards 
+reasoning, again. Solution, remove reasoning after generation.
+
+
 ==2014-07-16==
 * More nested Convert-Cube queries do not work, anymore.
 * Maybe because of "isLoaded(dataset)"?
+* Also, normalisation and reasoning is now done for each dataset.
 
 ==2014-07-14==
 Problem: When I create the LogicalQueryPlan starting from a (preprocessed) dataset, I look for the "first" occurence of Base-Cube-Op and use that for the "schema".

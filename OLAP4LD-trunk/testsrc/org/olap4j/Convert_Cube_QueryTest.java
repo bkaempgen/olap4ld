@@ -795,6 +795,126 @@ public class Convert_Cube_QueryTest extends TestCase {
 			e.printStackTrace();
 		}
 	}
+	
+	public void test_SMALLGdpGrowthRate_vs_EmploymentFearMetric() {
+		try {
+		// Second: Unemployment dataset
+		Node unemploymentdsuri = new Resource(
+				"http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds");
+		Restrictions unemploymentdsrestrictions = new Restrictions();
+		unemploymentdsrestrictions.cubeNamePattern = unemploymentdsuri;
+
+		// Base-cube
+
+		// Here, the data will be loaded. In order to fill the engine with data
+		List<Node[]> unemploymentcube = lde.getCubes(unemploymentdsrestrictions);
+		assertEquals(2, unemploymentcube.size());
+		Map<String, Integer> unemploymentcubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(unemploymentcube.get(0));
+		System.out.println("CUBE_NAME: "
+				+ unemploymentcube.get(1)[unemploymentcubemap.get("?CUBE_NAME")]);
+
+		List<Node[]> unemploymentcubemeasures = lde
+				.getMeasures(unemploymentdsrestrictions);
+
+		List<Node[]> unemploymentcubedimensions = lde
+				.getDimensions(unemploymentdsrestrictions);
+		assertEquals(true, unemploymentcubedimensions.size() > 1);
+
+		List<Node[]> unemploymentcubehierarchies = lde
+				.getHierarchies(unemploymentdsrestrictions);
+
+		List<Node[]> unemploymentcubelevels = lde
+				.getLevels(unemploymentdsrestrictions);
+
+		List<Node[]> unemploymentcubemembers = lde
+				.getMembers(unemploymentdsrestrictions);
+
+		BaseCubeOp unemploymentbasecube = new BaseCubeOp(unemploymentdsuri.toString());
+
+		// First pre-processing
+		
+		// Convert-Cube / Merge-Cubes
+		
+		// COMPUTE_YES
+		ReconciliationCorrespondence computeyes_correspondence;
+		List<Node[]> computeyes_inputmembers1 = new ArrayList<Node[]>();
+		computeyes_inputmembers1
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2") });
+
+		List<Node[]> computeyes_inputmembers2 = new ArrayList<Node[]>();
+		computeyes_inputmembers2
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_3") });
+
+		List<Node[]> computeyes_outputmembers = new ArrayList<Node[]>();
+		computeyes_outputmembers
+				.add(new Node[] {
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+						new Resource(
+								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+
+		String computeyes_function = "(x1 + x2)";
+
+		computeyes_correspondence = new ReconciliationCorrespondence(
+				"computeyes", computeyes_inputmembers1,
+				computeyes_inputmembers2,
+				computeyes_outputmembers, computeyes_function);
+
+		LogicalOlapOp computeyes_op = new ConvertCubeOp(unemploymentbasecube,
+				unemploymentbasecube, computeyes_correspondence);
+		
+		// Slice
+		List<Node[]> computepercentagenosslicesliceddimensions = new ArrayList<Node[]>();
+
+		System.out.println("DIMENSION_UNIQUE_NAMES:");
+		Map<String, Integer> computepercentagenosslicedimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(unemploymentcubedimensions.get(0));
+		// Header
+		computepercentagenosslicesliceddimensions.add(unemploymentcubedimensions.get(0));
+		for (Node[] nodes : unemploymentcubedimensions) {
+			String dimensionname = nodes[computepercentagenosslicedimensionmap
+					.get("?DIMENSION_UNIQUE_NAME")].toString();
+			System.out.println(dimensionname);
+			if (dimensionname.equals("http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable") || dimensionname.equals("http://ontologycentral.com/2009/01/eurostat/ns#indic_na")) {
+				computepercentagenosslicesliceddimensions.add(nodes);
+			}
+		}
+				
+		SliceOp computepercentagenosslicesliced = new SliceOp(computeyes_op, computepercentagenosslicesliceddimensions);
+		
+		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
+				computepercentagenosslicesliced);
+
+		System.out.println("Logical Query Plan:"+myplan.toString());
+		
+		String result = executeStatement(myplan);
+		
+		// Result as in ISEM paper		
+		assertContains(
+				"http://dbpedia.org/resource/Germany; http://dbpedia.org/resource/Germany; 1980; 0.927512355848434925864909;",
+				result);
+		
+		// Result as manually computed
+		assertContains(
+				"http://estatwrap.ontologycentral.com/dic/geo#DE; http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00; 2008; 1.1,0.826589595375722543352601;",
+				result);
+		
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 
 	/**
 	 * Tries to get worldbank data from Sarven.

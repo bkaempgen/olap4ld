@@ -1175,50 +1175,50 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			correspondences.add(computeyes_correspondence);
 		}
 
-		// COMPUTE\_PERCENTAGENOS
-		ReconciliationCorrespondence computepercentagenos_correspondence;
-		List<Node[]> computepercentagenos_inputmembers1 = new ArrayList<Node[]>();
-		computepercentagenos_inputmembers1
-				.add(new Node[] {
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1") });
-
-		List<Node[]> computepercentagenos_inputmembers2 = new ArrayList<Node[]>();
-		computepercentagenos_inputmembers2
-				.add(new Node[] {
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
-
-		List<Node[]> computepercentagenos_outputmembers = new ArrayList<Node[]>();
-		computepercentagenos_outputmembers
-				.add(new Node[] {
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
-		// Not yet needed since manual drill-across:
-		// computepercentagenos_outputmembers
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
-
-		String computepercentagenos_function = "(x1 / (x1 + x2))";
-
-		computepercentagenos_correspondence = new ReconciliationCorrespondence(
-				"COMP_PERCNOS", computepercentagenos_inputmembers1,
-				computepercentagenos_inputmembers2,
-				computepercentagenos_outputmembers,
-				computepercentagenos_function);
-
-		if (askForMergeCorrespondences) {
-			correspondences.add(computepercentagenos_correspondence);
-		}
+//		// COMPUTE\_PERCENTAGENOS
+//		ReconciliationCorrespondence computepercentagenos_correspondence;
+//		List<Node[]> computepercentagenos_inputmembers1 = new ArrayList<Node[]>();
+//		computepercentagenos_inputmembers1
+//				.add(new Node[] {
+//						new Resource(
+//								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+//						new Resource(
+//								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1") });
+//
+//		List<Node[]> computepercentagenos_inputmembers2 = new ArrayList<Node[]>();
+//		computepercentagenos_inputmembers2
+//				.add(new Node[] {
+//						new Resource(
+//								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+//						new Resource(
+//								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+//
+//		List<Node[]> computepercentagenos_outputmembers = new ArrayList<Node[]>();
+//		computepercentagenos_outputmembers
+//				.add(new Node[] {
+//						new Resource(
+//								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+//						new Resource(
+//								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+//		// Not yet needed since manual drill-across:
+//		// computepercentagenos_outputmembers
+//		// .add(new Node[] {
+//		// new Resource(
+//		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+//		// new Resource(
+//		// "http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
+//
+//		String computepercentagenos_function = "(x1 / (x1 + x2))";
+//
+//		computepercentagenos_correspondence = new ReconciliationCorrespondence(
+//				"COMP_PERCNOS", computepercentagenos_inputmembers1,
+//				computepercentagenos_inputmembers2,
+//				computepercentagenos_outputmembers,
+//				computepercentagenos_function);
+//
+//		if (askForMergeCorrespondences) {
+//			correspondences.add(computepercentagenos_correspondence);
+//		}
 
 		return correspondences;
 	}
