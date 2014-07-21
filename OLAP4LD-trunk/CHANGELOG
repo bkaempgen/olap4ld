@@ -15,6 +15,12 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-07-21==
+* Status at submission.
+* Next steps:
+** Test-Case for automatic materialisation of GDP per Capita scenario: executeDrillAcrossGdpCap_AutomaticConvert 
+in Example_QB_Datasets_ConvertCube_QueryTest.
+
 ==2014-07-17==
 Problem: SPARQL construct query is not properly created, as is the N3 rule.
 

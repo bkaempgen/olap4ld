@@ -53,6 +53,12 @@ public class GeneralHelpFunctionsTest extends TestCase {
 	
 	public void testOlap4ldLinkedDataUtilnumberForMergeChildren() {
 		
+		System.out.println(Olap4ldLinkedDataUtil.numberForMergeChildren(0, 3, 3));
+		System.out.println(Olap4ldLinkedDataUtil.numberForMergeChildren(1, 3, 3));
+		System.out.println(Olap4ldLinkedDataUtil.numberForMergeChildren(2, 3, 3));
+		System.out.println(Olap4ldLinkedDataUtil.numberForMergeChildren(3, 3, 3));
+		System.out.println(Olap4ldLinkedDataUtil.numberForMergeChildren(4, 3, 3));
+		
 		int no = Olap4ldLinkedDataUtil.numberForMergeChildren(0, 3, 2);
 		assertEquals(3, no);
 		

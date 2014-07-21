@@ -226,12 +226,18 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Load links
 			loadInStore(new URL(
 					"http://people.aifb.kit.edu/bka/Public/cube_additionalRDF.rdf"));
+
+			// Seems not to work
 			loadInStore(new URL("http://pastebin.com/raw.php?i=e1K52uhc"));
 
 			String triples = "<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://rdfdata.eionet.europa.eu/ramon/ontology/NUTSRegion>. ";
-			//triples += "<http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable> <http://www.w3.org/2002/07/owl#sameAs> <http://ontologycentral.com/2009/01/eurostat/ns#indic_na>. ";
-			//triples += "<http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://estatwrap.ontologycentral.com/dsd/nama_aux_gph#cl_indic_na>. ";
-			//triples += "<http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://estatwrap.ontologycentral.com/dsd/nama_gdp_c#cl_indic_na>. ";
+			// triples +=
+			// "<http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable> <http://www.w3.org/2002/07/owl#sameAs> <http://ontologycentral.com/2009/01/eurostat/ns#indic_na>. ";
+			// triples +=
+			// "<http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://estatwrap.ontologycentral.com/dsd/nama_aux_gph#cl_indic_na>. ";
+			// triples +=
+			// "<http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://estatwrap.ontologycentral.com/dsd/nama_gdp_c#cl_indic_na>. ";
+			triples += "<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00> <http://www.w3.org/2002/07/owl#sameAs> <http://estatwrap.ontologycentral.com/dic/geo#DE>.";
 
 			insertTriples(triples);
 
@@ -921,7 +927,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		} catch (MalformedQueryException e) {
 			throw new OlapException("Problem with malformed query: "
 					+ e.getMessage());
-		} 
+		}
 	}
 
 	public void runOWLReasoningAlgorithm() throws OlapException {
@@ -1008,217 +1014,216 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		List<ReconciliationCorrespondence> correspondences = new ArrayList<ReconciliationCorrespondence>();
 
-		// // MIO2EUR
-		// List<Node[]> mio_eur2eur_inputmembers = new ArrayList<Node[]>();
-		// mio_eur2eur_inputmembers
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR") });
-		//
-		// // mio_eur2eur_inputmembers.add(new Node[] {new
-		// //
-		// Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
-		// // new Variable("value1")});
-		//
-		// List<Node[]> mio_eur2eur_outputmembers = new ArrayList<Node[]>();
-		// mio_eur2eur_outputmembers.add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/unit#EUR") });
-		// // mio_eur2eur_outputmembers.add(new Node[] {new
-		// Variable("outputcube"),
-		// // new
-		// //
-		// Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
-		// // new Variable("value2")});
-		//
-		// String mio_eur2eur_function = "(1000000 * x)";
-		//
-		// ReconciliationCorrespondence mio_eur2eur_correspondence = new
-		// ReconciliationCorrespondence(
-		// "MIO2EUR", mio_eur2eur_inputmembers, null,
-		// mio_eur2eur_outputmembers, mio_eur2eur_function);
-		// if (!askForMergeCorrespondences) {
-		// correspondences.add(mio_eur2eur_correspondence);
-		// }
-
-		// // COMPUTE_GDP
-		//
-		// List<Node[]> computegdp_inputmembers1 = new ArrayList<Node[]>();
-		// computegdp_inputmembers1
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/indic_na#B1G") });
-		//
-		// List<Node[]> computegdp_inputmembers2 = new ArrayList<Node[]>();
-		// computegdp_inputmembers2
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31") });
-		//
-		// List<Node[]> computegdp_outputmembers = new ArrayList<Node[]>();
-		// computegdp_outputmembers
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
-		//
-		// String computegdp_function = "(x1 + x2)";
-		//
-		// ReconciliationCorrespondence computegdp_correspondence = new
-		// ReconciliationCorrespondence(
-		// "COMP_GDP", computegdp_inputmembers1,
-		// computegdp_inputmembers2, computegdp_outputmembers,
-		// computegdp_function);
-		// if (askForMergeCorrespondences) {
-		// correspondences.add(computegdp_correspondence);
-		// }
-
-		// // COMPUTE_GDP_PER_CAPITA
-		//
-		// List<Node[]> computegdppercapita_inputmembers1 = new
-		// ArrayList<Node[]>();
-		// computegdppercapita_inputmembers1
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
-		// computegdppercapita_inputmembers1.add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/unit#EUR") });
-		//
-		// List<Node[]> computegdppercapita_inputmembers2 = new
-		// ArrayList<Node[]>();
-		// computegdppercapita_inputmembers2
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#sex"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/sex#T") });
-		// computegdppercapita_inputmembers2
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#age"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/age#TOTAL") });
-		//
-		// List<Node[]> computegdppercapita_outputmembers = new
-		// ArrayList<Node[]>();
-		// computegdppercapita_outputmembers
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH") });
-		// computegdppercapita_outputmembers
-		// .add(new Node[] {
-		// new Resource(
-		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-		// new Resource(
-		// "http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB") });
-		//
-		// String computegdppercapita_function = "(x1 / x2)";
-		//
-		// ReconciliationCorrespondence computegdppercapita_correspondence = new
-		// ReconciliationCorrespondence(
-		// "COMP_GDP_CAP", computegdppercapita_inputmembers1,
-		// computegdppercapita_inputmembers2,
-		// computegdppercapita_outputmembers, computegdppercapita_function);
-		// if (askForMergeCorrespondences) {
-		// correspondences.add(computegdppercapita_correspondence);
-		// }
-
-		// COMPUTE_YES
-		ReconciliationCorrespondence computeyes_correspondence;
-		List<Node[]> computeyes_inputmembers1 = new ArrayList<Node[]>();
-		computeyes_inputmembers1
+		// MIO2EUR
+		List<Node[]> mio_eur2eur_inputmembers = new ArrayList<Node[]>();
+		mio_eur2eur_inputmembers
 				.add(new Node[] {
 						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+								"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
 						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2") });
+								"http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR") });
 
-		List<Node[]> computeyes_inputmembers2 = new ArrayList<Node[]>();
-		computeyes_inputmembers2
+		mio_eur2eur_inputmembers.add(new Node[] { new
+
+		Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
+				new Variable("value1") });
+
+		List<Node[]> mio_eur2eur_outputmembers = new ArrayList<Node[]>();
+		mio_eur2eur_outputmembers.add(new Node[] {
+				new Resource(
+						"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+				new Resource(
+						"http://estatwrap.ontologycentral.com/dic/unit#EUR") });
+		mio_eur2eur_outputmembers
 				.add(new Node[] {
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_3") });
+						new Variable("outputcube"),
+						new
 
-		List<Node[]> computeyes_outputmembers = new ArrayList<Node[]>();
-		computeyes_outputmembers
-				.add(new Node[] {
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
-						new Resource(
-								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+						Resource(
+								"http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
+						new Variable("value2") });
 
-		String computeyes_function = "(x1 + x2)";
+		String mio_eur2eur_function = "(1000000 * x)";
 
-		computeyes_correspondence = new ReconciliationCorrespondence(
-				"COMP_YES", computeyes_inputmembers1, computeyes_inputmembers2,
-				computeyes_outputmembers, computeyes_function);
-
-		if (askForMergeCorrespondences) {
-			correspondences.add(computeyes_correspondence);
+		ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence(
+				"MIO2EUR", mio_eur2eur_inputmembers, null,
+				mio_eur2eur_outputmembers, mio_eur2eur_function);
+		if (!askForMergeCorrespondences) {
+			correspondences.add(mio_eur2eur_correspondence);
 		}
 
-//		// COMPUTE\_PERCENTAGENOS
-//		ReconciliationCorrespondence computepercentagenos_correspondence;
-//		List<Node[]> computepercentagenos_inputmembers1 = new ArrayList<Node[]>();
-//		computepercentagenos_inputmembers1
-//				.add(new Node[] {
-//						new Resource(
-//								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
-//						new Resource(
-//								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1") });
-//
-//		List<Node[]> computepercentagenos_inputmembers2 = new ArrayList<Node[]>();
-//		computepercentagenos_inputmembers2
-//				.add(new Node[] {
-//						new Resource(
-//								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
-//						new Resource(
-//								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
-//
-//		List<Node[]> computepercentagenos_outputmembers = new ArrayList<Node[]>();
-//		computepercentagenos_outputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
-//						new Resource(
-//								"http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
-//		// Not yet needed since manual drill-across:
-//		// computepercentagenos_outputmembers
-//		// .add(new Node[] {
-//		// new Resource(
-//		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//		// new Resource(
-//		// "http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
-//
-//		String computepercentagenos_function = "(x1 / (x1 + x2))";
-//
-//		computepercentagenos_correspondence = new ReconciliationCorrespondence(
-//				"COMP_PERCNOS", computepercentagenos_inputmembers1,
-//				computepercentagenos_inputmembers2,
-//				computepercentagenos_outputmembers,
-//				computepercentagenos_function);
-//
-//		if (askForMergeCorrespondences) {
-//			correspondences.add(computepercentagenos_correspondence);
-//		}
+		// COMPUTE_GDP
+
+		List<Node[]> computegdp_inputmembers1 = new ArrayList<Node[]>();
+		computegdp_inputmembers1
+				.add(new Node[] {
+						new Resource(
+								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+						new Resource(
+								"http://estatwrap.ontologycentral.com/dic/indic_na#B1G") });
+
+		List<Node[]> computegdp_inputmembers2 = new ArrayList<Node[]>();
+		computegdp_inputmembers2
+				.add(new Node[] {
+						new Resource(
+								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+						new Resource(
+								"http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31") });
+
+		List<Node[]> computegdp_outputmembers = new ArrayList<Node[]>();
+		computegdp_outputmembers
+				.add(new Node[] {
+						new Resource(
+								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+						new Resource(
+								"http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
+
+		String computegdp_function = "(x1 + x2)";
+
+		ReconciliationCorrespondence computegdp_correspondence = new ReconciliationCorrespondence(
+				"COMP_GDP", computegdp_inputmembers1, computegdp_inputmembers2,
+				computegdp_outputmembers, computegdp_function);
+		if (askForMergeCorrespondences) {
+			correspondences.add(computegdp_correspondence);
+		}
+
+		// COMPUTE_GDP_PER_CAPITA
+
+		List<Node[]> computegdppercapita_inputmembers1 = new ArrayList<Node[]>();
+		computegdppercapita_inputmembers1
+				.add(new Node[] {
+						new Resource(
+								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+						new Resource(
+								"http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
+		computegdppercapita_inputmembers1.add(new Node[] {
+				new Resource(
+						"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+				new Resource(
+						"http://estatwrap.ontologycentral.com/dic/unit#EUR") });
+
+		List<Node[]> computegdppercapita_inputmembers2 = new ArrayList<Node[]>();
+		computegdppercapita_inputmembers2
+				.add(new Node[] {
+						new Resource(
+								"http://ontologycentral.com/2009/01/eurostat/ns#sex"),
+						new Resource(
+								"http://estatwrap.ontologycentral.com/dic/sex#T") });
+		computegdppercapita_inputmembers2
+				.add(new Node[] {
+						new Resource(
+								"http://ontologycentral.com/2009/01/eurostat/ns#age"),
+						new Resource(
+								"http://estatwrap.ontologycentral.com/dic/age#TOTAL") });
+
+		List<Node[]> computegdppercapita_outputmembers = new ArrayList<Node[]>();
+		computegdppercapita_outputmembers
+				.add(new Node[] {
+						new Resource(
+								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+						new Resource(
+								"http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH") });
+		computegdppercapita_outputmembers
+				.add(new Node[] {
+						new Resource(
+								"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+						new Resource(
+								"http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB") });
+
+		String computegdppercapita_function = "(x1 / x2)";
+
+		ReconciliationCorrespondence computegdppercapita_correspondence = new ReconciliationCorrespondence(
+				"COMP_GDP_CAP", computegdppercapita_inputmembers1,
+				computegdppercapita_inputmembers2,
+				computegdppercapita_outputmembers, computegdppercapita_function);
+		if (askForMergeCorrespondences) {
+			correspondences.add(computegdppercapita_correspondence);
+		}
+
+		// COMPUTE_YES
+		// ReconciliationCorrespondence computeyes_correspondence;
+		// List<Node[]> computeyes_inputmembers1 = new ArrayList<Node[]>();
+		// computeyes_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2") });
+		//
+		// List<Node[]> computeyes_inputmembers2 = new ArrayList<Node[]>();
+		// computeyes_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_3") });
+		//
+		// List<Node[]> computeyes_outputmembers = new ArrayList<Node[]>();
+		// computeyes_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+		//
+		// String computeyes_function = "(x1 + x2)";
+		//
+		// computeyes_correspondence = new ReconciliationCorrespondence(
+		// "COMP_YES", computeyes_inputmembers1, computeyes_inputmembers2,
+		// computeyes_outputmembers, computeyes_function);
+		//
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computeyes_correspondence);
+		// }
+
+		// COMPUTE\_PERCENTAGENOS
+		// ReconciliationCorrespondence computepercentagenos_correspondence;
+		// List<Node[]> computepercentagenos_inputmembers1 = new
+		// ArrayList<Node[]>();
+		// computepercentagenos_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1") });
+		//
+		// List<Node[]> computepercentagenos_inputmembers2 = new
+		// ArrayList<Node[]>();
+		// computepercentagenos_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+		//
+		// List<Node[]> computepercentagenos_outputmembers = new
+		// ArrayList<Node[]>();
+		// computepercentagenos_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+		// // Not yet needed since manual drill-across:
+		// // computepercentagenos_outputmembers
+		// // .add(new Node[] {
+		// // new Resource(
+		// // "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// // new Resource(
+		// // "http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
+		//
+		// String computepercentagenos_function = "(x1 / (x1 + x2))";
+		//
+		// computepercentagenos_correspondence = new
+		// ReconciliationCorrespondence(
+		// "COMP_PERCNOS", computepercentagenos_inputmembers1,
+		// computepercentagenos_inputmembers2,
+		// computepercentagenos_outputmembers,
+		// computepercentagenos_function);
+		//
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computepercentagenos_correspondence);
+		// }
 
 		return correspondences;
 	}

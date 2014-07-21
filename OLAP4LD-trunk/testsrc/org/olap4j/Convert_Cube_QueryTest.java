@@ -618,6 +618,8 @@ public class Convert_Cube_QueryTest extends TestCase {
 				gdpsliceddimensions.add(nodes);
 			}
 		}
+		
+		// Here, projection would be needed.
 				
 		SliceOp gdpsliced = new SliceOp(gdpbasecube, gdpsliceddimensions);
 		

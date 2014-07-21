@@ -104,17 +104,41 @@ public class Example_QB_Datasets_ConvertCube_QueryTest extends TestCase {
 	
 	/**
 	 * Specific measures from two datasets. 
+	 * 
+	 * Here we see that we get three values per cell because due to reasoning we have another
+	 * dimension which we should add to column as well.
+	 * 
 	 */
-	public void executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany_MoreDatasets_AutomaticConvert() {
+	public void executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany_AutomaticConvert() {
 		
 		// Maybe ask for specific measure? 
 		// Add another dataset? XXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Fnama_aux_gphXXX23ds
-		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]}, Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23indic_na])) ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
+		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]} ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
 
-		// Should be correct: obsValue (?), gesis:sum (461.33), estatwrap:sum (116) Dice: Germany, 2008
+		// With both COMP_YES and COMP_PERCNOS, 		
+		// Should be correct: GDP Growth 1.1, Answers to survey, COMP_YES, Unemployment Fear Metric from COMP_PERCNOS: 0.826; Dice: Germany, 2008
+		// Result as manually computed: Unemployment Fear Metric 0.826
+		assertContains("|  |      |  |  00      | 1144 160 80,1.1,240 240 240,0.826589595375722543352601 0.826589595375722543352601 0.826589595375722543352601 |",
+				result);
+		
+		// Result as in ISEM paper: 0.9275 Dice: Germany, 1980
+		assertContains(
+				"|  |      |  |  00      |         1126 42 46,88 88 88,0.927512355848434925864909 0.927512355848434925864909 0.927512355848434925864909 |",
+				result); 
+	}
+	
+	public void executeDrillAcrossGdpCap_AutomaticConvert() {
+		
+		// Maybe ask for specific measure? 
+		// Add another dataset?  
+		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]}, Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23indic_na])) ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Fnama_aux_gphXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Fnama_gdp_cXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Fdemo_pjanXXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
+
+		// Should be correct: |  |      |  |  00    |  28100 104.1 4.1 27300 |  28000 28000 103.8 3.8 |
+		// We distinguish different NGDPH | RGDPH (with different units)
+		
 		assertContains("|  |      |  |  00      | 461.333333333333333333333333,1.1,140.3 |",
 				result);
-	}
+	}	
 
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
