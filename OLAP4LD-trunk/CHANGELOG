@@ -35,6 +35,54 @@ created observations.
 Solution: For any one combination should there not be only one possibility? No, since afterwards 
 reasoning, again. Solution, remove reasoning after generation.
 
+Problem: Apparently, the dimensions and measures are not properly propagated through the iterators.
+
+Status?
+
+* BaseCubeSparqlDerivedDatasetIterator propagates them all, but not in the data. <= Problem is: I drill-across it directly for comparison. I could also do a projection over it. If from MDX, I have always OLAP2SPARQL on top. 
+* Drill-AcrossNestedLoop adds measures of two cubes
+* Olap2SparqlIterator works with all
+* ConvertSparqlIterator propagates all (from first cube), but only publishes info of non-implicit measures.
+
+Drill-across(Merge-Cubes (Merge-Cubes (Convert-Cube (BaseCube (http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds), (mio_eur2eur, {(http://ontologycentral.com/2009/01/eurostat/ns#unit,http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR)},{},{(http://ontologycentral.com/2009/01/eurostat/ns#unit,http://estatwrap.ontologycentral.com/dic/unit#EUR)},{(1000000 * x)})), Convert-Cube (BaseCube (http://estatwrap.ontologycentral.com/id/nama_gdp_c#ds), (mio_eur2eur, {(http://ontologycentral.com/2009/01/eurostat/ns#unit,http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR)},{},{(http://ontologycentral.com/2009/01/eurostat/ns#unit,http://estatwrap.ontologycentral.com/dic/unit#EUR)},{(1000000 * x)})), (computegdp, {(http://ontologycentral.com/2009/01/eurostat/ns#indic_na,http://estatwrap.ontologycentral.com/dic/indic_na#B1G)},{(http://ontologycentral.com/2009/01/eurostat/ns#indic_na,http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31)},{(http://ontologycentral.com/2009/01/eurostat/ns#indic_na,http://estatwrap.ontologycentral.com/dic/indic_na#NGDP)},{(x1 + x2)})), BaseCube (http://estatwrap.ontologycentral.com/id/demo_pjan#ds), (computegdppercapita, {(http://ontologycentral.com/2009/01/eurostat/ns#indic_na,http://estatwrap.ontologycentral.com/dic/indic_na#NGDP)(http://ontologycentral.com/2009/01/eurostat/ns#unit,http://estatwrap.ontologycentral.com/dic/unit#EUR)},{(http://ontologycentral.com/2009/01/eurostat/ns#sex,http://estatwrap.ontologycentral.com/dic/sex#T)(http://ontologycentral.com/2009/01/eurostat/ns#age,http://estatwrap.ontologycentral.com/dic/age#TOTAL)},{(http://ontologycentral.com/2009/01/eurostat/ns#indic_na,http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH)(http://ontologycentral.com/2009/01/eurostat/ns#unit,http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB)},{(x1 / x2)})), Slice (BaseCube (http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds), {}))
+
+SPARQL CONSTRUCT query: PREFIX qb:<http://purl.org/linked-data/cube#> PREFIX olap4ld:<http://purl.org/olap4ld/>construct { _:outputcube <http://purl.org/linked-data/cube#dataSet> <http://localhost/deriveddataset/dataset1974913310/conversionfunction-2005164347> . 
+<http://localhost/deriveddataset/dataset1974913310/conversionfunction-2005164347> <http://purl.org/linked-data/cube#structure> ?dsd1 . 
+_:outputcube <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH> . 
+_:outputcube <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB> . 
+_:outputcube <http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo> ?httplodgesisorglodpilotALLBUSvocabrdfgeo . 
+_:outputcube <http://ontologycentral.com/2009/01/eurostat/ns#geo> ?httpontologycentralcom200901eurostatnsgeo . 
+_:outputcube <http://purl.org/dc/terms/date> ?httppurlorgdctermsdate . 
+_:outputcube <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?outputvalue1 . 
+ } where { { 
+ 
+ select  ?dsd1 ?dsd2  ((?input1value1 / ?input2value1) as ?outputvalue1)  ?httplodgesisorglodpilotALLBUSvocabrdfgeo  ?dsd2  ?httppurlorgdctermsdate  ?httpontologycentralcom200901eurostatnsgeo  ?input2value1  where {
+ 
+ ?inputcube1 <http://purl.org/linked-data/cube#dataSet> <http://localhost/deriveddataset/dataset666074368/conversionfunction-270137444> . 
+<http://localhost/deriveddataset/dataset666074368/conversionfunction-270137444> <http://purl.org/linked-data/cube#structure> ?dsd1 . 
+
+?inputcube2 <http://purl.org/linked-data/cube#dataSet> <http://estatwrap.ontologycentral.com/id/demo_pjan#ds> . 
+<http://estatwrap.ontologycentral.com/id/demo_pjan#ds> <http://purl.org/linked-data/cube#structure> ?dsd2 . 
+
+?inputcube1 <http://ontologycentral.com/2009/01/eurostat/ns#indic_na> <http://estatwrap.ontologycentral.com/dic/indic_na#NGDP> . 
+?inputcube1 <http://ontologycentral.com/2009/01/eurostat/ns#unit> <http://estatwrap.ontologycentral.com/dic/unit#EUR> . 
+
+?inputcube2 <http://ontologycentral.com/2009/01/eurostat/ns#sex> <http://estatwrap.ontologycentral.com/dic/sex#T> . 
+?inputcube2 <http://ontologycentral.com/2009/01/eurostat/ns#age> <http://estatwrap.ontologycentral.com/dic/age#TOTAL> . 
+
+?inputcube1 <http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo> ?httplodgesisorglodpilotALLBUSvocabrdfgeo . 
+?inputcube2 <http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo> ?httplodgesisorglodpilotALLBUSvocabrdfgeo . 
+?inputcube1 <http://ontologycentral.com/2009/01/eurostat/ns#geo> ?httpontologycentralcom200901eurostatnsgeo . 
+?inputcube2 <http://ontologycentral.com/2009/01/eurostat/ns#geo> ?httpontologycentralcom200901eurostatnsgeo . 
+
+?inputcube1 <http://purl.org/dc/terms/date> ?httppurlorgdctermsdate . 
+?inputcube2 <http://purl.org/dc/terms/date> ?httppurlorgdctermsdate . 
+?inputcube1 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?input1value1 . 
+?inputcube2 <http://purl.org/linked-data/sdmx/2009/measure#obsValue> ?input2value1 . 
+
+} } }
+ 
+
 
 ==2014-07-16==
 * More nested Convert-Cube queries do not work, anymore.
