@@ -125,7 +125,8 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 			 * disregarded.
 			 */
 
-			// XXX: I think, this will make problems, later.
+			// XXX: I think, this will make problems, later, since OLAP-to-SPARQL requires this information as does the QB dataset tests.
+			// BUT: Only if the result is used.
 			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 					.contains("AGGFUNC")) {
 				continue;
