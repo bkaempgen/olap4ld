@@ -15,6 +15,26 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-07-25==
+* What measures do we have?
+** Implicit specific measures (with dataset)
+** Implicity unspecific measures (without dataset)
+** Explicit, unspecific measure
+
+* Problem: Apparently, for hierarchies, we get several options. 
+* Solution: Have test cases for metadata queries over drill-across cubes.
+
+* Problems
+** Every implicit aggregate measure is double
+** Every hierarchies is double
+** getMembers(Level:Measures) returns hierarchies, also?
+** Apparently, we ask for other members if we ask for all members of the level measures: we query for a measure if...
+
+Current setting of LDCX
+* Crawling: no seeAlso, no members, now owl:sameAs, no subpropertyOf
+* Integrity constraints: 
+
+
 ==2014-07-21==
 * Status at submission.
 * Next steps:

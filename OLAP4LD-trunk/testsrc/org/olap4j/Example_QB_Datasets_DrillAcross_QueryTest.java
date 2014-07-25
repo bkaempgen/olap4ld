@@ -20,8 +20,11 @@ package org.olap4j;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.logging.Level;
 
 import junit.framework.TestCase;
@@ -30,6 +33,10 @@ import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
+import org.olap4j.metadata.Cube;
+import org.olap4j.metadata.Dimension;
+import org.olap4j.metadata.Measure;
+import org.olap4j.metadata.Member;
 import org.olap4j.test.TestContext;
 
 /**
@@ -149,6 +156,15 @@ public class Example_QB_Datasets_DrillAcross_QueryTest extends TestCase {
 	}
 	
 	// Variations of the UNEMPLOY query from performance evaluation
+	
+	
+	public void testExecuteDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermanyMetadata() {
+		String dsUri = "httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23ds";
+		// localhost
+		// dsUri =
+		// "http://localhost:8080/ldcx-trunk/ldcx/tests/ssb001/ttl/example.ttl#ds";
+		metadataTest(dsUri, 5, 5);
+	}
 	
 	/**
 	 * Specific measures from two datasets. 
@@ -355,6 +371,47 @@ public class Example_QB_Datasets_DrillAcross_QueryTest extends TestCase {
 				result);
 	}
 
+	private void metadataTest(String dsUri, int numberOfDimensions,
+			int numberOfMeasures) {
+		try {
+
+			// We have to use MDX encoded name
+			String name = URLEncoder.encode(dsUri, "UTF-8");
+			name = name.replace("%", "XXX");
+			name = name.replace(".", "YYY");
+			name = name.replace("-", "ZZZ");
+			// xmla4js is attaching square brackets automatically
+			// xmla-server is using a set of values for a restriction.
+			Cube cube = olapConnection.getOlapDatabases().get(0).getCatalogs()
+					.get(0).getSchemas().get(0).getCubes()
+					.get("[" + name + "]");
+
+			// Currently, we have to first query for dimensions.
+			List<Dimension> dimensions = cube.getDimensions();
+
+			// Number of dimensions
+			assertEquals(numberOfDimensions, dimensions.size());
+			for (Dimension dimension : dimensions) {
+				List<Member> members = dimension.getHierarchies().get(0)
+						.getLevels().get(0).getMembers();
+
+				// Each dimension should have some members
+				assertEquals(true, members.size() >= 1);
+			}
+
+			List<Measure> measures = cube.getMeasures();
+
+			// Number of measures
+			assertEquals(numberOfMeasures, measures.size());
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
 			fail("expected to find '" + seek + "' in '" + s + "'");

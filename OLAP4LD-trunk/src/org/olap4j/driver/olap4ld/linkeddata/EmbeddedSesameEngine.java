@@ -1240,11 +1240,11 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			Node hierarchyUniqueName, Node levelUniqueName) {
 		// If one is set, it should not be Measures, not.
 		// Watch out: no square brackets are needed.
-		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName
+		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName.toString()
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))
-				|| (hierarchyUniqueName != null && hierarchyUniqueName
+				|| (hierarchyUniqueName != null && hierarchyUniqueName.toString()
 						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))
-				|| (levelUniqueName != null && levelUniqueName
+				|| (levelUniqueName != null && levelUniqueName.toString()
 						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME));
 
 		return explicitlyStated;
@@ -1581,22 +1581,24 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				}
 
 				boolean first;
-				// If loading ds, also load seeAlso
-				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?seeAlso WHERE {<"
-						+ uri + "> rdfs:seeAlso ?seeAlso.}";
-				List<Node[]> seeAlso = sparql(query, true);
-
-				first = true;
-				for (Node[] nodes : seeAlso) {
-					if (first) {
-						first = false;
-						continue;
-					}
-					if (nodes[0] instanceof Resource) {
-						URL componenturi = new URL(nodes[0].toString());
-						loadInStore(componenturi);
-					}
-				}
+				
+				// Not done. Takes too long.
+//				// If loading ds, also load seeAlso
+//				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?seeAlso WHERE {<"
+//						+ uri + "> rdfs:seeAlso ?seeAlso.}";
+//				List<Node[]> seeAlso = sparql(query, true);
+//
+//				first = true;
+//				for (Node[] nodes : seeAlso) {
+//					if (first) {
+//						first = false;
+//						continue;
+//					}
+//					if (nodes[0] instanceof Resource) {
+//						URL componenturi = new URL(nodes[0].toString());
+//						loadInStore(componenturi);
+//					}
+//				}
 
 				// If loading ds, also load components
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?comp WHERE {<"
@@ -1665,25 +1667,26 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					}
 				}
 
+				// Extra: Not done either.
 				// If loading dimensions, also load rdfs:subPropertyOf
-				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?superdimension WHERE {<"
-						+ uri
-						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:subPropertyOf ?superdimension. }";
-				List<Node[]> superdimensions = sparql(query, true);
-
-				first = true;
-				for (Node[] nodes : superdimensions) {
-					if (first) {
-						first = false;
-						continue;
-					}
-
-					if (nodes[0] instanceof Resource) {
-						URL dimensionuri = new URL(nodes[0].toString());
-
-						loadInStore(dimensionuri);
-					}
-				}
+//				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?superdimension WHERE {<"
+//						+ uri
+//						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:subPropertyOf ?superdimension. }";
+//				List<Node[]> superdimensions = sparql(query, true);
+//
+//				first = true;
+//				for (Node[] nodes : superdimensions) {
+//					if (first) {
+//						first = false;
+//						continue;
+//					}
+//
+//					if (nodes[0] instanceof Resource) {
+//						URL dimensionuri = new URL(nodes[0].toString());
+//
+//						loadInStore(dimensionuri);
+//					}
+//				}
 
 				// If loading ds, also load codelists
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?codelist WHERE {<"
