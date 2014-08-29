@@ -56,10 +56,10 @@ public class LDCX_User_Study_Evaluation_XmlaTest extends TestCase {
 			Olap4ldUtil.prepareLogging();
 
 			// For this test, we need to run a server.
-			 this.xmlauri = new URL(
-			 "http://localhost:8080/xmlaserver-trunk/xmla");
+//			 this.xmlauri = new URL(
+//			 "http://localhost:8080/xmlaserver-trunk/xmla");
 			 //this.xmlauri = new URL("http://aifbkos.aifb.uni-karlsruhe.de:8080/xmlaserver-trunk/xmla");
-			 //this.xmlauri = new URL("http://km.aifb.kit.edu/services/xmlaserver-trunk/xmla");
+			 this.xmlauri = new URL("http://km.aifb.kit.edu/services/xmlaserver-trunk/xmla");
 //			 this.xmlauri = new URL(
 			// "http://141.52.218.137:8000/xmlaserver-trunk/xmla");
 //			this.xmlauri = new URL(
@@ -166,6 +166,8 @@ public class LDCX_User_Study_Evaluation_XmlaTest extends TestCase {
 
 	/**
 	 * What is the problem with the HCO3 climate data at location AD0514?
+	 * 
+	 * Apparently, we do not have a problem here, anymore.
 	 */
 	public void test9() {
 		String cubename = uriToMdx("http://smartdbwrap.appspot.com/id/locationdataset/AD0514/HCO3");
