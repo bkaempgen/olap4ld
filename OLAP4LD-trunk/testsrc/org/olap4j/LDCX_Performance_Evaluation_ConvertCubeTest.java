@@ -1,22 +1,3 @@
-/*
-//$Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
-//
-//Licensed to Julian Hyde under one or more contributor license
-//agreements. See the NOTICE file distributed with this work for
-//additional information regarding copyright ownership.
-//
-//Julian Hyde licenses this file to you under the Apache License,
-//Version 2.0 (the "License"); you may not use this file except in
-//compliance with the License. You may obtain a copy of the License at:
-//
-//http://www.apache.org/licenses/LICENSE-2.0
-//
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
- */
 package org.olap4j;
 
 import java.io.PrintWriter;
@@ -50,8 +31,13 @@ import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Resource;
 
 /**
- * Tests on executing drill-across.
+ * Tests on executing drill-across, convert-cube, and merge-cubes operators.
  * 
+ * Seems to need at least:
+ * 
+ * -Xms512M -Xmx1524M
+ * -XX:PermSize=512M
+ * -XX:MaxPermSize=1000M
  * 
  * @version $Id: MetadataTest.java 482 2012-01-05 23:27:27Z jhyde $
  */
@@ -439,7 +425,48 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 		String result = executeStatement(myplan);
 		
 		assertContains(
-				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27800; 27704.423967820803;",
+				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803,27800;",
+				result);
+		
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void testOfBaseCubeDrillAcross() {
+		
+		try {
+		// Third: GDP per Capita
+		Node gdpalreadycomputeduri = new Resource(
+				"http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds");
+		Restrictions gdpalreadycomputedrestrictions = new Restrictions();
+		gdpalreadycomputedrestrictions.cubeNamePattern = gdpalreadycomputeduri;
+
+		// Base-cube
+		// XXX: We need to make sure that only the lowest members are queried
+		// from each cube.
+
+		// In order to fill the engine with data
+		// XXX: Should be part of base-cube operator
+		List<Node[]> gdpalreadycomputedcube = lde.getCubes(gdpalreadycomputedrestrictions);
+		assertEquals(2, gdpalreadycomputedcube.size());
+		Map<String, Integer> gdpalreadycomputedcubemap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(gdpalreadycomputedcube.get(0));
+		System.out.println("CUBE_NAME: "
+				+ gdpalreadycomputedcube.get(1)[gdpalreadycomputedcubemap.get("?CUBE_NAME")]);
+
+		BaseCubeOp gdpalreadycomputedbasecube = new BaseCubeOp(gdpalreadycomputeduri.toString());
+	
+		LogicalOlapQueryPlan myplan = new LogicalOlapQueryPlan(
+				gdpalreadycomputedbasecube);
+
+		System.out.println("Logical Query Plan:"+myplan.toString());
+		
+		String result = executeStatement(myplan);
+		
+		assertContains(
+				"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803,27800;",
 				result);
 		
 		} catch (OlapException e) {

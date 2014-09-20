@@ -1,6 +1,5 @@
 package org.olap4j.driver.olap4ld.linkeddata;
 
-import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1198,6 +1197,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				}
 				
 				// Only those which are not implicit.
+				// XXX: This distinguishing of implicit, explicit and real measure is confusing.
 				if (node[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
 						.contains("AGGFUNC")) {
 					continue;
@@ -1712,6 +1712,9 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	public List<Node[]> getMeasures(Restrictions restrictions)
 			throws OlapException {
 
+		// XXX: Actually, we already distinguished measures when creating the metadata. 
+		// So, no change.
+		
 		// Convert-Cube would only take the non-aggregated measures
 		List<Node[]> newmeasures = new ArrayList<Node[]>();
 		newmeasures.add(measures.get(0));

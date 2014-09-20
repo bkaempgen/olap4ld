@@ -22,24 +22,28 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import junit.framework.TestCase;
 
 import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
+import org.olap4j.driver.olap4ld.linkeddata.BaseCubeOp;
+import org.olap4j.driver.olap4ld.linkeddata.ConvertCubeOp;
+import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
+import org.olap4j.driver.olap4ld.linkeddata.LogicalOlapOp;
+import org.olap4j.driver.olap4ld.linkeddata.ReconciliationCorrespondence;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.olap4j.test.TestContext;
 
 /**
- * Unit test for OLAP4LD Queries on external example data and Drill-Across operator.
+ * Unit test for OLAP4LD Queries on external example data and Drill-Across and Convert-Cube and Merge-Cubes operator.
  * 
- * To also help developers with Drill-Across queries, we provide the same as Example_QB_Datasets_QueryTest for Drill-Across queries.
+ * To also help developers with Convert-Cube and Merge-Cubes queries, we provide the same as Example_QB_Datasets_QueryTest for those queries.
  * 
- * For most Example QB Datasets given at [1], we want to add a unit test.
- * 
- * [1] http://www.linked-data-cubes.org/index.php/Example_QB_Datasets
  * 
  * Remember to set test.properties:
  * org.olap4j.test.helperClassName=org.olap4j.LdRemoteOlap4jTester
@@ -144,6 +148,232 @@ public class Example_QB_Datasets_ConvertCube_QueryTest extends TestCase {
 		if (s.indexOf(seek) < 0) {
 			fail("expected to find '" + seek + "' in '" + s + "'");
 		}
+	}
+	
+	/**
+	 * 
+	 * The ordering of Merge-Cubes is relevant but every Merge-Cube may only be
+	 * used once in a query plan.
+	 * 
+	 * @param depth
+	 *            Depth of query plan
+	 * @param d
+	 *            Number of datasets (converted or not converted)
+	 * @param mc
+	 *            Number of merge-cubes
+	 * @return Number of query plans
+	 */
+	public static int numberForMergeChildren(int depth, int d, int mc) {
+
+		if (depth == 0) {
+
+			return d;
+		}
+
+		int no = 0;
+
+		// Both same depth
+		no += mc * numberForMergeChildren(depth - 1, d, mc - 1)
+				* numberForMergeChildren(depth - 1, d, mc - 1);
+
+		// Left
+		for (int i = 0; i < depth - 1; i++) {
+			no += mc * numberForMergeChildren(depth - 1, d, mc - 1)
+					* numberForMergeChildren(i, d, mc - 1);
+		}
+
+		// Right
+		for (int i = 0; i < depth - 1; i++) {
+			no += mc * numberForMergeChildren(i, d, mc - 1)
+					* numberForMergeChildren(depth - 1, d, mc - 1);
+		}
+		return no;
+	}
+
+	/**
+	 * The ordering of Merge-Cubes is relevant but every Merge-Cube may only be
+	 * used once in a query plan.
+	 * 
+	 * @param depth
+	 *            Depth of query plan
+	 * @param datasets
+	 *            Number of datasets
+	 * @param correspondences
+	 *            Merge
+	 * @return
+	 */
+	public static List<LogicalOlapOp> generateMergeLqpsForDepth(int depth,
+			String[] datasets,
+			List<ReconciliationCorrespondence> correspondences) {
+
+		List<LogicalOlapOp> newlqps = new ArrayList<LogicalOlapOp>();
+
+		if (depth == 0) {
+
+			for (int i = 0; i < datasets.length; i++) {
+				newlqps.add(new BaseCubeOp(datasets[i]));
+			}
+			return newlqps;
+		}
+
+		// Both same depth.
+
+		for (ReconciliationCorrespondence selectedCorrespondence : correspondences) {
+
+			List<ReconciliationCorrespondence> reducedcorrespondences = new ArrayList<ReconciliationCorrespondence>();
+
+			for (ReconciliationCorrespondence aCorrespondence : correspondences) {
+				// Only if not correspondence
+				if (!aCorrespondence.getname().equals(
+						selectedCorrespondence.getname())) {
+					reducedcorrespondences.add(aCorrespondence);
+				}
+			}
+
+			// Here, the same correspondence is not allowed to be used.
+			List<LogicalOlapOp> nextdepthlqps = generateMergeLqpsForDepth(
+					depth - 1, datasets, reducedcorrespondences);
+
+			for (LogicalOlapOp logicalOlapOp1 : nextdepthlqps) {
+				for (LogicalOlapOp logicalOlapOp2 : nextdepthlqps) {
+					newlqps.add(new ConvertCubeOp(logicalOlapOp1,
+							logicalOlapOp2, selectedCorrespondence));
+				}
+			}
+
+			// Recursively other depths of the other.
+			for (int i = 0; i < depth - 1; i++) {
+				List<LogicalOlapOp> lowerdepthlqps = generateMergeLqpsForDepth(
+						i, datasets, reducedcorrespondences);
+				for (LogicalOlapOp logicalOlapOp1 : lowerdepthlqps) {
+					for (LogicalOlapOp logicalOlapOp2 : nextdepthlqps) {
+
+						// Left / Right
+						newlqps.add(new ConvertCubeOp(logicalOlapOp1,
+								logicalOlapOp2, selectedCorrespondence));
+						// Vice-versa
+						newlqps.add(new ConvertCubeOp(logicalOlapOp2,
+								logicalOlapOp1, selectedCorrespondence));
+					}
+				}
+			}
+
+		}
+
+		return newlqps;
+	}
+
+	/**
+	 * The ordering of ccs is relevant but every cc can only be used once in a
+	 * query plan.
+	 * 
+	 * @param depth
+	 * @param d
+	 * @param cc
+	 * @return
+	 */
+	public static int numberForConvertChildren(int depth, int d, int cc) {
+		if (depth == 0) {
+			return d;
+		}
+
+		return cc * numberForConvertChildren(depth - 1, d, cc - 1);
+	}
+	
+	/**
+	 * We are interested in whether we can estimate the upper bound of derived datasets.
+	 * 
+	 */
+	public void testExample_QB_Datasets_ConvertCube_QueryTestnumberForMergeChildren() {
+		
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(0, 3, 3));
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(1, 3, 3));
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(2, 3, 3));
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(3, 3, 3));
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(4, 3, 3));
+		
+		int no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(0, 3, 2);
+		assertEquals(3, no);
+		
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(1, 3, 2);
+		assertEquals(18, no);
+		
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(2, 3, 2);
+		assertEquals(270, no);
+		
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(3, 3, 2);
+		assertEquals(0, no);
+		
+		// Before
+//		int no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(0, 3, 2);
+//		assertEquals(3, no);
+//		
+//		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(1, 3, 2);
+//		assertEquals(18, no);
+//		
+//		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(2, 3, 2);
+//		assertEquals(864, no);
+//		
+//		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(3, 3, 2);
+//		assertEquals(1565568, no);
+	}
+	
+	public void testExample_QB_Datasets_ConvertCube_QueryTestgenerateMergeLqpsForDepth() {
+		
+		List<ReconciliationCorrespondence> correspondences = EmbeddedSesameEngine.getReconciliationCorrespondences(true);
+		String[] datasets = {"http://estatwrap.ontologycentral.com/id/tec00115#ds", "http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds", "http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds"};
+		
+		List<LogicalOlapOp> lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(0, datasets, correspondences);
+		assertEquals(3, lqps.size());
+		
+		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(1, datasets, correspondences);
+		assertEquals(18, lqps.size());
+		
+		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(2, datasets, correspondences);
+		assertEquals(270, lqps.size());
+		
+		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(3, datasets, correspondences);
+		assertEquals(0, lqps.size());
+		
+		// Before
+//		List<LogicalOlapOp> lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(0, datasets, correspondences);
+//		assertEquals(3, lqps.size());
+//		
+//		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(1, datasets, correspondences);
+//		assertEquals(18, lqps.size());
+//		
+//		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(2, datasets, correspondences);
+//		assertEquals(864, lqps.size());
+//		
+//		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(3, datasets, correspondences);
+//		assertEquals(1565568, lqps.size());
+	}
+	
+	public void testExample_QB_Datasets_ConvertCube_QueryTestnumberForConvertChildren() {
+		
+		// Case for one
+		int no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(0, 3, 1);
+		assertEquals(3, no);
+		
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(1, 3, 1);
+		assertEquals(3, no);
+		
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(2, 3, 1);
+		assertEquals(0, no);
+		
+		// Case for two
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(0, 3, 2);
+		assertEquals(3, no);
+	
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(1, 3, 2);
+		assertEquals(6, no);
+		
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(2, 3, 2);
+		assertEquals(6, no);
+		
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(3, 3, 2);
+		assertEquals(0, no);
+		
 	}
 
 	private String executeStatement(String mdxString) {

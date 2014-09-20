@@ -534,7 +534,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 		// Problem:
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testYahooFinanceWrapExampleOlap */ {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FvocabXXX2FyahooXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FarchiveXXX2FBACXXX2F2012ZZZ12ZZZ12XXX23ds]");
-		assertContains("| Adjusted Closing Price |      10.57 |", result);
+		assertContains("| Adjusted Closing Price |      10.53 |", result);
 
 	}
 

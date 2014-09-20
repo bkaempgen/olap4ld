@@ -23,20 +23,78 @@ public class LogicalToPhysical {
 		this.engine = embeddedSesameEngine;
 	}
 
+	/**
+	 * 
+	 * * Design decisions The LogicalOperators only get as input a cube and the
+	 * parameters, but not specifically the metadata of the cube.
+	 * 
+	 * The PhysicalIterators get as input another iterator and the parameters,
+	 * but also the metadata of the iterator. I create PhysicalIterators for
+	 * metadata, they get as input the repo and the parameters (restrictions).
+	 * Every LogicalOperator could be wrapped, get as input the identifier of a
+	 * cube and the parameters and return a new identifier.
+	 * 
+	 * Mioeur2eur is another LogicalOperator that could get wrapped, get as
+	 * input the identifier of a cube and the parameters and return a new
+	 * identifier. Mioeur2eur would also include PhysicalIterators. The
+	 * Mioeur2eur iterator would get as input another iterator,
+	 * BaseCubeIterator, and return the conversion. Example:
+	 * http://olap4ld.googlecode.com/dic/aggreg95#00;
+	 * http://olap4ld.googlecode.com/dic/geo#US;
+	 * http://olap4ld.googlecode.com/dic/indic_na#VI_PPS_EU28_HAB; 2012; 149;
+	 * 
+	 */
+
+	/**
+	 * 
+	 * This method recursively creates a physical query plan from a logical one.
+	 * 
+	 * @param node
+	 * @return
+	 */
 	public PhysicalOlapIterator compile(LogicalOlapOp node) {
 		PhysicalOlapIterator theIterator = null;
+
+		// If we have Drill-Across, we recursively compile and use nested loop.
 		if (node instanceof DrillAcrossOp) {
-			PhysicalOlapIterator iterator1 = compile(((DrillAcrossOp) node).inputop1);
-			PhysicalOlapIterator iterator2 = compile(((DrillAcrossOp) node).inputop2);
+			LogicalOlapOp inputop1 = ((DrillAcrossOp) node).inputop1;
+			LogicalOlapOp inputop2 = ((DrillAcrossOp) node).inputop2;
+			PhysicalOlapIterator iterator1;
+			PhysicalOlapIterator iterator2;
+			PhysicalOlapIterator intermediateIterator;
+
+			/*
+			 * Otherwise:
+			 * 
+			 * * We may have Slice/Dice/etc. over BaseCube -> No problem. * We
+			 * may have Convert-Cube etc. over BaseCube -> No problem. * We may
+			 * have Drill-Across over BaseCube -> Problem.
+			 */
+			if (inputop1 instanceof BaseCubeOp) {
+				intermediateIterator = compile(inputop1);
+
+				iterator1 = createOlap2SparqlIterator(intermediateIterator);
+			} else {
+				iterator1 = compile(inputop1);
+			}
+			if (inputop2 instanceof BaseCubeOp) {
+				intermediateIterator = compile(inputop2);
+
+				iterator2 = createOlap2SparqlIterator(intermediateIterator);
+			} else {
+				iterator2 = compile(inputop2);
+			}
 			theIterator = new DrillAcrossNestedLoopJoinSesameIterator(
 					iterator1, iterator2);
 		}
 
+		// The thing is, we may have SPARQL2OLAP over Convert-Cube or over
+		// Base-Cube.
 		if (node instanceof RollupOp || node instanceof SliceOp
 				|| node instanceof DiceOp || node instanceof ProjectionOp) {
 
 			LogicalOlapOp inputop = null;
-			
+
 			if (node instanceof RollupOp) {
 				// For rollup,
 				RollupOp ro = (RollupOp) node;
@@ -93,72 +151,57 @@ public class LogicalToPhysical {
 				theIterator = compile(inputop);
 			}
 		}
-		
-		
-		/**
-		 * 
-		 * * Design decisions The LogicalOperators only get as input a cube and the
-		 * parameters, but not specifically the metadata of the cube.
-		 * 
-		 * The PhysicalIterators get as input another iterator and the parameters,
-		 * but also the metadata of the iterator. I create PhysicalIterators for
-		 * metadata, they get as input the repo and the parameters (restrictions).
-		 * Every LogicalOperator could be wrapped, get as input the identifier of a
-		 * cube and the parameters and return a new identifier.
-		 * 
-		 * Mioeur2eur is another LogicalOperator that could get wrapped, get as
-		 * input the identifier of a cube and the parameters and return a new
-		 * identifier. Mioeur2eur would also include PhysicalIterators. The
-		 * Mioeur2eur iterator would get as input another iterator,
-		 * BaseCubeIterator, and return the conversion. Example:
-		 * http://olap4ld.googlecode.com/dic/aggreg95#00;
-		 * http://olap4ld.googlecode.com/dic/geo#US;
-		 * http://olap4ld.googlecode.com/dic/indic_na#VI_PPS_EU28_HAB; 2012; 149;
-		 * 
-		 */
+
 		if (node instanceof ConvertCubeOp) {
-			
+
 			ConvertCubeOp so = (ConvertCubeOp) node;
 
 			if (so.inputOp2 == null) {
-				
+
 				PhysicalOlapIterator iterator = compile(so.inputOp1);
-				theIterator = new ConvertSparqlDerivedDatasetIterator(engine, iterator,
-						null, so.conversioncorrespondence);
-				
+				theIterator = new ConvertSparqlDerivedDatasetIterator(engine,
+						iterator, null, so.conversioncorrespondence);
+
 			} else if (so.inputOp1 == so.inputOp2) {
 				// If both operators are the same, we can reuse the iterator.
 				// Unfortunately, this does not work for further nested equal
 				// operators.
-				// If inside a logical olap query plan the same function is run on
+				// If inside a logical olap query plan the same function is run
+				// on
 				// the same dataset, we
 				// still have a problem that it is run twice. we could have a
 				// hashmap storing
 				// previous operators and reusing them if needed.
 				PhysicalOlapIterator iterator = compile(so.inputOp1);
-				theIterator = new ConvertSparqlDerivedDatasetIterator(engine, iterator,
-						iterator, so.conversioncorrespondence);
+				theIterator = new ConvertSparqlDerivedDatasetIterator(engine,
+						iterator, iterator, so.conversioncorrespondence);
 			} else {
 				PhysicalOlapIterator iterator1 = compile(so.inputOp1);
 				PhysicalOlapIterator iterator2 = compile(so.inputOp2);
-				
-				theIterator = new ConvertSparqlDerivedDatasetIterator(engine, iterator1,
-						iterator2, so.conversioncorrespondence);
+
+				theIterator = new ConvertSparqlDerivedDatasetIterator(engine,
+						iterator1, iterator2, so.conversioncorrespondence);
 			}
+
+		}
+
+		if (node instanceof BaseCubeOp) {
+			
+			theIterator = new BaseCubeSparqlDerivedDatasetIterator(engine,
+					((BaseCubeOp) node).dataseturi);
+			
+			// XXX: Not sure whether that will make problems.
+			// theIterator = createOlap2SparqlIterator(theIterator);
 			
 		}
-		
-		if (node instanceof BaseCubeOp) {
-			theIterator = new BaseCubeSparqlDerivedDatasetIterator(engine, ((BaseCubeOp) node).dataseturi); 
-		}
-		
+
 		return theIterator;
 
 	}
 
 	private PhysicalOlapIterator createOlap2SparqlIterator(
 			PhysicalOlapIterator iterator1) {
-		
+
 		PhysicalOlapIterator theIterator = null;
 
 		try {
@@ -191,14 +234,16 @@ public class LogicalToPhysical {
 			 * the MDX query).
 			 */
 
-			// Find dimensions not in sliced and not in rolluplevel (that are rolled-up).
+			// Find dimensions not in sliced and not in rolluplevel (that are
+			// rolled-up).
 			List<Node[]> basedimensions = new ArrayList<Node[]>();
 			// Header
 			basedimensions.add(dimensions.get(0));
-			
+
 			boolean first = true;
+			// We check all dimensions of the input dataset
 			for (Node[] dimension : dimensions) {
-				
+
 				if (first) {
 					first = false;
 					continue;
@@ -236,17 +281,20 @@ public class LogicalToPhysical {
 						continue;
 					}
 				}
+				boolean containedInSlicedDimensions = false;
+				// We check whether a sliced dimension.
 				for (Node[] sliceddimension : slicedDimensions) {
 					if (dimension[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
 							.toString().equals(
 									sliceddimension[dimensionmap
 											.get("?DIMENSION_UNIQUE_NAME")]
 											.toString())) {
-						containedInRollupsLevels = true;
+						containedInSlicedDimensions = true;
 					}
 				}
 				// As usual also check whether Measure dimension.
 				if (!containedInRollupsLevels
+						&& !containedInSlicedDimensions
 						&& !dimension[dimensionmap
 								.get("?DIMENSION_UNIQUE_NAME")]
 								.toString()
@@ -296,8 +344,19 @@ public class LogicalToPhysical {
 			// slicesrollups should contain a dimension for each apart from
 			// slices.
 			// Remember measure dimension that never gets sliced or rolled-up
-			int slicesrollupsshouldbesize = (dimensions.size() - 2)
-					- (slicedDimensions.size() - 1);
+
+			// Get number of non-measure dimensions
+			int nonMeasureDimensions = dimensions.size() - 2;
+			// Get size of sliced dimensions:
+			int slicedDimensionsNumber;
+			if (slicedDimensions.isEmpty()) {
+				slicedDimensionsNumber = 0;
+			} else {
+				slicedDimensionsNumber = slicedDimensions.size() - 1;
+			}
+
+			int slicesrollupsshouldbesize = nonMeasureDimensions
+					- slicedDimensionsNumber;
 
 			if (slicesrollups.size() - 1 != slicesrollupsshouldbesize) {
 				throw new UnsupportedOperationException(

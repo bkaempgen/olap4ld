@@ -127,10 +127,10 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 
 			// XXX: I think, this will make problems, later, since OLAP-to-SPARQL requires this information as does the QB dataset tests.
 			// BUT: Only if the result is used.
-			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
-					.contains("AGGFUNC")) {
-				continue;
-			}
+//			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+//					.contains("AGGFUNC")) {
+//				continue;
+//			}
 			
 			// As always, remove Aggregation Function from Measure Name
 			String measureProperty = measure[measuremap
@@ -273,10 +273,40 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 		return dimensions;
 	}
 
-	@Override
+	/**
+	 * BaseCubeSparql does only return the actual measure.
+	 */
 	public List<Node[]> getMeasures(Restrictions restrictions)
 			throws OlapException {
-		return measures;
+		
+		 Map<String, Integer> measuremap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(measures.get(0));
+		
+		// XXX: In this case, we have not yet distinguished measures when creating the metadata. 
+		// So, we change.
+		
+		// Convert-Cube would only take the non-aggregated measures
+		List<Node[]> newmeasures = new ArrayList<Node[]>();
+		newmeasures.add(measures.get(0));
+		for (int i = 1; i < measures.size(); i++) {
+			Node[] measure = measures.get(i);
+
+			/*
+			 * Here we deal with the problem that cubes coming in will possibly
+			 * have many "implicit" measures. For now, we assume those to be
+			 * disregarded.
+			 */
+			// XXX: Seems to have been done before, already.
+//			if (measure[measuremap.get("?MEASURE_UNIQUE_NAME")].toString()
+//					.contains("AGGFUNC")) {
+//				continue;
+//			}
+
+			newmeasures.add(measure);
+		}
+
+		return newmeasures;
+		
 	}
 
 	@Override
