@@ -15,9 +15,97 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-09-20==
+* Now, BaseCube-Derived returns all measures, but not if asked for data.
+* Now, if we run BaseCube directly after Drill-Across, we would also
+run OLAP2SPARQL.
+* Also, we make sure we also call projection.
+
+Now, we:
+
+* automatically run createOlap2SparqlIterator if we directly ask for a BaseCube in case of Drill-Across and directly.
+
+Better in our case of Convert-Cube:
+
+* We do a projection operator. 
+
+* It works, but we have the problem that: If we ask a query for GDP per Capita, we will not... wait, yes, if we first do a projection. 
+
+
 ==2014-09-19==
 * I need to make all test cases work, again.
-** 
+
+* Failed 
+testExampleEdgarCOSTCOOlapTypicalCrossjoin1
+testExampleEdgarCOSTCOOlapLargeDateCrossjoinColumnsNonEmptyRowsCOUNT
+testExampleEdgarCOSTCOOlapLargeSegmentSubjectCrossjoinNonEmptyRowsCOUNT
+testOriginalEdgarCOSTCOOlapBothMeasuresPlusSubject
+testExampleEstatwrapGDPpercapitainPPSOlapEsaAggregateBothMeasures
+testSmartDbWrapExampleOlap
+testSmartDbWrapExampleOlapMeasure
+testYahooFinanceWrapExampleOlap
+
+
+The problems seems to be:
+
+* If I parse a logical query plan, for BaseCubeOp, I always use SparqlDerived. That one returns which measures? It returns only 
+the explicit.
+
+* If I return all, I have a problem with the Convert-Cube example query.
+
+What do I want?
+
+* For simplicity reasons Convert-Cube and Merge-Cubes automatically do a projection for the single explicit measure.
+
+* BaseCubeOp should return all measures.
+
+But now, what to change with Convert-Cube?
+
+
+Example_QB_Datasets_QueryTest.java - *basic MDX examples work*
+Example_QB_Datasets_DrillAcross_QueryTest.java *basic MDX drill-across examples ?*
+Example_QB_Datasets_ConvertCube_QueryTest.java *MDX with correspondences examples ?*
+
+
+LDCX_Performance_Evaluation_ConvertCubeTest.java
+
+
+Problem: DerivedBaseCubeOp returns 8 measures but only 2 from the query.
+
+Why do I need BaseCube at all?
+
+* For Queries without Convert, I directly 
+
+The actual problem is that BaseCube would not return the same amount of data than the schema suggests.
+
+compile:
+
+Problem:
+
+* We may have Slice/Dice/etc. over BaseCube -> No problem.
+* We may have Convert-Cube etc. over BaseCube -> No problem.
+* We may have Drill-Across over BaseCube -> Problem.
+* We may have Base-Cube directly -> Problem.
+
+			// XXX: Apparently the nested-loop join does not work. This may be
+			// because the headers of the outputs are different:
+
+			/*
+			 * [httplodgesisorglodpilotALLBUSvocabrdfgeo,
+			 * httpontologycentralcom200901eurostatnsgeo,
+			 * httpontologycentralcom200901eurostatnsindicna,
+			 * httpontologycentralcom200901eurostatnsunit,
+			 * httppurlorgdctermsdate,
+			 * httppurlorglinkeddatasdmx2009measureobsValue]
+			 * 
+			 * 
+			 * [httplodgesisorglodpilotALLBUSvocabrdfgeo0,
+			 * httpontologycentralcom200901eurostatnsgeo0,
+			 * httpontologycentralcom200901eurostatnsindicna0,
+			 * httpontologycentralcom200901eurostatnsunit0,
+			 * httppurlorgdctermsdate0,
+			 * httppurlorglinkeddatasdmx2009measureobsValue_new]
+			 */
 
 ==2014-07-25==
 * What measures do we have?

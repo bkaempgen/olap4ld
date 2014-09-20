@@ -355,6 +355,10 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	/**
 	 * Test cik/90983#id COSTCO WHOLESALE CORP /NEW (example form): All subjects
 	 * in rows.
+	 * 
+	 * XXX Here we see a problem that apparently COUNT is not done correctly. Is it possible that we 
+	 * count facts several times? 
+	 * 
 	 */
 	public void testOriginalEdgarCOSTCOOlapBothMeasuresPlusSubject() {
 		String result;

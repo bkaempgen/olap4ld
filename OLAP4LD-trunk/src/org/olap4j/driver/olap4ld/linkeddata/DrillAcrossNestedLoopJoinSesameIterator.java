@@ -337,7 +337,7 @@ public class DrillAcrossNestedLoopJoinSesameIterator implements
 										newnode = new Resource(
 												root1_node[root1_dimensions
 														.size() - 2 + i]
-														+ ","
+														+ " / "
 														+ root2_node[root1_dimensions
 																.size() - 2 + i]);
 
