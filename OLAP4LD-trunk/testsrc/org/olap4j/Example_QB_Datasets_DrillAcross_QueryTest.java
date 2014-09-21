@@ -73,17 +73,7 @@ public class Example_QB_Datasets_DrillAcross_QueryTest extends TestCase {
 		
 		Olap4ldUtil.prepareLogging();
 		
-		// Logging
-		// For debugging purposes
-		Olap4ldUtil._log.setLevel(Level.CONFIG);
-
-		// For monitoring usage
-		//Olap4ldUtil._log.setLevel(Level.INFO);
-
-		// For warnings (and errors) only
-		// Olap4ldUtil._log.setLevel(Level.WARNING);
-
-		Olap4ldUtil._isDebug = true;
+		Olap4ldUtil._isDebug = false;
 		
 		connection = tester.createConnection();
 		connection.getCatalog();

@@ -48,15 +48,6 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 	public LDCX_Performance_Evaluation_ConvertCubeTest() throws SQLException {
 
 		Olap4ldUtil.prepareLogging();
-		// Logging
-		// For debugging purposes
-		// Olap4ldUtil._log.setLevel(Level.INFO);
-
-		// For monitoring usage
-		Olap4ldUtil._log.setLevel(Level.CONFIG);
-
-		// For warnings (and errors) only
-		// Olap4ldUtil._log.setLevel(Level.WARNING);
 
 		Olap4ldUtil._isDebug = false;
 
@@ -489,7 +480,7 @@ public class LDCX_Performance_Evaluation_ConvertCubeTest extends TestCase {
 			 */
 
 			assertContains(
-					"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803 / 27800 27800;",
+					"http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/geo#UK; http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH; http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB; 2010; 27704.423967820803 / 27800;",
 					result);
 
 		} catch (OlapException e) {

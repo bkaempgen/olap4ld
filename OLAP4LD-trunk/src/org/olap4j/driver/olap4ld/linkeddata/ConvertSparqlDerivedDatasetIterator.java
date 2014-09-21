@@ -1652,7 +1652,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 				executeSPARQLConstructQuery();
 
-				// After loading, we need to all the rest.
+				// After loading, we need to do all the rest.
 				this.engine.runNormalizationAlgorithm();
 				
 				//this.engine.runOWLReasoningAlgorithm();

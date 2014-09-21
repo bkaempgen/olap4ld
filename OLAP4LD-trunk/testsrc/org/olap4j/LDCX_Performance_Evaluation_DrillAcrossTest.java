@@ -143,7 +143,7 @@ public class LDCX_Performance_Evaluation_DrillAcrossTest extends TestCase {
 
 		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testEU2020-4 */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdcc310XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd310XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd300XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec360XXX23dsAGGFUNCAVG]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdcc310XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd310XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd300XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec360XXX23ds]");
 		
-		assertContains("|  | 2008 |      260.64 |       10.54 |       41.85 |        5.25 |",
+		assertContains("|  | 2008 |      260.64 |       10.62 |        5.86 |       43.83 |",
 				result);
 	}
 	
@@ -157,37 +157,37 @@ public class LDCX_Performance_Evaluation_DrillAcrossTest extends TestCase {
 	
 	public void test1() {
 		
-		executeDrillAcrossEu2020indicators8();
+		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
 		
 	}
 	
 	public void test2() {
 		
-		executeDrillAcrossEu2020indicators8();
+		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
 		
 	}
 	
 	public void test3() {
 		
-		executeDrillAcrossEu2020indicators8();
+		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
 		
 	}
 	
 	public void test4() {
 		
-		executeDrillAcrossEu2020indicators8();
+		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
 		
 	}
 	
 	public void test5() {
 		
-		executeDrillAcrossEu2020indicators8();
+		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
 		
 	}
 	
 	public void test6() {
 		
-		executeDrillAcrossEu2020indicators8();
+		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
 		
 	}
 

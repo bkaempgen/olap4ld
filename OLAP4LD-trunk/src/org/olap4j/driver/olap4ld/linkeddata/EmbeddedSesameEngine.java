@@ -228,7 +228,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					"http://people.aifb.kit.edu/bka/Public/cube_additionalRDF.rdf"));
 
 			// Seems not to work
-			loadInStore(new URL("http://pastebin.com/raw.php?i=e1K52uhc"));
+			// loadInStore(new URL("http://pastebin.com/raw.php?i=e1K52uhc"));
 
 			String triples = "<http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list> <http://www.w3.org/2002/07/owl#sameAs> <http://rdfdata.eionet.europa.eu/ramon/ontology/NUTSRegion>. ";
 			// triples +=
@@ -594,16 +594,27 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 	public boolean isLoaded(URL resource) {
 
-		if (loadedMap.get(resource.hashCode()) != null
-				&& loadedMap.get(resource.hashCode()) == true) {
+		if (loadedMap.get(resource.toString().hashCode()) != null
+				&& loadedMap.get(resource.toString().hashCode()) == true) {
+			
+			Olap4ldUtil._log
+			.info("Is loaded: "+resource.toString()+", Hash: "+resource.toString().hashCode());
+			
 			return true;
 		} else {
+			
+			Olap4ldUtil._log
+			.info("Is not yet loaded: "+resource.toString()+", Hash: "+resource.toString().hashCode());
+			
 			return false;
 		}
 	}
 
 	public void setLoaded(URL resource) {
-		loadedMap.put(resource.hashCode(), true);
+		Olap4ldUtil._log
+		.info("Set loaded: "+resource.toString()+", Hash: "+resource.toString().hashCode());
+		
+		loadedMap.put(resource.toString().hashCode(), true);
 	}
 
 	/**
@@ -613,31 +624,18 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 * @param location
 	 * @throws OlapException
 	 */
-	private void loadInStore(URL resource) throws OlapException {
+	private void loadInStore(URL noninformationuri) throws OlapException {
 		RepositoryConnection con = null;
-
-		if (isLoaded(resource)) {
-			// Already loaded
-			return;
-		}
 
 		try {
 
-			URL location = Olap4ldLinkedDataUtil.askForLocation(resource);
-			if (isLoaded(location)) {
-				// Mark as loaded for next tries
-				setLoaded(resource);
+			URL informationuri = Olap4ldLinkedDataUtil.askForLocation(noninformationuri);
+			if (isLoaded(noninformationuri) || isLoaded(informationuri)) {
+				setLoaded(noninformationuri);
+				setLoaded(informationuri);
 				// Already loaded
 				return;
-
-			} else {
-				// Now: If resource is the same as location, we will never load
-				// otherwise Mark as loaded
-				setLoaded(resource);
 			}
-
-			// Mark as loaded
-			setLoaded(location);
 
 			// Check max loaded
 			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
@@ -653,8 +651,8 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 						"Warning: Maximum storage capacity reached! Dataset contains too many triples.");
 			}
 
-			String locationstring = location.toString();
-			Olap4ldUtil._log.config("Load in store: " + location);
+			String locationstring = informationuri.toString();
+			Olap4ldUtil._log.config("Load in store: " + informationuri);
 
 			con = repo.getConnection();
 
@@ -689,12 +687,12 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			// Guess file format
 			RDFFormat format = RDFFormat.forFileName(locationstring);
 			if (format != null) {
-				con.add(location, locationstring, format);
+				con.add(informationuri, locationstring, format);
 			} else {
 				// Heuristics
 
 				// InputStream is;
-				HttpURLConnection connection = (HttpURLConnection) location
+				HttpURLConnection connection = (HttpURLConnection) informationuri
 						.openConnection();
 				// We always try to get rdf/xml
 				connection.setRequestProperty("Accept", "application/rdf+xml");
@@ -707,7 +705,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// Not acceptable format?
 				if (responsecode == 406) {
 					connection.disconnect();
-					connection = (HttpURLConnection) location.openConnection();
+					connection = (HttpURLConnection) informationuri.openConnection();
 					connection.setRequestProperty("Accept", "text/turtle");
 					format = RDFFormat.TURTLE;
 					responsecode = connection.getResponseCode();
@@ -794,10 +792,10 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 							// Try with in-built loading functionality
 							if (format == RDFFormat.RDFXML) {
-								con.add(location, locationstring,
+								con.add(informationuri, locationstring,
 										RDFFormat.TURTLE);
 							} else {
-								con.add(location, locationstring,
+								con.add(informationuri, locationstring,
 										RDFFormat.RDFXML);
 							}
 
@@ -807,8 +805,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			}
 
-			Olap4ldUtil._log.info("Lookup on resource: " + resource);
+			Olap4ldUtil._log.info("Lookup on resource: " + noninformationuri);
+			Olap4ldUtil._log.info("Its informationuri: " + informationuri);
 
+			// Make sure we set it loaded
+			setLoaded(noninformationuri);
+			setLoaded(informationuri);
+			
 			// Log content only if log level accordingly
 			if (Olap4ldUtil._isDebug) {
 
@@ -847,7 +850,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 * 
 	 * @param location
 	 */
-	private void loadCube(Node cubeNamePattern) throws OlapException {
+	private void loadCube(URL noninformationuri) throws OlapException {
 
 		try {
 			// We crawl the data
@@ -856,7 +859,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			long time = System.currentTimeMillis();
 
-			runDirectedCrawlingAlgorithm(cubeNamePattern);
+			runDirectedCrawlingAlgorithm(noninformationuri);
 
 			// Load other metadata objects?
 			time = System.currentTimeMillis() - time;
@@ -927,9 +930,16 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		} catch (MalformedQueryException e) {
 			throw new OlapException("Problem with malformed query: "
 					+ e.getMessage());
-		}
+		} 
 	}
 
+	/**
+	 * Duplication strategy of deduction rules as in
+	 * http://semanticweb.org/OWLLD/#Rules are executed, but only once which may
+	 * not do full materialisation.
+	 * 
+	 * @throws OlapException
+	 */
 	public void runOWLReasoningAlgorithm() throws OlapException {
 
 		try {
@@ -1014,131 +1024,137 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		List<ReconciliationCorrespondence> correspondences = new ArrayList<ReconciliationCorrespondence>();
 
-//		// MIO2EUR
-//		List<Node[]> mio_eur2eur_inputmembers = new ArrayList<Node[]>();
-//		mio_eur2eur_inputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR") });
-//
-//		mio_eur2eur_inputmembers.add(new Node[] { new
-//
-//		Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
-//				new Variable("value1") });
-//
-//		List<Node[]> mio_eur2eur_outputmembers = new ArrayList<Node[]>();
-//		mio_eur2eur_outputmembers.add(new Node[] {
-//				new Resource(
-//						"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-//				new Resource(
-//						"http://estatwrap.ontologycentral.com/dic/unit#EUR") });
-//		mio_eur2eur_outputmembers
-//				.add(new Node[] {
-//						new Variable("outputcube"),
-//						new
-//
-//						Resource(
-//								"http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
-//						new Variable("value2") });
-//
-//		String mio_eur2eur_function = "(1000000 * x)";
-//
-//		ReconciliationCorrespondence mio_eur2eur_correspondence = new ReconciliationCorrespondence(
-//				"MIO2EUR", mio_eur2eur_inputmembers, null,
-//				mio_eur2eur_outputmembers, mio_eur2eur_function);
-//		if (!askForMergeCorrespondences) {
-//			correspondences.add(mio_eur2eur_correspondence);
-//		}
-//
-//		// COMPUTE_GDP
-//
-//		List<Node[]> computegdp_inputmembers1 = new ArrayList<Node[]>();
-//		computegdp_inputmembers1
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#B1G") });
-//
-//		List<Node[]> computegdp_inputmembers2 = new ArrayList<Node[]>();
-//		computegdp_inputmembers2
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31") });
-//
-//		List<Node[]> computegdp_outputmembers = new ArrayList<Node[]>();
-//		computegdp_outputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
-//
-//		String computegdp_function = "(x1 + x2)";
-//
-//		ReconciliationCorrespondence computegdp_correspondence = new ReconciliationCorrespondence(
-//				"COMP_GDP", computegdp_inputmembers1, computegdp_inputmembers2,
-//				computegdp_outputmembers, computegdp_function);
-//		if (askForMergeCorrespondences) {
-//			correspondences.add(computegdp_correspondence);
-//		}
-//
-//		// COMPUTE_GDP_PER_CAPITA
-//
-//		List<Node[]> computegdppercapita_inputmembers1 = new ArrayList<Node[]>();
-//		computegdppercapita_inputmembers1
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
-//		computegdppercapita_inputmembers1.add(new Node[] {
-//				new Resource(
-//						"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-//				new Resource(
-//						"http://estatwrap.ontologycentral.com/dic/unit#EUR") });
-//
-//		List<Node[]> computegdppercapita_inputmembers2 = new ArrayList<Node[]>();
-//		computegdppercapita_inputmembers2
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#sex"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/sex#T") });
-//		computegdppercapita_inputmembers2
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#age"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/age#TOTAL") });
-//
-//		List<Node[]> computegdppercapita_outputmembers = new ArrayList<Node[]>();
-//		computegdppercapita_outputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH") });
-//		computegdppercapita_outputmembers
-//				.add(new Node[] {
-//						new Resource(
-//								"http://ontologycentral.com/2009/01/eurostat/ns#unit"),
-//						new Resource(
-//								"http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB") });
-//
-//		String computegdppercapita_function = "(x1 / x2)";
-//
-//		ReconciliationCorrespondence computegdppercapita_correspondence = new ReconciliationCorrespondence(
-//				"COMP_GDP_CAP", computegdppercapita_inputmembers1,
-//				computegdppercapita_inputmembers2,
-//				computegdppercapita_outputmembers, computegdppercapita_function);
-//		if (askForMergeCorrespondences) {
-//			correspondences.add(computegdppercapita_correspondence);
-//		}
+		// // MIO2EUR
+		// List<Node[]> mio_eur2eur_inputmembers = new ArrayList<Node[]>();
+		// mio_eur2eur_inputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR") });
+		//
+		// mio_eur2eur_inputmembers.add(new Node[] { new
+		//
+		// Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
+		// new Variable("value1") });
+		//
+		// List<Node[]> mio_eur2eur_outputmembers = new ArrayList<Node[]>();
+		// mio_eur2eur_outputmembers.add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#EUR") });
+		// mio_eur2eur_outputmembers
+		// .add(new Node[] {
+		// new Variable("outputcube"),
+		// new
+		//
+		// Resource(
+		// "http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
+		// new Variable("value2") });
+		//
+		// String mio_eur2eur_function = "(1000000 * x)";
+		//
+		// ReconciliationCorrespondence mio_eur2eur_correspondence = new
+		// ReconciliationCorrespondence(
+		// "MIO2EUR", mio_eur2eur_inputmembers, null,
+		// mio_eur2eur_outputmembers, mio_eur2eur_function);
+		// if (!askForMergeCorrespondences) {
+		// correspondences.add(mio_eur2eur_correspondence);
+		// }
+		//
+		// // COMPUTE_GDP
+		//
+		// List<Node[]> computegdp_inputmembers1 = new ArrayList<Node[]>();
+		// computegdp_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#B1G") });
+		//
+		// List<Node[]> computegdp_inputmembers2 = new ArrayList<Node[]>();
+		// computegdp_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31") });
+		//
+		// List<Node[]> computegdp_outputmembers = new ArrayList<Node[]>();
+		// computegdp_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
+		//
+		// String computegdp_function = "(x1 + x2)";
+		//
+		// ReconciliationCorrespondence computegdp_correspondence = new
+		// ReconciliationCorrespondence(
+		// "COMP_GDP", computegdp_inputmembers1, computegdp_inputmembers2,
+		// computegdp_outputmembers, computegdp_function);
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computegdp_correspondence);
+		// }
+		//
+		// // COMPUTE_GDP_PER_CAPITA
+		//
+		// List<Node[]> computegdppercapita_inputmembers1 = new
+		// ArrayList<Node[]>();
+		// computegdppercapita_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
+		// computegdppercapita_inputmembers1.add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#EUR") });
+		//
+		// List<Node[]> computegdppercapita_inputmembers2 = new
+		// ArrayList<Node[]>();
+		// computegdppercapita_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#sex"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/sex#T") });
+		// computegdppercapita_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#age"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/age#TOTAL") });
+		//
+		// List<Node[]> computegdppercapita_outputmembers = new
+		// ArrayList<Node[]>();
+		// computegdppercapita_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH") });
+		// computegdppercapita_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB") });
+		//
+		// String computegdppercapita_function = "(x1 / x2)";
+		//
+		// ReconciliationCorrespondence computegdppercapita_correspondence = new
+		// ReconciliationCorrespondence(
+		// "COMP_GDP_CAP", computegdppercapita_inputmembers1,
+		// computegdppercapita_inputmembers2,
+		// computegdppercapita_outputmembers, computegdppercapita_function);
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computegdppercapita_correspondence);
+		// }
 
 		// COMPUTE_YES
 		// ReconciliationCorrespondence computeyes_correspondence;
@@ -1240,10 +1256,12 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			Node hierarchyUniqueName, Node levelUniqueName) {
 		// If one is set, it should not be Measures, not.
 		// Watch out: no square brackets are needed.
-		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName.toString()
+		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName
+				.toString()
 				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))
-				|| (hierarchyUniqueName != null && hierarchyUniqueName.toString()
-						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))
+				|| (hierarchyUniqueName != null && hierarchyUniqueName
+						.toString().equals(
+								Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))
 				|| (levelUniqueName != null && levelUniqueName.toString()
 						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME));
 
@@ -1495,7 +1513,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		List<Node[]> result = new ArrayList<Node[]>();
 
 		// Before loading, I should check first, whether already loaded.
-		URL resource;
+		URL noninformationuri;
 
 		try {
 			if (restrictions.cubeNamePattern == null) {
@@ -1503,13 +1521,18 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				Olap4ldUtil._log
 						.config("If no cubeNamePattern is given, we cannot load a cube.");
 			} else {
-				resource = new URL(restrictions.cubeNamePattern.toString());
-				if (!isLoaded(resource)) {
+				noninformationuri = new URL(
+						restrictions.cubeNamePattern.toString());
+				URL informationuri = Olap4ldLinkedDataUtil
+						.askForLocation(noninformationuri);
+				if (!isLoaded(noninformationuri) || !isLoaded(informationuri)) {
 
 					// For now, we simply preload.
-					loadCube(restrictions.cubeNamePattern);
+					loadCube(noninformationuri);
 
 				}
+				setLoaded(noninformationuri);
+				setLoaded(informationuri);
 			}
 
 		} catch (MalformedURLException e) {
@@ -1533,16 +1556,15 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		return result;
 	}
 
-	private void runDirectedCrawlingAlgorithm(Node cubeNamePattern)
+	private void runDirectedCrawlingAlgorithm(URL noninformationuri)
 			throws OlapException {
 
 		try {
-			URL uri = new URL(cubeNamePattern.toString());
 
 			// If we have cube uri and location is not loaded, yet, we start
 			// collecting all information
 
-			loadInStore(uri);
+			loadInStore(noninformationuri);
 
 			// For everything else: Check whether really cube
 			RepositoryConnection con;
@@ -1550,7 +1572,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// qb:structure is more robust than a qb:DataSet.
 			String testquery = "PREFIX qb: <http://purl.org/linked-data/cube#> ASK { ?CUBE_NAME qb:structure ?dsd. FILTER (?CUBE_NAME = <"
-					+ uri + ">)}";
+					+ noninformationuri + ">)}";
 			BooleanQuery booleanQuery = con.prepareBooleanQuery(
 					QueryLanguage.SPARQL, testquery);
 			boolean isDataset = booleanQuery.evaluate();
@@ -1559,13 +1581,13 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			if (!isDataset) {
 				throw new OlapException(
 						"A cube should be a qb:DataSet and serve via qb:structure a qb:DataStructureDefinition, also this one "
-								+ uri + "!");
+								+ noninformationuri + "!");
 			} else {
 
 				// If loading ds, also load dsd. Ask for DSD URI and
 				// load
 				String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
-						+ uri + "> qb:structure ?dsd}";
+						+ noninformationuri + "> qb:structure ?dsd}";
 				List<Node[]> dsd = sparql(query, true);
 				// There should be a dsd
 				// Note in spec:
@@ -1581,28 +1603,29 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				}
 
 				boolean first;
-				
+
 				// Not done. Takes too long.
-//				// If loading ds, also load seeAlso
-//				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?seeAlso WHERE {<"
-//						+ uri + "> rdfs:seeAlso ?seeAlso.}";
-//				List<Node[]> seeAlso = sparql(query, true);
-//
-//				first = true;
-//				for (Node[] nodes : seeAlso) {
-//					if (first) {
-//						first = false;
-//						continue;
-//					}
-//					if (nodes[0] instanceof Resource) {
-//						URL componenturi = new URL(nodes[0].toString());
-//						loadInStore(componenturi);
-//					}
-//				}
+				// // If loading ds, also load seeAlso
+				// query =
+				// "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?seeAlso WHERE {<"
+				// + uri + "> rdfs:seeAlso ?seeAlso.}";
+				// List<Node[]> seeAlso = sparql(query, true);
+				//
+				// first = true;
+				// for (Node[] nodes : seeAlso) {
+				// if (first) {
+				// first = false;
+				// continue;
+				// }
+				// if (nodes[0] instanceof Resource) {
+				// URL componenturi = new URL(nodes[0].toString());
+				// loadInStore(componenturi);
+				// }
+				// }
 
 				// If loading ds, also load components
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?comp WHERE {<"
-						+ uri
+						+ noninformationuri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp.}";
 				List<Node[]> components = sparql(query, true);
 				// There should be a dsd
@@ -1622,7 +1645,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 				// If loading ds, also load measures
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?measure WHERE {<"
-						+ uri
+						+ noninformationuri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:measure ?measure}";
 				List<Node[]> measures = sparql(query, true);
 				// There should be a dsd
@@ -1643,7 +1666,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 				// If loading ds, also load dimensions
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dimension WHERE {<"
-						+ uri
+						+ noninformationuri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension}";
 				List<Node[]> dimensions = sparql(query, true);
 				// There should be a dsd
@@ -1669,28 +1692,30 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 				// Extra: Not done either.
 				// If loading dimensions, also load rdfs:subPropertyOf
-//				query = "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?superdimension WHERE {<"
-//						+ uri
-//						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:subPropertyOf ?superdimension. }";
-//				List<Node[]> superdimensions = sparql(query, true);
-//
-//				first = true;
-//				for (Node[] nodes : superdimensions) {
-//					if (first) {
-//						first = false;
-//						continue;
-//					}
-//
-//					if (nodes[0] instanceof Resource) {
-//						URL dimensionuri = new URL(nodes[0].toString());
-//
-//						loadInStore(dimensionuri);
-//					}
-//				}
+				// query =
+				// "PREFIX qb: <http://purl.org/linked-data/cube#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> SELECT ?superdimension WHERE {<"
+				// + uri
+				// +
+				// "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension rdfs:subPropertyOf ?superdimension. }";
+				// List<Node[]> superdimensions = sparql(query, true);
+				//
+				// first = true;
+				// for (Node[] nodes : superdimensions) {
+				// if (first) {
+				// first = false;
+				// continue;
+				// }
+				//
+				// if (nodes[0] instanceof Resource) {
+				// URL dimensionuri = new URL(nodes[0].toString());
+				//
+				// loadInStore(dimensionuri);
+				// }
+				// }
 
 				// If loading ds, also load codelists
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?codelist WHERE {<"
-						+ uri
+						+ noninformationuri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension qb:codeList ?codelist}";
 				List<Node[]> codelists = sparql(query, true);
 				// There should be a dsd

@@ -15,6 +15,37 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
+==2014-09-21==
+* Fixed loading problem:
+
+The problem was still the loading of resources and setting of setLoaded. 
+
+How do want to have it?
+
+We have a URI of a cube that we want to load.
+
+We check whether already loaded: 1) Is URI loaded? OR 2) Is Location loaded?
+
+If yes, we set: setLoaded(URI), setLoaded(Location).
+
+If not, we load: loadCube()
+
+For every resource: 1) Is URI loaded? OR 2) Is Location loaded?
+
+If yes, we set: setLoaded(URI), setLoaded(Location).
+
+If not, we load: loadInStore(URI)
+
+After loading, we set it loaded: setLoaded(URI), setLoaded(Location).
+
+After we loaded the cube, we set it loaded: setLoaded(URI), setLoaded(Location).
+
+Note: We assume that if a dataset is loaded, then the full directed crawling was executed. We make that sure by not simply crawling other datasets in the direct crawl.
+
+Also, had to change from URL to Sring (!)
+
+loadedMap.put(resource.toString().hashCode(), true);
+
 ==2014-09-20==
 * Now, BaseCube-Derived returns all measures, but not if asked for data.
 * Now, if we run BaseCube directly after Drill-Across, we would also
