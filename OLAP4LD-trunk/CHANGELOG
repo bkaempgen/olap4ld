@@ -31,6 +31,16 @@ Better in our case of Convert-Cube:
 
 * It works, but we have the problem that: If we ask a query for GDP per Capita, we will not... wait, yes, if we first do a projection. 
 
+* We may have introduced some error with counting, but the test
+cases for Convert-Cube and Example generally work: 
+
+Status:
+
+Example_QB_Datasets_QueryTest.java - *basic MDX examples* - yes
+Example_QB_Datasets_DrillAcross_QueryTest.java *basic MDX drill-across examples* - yes 
+Example_QB_Datasets_ConvertCube_QueryTest.java *MDX with correspondences examples* - not implemented, yet
+LDCX_Performance_Evaluation_ConvertCubeTest.java *Manual Logical Query Plan with Convert-Cube examples* - yes
+
 
 ==2014-09-19==
 * I need to make all test cases work, again.
