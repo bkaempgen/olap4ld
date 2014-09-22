@@ -27,15 +27,12 @@ import junit.framework.TestCase;
 
 import org.olap4j.CellSetFormatterTest.Format;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
-import org.olap4j.driver.olap4ld.linkeddata.EmbeddedSesameEngine;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.olap4j.test.TestContext;
-import org.semanticweb.yars.nx.Node;
-import org.semanticweb.yars.nx.Resource;
 
 /**
- * Performance evaluation for Drill-Across paper. 
+ * Performance evaluation for Drill-Across paper.
  * 
  * GDP Growth vs. Employment Fear as in ISEM paper.
  * 
@@ -50,9 +47,9 @@ public class LDCX_Performance_Evaluation_DrillAcrossTest extends TestCase {
 	private OlapConnection olapConnection;
 	private OlapStatement stmt;
 
-	public LDCX_Performance_Evaluation_DrillAcrossTest() throws SQLException {	
-				
-			Olap4ldUtil.prepareLogging();
+	public LDCX_Performance_Evaluation_DrillAcrossTest() throws SQLException {
+
+		Olap4ldUtil.prepareLogging();
 	}
 
 	protected void setUp() throws SQLException {
@@ -85,110 +82,98 @@ public class LDCX_Performance_Evaluation_DrillAcrossTest extends TestCase {
 			connection = null;
 		}
 	}
-	
+
+	/**
+	 * Make sure, that same-as between dimensions and members exist so that owl reasoning is done.
+	 */
 	public void executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany() {
 
-//		// for now, we simply assume equivalence statements given
-//		EmbeddedSesameEngine.equivs.add(new Node[] {
-//				new Resource(
-//						"http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#geo"),
-//				new Resource(
-//						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-//
-//		// Hierarchy gesis-geo:list = estatwrap:geo
-//		EmbeddedSesameEngine.equivs.add(new Node[] {
-//				new Resource(
-//						"http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#list"),
-//				new Resource(
-//						"http://ontologycentral.com/2009/01/eurostat/ns#geo") });
-//
-//		// Could also for the olap
-//		EmbeddedSesameEngine.equivs.add(new Node[] {
-//		new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-//		new Resource("http://estatwrap.ontologycentral.com/dic/geo#DE") });
-//
-//		EmbeddedSesameEngine.equivs.add(new Node[] {
-//				new Resource("http://lod.gesis.org/lodpilot/ALLBUS/geo.rdf#00"),
-//				new Resource("http://olap4ld.googlecode.com/dic/geo#DE") });
-		
-		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23dsAGGFUNCAVG]} ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
+		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]} ON COLUMNS, NON EMPTY CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
 
-		// Should be correct: obsValue (?), gesis:sum (461.33), estatwrap:sum (116) Dice: Germany, 2008
-		assertContains("|  |      |  |  00      |      461.33 |         1.1 |",
-				result);
+		// Should be correct: obsValue (?), gesis:sum (461.33 or single: 1144 160 80), estatwrap:sum
+		// (116 or single 1.1) Dice: Germany, 2008
+		assertContains("|  | 2008 |  |  00 | 1144 160 80 / 1.1 |", result);
 	}
-	
+
 	/**
 	 * 
-
-	% First four experiments:
-	% Employment rate: http://estatwrap.ontologycentral.com/id/t2020_10 (1992-2013) - replaced by
-	% Energy dependence: http://estatwrap.ontologycentral.com/id/tsdcc310 (2001-2012)
-	% GDP on RnD: http://estatwrap.ontologycentral.com/id/t2020_20 (from 1990 to 2012) - replaced by
-	% Energy productivity: http://estatwrap.ontologycentral.com/id/t2020_rd310 (2000-2012)
-	% Energy intensity: http://estatwrap.ontologycentral.com/id/tsdec360 (2001-2012)
-	% Greenhouse gas emissions, base\ldots: http://estatwrap.ontologycentral.com/id/t2020_30 (1990-2011) - replaced by
-	% Greenhouse gas emissions per capita: http://estatwrap.ontologycentral.com/id/t2020_rd300 (2000-2011)
-	% Next four experiments:
-	%  
-	% Share of renewable energy: http://estatwrap.ontologycentral.com/id/t2020_31 (2004-2012)
-	% People at risk of poverty or social exclusion: http://estatwrap.ontologycentral.com/id/t2020_50 (2004-2012)
-	People living in households with very low work intensity: http://estatwrap.ontologycentral.com/id/t2020_51 (2004 - 2012)
-	People at risk of poverty after social transfers: http://estatwrap.ontologycentral.com/id/t2020_52 (2003-2012)
-	Severely materially deprived people: http://estatwrap.ontologycentral.com/id/t2020_53 (2003-2012)
+	 % First four experiments: % Employment rate:
+	 * http://estatwrap.ontologycentral.com/id/t2020_10 (1992-2013) - replaced
+	 * by % Energy dependence: http://estatwrap.ontologycentral.com/id/tsdcc310
+	 * (2001-2012) % GDP on RnD:
+	 * http://estatwrap.ontologycentral.com/id/t2020_20 (from 1990 to 2012) -
+	 * replaced by % Energy productivity:
+	 * http://estatwrap.ontologycentral.com/id/t2020_rd310 (2000-2012) % Energy
+	 * intensity: http://estatwrap.ontologycentral.com/id/tsdec360 (2001-2012) %
+	 * Greenhouse gas emissions, base\ldots:
+	 * http://estatwrap.ontologycentral.com/id/t2020_30 (1990-2011) - replaced
+	 * by % Greenhouse gas emissions per capita:
+	 * http://estatwrap.ontologycentral.com/id/t2020_rd300 (2000-2011) % Next
+	 * four experiments: % % Share of renewable energy:
+	 * http://estatwrap.ontologycentral.com/id/t2020_31 (2004-2012) % People at
+	 * risk of poverty or social exclusion:
+	 * http://estatwrap.ontologycentral.com/id/t2020_50 (2004-2012) People
+	 * living in households with very low work intensity:
+	 * http://estatwrap.ontologycentral.com/id/t2020_51 (2004 - 2012) People at
+	 * risk of poverty after social transfers:
+	 * http://estatwrap.ontologycentral.com/id/t2020_52 (2003-2012) Severely
+	 * materially deprived people:
+	 * http://estatwrap.ontologycentral.com/id/t2020_53 (2003-2012)
 	 * 
 	 * 
 	 */
 	public void executeDrillAcrossEu2020indicators4() {
 
 		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testEU2020-4 */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdcc310XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd310XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd300XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec360XXX23dsAGGFUNCAVG]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdcc310XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd310XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd300XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec360XXX23ds]");
-		
-		assertContains("|  | 2008 |      260.64 |       10.62 |        5.86 |       43.83 |",
+
+		assertContains(
+				"|  | 2008 |      260.64 |       10.62 |        5.86 |       43.83 |",
 				result);
 	}
-	
+
 	public void executeDrillAcrossEu2020indicators8() {
 
 		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testEU2020-8 */ NON EMPTY {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdcc310XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd310XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd300XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec360XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_31XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_50XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_51XXX23dsAGGFUNCAVG], [httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValuehttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_52XXX23dsAGGFUNCAVG]} ON COLUMNS, NON EMPTY {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdcc310XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd310XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_rd300XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftsdec360XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_31XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_50XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_51XXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ft2020_52XXX23ds]");
-		
-		assertContains("|  | 2006 |     2169.55 |     6676.42 |       13.45 |        5.49 |       41.48 |       10.99 |      277.35 |     4218.92 |",
+
+		assertContains(
+				"|  | 2006 |     2169.55 |     6676.42 |       13.45 |        5.49 |       41.48 |       10.99 |      277.35 |     4218.92 |",
 				result);
 	}
-	
+
 	public void test1() {
-		
-		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
-		
+
+		executeDrillAcrossEu2020indicators8();
+
 	}
-	
+
 	public void test2() {
-		
-		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
-		
+
+		executeDrillAcrossEu2020indicators8();
+
 	}
-	
+
 	public void test3() {
-		
-		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
-		
+
+		executeDrillAcrossEu2020indicators8();
+
 	}
-	
+
 	public void test4() {
-		
-		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
-		
+
+		executeDrillAcrossEu2020indicators8();
+
 	}
-	
+
 	public void test5() {
-		
-		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
-		
+
+		executeDrillAcrossEu2020indicators8();
+
 	}
-	
+
 	public void test6() {
-		
-		executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany();
-		
+
+		executeDrillAcrossEu2020indicators8();
+
 	}
 
 	private void assertContains(String seek, String s) {
