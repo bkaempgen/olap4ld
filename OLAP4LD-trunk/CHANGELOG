@@ -17,6 +17,8 @@ We now would like to extend this.
 
 ==2014-09-22==
 * Refined test cases for EKAW paper, see http://linked-data-cubes.org/index.php/Global_Cube_Evaluation_EKAW14
+* tagged version
+* data added to ekaw version
 
 ==2014-09-21==
 * Fixed loading problem:
