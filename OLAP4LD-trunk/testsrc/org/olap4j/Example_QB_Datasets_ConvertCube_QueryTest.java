@@ -40,9 +40,11 @@ import org.olap4j.layout.TraditionalCellSetFormatter;
 import org.olap4j.test.TestContext;
 
 /**
- * Unit test for OLAP4LD Queries on external example data and Drill-Across and Convert-Cube and Merge-Cubes operator.
+ * Unit test for OLAP4LD Queries on external example data and Drill-Across and
+ * Convert-Cube and Merge-Cubes operator.
  * 
- * To also help developers with Convert-Cube and Merge-Cubes queries, we provide the same as Example_QB_Datasets_QueryTest for those queries.
+ * To also help developers with Convert-Cube and Merge-Cubes queries, we provide
+ * the same as Example_QB_Datasets_QueryTest for those queries.
  * 
  * 
  * Remember to set test.properties:
@@ -62,13 +64,13 @@ public class Example_QB_Datasets_ConvertCube_QueryTest extends TestCase {
 	private OlapConnection olapConnection;
 	private OlapStatement stmt;
 
-	public Example_QB_Datasets_ConvertCube_QueryTest() throws SQLException {	
-		
-			Olap4ldUtil.prepareLogging();
-			
-			// Logging
-			// For debugging purposes
-			Olap4ldUtil._log.setLevel(Level.CONFIG);
+	public Example_QB_Datasets_ConvertCube_QueryTest() throws SQLException {
+
+		Olap4ldUtil.prepareLogging();
+
+		// Logging
+		// For debugging purposes
+		Olap4ldUtil._log.setLevel(Level.CONFIG);
 	}
 
 	protected void setUp() throws SQLException {
@@ -88,7 +90,7 @@ public class Example_QB_Datasets_ConvertCube_QueryTest extends TestCase {
 			System.out.println("Validation failed: " + e);
 			return;
 		}
-	
+
 	}
 
 	protected void tearDown() throws Exception {
@@ -103,89 +105,96 @@ public class Example_QB_Datasets_ConvertCube_QueryTest extends TestCase {
 		}
 	}
 
-	
 	// Variations of the UNEMPLOY query
-	
+
 	/**
-	 * Specific measures from two datasets. 
+	 * Specific measures from two datasets.
 	 * 
-	 * Here we see that we get three values per cell because due to reasoning we have another
-	 * dimension which we should add to column as well.
+	 * Here we see that we get three values per cell because due to reasoning we
+	 * have another dimension which we should add to column as well.
 	 * 
 	 */
 	public void executeDrillAcrossUnemploymentFearAndRealGDPGrowthRateGermany_AutomaticConvert() {
-		
-		// Maybe ask for specific measure? 
-		// Add another dataset? XXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Fnama_aux_gphXXX23ds
+
+		// Maybe ask for specific measure?
+		// Add another dataset?
+		// XXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Fnama_aux_gphXXX23ds
 		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]} ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FZA4570v590YYYrdfXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Ftec00115XXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
 
-		// With both COMP_YES and COMP_PERCNOS, 		
-		// Should be correct: GDP Growth 1.1, Answers to survey, COMP_YES, Unemployment Fear Metric from COMP_PERCNOS: 0.826; Dice: Germany, 2008
+		// With both COMP_YES and COMP_PERCNOS,
+		// Should be correct: GDP Growth 1.1, Answers to survey, COMP_YES,
+		// Unemployment Fear Metric from COMP_PERCNOS: 0.826; Dice: Germany,
+		// 2008
 		// Result as manually computed: Unemployment Fear Metric 0.826
-		assertContains("|  |      |  |  00      | 1144 160 80,1.1,240 240 240,0.826589595375722543352601 0.826589595375722543352601 0.826589595375722543352601 |",
+		assertContains(
+				"|  |      |  |  00      | 1144 160 80,1.1,240 240 240,0.826589595375722543352601 0.826589595375722543352601 0.826589595375722543352601 |",
 				result);
-		
+
 		// Result as in ISEM paper: 0.9275 Dice: Germany, 1980
 		assertContains(
 				"|  |      |  |  00      |         1126 42 46,88 88 88,0.927512355848434925864909 0.927512355848434925864909 0.927512355848434925864909 |",
-				result); 
+				result);
 	}
-	
+
 	public void executeDrillAcrossGdpCap_AutomaticConvert() {
-		
-		// Maybe ask for specific measure? 
-		// Add another dataset?  
+
+		// Maybe ask for specific measure?
+		// Add another dataset?
 		String result = executeStatement("SELECT /* $session: ldcx_performance_evaluation_testGdpEmployment */ CrossJoin({[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValue]}, Members([httpXXX3AXXX2FXXX2FontologycentralYYYcomXXX2F2009XXX2F01XXX2FeurostatXXX2FnsXXX23indic_na])) ON COLUMNS, CrossJoin(Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate]),Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])) ON ROWS FROM [httpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Fnama_aux_gphXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Fnama_gdp_cXXX23dsXXX2ChttpXXX3AXXX2FXXX2FestatwrapYYYontologycentralYYYcomXXX2FidXXX2Fdemo_pjanXXX23ds] WHERE {[httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FgeoYYYrdfXXX2300]}");
 
-		// Should be correct: |  |      |  |  00    |  28100 104.1 4.1 27300 |  28000 28000 103.8 3.8 |
+		// Should be correct: | | | | 00 | 28100 104.1 4.1 27300 | 28000 28000
+		// 103.8 3.8 |
 		// We distinguish different NGDPH | RGDPH (with different units)
-		
-		assertContains("|  |      |  |  00      | 461.333333333333333333333333,1.1,140.3 |",
+
+		assertContains(
+				"|  |      |  |  00      | 461.333333333333333333333333,1.1,140.3 |",
 				result);
-	}	
+	}
 
 	private void assertContains(String seek, String s) {
 		if (s.indexOf(seek) < 0) {
 			fail("expected to find '" + seek + "' in '" + s + "'");
 		}
 	}
-	
+
 	/**
 	 * 
 	 * The ordering of Merge-Cubes is relevant but every Merge-Cube may only be
-	 * used once in a query plan.
+	 * used once in a query plan (no cycles).
 	 * 
-	 * @param depth
+	 * Implementation for GlobalCube paper: noc(dp,ds,mc)
+	 * 
+	 * @param dp
 	 *            Depth of query plan
-	 * @param d
+	 * @param ds
 	 *            Number of datasets (converted or not converted)
 	 * @param mc
 	 *            Number of merge-cubes
 	 * @return Number of query plans
 	 */
-	public static int numberForMergeChildren(int depth, int d, int mc) {
+	public static int numberForMergeChildren(int dp, int ds, int mc) {
 
-		if (depth == 0) {
+		if (dp == 0) {
 
-			return d;
+			return ds;
 		}
 
 		int no = 0;
 
 		// Both same depth
-		no += mc * numberForMergeChildren(depth - 1, d, mc - 1)
-				* numberForMergeChildren(depth - 1, d, mc - 1);
+		no += mc * mc * numberForMergeChildren(dp - 1, ds, mc - 1)
+				* numberForMergeChildren(dp - 1, ds, mc - 1);
 
 		// Left
-		for (int i = 0; i < depth - 1; i++) {
-			no += mc * numberForMergeChildren(depth - 1, d, mc - 1)
-					* numberForMergeChildren(i, d, mc - 1);
+		for (int i = 0; i < dp - 1; i++) {
+			no += mc * mc * numberForMergeChildren(dp - 1, ds, mc - 1)
+					* numberForMergeChildren(i, ds, mc - 1);
 		}
 
 		// Right
-		for (int i = 0; i < depth - 1; i++) {
-			no += mc * numberForMergeChildren(i, d, mc - 1)
-					* numberForMergeChildren(depth - 1, d, mc - 1);
+		for (int i = 0; i < dp - 1; i++) {
+			no += mc * mc * numberForMergeChildren(dp - 1, ds, mc - 1)
+					* numberForMergeChildren(i, ds, mc - 1);
 		}
 		return no;
 	}
@@ -193,6 +202,8 @@ public class Example_QB_Datasets_ConvertCube_QueryTest extends TestCase {
 	/**
 	 * The ordering of Merge-Cubes is relevant but every Merge-Cube may only be
 	 * used once in a query plan.
+	 * 
+	 * XXX: Is not up to date to numberForMergeChildren anymore.
 	 * 
 	 * @param depth
 	 *            Depth of query plan
@@ -279,101 +290,146 @@ public class Example_QB_Datasets_ConvertCube_QueryTest extends TestCase {
 
 		return cc * numberForConvertChildren(depth - 1, d, cc - 1);
 	}
-	
+
 	/**
-	 * We are interested in whether we can estimate the upper bound of derived datasets.
+	 * We are interested in whether we can estimate the upper bound of derived
+	 * datasets.
 	 * 
 	 */
 	public void testExample_QB_Datasets_ConvertCube_QueryTestnumberForMergeChildren() {
-		
-		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(0, 3, 3));
-		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(1, 3, 3));
-		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(2, 3, 3));
-		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(3, 3, 3));
-		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(4, 3, 3));
-		
-		int no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(0, 3, 2);
+
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForMergeChildren(0, 3, 3));
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForMergeChildren(1, 3, 3));
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForMergeChildren(2, 3, 3));
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForMergeChildren(3, 3, 3));
+		System.out.println(Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForMergeChildren(4, 3, 3));
+
+		int no = Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForMergeChildren(0, 3, 3);
 		assertEquals(3, no);
-		
-		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(1, 3, 2);
-		assertEquals(18, no);
-		
-		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(2, 3, 2);
-		assertEquals(270, no);
-		
-		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(3, 3, 2);
+
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(
+				1, 3, 3);
+		assertEquals(81, no);
+
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(
+				2, 3, 3);
+		assertEquals(13608, no);
+
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(
+				3, 3, 3);
+		assertEquals(3003480, no);
+
+		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(
+				4, 3, 3);
 		assertEquals(0, no);
-		
+
 		// Before
-//		int no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(0, 3, 2);
-//		assertEquals(3, no);
-//		
-//		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(1, 3, 2);
-//		assertEquals(18, no);
-//		
-//		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(2, 3, 2);
-//		assertEquals(864, no);
-//		
-//		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(3, 3, 2);
-//		assertEquals(1565568, no);
+		// int no =
+		// Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(0,
+		// 3, 2);
+		// assertEquals(3, no);
+		//
+		// no =
+		// Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(1,
+		// 3, 2);
+		// assertEquals(18, no);
+		//
+		// no =
+		// Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(2,
+		// 3, 2);
+		// assertEquals(864, no);
+		//
+		// no =
+		// Example_QB_Datasets_ConvertCube_QueryTest.numberForMergeChildren(3,
+		// 3, 2);
+		// assertEquals(1565568, no);
 	}
-	
+
 	public void testExample_QB_Datasets_ConvertCube_QueryTestgenerateMergeLqpsForDepth() {
-		
-		List<ReconciliationCorrespondence> correspondences = EmbeddedSesameEngine.getReconciliationCorrespondences(true);
-		String[] datasets = {"http://estatwrap.ontologycentral.com/id/tec00115#ds", "http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds", "http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds"};
-		
-		List<LogicalOlapOp> lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(0, datasets, correspondences);
+
+		List<ReconciliationCorrespondence> correspondences = EmbeddedSesameEngine
+				.getReconciliationCorrespondences(true);
+		String[] datasets = {
+				"http://estatwrap.ontologycentral.com/id/tec00115#ds",
+				"http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds",
+				"http://estatwrap.ontologycentral.com/id/nama_aux_gph#ds" };
+
+		List<LogicalOlapOp> lqps = Example_QB_Datasets_ConvertCube_QueryTest
+				.generateMergeLqpsForDepth(0, datasets, correspondences);
 		assertEquals(3, lqps.size());
-		
-		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(1, datasets, correspondences);
+
+		lqps = Example_QB_Datasets_ConvertCube_QueryTest
+				.generateMergeLqpsForDepth(1, datasets, correspondences);
 		assertEquals(18, lqps.size());
-		
-		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(2, datasets, correspondences);
+
+		lqps = Example_QB_Datasets_ConvertCube_QueryTest
+				.generateMergeLqpsForDepth(2, datasets, correspondences);
 		assertEquals(270, lqps.size());
-		
-		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(3, datasets, correspondences);
+
+		lqps = Example_QB_Datasets_ConvertCube_QueryTest
+				.generateMergeLqpsForDepth(3, datasets, correspondences);
 		assertEquals(0, lqps.size());
-		
+
 		// Before
-//		List<LogicalOlapOp> lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(0, datasets, correspondences);
-//		assertEquals(3, lqps.size());
-//		
-//		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(1, datasets, correspondences);
-//		assertEquals(18, lqps.size());
-//		
-//		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(2, datasets, correspondences);
-//		assertEquals(864, lqps.size());
-//		
-//		lqps = Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(3, datasets, correspondences);
-//		assertEquals(1565568, lqps.size());
+		// List<LogicalOlapOp> lqps =
+		// Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(0,
+		// datasets, correspondences);
+		// assertEquals(3, lqps.size());
+		//
+		// lqps =
+		// Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(1,
+		// datasets, correspondences);
+		// assertEquals(18, lqps.size());
+		//
+		// lqps =
+		// Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(2,
+		// datasets, correspondences);
+		// assertEquals(864, lqps.size());
+		//
+		// lqps =
+		// Example_QB_Datasets_ConvertCube_QueryTest.generateMergeLqpsForDepth(3,
+		// datasets, correspondences);
+		// assertEquals(1565568, lqps.size());
 	}
-	
+
 	public void testExample_QB_Datasets_ConvertCube_QueryTestnumberForConvertChildren() {
-		
+
 		// Case for one
-		int no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(0, 3, 1);
+		int no = Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForConvertChildren(0, 3, 1);
 		assertEquals(3, no);
-		
-		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(1, 3, 1);
+
+		no = Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForConvertChildren(1, 3, 1);
 		assertEquals(3, no);
-		
-		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(2, 3, 1);
+
+		no = Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForConvertChildren(2, 3, 1);
 		assertEquals(0, no);
-		
+
 		// Case for two
-		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(0, 3, 2);
+		no = Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForConvertChildren(0, 3, 2);
 		assertEquals(3, no);
-	
-		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(1, 3, 2);
+
+		no = Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForConvertChildren(1, 3, 2);
 		assertEquals(6, no);
-		
-		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(2, 3, 2);
+
+		no = Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForConvertChildren(2, 3, 2);
 		assertEquals(6, no);
-		
-		no = Example_QB_Datasets_ConvertCube_QueryTest.numberForConvertChildren(3, 3, 2);
+
+		no = Example_QB_Datasets_ConvertCube_QueryTest
+				.numberForConvertChildren(3, 3, 2);
 		assertEquals(0, no);
-		
+
 	}
 
 	private String executeStatement(String mdxString) {
