@@ -1,4 +1,12 @@
-==XXX Design experiments==
+This is the changelog of OLAP4LD.
+
+==2015-05-27==
+* Made it work with Java 8 (only had to add some empty inherited methods)
+* Started refining the test cases (had to remove rounding since there were math problems at: CellSet.
+
+==2014-10-19==
+* Refined test cases for EKAW paper for estimating size of Global Cube, see http://linked-data-cubes.org/index.php/Global_Cube_Evaluation_EKAW14#Program_for_computing_the_number_of_derived_data_cubes_in_case_conversion_correspondences_are_seen_as_merging_correspondences_and_no_cycles_.28repeated_application_of_correspondences.29_are_allowed
+
 In ISEM paper, we compare: Percentage of Nos with Real GDP growth rate.
 
 Since we cannot compute Percentage of Nos, we compare:
@@ -15,8 +23,6 @@ In ISEM paper, we had with respect to size of datasets:
 
 We now would like to extend this.
 
-==2014-10-19==
-* Refined test cases for EKAW paper for estimating size of Global Cube, see http://linked-data-cubes.org/index.php/Global_Cube_Evaluation_EKAW14#Program_for_computing_the_number_of_derived_data_cubes_in_case_conversion_correspondences_are_seen_as_merging_correspondences_and_no_cycles_.28repeated_application_of_correspondences.29_are_allowed
 
 ==2014-09-22==
 * Refined test cases for EKAW paper, see http://linked-data-cubes.org/index.php/Global_Cube_Evaluation_EKAW14

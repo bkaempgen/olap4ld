@@ -10,6 +10,7 @@ package org.olap4j.driver.olap4ld;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.io.Reader;
 import java.io.InputStream;
 
@@ -374,6 +375,20 @@ class FactoryJdbc4Impl implements Factory {
         {
             throw new UnsupportedOperationException();
         }
+
+		@Override
+		public <T> T getObject(int columnIndex, Class<T> type)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public <T> T getObject(String columnLabel, Class<T> type)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
 
     private static class XmlaOlap4jConnectionJdbc4
@@ -462,6 +477,25 @@ class FactoryJdbc4Impl implements Factory {
         {
             throw new UnsupportedOperationException();
         }
+
+		@Override
+		public void abort(Executor executor) throws SQLException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public int getNetworkTimeout() throws SQLException {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public void setNetworkTimeout(Executor executor, int milliseconds)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     private static class XmlaOlap4jCellSetJdbc4 extends Olap4ldCellSet {
@@ -758,6 +792,20 @@ class FactoryJdbc4Impl implements Factory {
         {
             throw new UnsupportedOperationException();
         }
+
+		@Override
+		public <T> T getObject(int columnIndex, Class<T> type)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public <T> T getObject(String columnLabel, Class<T> type)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
 
     private static class XmlaOlap4jPreparedStatementJdbc4
@@ -961,6 +1009,19 @@ class FactoryJdbc4Impl implements Factory {
         {
             throw new UnsupportedOperationException();
         }
+
+		@Override
+		public boolean generatedKeyAlwaysReturned() throws SQLException {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public ResultSet getPseudoColumns(String arg0, String arg1,
+				String arg2, String arg3) throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
 }
 

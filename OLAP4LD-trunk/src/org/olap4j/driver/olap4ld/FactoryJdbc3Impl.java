@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Executor;
 
 /**
  * Implementation of {@link Factory} for JDBC 3.0.
@@ -538,6 +539,20 @@ class FactoryJdbc3Impl implements Factory {
 			// TODO Auto-generated method stub
 			
 		}
+
+		@Override
+		public <T> T getObject(int columnIndex, Class<T> type)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public <T> T getObject(String columnLabel, Class<T> type)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
 
     private static class EmptyResultSetJdbc3 extends EmptyResultSet {
@@ -872,6 +887,20 @@ class FactoryJdbc3Impl implements Factory {
 			// TODO Auto-generated method stub
 			
 		}
+
+		@Override
+		public <T> T getObject(int columnIndex, Class<T> type)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public <T> T getObject(String columnLabel, Class<T> type)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
 
     private class XmlaOlap4jConnectionJdbc3 extends Olap4ldConnection {
@@ -954,6 +983,25 @@ class FactoryJdbc3Impl implements Factory {
 			// TODO Auto-generated method stub
 			
 		}
+
+		@Override
+		public void abort(Executor executor) throws SQLException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public int getNetworkTimeout() throws SQLException {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public void setNetworkTimeout(Executor executor, int milliseconds)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     private static class XmlaOlap4jDatabaseMetaDataJdbc3
@@ -1010,6 +1058,20 @@ class FactoryJdbc3Impl implements Factory {
 				throws SQLException {
 			// TODO Auto-generated method stub
 			return false;
+		}
+
+		@Override
+		public boolean generatedKeyAlwaysReturned() throws SQLException {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public ResultSet getPseudoColumns(String catalog, String schemaPattern,
+				String tableNamePattern, String columnNamePattern)
+				throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
 		}
     }
 }

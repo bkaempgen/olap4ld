@@ -501,11 +501,10 @@ abstract class Olap4ldCellSet implements CellSet {
 			// startops.add(logicalOlapOp);
 			// }
 			// }
-			
-			
+
 			/*
-			 * Here, we should be loading the correspondences and creating all possible
-			 * derived datasets using XSB prolog.
+			 * Here, we should be loading the correspondences and creating all
+			 * possible derived datasets using XSB prolog.
 			 */
 
 			Olap4ldUtil._log.info("Finished creating " + startops.size()
@@ -1285,11 +1284,19 @@ abstract class Olap4ldCellSet implements CellSet {
 
 				if (Pattern.matches(fpRegex, nodevalue)) {
 					Double doubleValue = Double.valueOf(nodevalue); // Will not
-																	// throw
+					// throw
 					// NumberFormatException
-					DecimalFormat twoDForm = new DecimalFormat("#.##");
-					Double value = Double.valueOf(twoDForm.format(doubleValue));
-					nodevalue = value.toString();
+
+					try {
+						DecimalFormat twoDForm = new DecimalFormat("#.##");
+						doubleValue = Double.valueOf(twoDForm
+								.format(doubleValue));
+
+					} catch (NumberFormatException e1) {
+
+					}
+
+					nodevalue = doubleValue.toString();
 				}
 
 				valueArray[e - slicesRollupsSize] = nodevalue;

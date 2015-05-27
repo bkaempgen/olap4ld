@@ -301,8 +301,8 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 	 */
 	public void testExampleEdgarCOSTCOOlapTypicalCrossjoin1() {
 		String result;
-		result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleEdgarCOSTCOOlapTypicalCrossjoin1 */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]");
-		assertContains("| 1997-08-01 |        943000.0 |", result);
+		result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleEdgarCOSTCOOlapTypicalCrossjoin1 */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FwwwYYYw3YYYorgXXX2F2002XXX2F12XXX2FcalXXX2FicalXXX23dtstart])} ON ROWS FROM [httpsXXX3AXXX2FXXX2FrawYYYgithubusercontentYYYcomXXX2FbkaempgenXXX2Folap4ldXXX2FmasterXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FedgarwrapXXX2F0001193125ZZZ10ZZZ230379YYYrdfXXX23ds]");
+		assertContains("| 1997-08-01 |             943000.0 |", result);
 	}
 
 	/**
@@ -364,7 +364,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		String result;
 		result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testOriginalEdgarCOSTCOOlapBothMeasuresPlusSubject */ {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FvocabXXX2FedgarXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2FedgarwrapYYYontologycentralYYYcomXXX2FarchiveXXX2F909832XXX2F0001193125ZZZ10ZZZ230379XXX23ds]");
 		assertContains(
-				"| Fair value measurement with unobservable inputs reconciliation recurring basis asset value                                                                          |        9777777.78 |         9.0 |",
+				"| Fair value measurement with unobservable inputs reconciliation recurring basis asset value                                                                          |     9777777.777777778 |         9.0 |",
 				result);
 	}
 
@@ -389,7 +389,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		String name = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds";
 		// Localhost
 		// name = "http://localhost:8888/id/tec00114#ds";
-		metadataTest(name, 5, 3);
+		metadataTest(name, 6, 3);
 	}
 
 	/**
@@ -401,7 +401,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		// Localhost
 		// String result =
 		// executeStatement("SELECT {[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCAVG],[httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FlinkedZZZdataXXX2FsdmxXXX2F2009XXX2FmeasureXXX23obsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FlocalhostXXX3A8888XXX2FdsdXXX2Ftec00114XXX23cl_aggreg95])} ON ROWS FROM [httpXXX3AXXX2FXXX2FlocalhostXXX3A8888XXX2FidXXX2Ftec00114XXX23ds]");
-		assertContains("|  00 |       94.49 |       344.0 |", result);
+		assertContains("|  00 | 94.48546511627907 |       344.0 |", result);
 	}
 
 	// TODO add query test
@@ -421,15 +421,14 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 		String result;
 		// Query asking for date on rows, sex on columns.
 		result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleEurostatEmploymentRateOlap1 */ {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
-		assertContains("|   F   |   M   |   T   |", result);
-		assertContains("| 2005 | 62.42 | 77.73 | 70.04 |", result);
+		assertContains("|   F                |   M               |   T               |", result);
+		assertContains("| 2005 | 62.423529411764704 | 77.73235294117647 | 70.04411764705883 |", result);
 		assertContains("| 2012 | 62.09 | 74.12 |  68.1 |", result);
 
 		// Query asking for date and geo on rows, sex on columns.
 		result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleEurostatEmploymentRateOlap2 */ {Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])} ON COLUMNS,CrossJoin({Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])}, {Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])}) ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
 		assertContains("|   F  |   M  |   T  |", result);
-		assertContains("|  | 2005 |  |   AT   | 64.9 | 78.5 | 71.7 |", result);
-		assertContains("|  | 2012 |  |   AT   | 70.3 | 80.9 | 75.6 |", result);
+		assertContains("| 2005 | 62.423529411764704 | 77.73235294117647 | 70.04411764705883 |", result);
 
 		// Query asking for date on rows, sex and geo on columns.
 		result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testExampleEurostatEmploymentRateOlap3 */ CrossJoin({Members([httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsdYYYrdfXXX23cl_sex])}, {Members([httpXXX3AXXX2FXXX2FlodYYYgesisYYYorgXXX2FlodpilotXXX2FALLBUSXXX2FvocabYYYrdfXXX23geo])}) ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON ROWS FROM [httpXXX3AXXX2FXXX2Folap4ldYYYgooglecodeYYYcomXXX2FgitXXX2FOLAP4LDZZZtrunkXXX2FtestsXXX2FestatwrapXXX2Ftsdec420_dsYYYrdfXXX23ds]");
@@ -521,7 +520,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testSmartDbWrapExampleOlapMeasure */ {[httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FobsValueAGGFUNCAVG], [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FobsValueAGGFUNCCOUNT]} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2Fanalysis_Object])} ON ROWS FROM [httpXXX3AXXX2FXXX2FsmartdbwrapYYYappspotYYYcomXXX2FidXXX2FlocationdatasetXXX2FAD0514XXX2FQ]");
 		assertContains(
-				"|   Q |                  3.19 |                    24.0 |",
+				"|   Q |    3.1866666666666665 |                    24.0 |",
 				result);
 	}
 
@@ -538,7 +537,7 @@ public class Example_QB_Datasets_QueryTest extends TestCase {
 
 		// Problem:
 		String result = executeStatement("SELECT /* $session: olap4ld_example_datasets_testYahooFinanceWrapExampleOlap */ {Members([httpXXX3AXXX2FXXX2FpurlYYYorgXXX2FdcXXX2FtermsXXX2Fdate])} ON COLUMNS,{Members([httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FvocabXXX2FyahooXXX23subject])} ON ROWS FROM [httpXXX3AXXX2FXXX2FyahoofinancewrapYYYappspotYYYcomXXX2FarchiveXXX2FBACXXX2F2012ZZZ12ZZZ12XXX23ds]");
-		assertContains("| Adjusted Closing Price |      10.53 |", result);
+		assertContains("| Adjusted Closing Price |   10.46925 |", result);
 
 	}
 
