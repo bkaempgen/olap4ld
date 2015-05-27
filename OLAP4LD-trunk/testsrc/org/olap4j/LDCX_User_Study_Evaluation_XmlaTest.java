@@ -167,7 +167,7 @@ public class LDCX_User_Study_Evaluation_XmlaTest extends TestCase {
 	/**
 	 * What is the problem with the HCO3 climate data at location AD0514?
 	 * 
-	 * Apparently, we do not have a problem here, anymore.
+	 * Apparently, we do not have a problem here, anymore. Probably test disabled.
 	 */
 	public void test9() {
 		String cubename = uriToMdx("http://smartdbwrap.appspot.com/id/locationdataset/AD0514/HCO3");
