@@ -13,7 +13,12 @@ import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
 
-public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator {
+/**
+ * Aim should be to have this for all SPARQL engines (with possibly smaller modifications via if-else for dialects.
+ * @author kaempgen
+ *
+ */
+public class Olap2SparqlAlgorithmIterator implements PhysicalOlapIterator {
 
 	private List<Node[]> cubes = new ArrayList<Node[]>();
 	private List<Node[]> measures = new ArrayList<Node[]>();
@@ -29,7 +34,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	String groupByClause = " ";
 	String orderByClause = " ";
 
-	private EmbeddedSesameEngine engine;
+	private LinkedDataCubesEngine engine;
 	private String query;
 	private List<Node[]> result;
 	private Iterator<Node[]> outputiterator;
@@ -37,8 +42,8 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 	private ArrayList<Node[]> newmeasures;
 	private PhysicalOlapIterator inputiterator;
 
-	public Olap2SparqlAlgorithmSesameIterator(
-			PhysicalOlapIterator inputiterator, EmbeddedSesameEngine engine,
+	public Olap2SparqlAlgorithmIterator(
+			PhysicalOlapIterator inputiterator, LinkedDataCubesEngine engine,
 			List<Node[]> slicesrollups, List<Integer> levelheights,
 			List<Node[]> projections, List<List<Node[]>> membercombinations,
 			List<Node[]> hierarchysignature) {
@@ -1076,7 +1081,7 @@ public class Olap2SparqlAlgorithmSesameIterator implements PhysicalOlapIterator 
 			// We have to init also the input iterators.
 			this.inputiterator.init();
 			
-			this.result = engine.sparql(query, false);
+			this.result = engine.executeSparqlSelectQuery(query, false);
 
 			// Not done, anymore.
 			// After evaluation, we do "entity-consolidation"

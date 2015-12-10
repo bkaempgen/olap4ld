@@ -48,7 +48,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	// private String conversionfunction;
 	private ReconciliationCorrespondence conversioncorrespondence;
 
-	private EmbeddedSesameEngine engine;
+	private LinkedDataCubesEngine engine;
 	private String triples;
 	private String newdataset;
 	private String dataset1;
@@ -56,7 +56,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 	private DataFuProgram dataFuProgram;
 	private List<Node[]> results;
 
-	public ConvertSparqlDerivedDatasetIterator(EmbeddedSesameEngine engine,
+	public ConvertSparqlDerivedDatasetIterator(LinkedDataCubesEngine engine,
 			PhysicalOlapIterator inputiterator1,
 			PhysicalOlapIterator inputiterator2,
 			ReconciliationCorrespondence conversioncorrespondence) {
@@ -584,7 +584,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 		Olap4ldUtil._log.config("SPARQL SELECT query: " + observationquery);
 
-		this.results = this.engine.sparql(observationquery, false);
+		this.results = this.engine.executeSparqlSelectQuery(observationquery, false);
 	}
 
 	private void executeSPARQLConstructQuery() {
@@ -670,7 +670,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 
 		Olap4ldUtil._log.info("SPARQL CONSTRUCT query: " + constructquery);
 
-		this.engine.executeCONSTRUCTQuery(constructquery);
+		this.engine.executeSparqlConstructQuery(constructquery);
 	}
 
 	// Old
@@ -1555,7 +1555,7 @@ public class ConvertSparqlDerivedDatasetIterator implements
 		// FileOutputStream fos = new
 		// FileOutputStream("/home/benedikt/Workspaces/Git-Repositories/olap4ld/OLAP4LD-trunk/resources/result.srx");
 
-		this.outputiterator = this.engine.sparql(observationquery, false)
+		this.outputiterator = this.engine.executeSparqlSelectQuery(observationquery, false)
 				.iterator();
 	}
 
@@ -1643,8 +1643,12 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				inputiterator2.init();
 			}
 
+			// This is specific to EmbeddedSesameEngine.
+			
+			EmbeddedSesameEngine engine_embeddedsesame = (EmbeddedSesameEngine) this.engine;
+			
 			// Check if already existing. If so, do not create again
-			if (!this.engine.isLoaded(new URL(newdataset))) {
+			if (!engine_embeddedsesame.isLoaded(new URL(newdataset))) {
 
 				Olap4ldUtil._log
 						.info("Execute logical query plan: Create and load derived dataset.");
@@ -1653,11 +1657,11 @@ public class ConvertSparqlDerivedDatasetIterator implements
 				executeSPARQLConstructQuery();
 
 				// After loading, we need to do all the rest.
-				this.engine.runNormalizationAlgorithm();
+				engine_embeddedsesame.runNormalizationAlgorithm();
 				
 				//this.engine.runOWLReasoningAlgorithm();
 				
-				this.engine.setLoaded(new URL(newdataset));
+				engine_embeddedsesame.setLoaded(new URL(newdataset));
 
 				time = System.currentTimeMillis() - time;
 				

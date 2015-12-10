@@ -241,7 +241,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 	 *            (not used)
 	 * @return
 	 */
-	private List<Node[]> sparql(String query, boolean caching) {
+	private List<Node[]> executeSparqlSelectQuery(String query, boolean caching) {
 
 		Olap4ldUtil._log.config("SPARQL query: " + query);
 
@@ -424,7 +424,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 		// Log content
 		String query = "select * where {?s ?p ?o}";
 		Olap4ldUtil._log.config("Check loaded data: " + query);
-		sparql(query, false);
+		executeSparqlSelectQuery(query, false);
 	}
 
 	/**
@@ -555,7 +555,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> result = sparql(querytemplate, true);
+		List<Node[]> result = executeSparqlSelectQuery(querytemplate, true);
 
 		/*
 		 * Check on restrictions that the interface makes:
@@ -676,7 +676,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 				// load
 				String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
 						+ uri + "> qb:structure ?dsd}";
-				List<Node[]> dsd = sparql(query, true);
+				List<Node[]> dsd = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -703,7 +703,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?measure WHERE {<"
 						+ uri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:measure ?measure}";
-				List<Node[]> measures = sparql(query, true);
+				List<Node[]> measures = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -736,7 +736,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dimension WHERE {<"
 						+ uri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension}";
-				List<Node[]> dimensions = sparql(query, true);
+				List<Node[]> dimensions = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -769,7 +769,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?codelist WHERE {<"
 						+ uri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension qb:codeList ?codelist}";
-				List<Node[]> codelists = sparql(query, true);
+				List<Node[]> codelists = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -1175,7 +1175,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 			// Add all of result2 to result
 			boolean first = true;
 			for (Node[] nodes : myresult) {
@@ -1201,7 +1201,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
@@ -1261,7 +1261,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> result = sparql(querytemplate, true);
+		List<Node[]> result = executeSparqlSelectQuery(querytemplate, true);
 
 		// List<Node[]> result = applyRestrictions(measureUris, restrictions);
 		return result;
@@ -1309,7 +1309,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			boolean first = true;
 			for (Node[] nodes : myresult) {
@@ -1339,7 +1339,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
@@ -1380,7 +1380,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result3 = applyRestrictions(memberUris3,
 			// restrictions);
@@ -1440,7 +1440,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 			// Add all of result2 to result
 			boolean first = true;
 			for (Node[] nodes : myresult) {
@@ -1463,7 +1463,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			myresult = sparql(querytemplate, true);
+			myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// Add all of result2 to result
 			first = true;
@@ -1495,7 +1495,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
@@ -1527,7 +1527,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 					additionalFilters);
 
 			// Second, ask for the measures (which are also members)
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result3 = applyRestrictions(memberUris3,
 			// restrictions);
@@ -1705,7 +1705,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> memberUris2 = sparql(querytemplate, true);
+		List<Node[]> memberUris2 = executeSparqlSelectQuery(querytemplate, true);
 
 		return memberUris2;
 	}
@@ -1780,7 +1780,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> memberUris2 = sparql(querytemplate, true);
+		List<Node[]> memberUris2 = executeSparqlSelectQuery(querytemplate, true);
 
 		return memberUris2;
 	}
@@ -1856,7 +1856,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> memberUris = sparql(querytemplate, true);
+			List<Node[]> memberUris = executeSparqlSelectQuery(querytemplate, true);
 
 			return memberUris;
 
@@ -1924,7 +1924,7 @@ public class QcrumbEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> memberUris1 = sparql(querytemplate, true);
+		List<Node[]> memberUris1 = executeSparqlSelectQuery(querytemplate, true);
 
 		return memberUris1;
 

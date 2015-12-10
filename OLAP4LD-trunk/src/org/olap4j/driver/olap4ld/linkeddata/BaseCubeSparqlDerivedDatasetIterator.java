@@ -27,11 +27,11 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 	private List<Node[]> levels;
 	private List<Node[]> members;
 
-	private EmbeddedSesameEngine engine;
+	private LinkedDataCubesEngine engine;
 	private Iterator<Node[]> outputiterator;
 	private String query;
 
-	public BaseCubeSparqlDerivedDatasetIterator(EmbeddedSesameEngine engine,
+	public BaseCubeSparqlDerivedDatasetIterator(LinkedDataCubesEngine engine,
 			String dataseturi) {
 
 		this.engine = engine;
@@ -219,7 +219,7 @@ public class BaseCubeSparqlDerivedDatasetIterator implements
 
 		List<Node[]> myBindings = new ArrayList<Node[]>();
 
-		myBindings = engine.sparql(query, false);
+		myBindings = engine.executeSparqlSelectQuery(query, false);
 
 		return myBindings;
 	}

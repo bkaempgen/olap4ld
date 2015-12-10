@@ -28,30 +28,35 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.olap4j.OlapException;
 import org.olap4j.Position;
 import org.olap4j.driver.olap4ld.Olap4ldUtil;
 import org.olap4j.driver.olap4ld.helper.Olap4ldLinkedDataUtil;
-import org.olap4j.mdx.CallNode;
-import org.olap4j.mdx.MemberNode;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
-import org.olap4j.metadata.Member;
 import org.semanticweb.yars.nx.Literal;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
 import org.semanticweb.yars.nx.parser.NxParser;
 
 /**
- * Implements methods of XmlaOlap4jDatabaseMetadata, returning the specified
- * columns as nodes from a sparql endpoint.
+ * The OpenVirtuosoEngine uses an Open Virtuoso SPARQL endpoint for executing
+ * metadata or olap queries.
  * 
  * @author b-kaempgen
  * 
  */
 public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
+
+	/**
+	 * The type of SPARQL endpoint should be found out automatically and with
+	 * the server string
+	 */
+	private static String SPARQLSERVERURL;
 
 	/*
 	 * Open Virtuoso is default triple store
@@ -61,12 +66,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	private static final int OPENVIRTUOSO = 2;
 	private static final int OPENVIRTUOSORULESET = 3;
 
-	/**
-	 * The type of SPARQL endpoint should be found out automatically and with
-	 * the server string
-	 */
-	private static String SPARQLSERVERURL;
-
+	// Meta data attributes
 	private static final String DATASOURCEDESCRIPTION = "OLAP data from the statistical Linked Data cloud.";
 
 	private static final String PROVIDERNAME = "The community.";
@@ -75,34 +75,44 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 	private static final String DATASOURCEINFO = "Data following the Linked Data principles.";
 
-	private static final String TABLE_CAT = "LdCatalog";
+	private static final String TABLE_CAT = "LdCatalogSchema";
 
-	private static final String TABLE_SCHEM = "LdSchema";
+	private static final String TABLE_SCHEM = "LdCatalogSchema";
 
-	/*
-	 * Array of datasets of the database/catalog/schema that shall be integrated
-	 */
 	public String DATASOURCENAME;
-	public String DATASOURCEVERSION;
-	private ArrayList<String> datastructuredefinitions;
-	private ArrayList<String> datasets;
 
-	private HashMap<Integer, List<Node[]>> sparqlResultMap = new HashMap<Integer, List<Node[]>>();
+	public String DATASOURCEVERSION;
+
+	// Each typical sparql query assumes the following prefixes.
+	public String TYPICALPREFIXES = "PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos:    <http://www.w3.org/2004/02/skos/core#> PREFIX qb:      <http://purl.org/linked-data/cube#> PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#> PREFIX owl:     <http://www.w3.org/2002/07/owl#> ";
+
+	// Helper attributes
+
+	/**
+	 * Map of locations that have been loaded into the embedded triple store.
+	 */
+	private HashMap<Integer, Boolean> loadedMap = new HashMap<Integer, Boolean>();
+
+	private Integer MAX_LOAD_TRIPLE_SIZE = 1000000000;
+
+	private Integer MAX_COMPLEX_CONSTRAINTS_TRIPLE_SIZE = 5000;
+
+	private Integer LOADED_TRIPLE_SIZE = 0;
+
+	private PhysicalOlapQueryPlan execplan;
+
+	private HashMap<Integer, List<Node[]>> sparqlResultMap;
+
+	// Not needed any more since we use materialisation.
+	// private List<List<Node>> equivalenceList;
 
 	public OpenVirtuosoEngine(URL serverUrlObject,
-			ArrayList<String> datastructuredefinitions,
-			ArrayList<String> datasets, String databasename) {
-		URL = serverUrlObject.toString();
-		this.datastructuredefinitions = datastructuredefinitions;
-		this.datasets = datasets;
+			List<String> datastructuredefinitions, List<String> datasets,
+			String databasename) throws OlapException {
 
-		// TODO: I could add another version with a specific rule set for open
-		// virtuoso
-		if (databasename.equals("QCRUMB")) {
-			SPARQLSERVERTYPE = QCRUMB;
-			this.DATASOURCENAME = databasename;
-			this.DATASOURCEVERSION = "1.0";
-		}
+		// That is the SPARQL engine URL
+		URL = serverUrlObject.toString();
+
 		if (databasename.equals("OPENVIRTUOSO")) {
 			SPARQLSERVERTYPE = OPENVIRTUOSO;
 			DATASOURCENAME = databasename;
@@ -114,7 +124,61 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			DATASOURCEVERSION = "1.0";
 		}
 		// Set URL
-		SPARQLSERVERURL = serverUrlObject.toString();
+		SPARQLSERVERURL = URL.toString();
+		initialize();
+	}
+
+	private PhysicalOlapQueryPlan createExecplan(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
+
+		/*
+		 * Currently, I distinguish:
+		 * 
+		 * Drill-Across for queries with Drill-Across at the top, OLAP-to-SPARQL
+		 * queries below.
+		 * 
+		 * DerivedDataset for queries with Convert-Cube or BaseCubeOp.
+		 * 
+		 * OLAP-to-SPARQL for queries with OLAP-to-SPARQL queries
+		 * 
+		 * I want to have Drill-Across for queries with Drill-Across at the top,
+		 * OLAP-to-SPARQL queries below, and Convert-Cube or Merge-Cubes at the
+		 * end.
+		 */
+
+		LogicalToPhysical logicaltophysical = new LogicalToPhysical(this);
+
+		PhysicalOlapIterator newRoot;
+		// Transform into physical query plan
+		newRoot = (PhysicalOlapIterator) logicaltophysical
+				.compile(queryplan._root);
+		PhysicalOlapQueryPlan execplan = new PhysicalOlapQueryPlan(newRoot);
+
+		return execplan;
+	}
+
+	public PhysicalOlapQueryPlan getExecplan() {
+		return this.execplan;
+	}
+
+	/**
+	 * For OPENVIRTUOSO, no specific initialisation is needed.
+	 */
+	private void initialize() {
+		;
+	}
+
+	/**
+	 * We now implement the pre-processing pipeline that shall result in a fully
+	 * integrated database (triple store, data warehouse). (Cal, A., Calvanese,
+	 * D., Giacomo, G. De, & Lenzerini, M. (2002). Data Integration under
+	 * Integrity Constraints, 262–279.)
+	 * 
+	 * @throws
+	 * @throws OlapException
+	 */
+	private void preload() throws OlapException {
+		// Not needed here.
 	}
 
 	/**
@@ -127,198 +191,13 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @param uris
 	 * @return fromResult
 	 */
+	@Deprecated
 	private String askForFrom(boolean isDsdQuery) {
-
-		switch (SPARQLSERVERTYPE) {
-		case QCRUMB:
-
-			/*
-			 * 
-			 * Qcrumb has special requirements for querying. The given named
-			 * graphs in qcrumbs case would already be the locations to be
-			 * queried.
-			 * 
-			 * TODO: Think that through. Can we just query data using qcrumb? We
-			 * would simply...
-			 */
-			/*
-			 * Query for all the members of the dimension.
-			 * 
-			 * The problem is now, how to only query for members of the specific
-			 * hierarchy?
-			 */
-			// First, for each dataset, I need the location
-			// String dsFrom = askForFrom(datastructuredefinition
-			// .toArray(new String[datastructuredefinition.size()]));
-			//
-			// // Get all dsd
-			// String query = standardPrefix + "select ?ds ?dsd " + dsFrom
-			// + "where { ?ds qb:structure ?dsd } ";
-			// List<Node[]> dsdsdUris = sparql(query, true);
-			//
-			// // Now, for each dsd, I need the location
-			// ArrayList<String> dsdArray = new ArrayList<String>();
-			// boolean first = true;
-			// for (Node[] nodes1 : dsdsdUris) {
-			// if (first) {
-			// first = false;
-			// } else {
-			// // Create array of dsds
-			// dsdArray.add(nodes1[1].toString());
-			// }
-			// }
-			// String dsdFrom = askForFrom(dsdArray.toArray(new String[dsdsdUris
-			// .size() - 1]));
-			//
-			// /*
-			// * TODO: How to consider equal dimensions?
-			// */
-			//
-			// // Get all dimensions, with
-			// query = standardPrefix
-			// + "select ?dimension ?dimensionCaption ?dimensionRange"
-			// + dsFrom
-			// + " "
-			// + dsdFrom
-			// +
-			// "where { ?ds qb:structure ?dsd. ?dsd qb:component ?compSpec. ?compSpec qb:dimension ?dimension. OPTIONAL{?dimension rdfs:label ?dimensionCaption}. OPTIONAL{?dimension rdfs:range ?dimensionRange} } ";
-			// List<Node[]> dimensionUris = sparql(query, true);
-			//
-			// // Now, for each dimension, I need the location
-			// ArrayList<String> dimensionArray = new ArrayList<String>();
-			// boolean first1 = true;
-			// for (Node[] nodes1 : dimensionUris) {
-			// if (first1) {
-			// first1 = false;
-			// } else {
-			// // Create array of dimensions
-			// dimensionArray.add(nodes1[0].toString());
-			// }
-			// }
-			// String dimensionFrom = askForFrom(dimensionArray
-			// .toArray(new String[dsdsdUris.size() - 1]));
-			//
-			//
-			// String fromResult = "";
-			// for (String uri : uris) {
-			// String fromLocation;
-			// try {
-			// fromLocation = askForLocation(uri);
-			// fromResult += " from <" + fromLocation + "> ";
-			// } catch (MalformedURLException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
-			// }
-			// return fromResult;
-			return null;
-		case OPENVIRTUOSO:
-			// This is our hard-coded graph that we use for OLAP4LD
-			// We do not use several named graphs, yet.
-			// return " from <http://olap4ld/> ";
-			// return " from <http://constructed.com> ";
-
-			// return
-			// " from <http://vmdeb18.deri.ie:8080/saiku-ui-2.2.RC/#> from <http://vmdeb18.deri.ie:8080/saiku-ui-2.2.RC/#ffiec>";
-
-			/*
-			 * Depending on whether we want to query for dsd or data, we ask
-			 * different named graphs
-			 */
-			String fromResult = " ";
-			if (isDsdQuery) {
-				// create a from from dsd parameter
-				for (String dsdGraph : datastructuredefinitions) {
-					fromResult += "from <" + dsdGraph + "> ";
-				}
-			} else {
-				// We query for all ds parameters
-				for (String dsGraph : datasets) {
-					fromResult += "from <" + dsGraph + "> ";
-
-					// // Experiment, we query with Sponger
-					// String spongerQuery =
-					// "define get:refresh \"3600\" SELECT ?g FROM NAMED <"
-					// + dsGraph
-					// +
-					// "> OPTION (get:soft \"soft\", get:method \"GET\") WHERE { graph ?g { ?s ?p ?o } } LIMIT 1";
-					//
-					// List<Node[]> cubeUris = sparql(spongerQuery, false);
-				}
-
-			}
-			return fromResult;
-		case OPENVIRTUOSORULESET:
-			// This is our hard-coded graph that we use for OLAP4LD
-			// We do not use several named graphs, yet.
-			// return " from <http://olap4ld/> ";
-			// return " from <http://constructed.com> ";
-
-			// return
-			// " from <http://vmdeb18.deri.ie:8080/saiku-ui-2.2.RC/#> from <http://vmdeb18.deri.ie:8080/saiku-ui-2.2.RC/#ffiec>";
-
-			/*
-			 * Depending on whether we want to query for dsd or data, we ask
-			 * different named graphs
-			 */
-			fromResult = " ";
-			if (isDsdQuery) {
-				// create a from from dsd parameter
-				for (String dsdGraph : datastructuredefinitions) {
-					fromResult += "from <" + dsdGraph + "> ";
-				}
-			} else {
-				// We query for all ds parameters
-				for (String dsGraph : datasets) {
-					fromResult += "from <" + dsGraph + "> ";
-				}
-			}
-			return fromResult;
-		default:
-			return " ";
-		}
+		return "";
 	}
 
-	/**
-	 * Helper Method for asking for location
-	 * 
-	 * @param uri
-	 * @return
-	 * @throws MalformedURLException
-	 * @throws IOException
-	 */
-	@SuppressWarnings("unused")
-	private String askForLocation(String uri) throws MalformedURLException {
-		URL url;
-		url = new URL(uri);
-
-		HttpURLConnection.setFollowRedirects(false);
-		HttpURLConnection connection;
-		try {
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestProperty("Accept", "application/rdf+xml");
-			String header = connection.getHeaderField("location");
-			// TODO: Could be that we need to check whether bogus comes out
-			// (e.g., Not found).
-			if (header != null) {
-
-				if (header.startsWith("http:")) {
-					uri = header;
-				} else {
-					// Header only contains the local uri
-					// Cut all off until first / from the back
-					int index = uri.lastIndexOf("/");
-					uri = uri.substring(0, index + 1) + header;
-				}
-			}
-		} catch (IOException e) {
-			throw new MalformedURLException(e.getMessage());
-		}
-		if (uri.endsWith(".ttl")) {
-			throw new MalformedURLException(
-					"Qcrumb cannot handle non-rdf files, yet");
-		}
-		return uri;
+	public void executeSparqlConstructQuery(String constructquery) {
+		// Not needed.
 	}
 
 	/**
@@ -333,12 +212,15 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * 
 	 * @param query
 	 * @param caching
+	 *            (not used)
 	 * @return
 	 */
-	private List<Node[]> sparql(String query, Boolean caching) {
+	public List<Node[]> executeSparqlSelectQuery(String query, boolean caching) {
 
-		// XXX: Caching on
-		caching = true;
+		Olap4ldUtil._log.config("SPARQL query: " + query);
+	
+		// XXX: Caching false
+		caching = false;
 
 		Integer hash = null;
 		if (caching) {
@@ -349,23 +231,26 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 				return this.sparqlResultMap.get(hash);
 			}
 		}
-
+		
 		Olap4ldUtil._log.config("SPARQL query: " + query);
 		List<Node[]> result;
 		switch (SPARQLSERVERTYPE) {
 		case QCRUMB:
-			result = sparqlQcrumb(query);
+			//result = sparqlQcrumb(query);
+			result = null;
 			break;
 		case OPENVIRTUOSO:
 			result = sparqlOpenVirtuoso(query);
 			break;
 		case OPENVIRTUOSORULESET:
-			result = sparqlOpenVirtuosoRuleset(query);
+			//result = sparqlOpenVirtuosoRuleset(query);
+			result = null;
 			break;
 		default:
 			result = null;
 			break;
 		}
+
 		if (caching) {
 			if (this.sparqlResultMap != null
 					&& !this.sparqlResultMap.containsKey(hash)) {
@@ -378,77 +263,9 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			}
 		}
 		return result;
+		
 	}
-
-	/**
-	 * If new cube is created, I empty the cache of the Linked Data Engine
-	 */
-	public void emptySparqlResultCache() {
-		this.sparqlResultMap.clear();
-	}
-
-	private List<Node[]> sparqlQcrumb(String query) {
-		List<Node[]> myBindings = new ArrayList<Node[]>();
-
-		try {
-			// Better? ISO-8859-1
-			String querysuffix = "?query=" + URLEncoder.encode(query, "UTF-8");
-			/*
-			 * Curly brackets should not be encoded, says qcrumb
-			 * 
-			 * querysuffix = querysuffix.replaceAll("%7B", "{"); querysuffix =
-			 * querysuffix.replaceAll("%7D", "}");
-			 * 
-			 * Stimmt nicht: Das Problem ist NX-Darstellung und leere bindings.
-			 * 
-			 * Momentan wird dazu einfach <null> verwendet.
-			 */
-
-			String rulesuffix = "&rules=";
-			String acceptsuffix = "&accept=text%2Fnx";
-
-			String fullurl = SPARQLSERVERURL + querysuffix + rulesuffix
-					+ acceptsuffix;
-			// String fullurl =
-			// "http://qcrumb.com/sparql?query=PREFIX+sdmx-measure%3A+<http%3A%2F%2Fpurl.org%2Flinked-data%2Fsdmx%2F2009%2Fmeasure%23>%0D%0APREFIX+dcterms%3A+<http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F>%0D%0APREFIX+eus%3A+<http%3A%2F%2Fontologycentral.com%2F2009%2F01%2Feurostat%2Fns%23>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0APREFIX+qb%3A+<http%3A%2F%2Fpurl.org%2Flinked-data%2Fcube%23>%0D%0APREFIX+rdfs%3A+<http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0D%0A%0D%0ASELECT+%3Ftime+%3Fvalue+%3Fgeo%0D%0AFROM+<http%3A%2F%2Festatwrap.ontologycentral.com%2Fdata%2Ftsieb020>%0D%0AFROM+<http%3A%2F%2Festatwrap.ontologycentral.com%2Fdic%2Fgeo>%0D%0AWHERE+{%0D%0A++%3Fs+qb%3Adataset+<http%3A%2F%2Festatwrap.ontologycentral.com%2Fid%2Ftsieb020%23ds>+.%0D%0A++%3Fs+dcterms%3Adate+%3Ftime+.%0D%0A++%3Fs+eus%3Ageo+%3Fg+.%0D%0A++%3Fg+rdfs%3Alabel+%3Fgeo+.%0D%0A++%3Fs+sdmx-measure%3AobsValue+%3Fvalue+.%0D%0A++FILTER+(lang(%3Fgeo)+%3D+\"\")%0D%0A}+ORDER+BY+%3Fgeo%0D%0A&rules=&accept=application%2Fsparql-results%2Bjson"
-
-			HttpURLConnection con = (HttpURLConnection) new URL(fullurl)
-					.openConnection();
-			// TODO: How to properly set header? Does not work therefore
-			// manually
-			// added
-			con.setRequestProperty("Accept", "application/sparql-results+json");
-			con.setRequestMethod("POST");
-
-			if (con.getResponseCode() != 200) {
-				throw new RuntimeException("lookup on " + fullurl
-						+ " resulted HTTP in status code "
-						+ con.getResponseCode());
-			}
-
-			// String test = convertStreamToString(con.getInputStream());
-
-			NxParser nxp = new NxParser(con.getInputStream());
-
-			Node[] nxx;
-			while (nxp.hasNext()) {
-				nxx = nxp.next();
-				myBindings.add(nxx);
-			}
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return myBindings;
-	}
-
+	
 	private List<Node[]> sparqlOpenVirtuoso(String query) {
 		List<Node[]> myBindings = new ArrayList<Node[]>();
 
@@ -529,92 +346,299 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 		return myBindings;
 	}
 
-	private List<Node[]> sparqlOpenVirtuosoRuleset(String query) {
-		List<Node[]> myBindings = new ArrayList<Node[]>();
+	public boolean isLoaded(URL resource) {
 
-		try {
-			// obsValue sameAs
-			// String inferencesuffix = URLEncoder
-			// .encode("define input:inference \"http://localhost:8890/schema/property_rules2\" \n",
-			// "UTF-8");
-			// owl same as
-			String inferencesuffix = URLEncoder.encode(
-					"define input:same-as \"yes\" \n", "UTF-8");
+		if (loadedMap.get(resource.toString().hashCode()) != null
+				&& loadedMap.get(resource.toString().hashCode()) == true) {
 
-			// Better? ISO-8859-1
-			String querysuffix = "?query=" + inferencesuffix
-					+ URLEncoder.encode(query, "UTF-8");
-			/*
-			 * Curly brackets should not be encoded, says qcrumb
-			 * 
-			 * querysuffix = querysuffix.replaceAll("%7B", "{"); querysuffix =
-			 * querysuffix.replaceAll("%7D", "}");
-			 * 
-			 * Stimmt nicht: Das Problem ist NX-Darstellung und leere bindings.
-			 * 
-			 * Momentan wird dazu einfach <null> verwendet.
-			 */
+			Olap4ldUtil._log.info("Is loaded: " + resource.toString()
+					+ ", Hash: " + resource.toString().hashCode());
 
-			// String acceptsuffix = "&accept=text%2Fn3";
+			return true;
+		} else {
 
-			String fullurl = SPARQLSERVERURL + querysuffix;
-			// String fullurl =
-			// "http://qcrumb.com/sparql?query=PREFIX+sdmx-measure%3A+<http%3A%2F%2Fpurl.org%2Flinked-data%2Fsdmx%2F2009%2Fmeasure%23>%0D%0APREFIX+dcterms%3A+<http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F>%0D%0APREFIX+eus%3A+<http%3A%2F%2Fontologycentral.com%2F2009%2F01%2Feurostat%2Fns%23>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0APREFIX+qb%3A+<http%3A%2F%2Fpurl.org%2Flinked-data%2Fcube%23>%0D%0APREFIX+rdfs%3A+<http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0D%0A%0D%0ASELECT+%3Ftime+%3Fvalue+%3Fgeo%0D%0AFROM+<http%3A%2F%2Festatwrap.ontologycentral.com%2Fdata%2Ftsieb020>%0D%0AFROM+<http%3A%2F%2Festatwrap.ontologycentral.com%2Fdic%2Fgeo>%0D%0AWHERE+{%0D%0A++%3Fs+qb%3Adataset+<http%3A%2F%2Festatwrap.ontologycentral.com%2Fid%2Ftsieb020%23ds>+.%0D%0A++%3Fs+dcterms%3Adate+%3Ftime+.%0D%0A++%3Fs+eus%3Ageo+%3Fg+.%0D%0A++%3Fg+rdfs%3Alabel+%3Fgeo+.%0D%0A++%3Fs+sdmx-measure%3AobsValue+%3Fvalue+.%0D%0A++FILTER+(lang(%3Fgeo)+%3D+\"\")%0D%0A}+ORDER+BY+%3Fgeo%0D%0A&rules=&accept=application%2Fsparql-results%2Bjson"
+			Olap4ldUtil._log.info("Is not yet loaded: " + resource.toString()
+					+ ", Hash: " + resource.toString().hashCode());
 
-			HttpURLConnection con = (HttpURLConnection) new URL(fullurl)
-					.openConnection();
-			// TODO: How to properly set header? Does not work therefore
-			// manually
-			// added
-			// con.setRequestProperty("Accept",
-			// "application/sparql-results+json");
-			// con.setRequestProperty("Accept", "text/n3");
-			con.setRequestProperty("Accept", "application/sparql-results+xml");
-			con.setRequestMethod("POST");
-
-			if (con.getResponseCode() != 200) {
-				throw new RuntimeException("lookup on " + fullurl
-						+ " resulted HTTP in status code "
-						+ con.getResponseCode());
-			}
-
-			// InputStream inputStream = con.getInputStream();
-			// String test = XmlaOlap4jUtil.convertStreamToString(inputStream);
-			// _log.info("XML output: " + test);
-
-			// Transform sparql xml to nx
-			InputStream nx = Olap4ldLinkedDataUtil.transformSparqlXmlToNx(con
-					.getInputStream());
-			String test2 = Olap4ldLinkedDataUtil.convertStreamToString(nx);
-			Olap4ldUtil._log.config("NX output: " + test2);
-			nx.reset();
-
-			NxParser nxp = new NxParser(nx);
-
-			Node[] nxx;
-			while (nxp.hasNext()) {
-				try {
-					nxx = nxp.next();
-					myBindings.add(nxx);
-				} catch (Exception e) {
-					Olap4ldUtil._log
-							.warning("NxParser: Could not parse properly: "
-									+ e.getMessage());
-				}
-				;
-			}
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return false;
 		}
+	}
 
-		return myBindings;
+	public void setLoaded(URL resource) {
+		Olap4ldUtil._log.info("Set loaded: " + resource.toString() + ", Hash: "
+				+ resource.toString().hashCode());
+
+		loadedMap.put(resource.toString().hashCode(), true);
+	}
+
+	/**
+	 * Loads resource in store if 1) URI and location of resource not already
+	 * loaded 2) number of triples has not reached maximum.
+	 * 
+	 * @param location
+	 * @throws OlapException
+	 */
+	private void loadInStore(URL noninformationuri) throws OlapException {
+		// Not needed.
+	}
+
+	/**
+	 * We load all data for a cube. We also normalise and do integrity checks.
+	 * 
+	 * @param location
+	 */
+	private void loadCube(URL noninformationuri) throws OlapException {
+		// Not needed.
+	}
+
+	public static List<ReconciliationCorrespondence> getReconciliationCorrespondences(
+			boolean askForMergeCorrespondences) {
+
+		List<ReconciliationCorrespondence> correspondences = new ArrayList<ReconciliationCorrespondence>();
+
+		// // MIO2EUR
+		// List<Node[]> mio_eur2eur_inputmembers = new ArrayList<Node[]>();
+		// mio_eur2eur_inputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#MIO_EUR") });
+		//
+		// mio_eur2eur_inputmembers.add(new Node[] { new
+		//
+		// Resource("http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
+		// new Variable("value1") });
+		//
+		// List<Node[]> mio_eur2eur_outputmembers = new ArrayList<Node[]>();
+		// mio_eur2eur_outputmembers.add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#EUR") });
+		// mio_eur2eur_outputmembers
+		// .add(new Node[] {
+		// new Variable("outputcube"),
+		// new
+		//
+		// Resource(
+		// "http://purl.org/linked-data/sdmx/2009/measure#obsValue"),
+		// new Variable("value2") });
+		//
+		// String mio_eur2eur_function = "(1000000 * x)";
+		//
+		// ReconciliationCorrespondence mio_eur2eur_correspondence = new
+		// ReconciliationCorrespondence(
+		// "MIO2EUR", mio_eur2eur_inputmembers, null,
+		// mio_eur2eur_outputmembers, mio_eur2eur_function);
+		// if (!askForMergeCorrespondences) {
+		// correspondences.add(mio_eur2eur_correspondence);
+		// }
+		//
+		// // COMPUTE_GDP
+		//
+		// List<Node[]> computegdp_inputmembers1 = new ArrayList<Node[]>();
+		// computegdp_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#B1G") });
+		//
+		// List<Node[]> computegdp_inputmembers2 = new ArrayList<Node[]>();
+		// computegdp_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#D21_M_D31") });
+		//
+		// List<Node[]> computegdp_outputmembers = new ArrayList<Node[]>();
+		// computegdp_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
+		//
+		// String computegdp_function = "(x1 + x2)";
+		//
+		// ReconciliationCorrespondence computegdp_correspondence = new
+		// ReconciliationCorrespondence(
+		// "COMP_GDP", computegdp_inputmembers1, computegdp_inputmembers2,
+		// computegdp_outputmembers, computegdp_function);
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computegdp_correspondence);
+		// }
+		//
+		// // COMPUTE_GDP_PER_CAPITA
+		//
+		// List<Node[]> computegdppercapita_inputmembers1 = new
+		// ArrayList<Node[]>();
+		// computegdppercapita_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDP") });
+		// computegdppercapita_inputmembers1.add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#EUR") });
+		//
+		// List<Node[]> computegdppercapita_inputmembers2 = new
+		// ArrayList<Node[]>();
+		// computegdppercapita_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#sex"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/sex#T") });
+		// computegdppercapita_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#age"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/age#TOTAL") });
+		//
+		// List<Node[]> computegdppercapita_outputmembers = new
+		// ArrayList<Node[]>();
+		// computegdppercapita_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/indic_na#NGDPH") });
+		// computegdppercapita_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://ontologycentral.com/2009/01/eurostat/ns#unit"),
+		// new Resource(
+		// "http://estatwrap.ontologycentral.com/dic/unit#EUR_HAB") });
+		//
+		// String computegdppercapita_function = "(x1 / x2)";
+		//
+		// ReconciliationCorrespondence computegdppercapita_correspondence = new
+		// ReconciliationCorrespondence(
+		// "COMP_GDP_CAP", computegdppercapita_inputmembers1,
+		// computegdppercapita_inputmembers2,
+		// computegdppercapita_outputmembers, computegdppercapita_function);
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computegdppercapita_correspondence);
+		// }
+
+		// COMPUTE_YES
+		// ReconciliationCorrespondence computeyes_correspondence;
+		// List<Node[]> computeyes_inputmembers1 = new ArrayList<Node[]>();
+		// computeyes_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2") });
+		//
+		// List<Node[]> computeyes_inputmembers2 = new ArrayList<Node[]>();
+		// computeyes_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_3") });
+		//
+		// List<Node[]> computeyes_outputmembers = new ArrayList<Node[]>();
+		// computeyes_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+		//
+		// String computeyes_function = "(x1 + x2)";
+		//
+		// computeyes_correspondence = new ReconciliationCorrespondence(
+		// "COMP_YES", computeyes_inputmembers1, computeyes_inputmembers2,
+		// computeyes_outputmembers, computeyes_function);
+		//
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computeyes_correspondence);
+		// }
+
+		// COMPUTE\_PERCENTAGENOS
+		// ReconciliationCorrespondence computepercentagenos_correspondence;
+		// List<Node[]> computepercentagenos_inputmembers1 = new
+		// ArrayList<Node[]>();
+		// computepercentagenos_inputmembers1
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_1") });
+		//
+		// List<Node[]> computepercentagenos_inputmembers2 = new
+		// ArrayList<Node[]>();
+		// computepercentagenos_inputmembers2
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+		//
+		// List<Node[]> computepercentagenos_outputmembers = new
+		// ArrayList<Node[]>();
+		// computepercentagenos_outputmembers
+		// .add(new Node[] {
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#variable"),
+		// new Resource(
+		// "http://lod.gesis.org/lodpilot/ALLBUS/variable.rdf#v590_2+3") });
+		// // Not yet needed since manual drill-across:
+		// // computepercentagenos_outputmembers
+		// // .add(new Node[] {
+		// // new Resource(
+		// // "http://ontologycentral.com/2009/01/eurostat/ns#indic_na"),
+		// // new Resource(
+		// // "http://estatwrap.ontologycentral.com/dic/indic_na#RGDPG") });
+		//
+		// String computepercentagenos_function = "(x1 / (x1 + x2))";
+		//
+		// computepercentagenos_correspondence = new
+		// ReconciliationCorrespondence(
+		// "COMP_PERCNOS", computepercentagenos_inputmembers1,
+		// computepercentagenos_inputmembers2,
+		// computepercentagenos_outputmembers,
+		// computepercentagenos_function);
+		//
+		// if (askForMergeCorrespondences) {
+		// correspondences.add(computepercentagenos_correspondence);
+		// }
+
+		return correspondences;
+	}
+
+	/**
+	 * Check whether we query for "Measures".
+	 * 
+	 * @param dimensionUniqueName
+	 * @param hierarchyUniqueName
+	 * @param levelUniqueName
+	 * @return
+	 */
+	private boolean isMeasureQueriedForExplicitly(Node dimensionUniqueName,
+			Node hierarchyUniqueName, Node levelUniqueName) {
+		// If one is set, it should not be Measures, not.
+		// Watch out: no square brackets are needed.
+		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName
+				.toString()
+				.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))
+				|| (hierarchyUniqueName != null && hierarchyUniqueName
+						.toString().equals(
+								Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME))
+				|| (levelUniqueName != null && levelUniqueName.toString()
+						.equals(Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME));
+
+		return explicitlyStated;
+
 	}
 
 	/**
@@ -622,7 +646,6 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @return
 	 */
 	public List<Node[]> getDatabases(Restrictions restrictions) {
-
 		/*
 		 * DISCOVER_DATASOURCES(new MetadataColumn("DataSourceName"), new
 		 * MetadataColumn("DataSourceDescription"), new MetadataColumn("URL"),
@@ -691,61 +714,160 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * 
 	 * Here, the restrictions are strict restrictions without patterns.
 	 * 
-	 * ==Task: Show proper captions== Problem: Where to take captions from?
-	 * rdfs:label Problem: There might be several rdfs:label -> only English
-	 * When creating such dsds, we could give the dsd an english label Also, we
-	 * need an english label for dimension, hierarchy, level, members Cell
-	 * Values will be numeric and not require language
+	 * This is both called for metadata queries and OLAP queries.
 	 * 
 	 * @return Node[]{}
 	 */
-	public List<Node[]> getCubes(Restrictions restrictions) {
+	public List<Node[]> getCubes(Restrictions restrictions)
+			throws OlapException {
 
-		String additionalFilters = createFilterForRestrictions(restrictions);
+		Olap4ldUtil._log.config("Linked Data Engine: Get Cubes...");
 
-		// If new cube is created, I empty the cache of the Linked Data Engine
-		// this.emptySparqlResultCache();
+		// I once preloaded some data.
+		// We now assume that we can also query for a global dataset identified
+		// by a
+		// comma separated list of datasets. For now, since we are interested in
+		// all possible
+		// derived datasets from a set of datasets.
+		// Yet, we probably should either start with an MDX query or an Logical
+		// Operator Tree
+		// defining an information need. Although we might also just be
+		// interested in all
+		// possible derived datasets of a set of datasets.
+		try {
+			preload();
+		} catch (OlapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		List<Node[]> result = new ArrayList<Node[]>();
+		// Check whether Drill-across query
+		// XXX: Wildcard delimiter
+		if (restrictions.cubeNamePattern != null) {
+
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
+
+			Olap4ldUtil._log.info("Load dataset: " + datasets.length
+					+ " datasets crawled.");
+
+			for (int i = 0; i < datasets.length; i++) {
+				String dataset = datasets[i];
+				Restrictions newrestrictions = new Restrictions();
+				newrestrictions.cubeNamePattern = new Resource(dataset);
+
+				List<Node[]> intermediaryresult = getCubesPerDataSet(newrestrictions);
+
+				// Add to result
+				boolean first = true;
+				for (Node[] nodes : intermediaryresult) {
+					if (first) {
+						if (i == 0) {
+							result.add(nodes);
+						}
+						first = false;
+						continue;
+					}
+					// We do not want to have the single datasets returned.
+					// We always have only one cube, the global cube.
+					// result.add(nodes);
+				}
+			}
+
+		} else {
+
+			result = getCubesPerDataSet(restrictions);
+
+		}
 
 		/*
-		 * To improve performance, we filter for certain cubes. We either find
-		 * the cube name in the context or in the restrictions.
+		 * Now that we have loaded all cube, we need to implement entity
+		 * consolidation.
 		 * 
-		 * Question: How do we cache? For all metadata queries, we cache the
-		 * SPARQL queries. If new cube is created, I empty the cache of the
-		 * Linked Data Engine.
+		 * We create an equivalence table. Then, for each dimension unique name,
+		 * we have one equivalence class. Then we can do as before.
 		 */
-		// String cubeURI = null;
-		// if (context != null && context.olap4jCube != null) {
-		// // The name should not have any brackets.
-		// cubeURI = LdOlap4jUtil
-		// .decodeUriForMdx(context.olap4jCube.getName());
+
+		// List<Node[]> myresult = sparql(querytemplate, true);
+		// // Add all of result2 to result
+		// boolean first = true;
+		// for (Node[] nodes : myresult) {
+		// if (first) {
+		// first = false;
+		// continue;
 		// }
-		// for (int i = 0; i < restrictions.length; i++) {
-		// if (restrictions[i].equals("CUBE_NAME")) {
-		// cubeURI = LdOlap4jUtil.decodeUriForMdx(restrictions[i + 1]
-		// .toString());
-		// break;
-		// }
+		// result.add(nodes);
 		// }
 
-		// Add filter for certain cube
-		// additionalFilters +=
-		// "FILTER (?CUBE_NAME = <http://public.b-kaempgen.de:8080/fios#secyhofdsd>)";
+		// We do not do that anymore but use materialisation.
+		// Now that we have loaded all data cubes, we can compute the
+		// equivalence list.
+		/*
+		 * Load equivalence statements from triple store
+		 */
 
-		// TODO: For now, we only use the non-language-tag CAPTION and
-		// DESCRIPTION
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select distinct \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"CUBE\" as ?CUBE_TYPE min(?DESCRIPTION) as ?DESCRIPTION min(?CUBE_CAPTION) as ?CUBE_CAPTION "
-				+ askForFrom(true)
-				+ "where { ?ds qb:structure ?CUBE_NAME. ?CUBE_NAME a qb:DataStructureDefinition. OPTIONAL {?CUBE_NAME rdfs:label ?CUBE_CAPTION FILTER ( lang(?CUBE_CAPTION) = \"en\" )} OPTIONAL {?CUBE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" )} "
-				+ additionalFilters + "}"
-				+ "group by ?CUBE_NAME order by ?CUBE_NAME";
+		// Olap4ldUtil._log.info("Load dataset: create equivalence list started.");
+		// long time = System.currentTimeMillis();
+		//
+		// List<Node[]> equivs = getEquivalenceStatements();
+		//
+		// this.equivalenceList = createEquivalenceList(equivs);
+		//
+		// time = System.currentTimeMillis() - time;
+		// Olap4ldUtil._log
+		// .info("Load dataset: create equivalence list finished in "
+		// + time + "ms.");
 
-		List<Node[]> result = sparql(query, true);
+		// Now, add "virtual cube"
+		// ?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?CUBE_TYPE ?CUBE_CAPTION
+		// ?DESCRIPTION
+		String globalcubename = "";
+		if (restrictions.cubeNamePattern == null) {
+
+			Map<String, Integer> cubemap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(result.get(0));
+
+			// Concatenate all cubes.
+			boolean first = true;
+			for (Node[] nodes : result) {
+				if (first) {
+					// First header;
+					first = false;
+					continue;
+				}
+
+				if (!globalcubename.equals("")) {
+					globalcubename += ",";
+				}
+				globalcubename += nodes[cubemap.get("?CUBE_NAME")].toString();
+			}
+
+		} else {
+			globalcubename = restrictions.cubeNamePattern.toString();
+		}
+
+		// XXX: The virtual cube should actually not be given to users. Users
+		// simply issue queries over available datasets.
+		Node[] virtualcube = new Node[] { new Literal(TABLE_CAT),
+				new Literal(TABLE_SCHEM), new Resource(globalcubename),
+				new Literal("CUBE"), new Literal("Global Cube"),
+				new Literal("This is the global cube.") };
+		result.add(virtualcube);
+
+		Olap4ldUtil._log
+				.info("Load datasets: Number of loaded triples for all datasets: "
+						+ this.LOADED_TRIPLE_SIZE);
+
+		// Check max loaded
+		String query = "PREFIX qb: <http://purl.org/linked-data/cube#> select (count(?s) as ?count) where {?s qb:dataSet ?ds}";
+		List<Node[]> countobservationsresult = executeSparqlSelectQuery(query, false);
+		Integer countobservation = new Integer(
+				countobservationsresult.get(1)[0].toString());
+
+		Olap4ldUtil._log
+				.info("Load datasets: Number of observations for all datasets: "
+						+ countobservation);
 
 		/*
 		 * Check on restrictions that the interface makes:
@@ -756,6 +878,423 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 		// List<Node[]> result = applyRestrictions(cubeUris, restrictions);
 		return result;
 
+	}
+
+	private List<Node[]> getCubesPerDataSet(Restrictions restrictions)
+			throws OlapException {
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		// Before loading, I should check first, whether already loaded.
+		URL noninformationuri;
+
+		try {
+			if (restrictions.cubeNamePattern == null) {
+				// There is nothing to load
+				Olap4ldUtil._log
+						.config("If no cubeNamePattern is given, we cannot load a cube.");
+			} else {
+				noninformationuri = new URL(
+						restrictions.cubeNamePattern.toString());
+				URL informationuri = Olap4ldLinkedDataUtil
+						.askForLocation(noninformationuri);
+				if (!isLoaded(noninformationuri) || !isLoaded(informationuri)) {
+
+					// For now, we simply preload.
+					loadCube(noninformationuri);
+
+				}
+				setLoaded(noninformationuri);
+				setLoaded(informationuri);
+			}
+
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		String additionalFilters = createFilterForRestrictions(restrictions);
+
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getCubes_regular.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
+
+		result = executeSparqlSelectQuery(querytemplate, true);
+
+		return result;
+	}
+
+	private void checkIntegrityConstraints() throws OlapException {
+		// Possibly needed later.
+	}
+
+	/**
+	 * According to QB specification, a cube may be provided in abbreviated form
+	 * so that inferences first have to be materialised to properly query a
+	 * cube.
+	 * 
+	 * @throws OlapException
+	 */
+	public void runNormalizationAlgorithm() throws OlapException {
+		// Not needed.
+	}
+
+	/**
+	 * Returns canonical for a node.
+	 * 
+	 * If none is found, simply the node is returned.
+	 * 
+	 * @param canonical
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	@Deprecated
+	private Node getCanonical(Node canonical) {
+		// for (List<Node> equivalenceClass : equivalenceList) {
+		// for (Node node : equivalenceClass) {
+		//
+		// if (node.equals(canonical)) {
+		// canonical = equivalenceClass.get(0);
+		// break;
+		// }
+		// }
+		// }
+		// return canonical;
+		return null;
+	}
+
+	/**
+	 * 
+	 * @param equivs
+	 *            - equiv[0] first same as and equiv[1] second same as entity.
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	@Deprecated
+	private List<List<Node>> createEquivalenceList(List<Node[]> equivs) {
+		List<List<Node>> newequivalenceList = new ArrayList<List<Node>>();
+
+		// HashMap<String, Integer> invertedindex = new HashMap<String,
+		// Integer>();
+		//
+		// boolean first = true;
+		// for (Node[] equiv : equivs) {
+		//
+		// // First is header
+		// if (first) {
+		// first = false;
+		// continue;
+		// }
+		//
+		// String A = equiv[0].toString();
+		// String B = equiv[1].toString();
+		//
+		// // Store equiv
+		//
+		// // Find A
+		// Integer rA = invertedindex.get(A);
+		//
+		// // Find B
+		// Integer rB = invertedindex.get(B);
+		//
+		// if (rA == null && rB == null) {
+		// // new row rAB
+		//
+		//
+		// ArrayList<Node> newEquivalenceClass = new ArrayList<Node>();
+		// newEquivalenceClass.add(A);
+		// newEquivalenceClass.add(B);
+		// newequivalenceList.add(newEquivalenceClass);
+		//
+		// } else if (rA != null && rB != null) {
+		// // merge rA and rB
+		//
+		// // We create new list
+		//
+		// List<Node> rAB = new ArrayList<Node>();
+		//
+		// for (Node node : rB) {
+		// rAB.add(node);
+		// }
+		// for (Node node : rA) {
+		// rAB.add(node);
+		// }
+		// newequivalenceList.remove(rB);
+		// newequivalenceList.remove(rA);
+		// newequivalenceList.add(rAB);
+		//
+		// } else if (rA != null) {
+		// // add B to rA
+		//
+		// rA.add(B);
+		//
+		// } else if (rB != null) {
+		// // add A to rB
+		//
+		// rB.add(A);
+		// }
+		//
+		// }
+
+		return newequivalenceList;
+	}
+
+	@Deprecated
+	private List<Node> getEquivalenceClassOfNode(Node resource) {
+		// List<Node> equivalenceClass = new ArrayList<Node>();
+		// equivalenceClass.add(resource);
+		// for (List<Node> iterable_element : this.equivalenceList) {
+		// for (Node node : iterable_element) {
+		// if (resource.equals(node)) {
+		// equivalenceClass = iterable_element;
+		// break;
+		// }
+		// }
+		// }
+		// return equivalenceClass;
+		return null;
+	}
+
+	@Deprecated
+	public List<Node[]> getEquivalenceStatements() {
+
+		// /*
+		// * More directed better?
+		// *
+		// * {$this->getStandardPrefixes()} select ?same1 ?same2
+		// * {$this->getStandardFrom()} where { ?dsd qb:component ?comp. ?comp
+		// * ?componentProp ?same1. ?same1 owl:sameAs ?same2 }
+		// */
+		//
+		// // Same as between dimensions and members.
+		// String query =
+		// "PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX qb: <http://purl.org/linked-data/cube#> select ?same1 ?same2 where "
+		// +
+		// "{ { ?dsd qb:component ?comp. ?comp ?componentProp ?same1. ?same1 owl:sameAs ?same2 } UNION { ?obs a qb:Observation. ?obs ?dimension ?same1. ?same1 owl:sameAs ?same2 } }	";
+		//
+		// List<Node[]> myresult = sparql(query, true);
+		//
+		// Olap4ldUtil._log.info("Number of equivalence statements: "
+		// + (myresult.size() - 1));
+		//
+		// return myresult;
+		return null;
+	}
+
+	/**
+	 * Get possible dimensions (component properties) for each cube from the
+	 * triple store.
+	 * 
+	 * Approach: I create the output from Linked Data, and then I filter it
+	 * using the restrictions.
+	 * 
+	 * I have to also return the Measures dimension for each cube.
+	 * 
+	 * @return Node[]{?dsd ?dimension ?compPropType ?name}
+	 * @throws MalformedURLException
+	 */
+	public List<Node[]> getDimensions(Restrictions restrictions)
+			throws OlapException {
+
+		Olap4ldUtil._log.config("Linked Data Engine: Get Dimensions...");
+
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		// Check whether Drill-across query
+		// XXX: Wildcard delimiter
+		if (restrictions.cubeNamePattern != null) {
+
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
+			for (int i = 0; i < datasets.length; i++) {
+				String dataset = datasets[i];
+				// Should make sure that the full restrictions are used.
+				Node saverestrictioncubePattern = restrictions.cubeNamePattern;
+				restrictions.cubeNamePattern = new Resource(dataset);
+
+				List<Node[]> intermediaryresult = getDimensionsPerDataSet(restrictions);
+
+				restrictions.cubeNamePattern = saverestrictioncubePattern;
+
+				// Add to result
+				boolean first = true;
+
+				for (Node[] anIntermediaryresult : intermediaryresult) {
+					if (first) {
+						if (i == 0) {
+							result.add(anIntermediaryresult);
+						}
+						first = false;
+						continue;
+					}
+
+					// Add the single dimensions of the datasets to be
+					// transformed with createGlobalDimensions.
+					result.add(anIntermediaryresult);
+				}
+			}
+
+		} else {
+			result = getDimensionsPerDataSet(restrictions);
+		}
+
+		// Create global cube which is intersection of all dimensions and new
+		// cube name
+		return createGlobalDimensions(restrictions, result);
+	}
+
+	private List<Node[]> createGlobalDimensions(Restrictions restrictions,
+			List<Node[]> intermediaryresult) {
+
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		Map<String, Integer> dimensionmap = Olap4ldLinkedDataUtil
+				.getNodeResultFields(intermediaryresult.get(0));
+
+		// Add to result
+		boolean first = true;
+
+		for (Node[] anIntermediaryresult : intermediaryresult) {
+
+			if (first) {
+				first = false;
+				result.add(anIntermediaryresult);
+				continue;
+			}
+
+			// Also add dimension to global cube
+
+			Node[] newnode = new Node[9];
+			newnode[dimensionmap.get("?CATALOG_NAME")] = anIntermediaryresult[dimensionmap
+					.get("?CATALOG_NAME")];
+			newnode[dimensionmap.get("?SCHEMA_NAME")] = anIntermediaryresult[dimensionmap
+					.get("?SCHEMA_NAME")];
+			// New cube name of global cube
+			if (restrictions.cubeNamePattern == null) {
+				newnode[dimensionmap.get("?CUBE_NAME")] = anIntermediaryresult[dimensionmap
+						.get("?CUBE_NAME")];
+			} else {
+				newnode[dimensionmap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
+			}
+
+			newnode[dimensionmap.get("?DIMENSION_NAME")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_NAME")];
+
+			// Needs to be canonical name
+			newnode[dimensionmap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_UNIQUE_NAME")];
+
+			newnode[dimensionmap.get("?DIMENSION_CAPTION")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_CAPTION")];
+			newnode[dimensionmap.get("?DIMENSION_ORDINAL")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_ORDINAL")];
+			newnode[dimensionmap.get("?DIMENSION_TYPE")] = anIntermediaryresult[dimensionmap
+					.get("?DIMENSION_TYPE")];
+			newnode[dimensionmap.get("?DESCRIPTION")] = anIntermediaryresult[dimensionmap
+					.get("?DESCRIPTION")];
+
+			// Only add if not already contained.
+			boolean contained = false;
+			for (Node[] aResult : result) {
+				boolean sameDimension = aResult[dimensionmap
+						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
+						newnode[dimensionmap.get("?DIMENSION_UNIQUE_NAME")]
+								.toString());
+				boolean sameCube = aResult[dimensionmap.get("?CUBE_NAME")]
+						.toString().equals(
+								newnode[dimensionmap.get("?CUBE_NAME")]
+										.toString());
+
+				if (sameDimension && sameCube) {
+					contained = true;
+				}
+			}
+
+			if (!contained) {
+				result.add(newnode);
+			}
+		}
+		return result;
+	}
+
+	private List<Node[]> getDimensionsPerDataSet(Restrictions restrictions) {
+		String additionalFilters = createFilterForRestrictions(restrictions);
+		List<Node[]> result = new ArrayList<Node[]>();
+		// Create header
+		Node[] header = new Node[] { new Variable("?CATALOG_NAME"),
+				new Variable("?SCHEMA_NAME"), new Variable("?CUBE_NAME"),
+				new Variable("?DIMENSION_NAME"),
+				new Variable("?DIMENSION_UNIQUE_NAME"),
+				new Variable("?DIMENSION_CAPTION"),
+				new Variable("?DIMENSION_ORDINAL"),
+				new Variable("?DIMENSION_TYPE"), new Variable("?DESCRIPTION") };
+		result.add(header);
+
+		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
+
+			// Get all dimensions
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getDimensions_regular.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
+
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
+			// Add all of result2 to result
+			boolean first = true;
+			for (Node[] anIntermediaryresult : myresult) {
+				if (first) {
+					first = false;
+					continue;
+				}
+
+				result.add(anIntermediaryresult);
+			}
+		}
+
+		// We try to find measures
+		if (true) {
+
+			// In this case, we do ask for a measure dimension.
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getDimensions_measure_dimension.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
+
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
+
+			// List<Node[]> result2 = applyRestrictions(memberUris2,
+			// restrictions);
+
+			// Add all of result2 to result
+			boolean first = true;
+			for (Node[] nodes : myresult) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				result.add(nodes);
+			}
+		}
+
+		// Use canonical identifier
+		// result = replaceIdentifiersWithCanonical(result);
+
+		return result;
 	}
 
 	/**
@@ -776,8 +1315,107 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getMeasures(Restrictions restrictions) {
+	public List<Node[]> getMeasures(Restrictions restrictions)
+			throws OlapException {
 
+		Olap4ldUtil._log.config("Linked Data Engine: Get Measures...");
+
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		// Check whether Drill-across query
+		// XXX: Wildcard delimiter
+		if (restrictions.cubeNamePattern != null) {
+
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
+			for (int i = 0; i < datasets.length; i++) {
+				String dataset = datasets[i];
+				// Should make sure that the full restrictions are used.
+				Node saverestrictioncubePattern = restrictions.cubeNamePattern;
+				restrictions.cubeNamePattern = new Resource(dataset);
+
+				List<Node[]> intermediaryresult = getMeasuresPerDataSet(restrictions);
+
+				restrictions.cubeNamePattern = saverestrictioncubePattern;
+
+				// Add to result
+				boolean first = true;
+				for (Node[] anIntermediaryresult : intermediaryresult) {
+					if (first) {
+						if (i == 0) {
+							result.add(anIntermediaryresult);
+						}
+						first = false;
+						continue;
+					}
+
+					// We do not want to have the single datasets returned.
+					// result.add(anIntermediaryresult);
+
+					// Also add measure to global cube
+					Map<String, Integer> map = Olap4ldLinkedDataUtil
+							.getNodeResultFields(intermediaryresult.get(0));
+
+					Node[] newnode = new Node[10];
+					newnode[map.get("?CATALOG_NAME")] = anIntermediaryresult[map
+							.get("?CATALOG_NAME")];
+					newnode[map.get("?SCHEMA_NAME")] = anIntermediaryresult[map
+							.get("?SCHEMA_NAME")];
+					newnode[map.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
+					newnode[map.get("?MEASURE_UNIQUE_NAME")] = anIntermediaryresult[map
+							.get("?MEASURE_UNIQUE_NAME")];
+					newnode[map.get("?MEASURE_NAME")] = anIntermediaryresult[map
+							.get("?MEASURE_NAME")];
+					newnode[map.get("?MEASURE_CAPTION")] = anIntermediaryresult[map
+							.get("?MEASURE_CAPTION")];
+					newnode[map.get("?DATA_TYPE")] = anIntermediaryresult[map
+							.get("?DATA_TYPE")];
+					newnode[map.get("?MEASURE_IS_VISIBLE")] = anIntermediaryresult[map
+							.get("?MEASURE_IS_VISIBLE")];
+					newnode[map.get("?MEASURE_AGGREGATOR")] = anIntermediaryresult[map
+							.get("?MEASURE_AGGREGATOR")];
+					newnode[map.get("?EXPRESSION")] = anIntermediaryresult[map
+							.get("?EXPRESSION")];
+
+					// Only add if not already contained.
+					// For measures, we add them all.
+					// boolean contained = false;
+					// for (Node[] aResult : result) {
+					// boolean sameDimension = aResult[map
+					// .get("?MEASURE_UNIQUE_NAME")].toString()
+					// .equals(newnode[map
+					// .get("?MEASURE_UNIQUE_NAME")]
+					// .toString());
+					// boolean sameCube = aResult[map
+					// .get("?CUBE_NAME")].toString().equals(
+					// newnode[map.get("?CUBE_NAME")]
+					// .toString());
+					//
+					// if (sameDimension && sameCube) {
+					// contained = true;
+					// }
+					// }
+					//
+					// if (!contained) {
+					// result.add(newnode);
+					// }
+
+					result.add(newnode);
+				}
+
+			}
+
+		} else {
+
+			result = getMeasuresPerDataSet(restrictions);
+
+		}
+
+		return result;
+
+	}
+
+	private List<Node[]> getMeasuresPerDataSet(Restrictions restrictions) {
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
 		// ///////////QUERY//////////////////////////
@@ -787,138 +1425,46 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 		// Boolean values need to be returned as "true" or "false".
 		// Get all measures
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEASURE_NAME min(?MEASURE_CAPTION) as ?MEASURE_CAPTION \"5\" as ?DATA_TYPE \"true\" as ?MEASURE_IS_VISIBLE min(?MEASURE_AGGREGATOR) as ?MEASURE_AGGREGATOR min(?EXPRESSION) as ?EXPRESSION "
-				+ askForFrom(true)
-				// Hint: For now, MEASURE_CAPTION is simply the
-				// MEASURE_DIMENSION.
-				// Important: Only measures are queried
-				// XXX: EXPRESSION also needs to be attached to
-				// ?COMPONENT_SPECIFICATION
-				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION "
-				+ ". ?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = \"en\" )} OPTIONAL {?COMPONENT_SPECIFICATION qb:aggregator ?MEASURE_AGGREGATOR } OPTIONAL {?COMPONENT_SPECIFICATION qb:expression ?EXPRESSION } "
-				+ additionalFilters
-				+ "} "
-				+ "group by ?CUBE_NAME ?MEASURE_UNIQUE_NAME order by ?CUBE_NAME ?MEASURE_UNIQUE_NAME ";
-		List<Node[]> result = sparql(query, true);
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getMeasures.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
+
+		List<Node[]> result = executeSparqlSelectQuery(querytemplate, true);
+
+		// Here, we also include measures without aggregation function.
+		// We have also added these measures as members to getMembers().
+		querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getMeasures_withoutimplicit.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
+
+		List<Node[]> result2 = executeSparqlSelectQuery(querytemplate, true);
 
 		// List<Node[]> result = applyRestrictions(measureUris, restrictions);
-		return result;
-	}
 
-	/**
-	 * Get possible dimensions (component properties) for each cube from the
-	 * triple store.
-	 * 
-	 * Approach: I create the output from Linked Data, and then I filter it
-	 * using the restrictions.
-	 * 
-	 * I have to also return the Measures dimension for each cube.
-	 * 
-	 * @return Node[]{?dsd ?dimension ?compPropType ?name}
-	 * @throws MalformedURLException
-	 */
-	public List<Node[]> getDimensions(Restrictions restrictions) {
-
-		String additionalFilters = createFilterForRestrictions(restrictions);
-
-		// Get all dimensions
-		String query = "";
-		query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME as ?DIMENSION_NAME ?DIMENSION_UNIQUE_NAME min(?DIMENSION_CAPTION) as ?DIMENSION_CAPTION min(?DESCRIPTION) as ?DESCRIPTION \"0\" as ?DIMENSION_TYPE \"0\" as ?DIMENSION_ORDINAL "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?compSpec "
-				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. OPTIONAL {?DIMENSION_UNIQUE_NAME rdfs:label ?DIMENSION_CAPTION FILTER ( lang(?DIMENSION_CAPTION) = \"en\" )} OPTIONAL {?DIMENSION_UNIQUE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" )} "
-				+ additionalFilters
-				+ "} "
-				+ "group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME order by ?CUBE_NAME ?DIMENSION_NAME ";
-
-		List<Node[]> result = sparql(query, true);
-
-		// List<Node[]> result = applyRestrictions(dimensionUris, restrictions);
-
-		/*
-		 * Get all measures: We query for all cubes and simply add measure
-		 * information.
-		 * 
-		 * We need "distinct" in case we have several measures per cube.
-		 */
-
-		if (isMeasureQueriedFor(restrictions.dimensionUniqueName,
-				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
-
-			// Here, we again need specific filters, since only cube makes
-			// sense
-			String specificFilters = "";
-			if (restrictions.cubeNamePattern != null) {
-				specificFilters = " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern + ">) ";
+		// Add all of result2 to result
+		boolean first = true;
+		for (Node[] nodes : result2) {
+			if (first) {
+				first = false;
+				continue;
 			}
-
-			// In this case, we do ask for a measure dimension.
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "select distinct \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?DIMENSION_CAPTION \"Measures\" as ?DESCRIPTION \"2\" as ?DIMENSION_TYPE \"0\" as ?DIMENSION_ORDINAL "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec "
-					+ ". ?compSpec qb:measure ?MEASURE_PROPERTY. "
-					+ specificFilters + "} "
-					+ "order by ?CUBE_NAME ?MEASURE_PROPERTY";
-
-			List<Node[]> result2 = sparql(query, true);
-
-			// List<Node[]> result2 = applyRestrictions(memberUris2,
-			// restrictions);
-
-			// Add all of result2 to result
-			boolean first = true;
-			for (Node[] nodes : result2) {
-				if (first) {
-					first = false;
-					continue;
-				}
-				result.add(nodes);
-			}
+			result.add(nodes);
 		}
 
+		// Use canonical identifier
+		// result = replaceIdentifiersWithCanonical(result);
+
 		return result;
-	}
-
-	/**
-	 * We query for a measure if dim, hier, levl = measure OR if nothing is
-	 * stated.
-	 * 
-	 * @param dimensionUniqueName
-	 * @param hierarchyUniqueName
-	 * @param levelUniqueName
-	 * @return
-	 */
-	private boolean isMeasureQueriedFor(Node dimensionUniqueName,
-			Node hierarchyUniqueName, Node levelUniqueName) {
-		// If one is set, it should not be Measures, not.
-		// Watch out: square brackets are needed.
-		boolean notExplicitlyStated = dimensionUniqueName == null
-				&& hierarchyUniqueName == null && levelUniqueName == null;
-		boolean explicitlyStated = (dimensionUniqueName != null && dimensionUniqueName
-				.equals("Measures"))
-				|| (hierarchyUniqueName != null && hierarchyUniqueName
-						.equals("Measures"))
-				|| (levelUniqueName != null && levelUniqueName
-						.equals("Measures"));
-
-		return notExplicitlyStated || explicitlyStated;
-
 	}
 
 	/**
@@ -930,64 +1476,199 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getHierarchies(Restrictions restrictions) {
+	public List<Node[]> getHierarchies(Restrictions restrictions)
+			throws OlapException {
 
+		Olap4ldUtil._log.config("Linked Data Engine: Get Hierarchies...");
+
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		// Check whether Drill-across query
+		// XXX: Wildcard delimiter
+		if (restrictions.cubeNamePattern != null) {
+
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
+			for (int i = 0; i < datasets.length; i++) {
+				String dataset = datasets[i];
+				// Should make sure that the full restrictions are used.
+				Node saverestrictioncubePattern = restrictions.cubeNamePattern;
+				restrictions.cubeNamePattern = new Resource(dataset);
+
+				List<Node[]> intermediaryresult = getHierarchiesPerDataSet(restrictions);
+
+				restrictions.cubeNamePattern = saverestrictioncubePattern;
+
+				// Add to result
+				boolean first = true;
+				for (Node[] anIntermediaryresult : intermediaryresult) {
+					if (first) {
+						if (i == 0) {
+							result.add(anIntermediaryresult);
+						}
+						first = false;
+						continue;
+					}
+
+					// Add the single hierarchies of the datasets to be
+					// transformed with createGlobalHierarchies.
+					result.add(anIntermediaryresult);
+				}
+
+			}
+
+		} else {
+
+			result = getHierarchiesPerDataSet(restrictions);
+
+		}
+
+		// Create global hierarchies which is intersection of all hierarchies
+		// and new
+		// cube name
+		return createGlobalHierarchies(restrictions, result);
+	}
+
+	private List<Node[]> createGlobalHierarchies(Restrictions restrictions,
+			List<Node[]> intermediaryresult) {
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		boolean first = true;
+		for (Node[] anIntermediaryresult : intermediaryresult) {
+
+			if (first) {
+				first = false;
+				result.add(anIntermediaryresult);
+				continue;
+			}
+
+			// Also add hierarchy to global cube
+			Map<String, Integer> hierarchymap = Olap4ldLinkedDataUtil
+					.getNodeResultFields(intermediaryresult.get(0));
+
+			Node[] newnode = new Node[9];
+			newnode[hierarchymap.get("?CATALOG_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?CATALOG_NAME")];
+			newnode[hierarchymap.get("?SCHEMA_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?SCHEMA_NAME")];
+
+			// New cube name of global cube
+			if (restrictions.cubeNamePattern == null) {
+				newnode[hierarchymap.get("?CUBE_NAME")] = anIntermediaryresult[hierarchymap
+						.get("?CUBE_NAME")];
+			} else {
+				newnode[hierarchymap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
+			}
+			newnode[hierarchymap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?DIMENSION_UNIQUE_NAME")];
+			newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?HIERARCHY_UNIQUE_NAME")];
+			newnode[hierarchymap.get("?HIERARCHY_NAME")] = anIntermediaryresult[hierarchymap
+					.get("?HIERARCHY_NAME")];
+			newnode[hierarchymap.get("?HIERARCHY_CAPTION")] = anIntermediaryresult[hierarchymap
+					.get("?HIERARCHY_CAPTION")];
+			newnode[hierarchymap.get("?DESCRIPTION")] = anIntermediaryresult[hierarchymap
+					.get("?DESCRIPTION")];
+			newnode[hierarchymap.get("?HIERARCHY_MAX_LEVEL_NUMBER")] = anIntermediaryresult[hierarchymap
+					.get("?HIERARCHY_MAX_LEVEL_NUMBER")];
+
+			// Only add if not already contained.
+			boolean contained = false;
+			for (Node[] aResult : result) {
+				boolean sameDimension = aResult[hierarchymap
+						.get("?DIMENSION_UNIQUE_NAME")].toString().equals(
+						newnode[hierarchymap.get("?DIMENSION_UNIQUE_NAME")]
+								.toString());
+				boolean sameHierarchy = aResult[hierarchymap
+						.get("?HIERARCHY_UNIQUE_NAME")].toString().equals(
+						newnode[hierarchymap.get("?HIERARCHY_UNIQUE_NAME")]
+								.toString());
+				boolean sameCube = aResult[hierarchymap.get("?CUBE_NAME")]
+						.toString().equals(
+								newnode[hierarchymap.get("?CUBE_NAME")]
+										.toString());
+
+				if (sameDimension && sameHierarchy && sameCube) {
+					contained = true;
+				}
+			}
+
+			if (!contained) {
+				result.add(newnode);
+			}
+		}
+		return result;
+	}
+
+	private List<Node[]> getHierarchiesPerDataSet(Restrictions restrictions) {
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
-		// Get all hierarchies with codeLists
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?HIERARCHY_NAME min(?HIERARCHY_CAPTION) as ?HIERARCHY_CAPTION min(?DESCRIPTION) as ?DESCRIPTION "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?compSpec "
-				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:label ?HIERARCHY_CAPTION FILTER ( lang(?HIERARCHY_CAPTION) = \"en\" ) } OPTIONAL {?HIERARCHY_UNIQUE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" ) } "
-				+ additionalFilters
-				+ "} "
-				+ "group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ";
-		List<Node[]> result = sparql(query, true);
+		List<Node[]> result = new ArrayList<Node[]>();
 
-		// TODO: No sorting done, yet
+		// Create header
+		Node[] header = new Node[] { new Variable("?CATALOG_NAME"),
+				new Variable("?SCHEMA_NAME"), new Variable("?CUBE_NAME"),
+				new Variable("?DIMENSION_UNIQUE_NAME"),
+				new Variable("?HIERARCHY_UNIQUE_NAME"),
+				new Variable("?HIERARCHY_NAME"),
+				new Variable("?HIERARCHY_CAPTION"),
+				new Variable("?DESCRIPTION"),
+				new Variable("?HIERARCHY_MAX_LEVEL_NUMBER") };
+		result.add(header);
+
+		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
+
+			// Get all hierarchies with codeLists
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getHierarchies_regular.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
+
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
+
+			// Add all of result to result
+			boolean first = true;
+			for (Node[] nodes : myresult) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				result.add(nodes);
+			}
+
+		}
 
 		// List<Node[]> result = applyRestrictions(hierarchyResults,
 		// restrictions);
 
-		// Get measure dimensions, but only if neither dim, hier, lev is set and
-		// not "Measures".
-		if (isMeasureQueriedFor(restrictions.dimensionUniqueName,
-				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
-
-			// Here, we again need specific filters, since only cube makes
-			// sense
-			String specificFilters = "";
-			if (restrictions.cubeNamePattern != null) {
-				specificFilters = " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern + ">) ";
-			}
+		// Try to find measure dimensions.
+		if (true) {
 
 			// In this case, we do ask for a measure hierarchy.
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "select distinct \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?HIERARCHY_NAME \"Measures\" as ?HIERARCHY_CAPTION \"Measures\" as ?DESCRIPTION "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec "
-					+ ". ?compSpec qb:measure ?MEASURE_PROPERTY. "
-					+ specificFilters
-					+ "} order by ?CUBE_NAME ?MEASURE_PROPERTY ?HIERARCHY_NAME ";
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getHierarchies_measure_dimension.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
 
-			List<Node[]> result2 = sparql(query, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
 
 			// Add all of result2 to result
 			boolean first = true;
-			for (Node[] nodes : result2) {
+			for (Node[] nodes : myresult) {
 				if (first) {
 					first = false;
 					continue;
@@ -998,32 +1679,37 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 		// Get dimension hierarchies without codeList, but only if hierarchy is
 		// not set and different from dimension unique name
-		if (restrictions.hierarchyUniqueName != null
-				&& !restrictions.hierarchyUniqueName
-						.equals(restrictions.dimensionUniqueName)) {
-			// we do not need to do this
-		} else {
+		/*
+		 * * Note in spec:
+		 * "Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range."
+		 * Note in spec:
+		 * "Every dimension with range skos:Concept must have a qb:codeList." <=
+		 * This means, we do not necessarily need a code list in many cases.
+		 * But, if we have a code list, then: "If a dimension property has a
+		 * qb:codeList, then the value of the dimension property on every
+		 * qb:Observation must be in the code list."
+		 */
+		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
 
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "select \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_CAPTION ?DIMENSION_UNIQUE_NAME as ?DESCRIPTION "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec "
-					+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. } "
-					+ additionalFilters
-					+ "} order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ";
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getHierarchies_without_codelist.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
 
-			List<Node[]> result3 = sparql(query, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result3 = applyRestrictions(memberUris3,
 			// restrictions);
 
 			// Add all of result2 to result
 			boolean first = true;
-			for (Node[] nodes : result3) {
+			for (Node[] nodes : myresult) {
 				if (first) {
 					first = false;
 					continue;
@@ -1032,7 +1718,27 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			}
 		}
 
+		// Use canonical identifier
+		// result = replaceIdentifiersWithCanonical(result);
+
 		return result;
+	}
+
+	@Deprecated
+	public List<Node[]> replaceIdentifiersWithCanonical(List<Node[]> result) {
+		//
+		// List<Node[]> newresult = new ArrayList<Node[]>();
+		//
+		// for (Node[] anIntermediaryresult : result) {
+		// Node[] newnode = new Node[anIntermediaryresult.length];
+		// for (int i = 0; i < anIntermediaryresult.length; i++) {
+		// newnode[i] = getCanonical(anIntermediaryresult[i]);
+		// }
+		// newresult.add(newnode);
+		// }
+		//
+		// return newresult;
+		return null;
 	}
 
 	/**
@@ -1042,55 +1748,183 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @param restrictions
 	 * @return
 	 */
-	public List<Node[]> getLevels(Restrictions restrictions) {
+	public List<Node[]> getLevels(Restrictions restrictions)
+			throws OlapException {
 
+		Olap4ldUtil._log.config("Linked Data Engine: Get Levels...");
+
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		// Check whether Drill-across query
+		// XXX: Wildcard delimiter
+		if (restrictions.cubeNamePattern != null) {
+
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
+			for (int i = 0; i < datasets.length; i++) {
+				String dataset = datasets[i];
+				// Should make sure that the full restrictions are used.
+				Node saverestrictioncubePattern = restrictions.cubeNamePattern;
+				restrictions.cubeNamePattern = new Resource(dataset);
+
+				List<Node[]> intermediaryresult = getLevelsPerDataSet(restrictions);
+
+				restrictions.cubeNamePattern = saverestrictioncubePattern;
+
+				// Add to result
+				boolean first = true;
+				for (Node[] anIntermediaryresult : intermediaryresult) {
+					if (first) {
+						if (i == 0) {
+							result.add(anIntermediaryresult);
+						}
+						first = false;
+						continue;
+					}
+					// We do not want to have the single datasets returned.
+					// result.add(anIntermediaryresult);
+
+					// Also add dimension to global cube
+					Map<String, Integer> levelmap = Olap4ldLinkedDataUtil
+							.getNodeResultFields(intermediaryresult.get(0));
+
+					Node[] newnode = new Node[12];
+					newnode[levelmap.get("?CATALOG_NAME")] = anIntermediaryresult[levelmap
+							.get("?CATALOG_NAME")];
+					newnode[levelmap.get("?SCHEMA_NAME")] = anIntermediaryresult[levelmap
+							.get("?SCHEMA_NAME")];
+					newnode[levelmap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
+					newnode[levelmap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[levelmap
+							.get("?DIMENSION_UNIQUE_NAME")];
+					newnode[levelmap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[levelmap
+							.get("?HIERARCHY_UNIQUE_NAME")];
+					newnode[levelmap.get("?LEVEL_UNIQUE_NAME")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_UNIQUE_NAME")];
+					newnode[levelmap.get("?LEVEL_CAPTION")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_CAPTION")];
+					newnode[levelmap.get("?LEVEL_NAME")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_NAME")];
+					newnode[levelmap.get("?DESCRIPTION")] = anIntermediaryresult[levelmap
+							.get("?DESCRIPTION")];
+					newnode[levelmap.get("?LEVEL_NUMBER")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_NUMBER")];
+					newnode[levelmap.get("?LEVEL_CARDINALITY")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_CARDINALITY")];
+					newnode[levelmap.get("?LEVEL_TYPE")] = anIntermediaryresult[levelmap
+							.get("?LEVEL_TYPE")];
+
+					// Only add if not already contained.
+					boolean contained = false;
+					for (Node[] aResult : result) {
+						boolean sameDimension = aResult[levelmap
+								.get("?DIMENSION_UNIQUE_NAME")].toString()
+								.equals(newnode[levelmap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString());
+
+						boolean sameHierarchy = aResult[levelmap
+								.get("?HIERARCHY_UNIQUE_NAME")].toString()
+								.equals(newnode[levelmap
+										.get("?HIERARCHY_UNIQUE_NAME")]
+										.toString());
+
+						boolean sameLevel = aResult[levelmap
+								.get("?LEVEL_UNIQUE_NAME")].toString().equals(
+								newnode[levelmap.get("?LEVEL_UNIQUE_NAME")]
+										.toString());
+
+						boolean sameCube = aResult[levelmap.get("?CUBE_NAME")]
+								.toString().equals(
+										newnode[levelmap.get("?CUBE_NAME")]
+												.toString());
+
+						if (sameDimension && sameHierarchy && sameLevel
+								&& sameCube) {
+							contained = true;
+						}
+					}
+
+					if (!contained) {
+						result.add(newnode);
+					}
+				}
+
+			}
+
+		} else {
+
+			result = getLevelsPerDataSet(restrictions);
+
+		}
+
+		return result;
+	}
+
+	private List<Node[]> getLevelsPerDataSet(Restrictions restrictions) {
 		String additionalFilters = createFilterForRestrictions(restrictions);
 
-		// Get all levels of code lists without levels
-		// TODO: LEVEL_CARDINALITY is not solved, yet.
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?LEVEL_CAPTION ?HIERARCHY_UNIQUE_NAME as ?LEVEL_NAME \"N/A\" as ?DESCRIPTION \"1\" as ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?compSpec "
-				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. FILTER NOT EXISTS { ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. }"
-				+ additionalFilters
-				+ " }"
-				+ " order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_NUMBER ";
-		List<Node[]> result = sparql(query, true);
+		List<Node[]> result = new ArrayList<Node[]>();
 
-		// List<Node[]> result = applyRestrictions(levelResults, restrictions);
+		// Create header
+		Node[] header = new Node[] { new Variable("?CATALOG_NAME"),
+				new Variable("?SCHEMA_NAME"), new Variable("?CUBE_NAME"),
+				new Variable("?DIMENSION_UNIQUE_NAME"),
+				new Variable("?HIERARCHY_UNIQUE_NAME"),
+				new Variable("?LEVEL_UNIQUE_NAME"),
+				new Variable("?LEVEL_CAPTION"), new Variable("?LEVEL_NAME"),
+				new Variable("?DESCRIPTION"), new Variable("?LEVEL_NUMBER"),
+				new Variable("?LEVEL_CARDINALITY"), new Variable("?LEVEL_TYPE") };
+		result.add(header);
 
-		// TODO: No sorting done, yet
+		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
 
-		// TODO: Add properly modeled level
-		query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME min(?LEVEL_CAPTION) as ?LEVEL_CAPTION ?LEVEL_UNIQUE_NAME as ?LEVEL_NAME min(?DESCRIPTION) as ?DESCRIPTION ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?compSpec "
-				+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. OPTIONAL {?LEVEL_UNIQUE_NAME rdfs:label ?LEVEL_CAPTION FILTER ( lang(?LEVEL_CAPTION) = \"en\" ) } OPTIONAL {?LEVEL_UNIQUE_NAME rdfs:comment ?DESCRIPTION FILTER ( lang(?DESCRIPTION) = \"en\" ) }"
-				+ additionalFilters
-				+ "}"
-				+ "group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_NUMBER ";
-		List<Node[]> result0 = sparql(query, true);
+			// TODO: Add regularly modeled levels (without using xkos)
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getLevels_regular.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
 
-		// List<Node[]> result0 = applyRestrictions(memberUris0, restrictions);
-
-		// Add all of result2 to result
-		boolean first = true;
-		for (Node[] nodes : result0) {
-			if (first) {
-				first = false;
-				continue;
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
+			// Add all of result2 to result
+			boolean first = true;
+			for (Node[] nodes : myresult) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				result.add(nodes);
 			}
-			result.add(nodes);
+
+			// Get all levels of code lists using xkos
+			// TODO: LEVEL_CARDINALITY is not solved, yet.
+			querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getLevels_xkos.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
+
+			myresult = executeSparqlSelectQuery(querytemplate, true);
+
+			// Add all of result2 to result
+			first = true;
+			for (Node[] nodes : myresult) {
+				if (first) {
+					first = false;
+					continue;
+				}
+				result.add(nodes);
+			}
+
 		}
 
 		// Distinct for several measures per cube.
@@ -1098,37 +1932,27 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 		// Second, ask for the measures (which are also members), but only if
 		// measure
 
-		if (isMeasureQueriedFor(restrictions.dimensionUniqueName,
-				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
-
-			// Here, we again need specific filters, since only cube makes
-			// sense
-			String specificFilters = "";
-			if (restrictions.cubeNamePattern != null) {
-				specificFilters = " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern + ">) ";
-			}
+		if (true) {
 
 			// In this case, we do ask for a measure dimension.
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "select distinct \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?LEVEL_UNIQUE_NAME \"Measures\" as ?LEVEL_CAPTION \"Measures\" as ?LEVEL_NAME \"Measures\" as ?DESCRIPTION \"1\" as ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec "
-					+ ". ?compSpec qb:measure ?MEASURE_PROPERTY. "
-					+ specificFilters + "} " + "order by ?MEASURE_PROPERTY";
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getLevels_measure_dimension.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
 
-			List<Node[]> result2 = sparql(query, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
 
 			// Add all of result2 to result
-			first = true;
-			for (Node[] nodes : result2) {
+			boolean first = true;
+			for (Node[] nodes : myresult) {
 				if (first) {
 					first = false;
 					continue;
@@ -1139,45 +1963,28 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 		// Add levels for dimensions without codelist, but only if hierarchy and
 		// dimension names are equal
-		if (restrictions.hierarchyUniqueName != null
-				&& !restrictions.hierarchyUniqueName
-						.equals(restrictions.dimensionUniqueName)) {
-			// we do not need to do this
-		} else {
+		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
 
-			// We need specific filter
-			String specificFilters = "";
-			if (restrictions.cubeNamePattern != null) {
-				specificFilters += " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern + ">) ";
-			}
-			if (restrictions.dimensionUniqueName != null) {
-				specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
-						+ restrictions.dimensionUniqueName + ">) ";
-			}
-
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "select \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME ?DIMENSION_UNIQUE_NAME as ?LEVEL_CAPTION ?DIMENSION_UNIQUE_NAME as ?LEVEL_NAME \"N/A\" as ?DESCRIPTION \"1\" as ?LEVEL_NUMBER \"0\" as ?LEVEL_CARDINALITY \"0x0000\" as ?LEVEL_TYPE "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec "
-					+ ". ?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. FILTER NOT EXISTS { ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. }  "
-					+ specificFilters
-					+ "} "
-					+ "order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?LEVEL_NUMBER ";
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getLevels_without_codelist.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
 
 			// Second, ask for the measures (which are also members)
-			List<Node[]> result3 = sparql(query, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result3 = applyRestrictions(memberUris3,
 			// restrictions);
 
 			// Add all of result3 to result
-			first = true;
-			for (Node[] nodes : result3) {
+			boolean first = true;
+			for (Node[] nodes : myresult) {
 				if (first) {
 					first = false;
 					continue;
@@ -1185,6 +1992,9 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 				result.add(nodes);
 			}
 		}
+
+		// Use canonical identifier
+		// result = replaceIdentifiersWithCanonical(result);
 
 		return result;
 	}
@@ -1224,8 +2034,127 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @return Node[]{?memberURI ?name}
 	 * @throws MalformedURLException
 	 */
-	public List<Node[]> getMembers(Restrictions restrictions) {
+	public List<Node[]> getMembers(Restrictions restrictions)
+			throws OlapException {
 
+		Olap4ldUtil._log.config("Linked Data Engine: Get Members...");
+
+		List<Node[]> result = new ArrayList<Node[]>();
+
+		// Check whether Drill-across query
+		// XXX: Wildcard delimiter
+		if (restrictions.cubeNamePattern != null) {
+
+			String[] datasets = restrictions.cubeNamePattern.toString().split(
+					",");
+			for (int i = 0; i < datasets.length; i++) {
+				String dataset = datasets[i];
+				// Should make sure that the full restrictions are used.
+				// XXX: Refactor: used at every getXXX()
+				Node saverestrictioncubePattern = restrictions.cubeNamePattern;
+				restrictions.cubeNamePattern = new Resource(dataset);
+
+				List<Node[]> intermediaryresult = getMembersPerDataSet(restrictions);
+
+				restrictions.cubeNamePattern = saverestrictioncubePattern;
+
+				// Add to result
+				boolean first = true;
+				for (Node[] anIntermediaryresult : intermediaryresult) {
+					if (first) {
+						if (i == 0) {
+							result.add(anIntermediaryresult);
+						}
+						first = false;
+						continue;
+					}
+
+					// We do not want to have the single datasets returned.
+					// result.add(anIntermediaryresult);
+
+					// Also add dimension to global cube
+					Map<String, Integer> membermap = Olap4ldLinkedDataUtil
+							.getNodeResultFields(intermediaryresult.get(0));
+
+					Node[] newnode = new Node[13];
+					newnode[membermap.get("?CATALOG_NAME")] = anIntermediaryresult[membermap
+							.get("?CATALOG_NAME")];
+					newnode[membermap.get("?SCHEMA_NAME")] = anIntermediaryresult[membermap
+							.get("?SCHEMA_NAME")];
+					newnode[membermap.get("?CUBE_NAME")] = restrictions.cubeNamePattern;
+					newnode[membermap.get("?DIMENSION_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?DIMENSION_UNIQUE_NAME")];
+					newnode[membermap.get("?HIERARCHY_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?HIERARCHY_UNIQUE_NAME")];
+					newnode[membermap.get("?LEVEL_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?LEVEL_UNIQUE_NAME")];
+					newnode[membermap.get("?LEVEL_NUMBER")] = anIntermediaryresult[membermap
+							.get("?LEVEL_NUMBER")];
+					newnode[membermap.get("?MEMBER_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?MEMBER_UNIQUE_NAME")];
+					newnode[membermap.get("?MEMBER_NAME")] = anIntermediaryresult[membermap
+							.get("?MEMBER_NAME")];
+					newnode[membermap.get("?MEMBER_CAPTION")] = anIntermediaryresult[membermap
+							.get("?MEMBER_CAPTION")];
+					newnode[membermap.get("?MEMBER_TYPE")] = anIntermediaryresult[membermap
+							.get("?MEMBER_TYPE")];
+					newnode[membermap.get("?PARENT_UNIQUE_NAME")] = anIntermediaryresult[membermap
+							.get("?PARENT_UNIQUE_NAME")];
+					newnode[membermap.get("?PARENT_LEVEL")] = anIntermediaryresult[membermap
+							.get("?PARENT_LEVEL")];
+
+					// Only add if not already contained.
+					boolean contained = false;
+					for (Node[] aResult : result) {
+						boolean sameDimension = aResult[membermap
+								.get("?DIMENSION_UNIQUE_NAME")].toString()
+								.equals(newnode[membermap
+										.get("?DIMENSION_UNIQUE_NAME")]
+										.toString());
+
+						boolean sameHierarchy = aResult[membermap
+								.get("?HIERARCHY_UNIQUE_NAME")].toString()
+								.equals(newnode[membermap
+										.get("?HIERARCHY_UNIQUE_NAME")]
+										.toString());
+
+						boolean sameLevel = aResult[membermap
+								.get("?LEVEL_UNIQUE_NAME")].toString().equals(
+								newnode[membermap.get("?LEVEL_UNIQUE_NAME")]
+										.toString());
+
+						boolean sameMember = aResult[membermap
+								.get("?MEMBER_UNIQUE_NAME")].toString().equals(
+								newnode[membermap.get("?MEMBER_UNIQUE_NAME")]
+										.toString());
+						boolean sameCube = aResult[membermap.get("?CUBE_NAME")]
+								.toString().equals(
+										newnode[membermap.get("?CUBE_NAME")]
+												.toString());
+
+						if (sameDimension && sameHierarchy && sameLevel
+								&& sameMember && sameCube) {
+							contained = true;
+						}
+					}
+
+					if (!contained) {
+						result.add(newnode);
+					}
+				}
+
+			}
+
+		} else {
+
+			result = getMembersPerDataSet(restrictions);
+
+		}
+
+		return result;
+	}
+
+	private List<Node[]> getMembersPerDataSet(Restrictions restrictions) {
 		List<Node[]> result = new ArrayList<Node[]>();
 		List<Node[]> intermediaryresult = null;
 
@@ -1243,41 +2172,37 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 		result.add(header);
 
 		// Measure Member
-		if (isMeasureQueriedFor(restrictions.dimensionUniqueName,
-				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
+		if (true) {
 			intermediaryresult = getMeasureMembers(restrictions);
 
 			addToResult(intermediaryresult, result);
 
 		}
 
-		// Normal Member
-		// Watch out: No square brackets
-		if ((restrictions.dimensionUniqueName == null || !restrictions.dimensionUniqueName
-				.equals("Measures"))
-				|| (restrictions.hierarchyUniqueName == null || !restrictions.hierarchyUniqueName
-						.equals("Measures"))
-				|| (restrictions.levelUniqueName == null || !restrictions.levelUniqueName
-						.equals("Measures"))) {
-
-			intermediaryresult = getLevelMembers(restrictions);
-
-			addToResult(intermediaryresult, result);
-
-		}
-
-		// If we still do not have members, then we might have top members
-		// only
-		if (result.size() == 1) {
+		// Regular members
+		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
 
 			intermediaryresult = getHasTopConceptMembers(restrictions);
 
 			addToResult(intermediaryresult, result);
 		}
 
+		// Xkos members
+		// Watch out: No square brackets
+		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
+
+			intermediaryresult = getXkosMembers(restrictions);
+
+			addToResult(intermediaryresult, result);
+
+		}
+
 		// If we still do not have members, then we might have degenerated
 		// members
-		if (result.size() == 1) {
+		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
 			// Members without codeList
 			intermediaryresult = getDegeneratedMembers(restrictions);
 
@@ -1285,11 +2210,15 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 		}
 
+		// Use canonical identifier
+		// result = replaceIdentifiersWithCanonical(result);
+
 		return result;
 	}
 
 	private List<Node[]> getMeasureMembers(Restrictions restrictions) {
-		String additionalFilters = "";
+
+		String additionalFilters = createFilterForRestrictions(restrictions);
 
 		/*
 		 * I would assume that if TREE_OP is set, we have a unique member given
@@ -1336,32 +2265,19 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			// TreeOp = Self or null
 			Olap4ldUtil._log.config("TreeOp:SELF");
 
-			if (restrictions.cubeNamePattern != null) {
-				additionalFilters += " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern + ">) ";
-			}
-			if (restrictions.memberUniqueName != null) {
-				additionalFilters += " FILTER (?MEASURE_UNIQUE_NAME = <"
-						+ restrictions.memberUniqueName + ">) ";
-			}
-
 		}
 
 		// Second, ask for the measures (which are also members)
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-				+ "Select \""
-				+ TABLE_CAT
-				+ "\" as ?CATALOG_NAME \""
-				+ TABLE_SCHEM
-				+ "\" as ?SCHEMA_NAME ?CUBE_NAME \"Measures\" as ?DIMENSION_UNIQUE_NAME \"Measures\" as ?HIERARCHY_UNIQUE_NAME \"Measures\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEASURE_UNIQUE_NAME as ?MEMBER_UNIQUE_NAME ?MEASURE_UNIQUE_NAME as ?MEMBER_NAME min(?MEMBER_CAPTION) as ?MEMBER_CAPTION \"3\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"0\" as ?PARENT_LEVEL "
-				+ askForFrom(true)
-				+ " where { ?CUBE_NAME qb:component ?COMPONENT_SPECIFICATION. "
-				+ "?COMPONENT_SPECIFICATION qb:measure ?MEASURE_UNIQUE_NAME. OPTIONAL {?MEASURE_UNIQUE_NAME rdfs:label ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" OR lang(?MEMBER_CAPTION) = \"\" ) } "
-				+ additionalFilters
-				+ "} "
-				+ "group by ?CUBE_NAME ?MEASURE_UNIQUE_NAME order by ?MEASURE_UNIQUE_NAME";
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getMembers_measure_members.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
 
-		List<Node[]> memberUris2 = sparql(query, true);
+		List<Node[]> memberUris2 = executeSparqlSelectQuery(querytemplate, true);
 
 		return memberUris2;
 	}
@@ -1373,10 +2289,9 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * 
 	 * @return
 	 */
-	private List<Node[]> getLevelMembers(Restrictions restrictions) {
-		String query = "";
+	private List<Node[]> getXkosMembers(Restrictions restrictions) {
+
 		String additionalFilters = createFilterForRestrictions(restrictions);
-		List<Node[]> intermediaryresult;
 
 		/*
 		 * I would assume that if TREE_OP is set, we have a unique member given
@@ -1399,23 +2314,6 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 				additionalFilters = " FILTER (?PARENT_UNIQUE_NAME = <"
 						+ restrictions.memberUniqueName + ">) ";
 
-				query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-						+ "Select \""
-						+ TABLE_CAT
-						+ "\" as ?CATALOG_NAME \""
-						+ TABLE_SCHEM
-						+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME min(?MEMBER_CAPTION) as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE ?PARENT_UNIQUE_NAME min(?PARENT_LEVEL) as ?PARENT_LEVEL "
-						+ askForFrom(true)
-						+ " where { ?CUBE_NAME qb:component ?compSpec. "
-						+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?MEMBER_UNIQUE_NAME skos:member ?LEVEL_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
-						+ "?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skos:member ?PARENT_LEVEL_UNIQUE_NAME. ?PARENT_LEVEL_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL. OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" OR lang(?MEMBER_CAPTION) = \"\" ) } "
-						+ additionalFilters
-						+ "} "
-						+ " group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?PARENT_UNIQUE_NAME ?MEMBER_UNIQUE_NAME order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-				intermediaryresult = sparql(query, true);
-
-				return intermediaryresult;
-
 			}
 			if ((restrictions.tree & 2) == 2) {
 				// SIBLINGS
@@ -1443,26 +2341,20 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			// TreeOp = Self or null
 			Olap4ldUtil._log.config("TreeOp:SELF");
 
-			// XXX: Can be aligned with other sparql query??
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "Select \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME min(?MEMBER_CAPTION) as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE ?PARENT_UNIQUE_NAME min(?PARENT_LEVEL) as ?PARENT_LEVEL "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec. "
-					+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skos:inScheme ?HIERARCHY_UNIQUE_NAME. ?MEMBER_UNIQUE_NAME skos:member ?LEVEL_UNIQUE_NAME. ?LEVEL_UNIQUE_NAME skosclass:depth ?LEVEL_NUMBER. "
-					+ "OPTIONAL { ?MEMBER_UNIQUE_NAME skos:narrower ?PARENT_UNIQUE_NAME. ?PARENT_UNIQUE_NAME skosclass:depth ?PARENT_LEVEL. }"
-					+ " OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" OR lang(?MEMBER_CAPTION) = \"\" ) } "
-					+ additionalFilters
-					+ "} "
-					+ "group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?PARENT_UNIQUE_NAME ?MEMBER_UNIQUE_NAME order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-
-			List<Node[]> memberUris2 = sparql(query, true);
-
-			return memberUris2;
 		}
+
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getMembers_xkos.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
+
+		List<Node[]> memberUris2 = executeSparqlSelectQuery(querytemplate, true);
+
+		return memberUris2;
 	}
 
 	/**
@@ -1475,7 +2367,8 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @return
 	 */
 	private List<Node[]> getHasTopConceptMembers(Restrictions restrictions) {
-		String query = "";
+
+		String additionalFilters = createFilterForRestrictions(restrictions);
 
 		/*
 		 * I would assume that if TREE_OP is set, we have a unique member given
@@ -1521,37 +2414,21 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			// TreeOp = Self or null
 			Olap4ldUtil._log.config("TreeOp:SELF");
 
-			// Here, we again need specific filters, since only cube makes
-			// sense
-			String specificFilters = "";
-			if (restrictions.cubeNamePattern != null) {
-				specificFilters += " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern + ">) ";
-			}
-			if (restrictions.dimensionUniqueName != null) {
-				specificFilters += " FILTER (?DIMENSION_UNIQUE_NAME = <"
-						+ restrictions.dimensionUniqueName + ">) ";
-			}
-
 			// First, ask for all members
 			// Get all members of hierarchies without levels, that simply
 			// define
 			// skos:hasTopConcept members with skos:notation.
-			query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-					+ "Select \""
-					+ TABLE_CAT
-					+ "\" as ?CATALOG_NAME \""
-					+ TABLE_SCHEM
-					+ "\" as ?SCHEMA_NAME ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME min(?MEMBER_CAPTION) as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
-					+ askForFrom(true)
-					+ " where { ?CUBE_NAME qb:component ?compSpec. "
-					+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. ?DIMENSION_UNIQUE_NAME qb:codeList ?HIERARCHY_UNIQUE_NAME. ?HIERARCHY_UNIQUE_NAME skos:hasTopConcept ?MEMBER_UNIQUE_NAME. "
-					+ " OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" OR lang(?MEMBER_CAPTION) = \"\" ) } "
-					+ specificFilters
-					+ " } "
-					+ " group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME order by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?HIERARCHY_UNIQUE_NAME ?LEVEL_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
+			String querytemplate = Olap4ldLinkedDataUtil
+					.readInQueryTemplate("sesame_getMembers_topConcept.txt");
+			querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+					askForFrom(true));
+			querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+			querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}",
+					TABLE_SCHEM);
+			querytemplate = querytemplate.replace("{{{FILTERS}}}",
+					additionalFilters);
 
-			List<Node[]> memberUris = sparql(query, true);
+			List<Node[]> memberUris = executeSparqlSelectQuery(querytemplate, true);
 
 			return memberUris;
 
@@ -1566,6 +2443,8 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 	 * @return
 	 */
 	private List<Node[]> getDegeneratedMembers(Restrictions restrictions) {
+
+		String additionalFilters = createFilterForRestrictions(restrictions);
 
 		if (restrictions.tree != null && (restrictions.tree & 8) != 8) {
 
@@ -1606,132 +2485,129 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			// TreeOp = Self or null
 			Olap4ldUtil._log.config("TreeOp:SELF");
 
-			// First we ask for the dimensionWithoutHierarchies
-			String dimensionWithoutHierarchies = null;
-			if (restrictions.dimensionUniqueName != null) {
-				dimensionWithoutHierarchies = restrictions.dimensionUniqueName
-						.toString();
-			} else if (restrictions.hierarchyUniqueName != null) {
-				dimensionWithoutHierarchies = restrictions.hierarchyUniqueName
-						.toString();
-			} else if (restrictions.levelUniqueName != null) {
-				dimensionWithoutHierarchies = restrictions.levelUniqueName
-						.toString();
-			}
-
-			// Here, we need specific filters, since only cube and dimension
-			// unique name makes sense
-			String alteredadditionalFilters = "";
-			if (restrictions.cubeNamePattern != null) {
-				alteredadditionalFilters += " FILTER (?CUBE_NAME = <"
-						+ restrictions.cubeNamePattern + ">) ";
-			}
-			if (restrictions.memberUniqueName != null) {
-				// Check whether uri or Literal
-				Node resource = restrictions.memberUniqueName;
-				if (isResourceAndNotLiteral(resource)) {
-					alteredadditionalFilters += " FILTER (?MEMBER_UNIQUE_NAME = <"
-							+ resource + ">) ";
-				} else {
-					alteredadditionalFilters += " FILTER (str(?MEMBER_UNIQUE_NAME) = \""
-							+ resource + "\") ";
-				}
-			}
-
-			// It is possible that dimensionWithoutHierarchies is null
-			List<Node[]> memberUris1 = null;
-			String query = null;
-
-			// XXX: Necessary distinction? I think not...
-			if (dimensionWithoutHierarchies == null) {
-
-				query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-						+ "Select distinct \""
-						+ TABLE_CAT
-						+ "\" as ?CATALOG_NAME \""
-						+ TABLE_SCHEM
-						+ "\" as ?SCHEMA_NAME ?CUBE_NAME "
-						+ " ?DIMENSION_UNIQUE_NAME "
-						+ " ?DIMENSION_UNIQUE_NAME as ?HIERARCHY_UNIQUE_NAME "
-						+ "?DIMENSION_UNIQUE_NAME as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME min(?MEMBER_CAPTION) as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
-						// Since we query for instances
-						+ askForFrom(true)
-						+ askForFrom(false)
-						+ " where { ?CUBE_NAME qb:component ?compSpec. "
-						+ "?compSpec qb:dimension ?DIMENSION_UNIQUE_NAME. "
-						+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. "
-						+ "?obs ?DIMENSION_UNIQUE_NAME ?MEMBER_UNIQUE_NAME. "
-						+ " OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" OR lang(?MEMBER_CAPTION) = \"\" ) } "
-						+ alteredadditionalFilters
-						+ "} "
-						+ " group by ?CUBE_NAME ?DIMENSION_UNIQUE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-
-				memberUris1 = sparql(query, true);
-
-			} else {
-
-				query = Olap4ldLinkedDataUtil.getStandardPrefixes()
-						+ "Select distinct \""
-						+ TABLE_CAT
-						+ "\" as ?CATALOG_NAME \""
-						+ TABLE_SCHEM
-						+ "\" as ?SCHEMA_NAME ?CUBE_NAME \""
-						+ dimensionWithoutHierarchies
-						+ "\" as ?DIMENSION_UNIQUE_NAME \""
-						+ dimensionWithoutHierarchies
-						+ "\" as ?HIERARCHY_UNIQUE_NAME \""
-						+ dimensionWithoutHierarchies
-						+ "\" as ?LEVEL_UNIQUE_NAME \"0\" as ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME as ?MEMBER_NAME ?MEMBER_UNIQUE_NAME min(?MEMBER_CAPTION) as ?MEMBER_CAPTION \"1\" as ?MEMBER_TYPE \"null\" as ?PARENT_UNIQUE_NAME \"null\" as ?PARENT_LEVEL "
-						// Since we query for instances
-						+ askForFrom(true)
-						+ askForFrom(false)
-						+ " where { ?CUBE_NAME qb:component ?compSpec. "
-						+ "?compSpec qb:dimension <"
-						+ dimensionWithoutHierarchies
-						+ ">. "
-						+ "?obs qb:dataSet ?ds. ?ds qb:structure ?CUBE_NAME. ?obs <"
-						+ dimensionWithoutHierarchies
-						+ "> ?MEMBER_UNIQUE_NAME. "
-						+ " OPTIONAL {?MEMBER_UNIQUE_NAME skos:notation ?MEMBER_CAPTION FILTER ( lang(?MEMBER_CAPTION) = \"en\" OR lang(?MEMBER_CAPTION) = \"\" ) } "
-						+ alteredadditionalFilters
-						+ "} "
-						+ " group by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME order by ?CUBE_NAME ?LEVEL_NUMBER ?MEMBER_UNIQUE_NAME";
-
-				memberUris1 = sparql(query, true);
-
-			}
-
-			return memberUris1;
-
 		}
+
+		String querytemplate = Olap4ldLinkedDataUtil
+				.readInQueryTemplate("sesame_getMembers_degenerated.txt");
+		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
+				askForFrom(true));
+		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
+		querytemplate = querytemplate.replace("{{{TABLE_SCHEM}}}", TABLE_SCHEM);
+		querytemplate = querytemplate.replace("{{{FILTERS}}}",
+				additionalFilters);
+
+		List<Node[]> memberUris1 = executeSparqlSelectQuery(querytemplate, true);
+
+		return memberUris1;
 
 	}
 
-	private boolean isResourceAndNotLiteral(Node resource) {
-		return resource.toString().startsWith("http:");
+	@SuppressWarnings("unused")
+	private boolean isResourceAndNotLiteral(String resource) {
+		return resource.startsWith("http:");
 	}
 
 	private String createFilterForRestrictions(Restrictions restrictions) {
+
+		String filter = "";
 		// We need to create a filter for the specific restriction
-		String cubeNamePatternFilter = (restrictions.cubeNamePattern != null) ? " FILTER (?CUBE_NAME = <"
+		filter += (restrictions.cubeNamePattern != null) ? " FILTER (?CUBE_NAME = <"
 				+ restrictions.cubeNamePattern + ">) "
 				: "";
-		String dimensionUniqueNameFilter = (restrictions.dimensionUniqueName != null) ? " FILTER (?DIMENSION_UNIQUE_NAME = <"
-				+ restrictions.dimensionUniqueName + ">) "
-				: "";
-		String hierarchyUniqueNameFilter = (restrictions.hierarchyUniqueName != null) ? " FILTER (?HIERARCHY_UNIQUE_NAME = <"
-				+ restrictions.hierarchyUniqueName + ">) "
-				: "";
-		String levelUniqueNameFilter = (restrictions.levelUniqueName != null) ? " FILTER (?LEVEL_UNIQUE_NAME = <"
-				+ restrictions.levelUniqueName + ">) "
-				: "";
-		String memberUniqueNameFilter = (restrictions.memberUniqueName != null) ? " FILTER (str(?MEMBER_UNIQUE_NAME) = str(<"
-				+ restrictions.memberUniqueName + ">)) "
-				: "";
 
-		return cubeNamePatternFilter + dimensionUniqueNameFilter
-				+ hierarchyUniqueNameFilter + levelUniqueNameFilter
-				+ memberUniqueNameFilter;
+		if (restrictions.dimensionUniqueName != null
+				&& !restrictions.dimensionUniqueName.toString().equals(
+						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+			// filter += " filter("
+			// + createConditionConsiderEquivalences(
+			// restrictions.dimensionUniqueName, new Variable(
+			// "DIMENSION_UNIQUE_NAME")) + ") ";
+			filter += " filter(str(?DIMENSION_UNIQUE_NAME) = \""
+					+ restrictions.dimensionUniqueName + "\") ";
+		}
+
+		if (restrictions.hierarchyUniqueName != null
+				&& !restrictions.hierarchyUniqueName.toString().equals(
+						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+
+			// This we do since ranges may be blank nodes, e.g., of ical:dtend
+			// XXX: Workaround
+			if (restrictions.hierarchyUniqueName.toString().startsWith("node")) {
+				filter += "";
+			} else {
+				// filter += " filter("
+				// + createConditionConsiderEquivalences(
+				// restrictions.hierarchyUniqueName, new Variable(
+				// "HIERARCHY_UNIQUE_NAME")) + ") ";
+				filter += " filter(str(?HIERARCHY_UNIQUE_NAME) = \""
+						+ restrictions.hierarchyUniqueName + "\") ";
+			}
+
+		}
+
+		if (restrictions.levelUniqueName != null
+				&& !restrictions.levelUniqueName.toString().equals(
+						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+
+			// This we do since ranges may be blank nodes, e.g., of ical:dtend
+			// XXX: Workaround
+			if (restrictions.hierarchyUniqueName != null
+					&& restrictions.hierarchyUniqueName.toString().startsWith(
+							"node")) {
+				filter += "";
+			} else {
+
+				// filter += " filter("
+				// + createConditionConsiderEquivalences(
+				// restrictions.levelUniqueName, new Variable(
+				// "LEVEL_UNIQUE_NAME")) + ") ";
+				filter += " filter(str(?LEVEL_UNIQUE_NAME) = \""
+						+ restrictions.levelUniqueName + "\") ";
+
+			}
+
+		}
+
+		if (restrictions.memberUniqueName != null
+				&& !restrictions.memberUniqueName.toString().equals(
+						Olap4ldLinkedDataUtil.MEASURE_DIMENSION_NAME)) {
+
+			// filter += " filter("
+			// + createConditionConsiderEquivalences(
+			// restrictions.memberUniqueName, new Variable(
+			// "MEMBER_UNIQUE_NAME")) + ") ";
+			filter += " filter(str(?MEMBER_UNIQUE_NAME) = \""
+					+ restrictions.memberUniqueName + "\") ";
+		}
+
+		return filter;
+	}
+
+	/**
+	 * This method creates a filter string for a Resource with a specific
+	 * variable for all equivalences.
+	 * 
+	 * @param canonicalResource
+	 * @param variableName
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	@Deprecated
+	private String createConditionConsiderEquivalences(Node canonicalResource,
+			Variable variable) {
+
+		List<Node> equivalenceClass = getEquivalenceClassOfNode(canonicalResource);
+
+		// Since we sometimes manually build member names, we have to check
+		// on strings
+		String[] filterString = new String[equivalenceClass.size()];
+		for (int i = 0; i < filterString.length; i++) {
+			filterString[i] = "str(?" + variable + ") = \""
+					+ equivalenceClass.get(i) + "\"";
+		}
+
+		return "(" + Olap4ldLinkedDataUtil.implodeArray(filterString, " || ")
+				+ ")";
 	}
 
 	/**
@@ -1757,713 +2633,40 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 		return null;
 	}
 
-	/**
-	 * Input: We get the queried cube. We get a list of levels of inquired
-	 * dimensions. Also a list of measures. And for each diced dimension a set
-	 * of members.
-	 * 
-	 * @return The SPARQL output of the relational format of the
-	 *         multidimensional result.
-	 */
-	public List<Node[]> executeOlapQuery(Cube cube, List<Level> slicesrollups,
-			List<Position> dices, List<Measure> projections) {
-		// cube is olap4ld
-		Cube mycube = (Cube) cube;
-
-		Node dsd = Olap4ldLinkedDataUtil
-				.convertMDXtoURI(mycube.getUniqueName());
-
-		// Now, we have all neccessary data
-		String selectClause = "";
-		String whereClause = "";
-		String groupByClause = "group by ";
-		String orderByClause = "order by ";
-
-		// Typically, a cube is a dataset (actually, it represents a cube, but,
-		// anyway)
-
-		whereClause += " ?obs qb:dataSet ?ds." + " ?ds qb:structure <" + dsd
-				+ ">.";
-
-		// HashMaps for level height of dimension
-		HashMap<Integer, Integer> levelHeightMap = new HashMap<Integer, Integer>();
-
-		for (Level level : slicesrollups) {
-
-			// At the moment, we do not support hierarchy/roll-up, but simply
-			// query for all dimension members
-			// String hierarchyURI = LdOlap4jUtil.decodeUriForMdx(hierarchy
-			// .getUniqueName());
-			Node dimensionProperty = Olap4ldLinkedDataUtil
-					.convertMDXtoURI(level.getDimension().getUniqueName());
-			// XXX Why exactly do I include the level?
-			Node levelURI = Olap4ldLinkedDataUtil.convertMDXtoURI(level
-					.getUniqueName());
-
-			// Now, depending on level depth we need to behave differently
-			// Slicer level is the number of property-value pairs from the most
-			// granular value
-			// For that, the maximum depth and the level depth are used.
-			// TODO: THis is quite a simple approach, does not consider possible
-			// access restrictions.
-			Integer levelHeight = (level.getHierarchy().getLevels().size() - 1 - level
-					.getDepth());
-
-			// Note as inserted.
-			levelHeightMap.put(dimensionProperty.hashCode(), levelHeight);
-
-			whereClause += addLevelPropertyPath(0, levelHeight,
-					dimensionProperty, levelURI);
-
-			Node dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
-			selectClause += " ?" + dimensionPropertyVariable + levelHeight
-					+ " ";
-			groupByClause += " ?" + dimensionPropertyVariable + levelHeight
-					+ " ";
-			orderByClause += " ?" + dimensionPropertyVariable + levelHeight
-					+ " ";
-		}
-
-		// For each filter tuple
-		if (dices != null && !dices.isEmpty()) {
-			// We assume that each position has the same metadata (i.e., Levels)
-			// so that we only need to add graph patterns for the first position
-			for (Member member : dices.get(0).getMembers()) {
-				// We should be testing whether diceslevelHeight higher than
-				// slicesRollupsLevelHeight
-				// Dices Level Height
-				Integer diceslevelHeight = (member.getHierarchy().getLevels()
-						.size() - 1 - member.getLevel().getDepth());
-				Node dimensionProperty = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(member.getLevel().getDimension()
-								.getUniqueName());
-				Integer slicesRollupsLevelHeight = (levelHeightMap
-						.containsKey(dimensionProperty.hashCode())) ? levelHeightMap
-						.get(dimensionProperty.hashCode()) : 0;
-				if (member.getMemberType() != Member.Type.MEASURE
-						&& diceslevelHeight > slicesRollupsLevelHeight) {
-
-					Node levelURI = Olap4ldLinkedDataUtil
-							.convertMDXtoURI(member.getLevel().getUniqueName());
-
-					whereClause += addLevelPropertyPath(
-							slicesRollupsLevelHeight, diceslevelHeight,
-							dimensionProperty, levelURI);
-
-				}
-			}
-
-			whereClause += "FILTER (";
-			List<String> orList = new ArrayList<String>();
-
-			for (Position position : dices) {
-
-				// Each position is an OR
-				List<String> andList = new ArrayList<String>();
-
-				for (Member member : position.getMembers()) {
-					// We need to know the variable to filter
-					// First, we need to convert it to URI representation.
-					Node dimensionPropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil
-							.convertMDXtoURI(member.getLevel().getDimension()
-									.getUniqueName()));
-
-					// We need to know the member to filter
-					Node memberResource = Olap4ldLinkedDataUtil
-							.convertMDXtoURI(member.getUniqueName());
-
-					// Need to know the level of the member
-					Integer diceslevelHeight = (member.getHierarchy()
-							.getLevels().size() - 1 - member.getLevel()
-							.getDepth());
-
-					if (isResourceAndNotLiteral(memberResource)) {
-						andList.add(" ?" + dimensionPropertyVariable
-								+ diceslevelHeight + " = " + "<"
-								+ memberResource + "> ");
-					} else {
-						// For some reason, we need to convert the variable
-						// using str.
-						andList.add(" str(?" + dimensionPropertyVariable
-								+ diceslevelHeight + ") = " + "\""
-								+ memberResource + "\" ");
-					}
-
-				}
-
-				orList.add(Olap4ldLinkedDataUtil.implodeArray(
-						andList.toArray(new String[0]), " AND "));
-			}
-			whereClause += Olap4ldLinkedDataUtil.implodeArray(
-					orList.toArray(new String[0]), " OR ");
-			whereClause += ") ";
-
-		}
-
-		// This huge thing probably tries to combine filter expressions to
-		// efficient SPARQL expressions
-		// // First, what dimension?
-		// // If Measures, then do not filter (since the
-		// // selectionpredicates also contain measures, since that was
-		// // easier to do beforehand)
-		// try {
-		// if (position.get(0).getDimension().getDimensionType()
-		// .equals(Dimension.Type.MEASURE)) {
-		// continue;
-		// }
-		// } catch (OlapException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		//
-		// // We assume that all contained members are of the same
-		// // dimension and the same level
-		// String slicerDimensionProperty = LdOlap4jUtil
-		// .convertMDXtoURI(position.get(0).getDimension()
-		// .getUniqueName());
-		// String slicerDimensionPropertyVariable = makeParameter(position
-		// .get(0).getDimension().getUniqueName());
-		//
-		// /*
-		// * slicerLevelNumber would give me the difference between the
-		// * maximal depth of all levels and the level depth (presumably
-		// * the same for all tuples). This tells us the number of
-		// * property-value pairs from the most granular element.
-		// */
-		// Integer slicerLevelNumber = (position.get(0).getLevel()
-		// .getHierarchy().getLevels().size() - 1 - position
-		// .get(0).getLevel().getDepth());
-		//
-		// /*
-		// * Here, instead of going through all the members and filter for
-		// * them one by one, we need to "compress" the filter expression
-		// * somehow.
-		// */
-		// // Check whether the leveltype is integer and define smallest
-		// // and biggest
-		// boolean isInteger = true;
-		// int smallestTuple = 0;
-		// int biggestTuple = 0;
-		// int smallestLevelMember = 0;
-		// int biggestLevelMember = 0;
-		// try {
-		// // Initialize
-		// smallestTuple = Integer.parseInt(position.get(0)
-		// .getUniqueName());
-		// biggestTuple = smallestTuple;
-		// // Search for the smallest and the tallest member of
-		// // slicerTuple
-		// for (Member member : position) {
-		//
-		// int x = Integer.parseInt(member.getUniqueName());
-		// if (x < smallestTuple) {
-		// smallestTuple = x;
-		// }
-		// if (x > biggestTuple) {
-		// biggestTuple = x;
-		// }
-		// }
-		// // Initialize
-		// smallestLevelMember = smallestTuple;
-		// biggestLevelMember = smallestTuple;
-		// // Search for the smallest and the tallest member of all
-		// // level
-		// // members
-		// try {
-		// for (Member member : position.get(0).getLevel()
-		// .getMembers()) {
-		// int x = Integer.parseInt(member.getUniqueName());
-		// if (x < smallestLevelMember) {
-		// smallestLevelMember = x;
-		// }
-		// if (x > biggestLevelMember) {
-		// biggestLevelMember = x;
-		// }
-		// }
-		// } catch (OlapException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		//
-		// } catch (NumberFormatException nFE) {
-		// isInteger = false;
-		// }
-		//
-		// boolean isRestricted = false;
-		// try {
-		// for (Member levelMember : position.get(0).getLevel()
-		// .getMembers()) {
-		// if (isInteger) {
-		// // Then we do not need to do this
-		// break;
-		// }
-		// boolean isContained = false;
-		// for (Member slicerMember : position) {
-		// // if any member is not contained in the
-		// // slicerTuple, it is restricted
-		// if (levelMember.getUniqueName().equals(
-		// slicerMember.getUniqueName())) {
-		// isContained = true;
-		// break;
-		// }
-		// }
-		// if (!isContained) {
-		// isRestricted = true;
-		// break;
-		// }
-		// }
-		// } catch (OlapException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		//
-		// // Now, we create the string that shall be put between filter.
-		// String filterstring = "";
-		// if (isInteger) {
-		//
-		// if (smallestTuple > smallestLevelMember) {
-		// filterstring = "?" + slicerDimensionPropertyVariable
-		// + " >= " + smallestTuple + " AND ";
-		// }
-		// if (biggestTuple < biggestLevelMember) {
-		// filterstring += "?" + slicerDimensionPropertyVariable
-		// + " <= " + biggestTuple;
-		// }
-		//
-		// } else if (isRestricted) {
-		// String[] slicerTupleArray = new String[position.size()];
-		//
-		// for (int j = 0; j < slicerTupleArray.length; j++) {
-		//
-		// Member member = position.get(j);
-		// String memberString = LdOlap4jUtil
-		// .convertMDXtoURI(member.getUniqueName());
-		//
-		// // Check whether member is uri or literal value
-		// if (memberString.startsWith("http://")) {
-		// memberString = "?"
-		// + slicerDimensionPropertyVariable + " = <"
-		// + memberString + "> ";
-		// } else {
-		// memberString = "?"
-		// + slicerDimensionPropertyVariable + " = \""
-		// + memberString + "\" ";
-		// }
-		// slicerTupleArray[j] = memberString;
-		// }
-		//
-		// filterstring = LdOlap4jUtil.implodeArray(slicerTupleArray,
-		// " || ");
-		// } else {
-		// // Nothing to do, there is nothing to filter for.
-		// break;
-		// }
-		//
-		// // Only if this kind of level has not been selected, yet, we
-		// // need to do it.
-		// if (levelHeightMap.containsKey(slicerDimensionProperty
-		// .hashCode())) {
-		// query += " FILTER(" + filterstring + ").";
-		//
-		// } else {
-		//
-		// // Since we are on a specific level, we need to add
-		// // intermediary
-		// // property-values
-		// if (slicerLevelNumber == 0) {
-		// query += "?obs <" + slicerDimensionProperty + "> ?"
-		// + slicerDimensionPropertyVariable + " FILTER("
-		// + filterstring + ").";
-		// } else {
-		// // Level path will start with ?obs and end with
-		// // slicerConcept
-		// // // First, what dimension?
-		// // If Measures, then do not filter (since the
-		// // selectionpredicates also contain measures, since that was
-		// // easier to do beforehand)
-		// try {
-		// if (position.get(0).getDimension().getDimensionType()
-		// .equals(Dimension.Type.MEASURE)) {
-		// continue;
-		// }
-		// } catch (OlapException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		//
-		// // We assume that all contained members are of the same
-		// // dimension and the same level
-		// String slicerDimensionProperty = LdOlap4jUtil
-		// .convertMDXtoURI(position.get(0).getDimension()
-		// .getUniqueName());
-		// String slicerDimensionPropertyVariable = makeParameter(position
-		// .get(0).getDimension().getUniqueName());
-		//
-		// /*
-		// * slicerLevelNumber would give me the difference between the
-		// * maximal depth of all levels and the level depth (presumably
-		// * the same for all tuples). This tells us the number of
-		// * property-value pairs from the most granular element.
-		// */
-		// Integer slicerLevelNumber = (position.get(0).getLevel()
-		// .getHierarchy().getLevels().size() - 1 - position
-		// .get(0).getLevel().getDepth());
-		//
-		// /*
-		// * Here, instead of going through all the members and filter for
-		// * them one by one, we need to "compress" the filter expression
-		// * somehow.
-		// */
-		// // Check whether the leveltype is integer and define smallest
-		// // and biggest
-		// boolean isInteger = true;
-		// int smallestTuple = 0;
-		// int biggestTuple = 0;
-		// int smallestLevelMember = 0;
-		// int biggestLevelMember = 0;
-		// try {
-		// // Initialize
-		// smallestTuple = Integer.parseInt(position.get(0)
-		// .getUniqueName());
-		// biggestTuple = smallestTuple;
-		// // Search for the smallest and the tallest member of
-		// // slicerTuple
-		// for (Member member : position) {
-		//
-		// int x = Integer.parseInt(member.getUniqueName());
-		// if (x < smallestTuple) {
-		// smallestTuple = x;
-		// }
-		// if (x > biggestTuple) {
-		// biggestTuple = x;
-		// }
-		// }
-		// // Initialize
-		// smallestLevelMember = smallestTuple;
-		// biggestLevelMember = smallestTuple;
-		// // Search for the smallest and the tallest member of all
-		// // level
-		// // members
-		// try {
-		// for (Member member : position.get(0).getLevel()
-		// .getMembers()) {
-		// int x = Integer.parseInt(member.getUniqueName());
-		// if (x < smallestLevelMember) {
-		// smallestLevelMember = x;
-		// }
-		// if (x > biggestLevelMember) {
-		// biggestLevelMember = x;
-		// }
-		// }
-		// } catch (OlapException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		//
-		// } catch (NumberFormatException nFE) {
-		// isInteger = false;
-		// }
-		//
-		// boolean isRestricted = false;
-		// try {
-		// for (Member levelMember : position.get(0).getLevel()
-		// .getMembers()) {
-		// if (isInteger) {
-		// // Then we do not need to do this
-		// break;
-		// }
-		// boolean isContained = false;
-		// for (Member slicerMember : position) {
-		// // if any member is not contained in the
-		// // slicerTuple, it is restricted
-		// if (levelMember.getUniqueName().equals(
-		// slicerMember.getUniqueName())) {
-		// isContained = true;
-		// break;
-		// }
-		// }
-		// if (!isContained) {
-		// isRestricted = true;
-		// break;
-		// }
-		// }
-		// } catch (OlapException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		//
-		// // Now, we create the string that shall be put between filter.
-		// String filterstring = "";
-		// if (isInteger) {
-		//
-		// if (smallestTuple > smallestLevelMember) {
-		// filterstring = "?" + slicerDimensionPropertyVariable
-		// + " >= " + smallestTuple + " AND ";
-		// }
-		// if (biggestTuple < biggestLevelMember) {
-		// filterstring += "?" + slicerDimensionPropertyVariable
-		// + " <= " + biggestTuple;
-		// }
-		//
-		// } else if (isRestricted) {
-		// String[] slicerTupleArray = new String[position.size()];
-		//
-		// for (int j = 0; j < slicerTupleArray.length; j++) {
-		//
-		// Member member = position.get(j);
-		// String memberString = LdOlap4jUtil
-		// .convertMDXtoURI(member.getUniqueName());
-		//
-		// // Check whether member is uri or literal value
-		// if (memberString.startsWith("http://")) {
-		// memberString = "?"
-		// + slicerDimensionPropertyVariable + " = <"
-		// + memberString + "> ";
-		// } else {
-		// memberString = "?"
-		// + slicerDimensionPropertyVariable + " = \""
-		// + memberString + "\" ";
-		// }
-		// slicerTupleArray[j] = memberString;
-		// }
-		//
-		// filterstring = LdOlap4jUtil.implodeArray(slicerTupleArray,
-		// " || ");
-		// } else {
-		// // Nothing to do, there is nothing to filter for.
-		// break;
-		// }
-		//
-		// // Only if this kind of level has not been selected, yet, we
-		// // need to do it.
-		// if (levelHeightMap.containsKey(slicerDimensionProperty
-		// .hashCode())) {
-		// query += " FILTER(" + filterstring + ").";
-		//
-		// } else {
-		//
-		// // Since we are on a specific level, we need to add
-		// // intermediary
-		// // property-values
-		// if (slicerLevelNumber == 0) {
-		// query += "?obs <" + slicerDimensionProperty + "> ?"
-		// + slicerDimensionPropertyVariable + " FILTER("
-		// + filterstring + ").";
-		// } else {
-		// // Level path will start with ?obs and end with
-		// // slicerConcept
-		// String levelPath = "";
-		//
-		// for (int i = 0; i < slicerLevelNumber; i++) {
-		// levelPath += " ?" + slicerDimensionPropertyVariable
-		// + i + ". ?"
-		// + slicerDimensionPropertyVariable + i
-		// + " skos:narrower ";
-		// }
-		//
-		// query += "?obs <" + slicerDimensionProperty + "> "
-		// + levelPath + "?"
-		// + slicerDimensionPropertyVariable + " FILTER("
-		// + filterstring + ").";
-		// }
-		// }
-		// }
-		// } String levelPath = "";
-		//
-		// for (int i = 0; i < slicerLevelNumber; i++) {
-		// levelPath += " ?" + slicerDimensionPropertyVariable
-		// + i + ". ?"
-		// + slicerDimensionPropertyVariable + i
-		// + " skos:narrower ";
-		// }
-		//
-		// query += "?obs <" + slicerDimensionProperty + "> "
-		// + levelPath + "?"
-		// + slicerDimensionPropertyVariable + " FILTER("
-		// + filterstring + ").";
-		// }
-		// }
-		// }
-		// }
-
-		// Now, for each measure, we create a measure value column.
-		// Any measure should be contained only once, unless calculated measures
-		HashMap<Integer, Boolean> measureMap = new HashMap<Integer, Boolean>();
-
-		for (Measure measure : projections) {
-
-			// For formulas, this is different
-			if (measure.getAggregator().equals(Measure.Aggregator.CALCULATED)) {
-
-				/*
-				 * For now, hard coded. Here, I also partly evaluate a query
-				 * string, thus, I could do the same with filters.
-				 */
-				Measure measure1 = (Measure) ((MemberNode) ((CallNode) measure
-						.getExpression()).getArgList().get(0)).getMember();
-				Measure measure2 = (Measure) ((MemberNode) ((CallNode) measure
-						.getExpression()).getArgList().get(1)).getMember();
-
-				String operatorName = ((CallNode) measure.getExpression())
-						.getOperatorName();
-
-				// Measure
-				// Measure property has aggregator attached to it " avg".
-				Node measureProperty1 = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure1.getUniqueName().replace(
-								" " + measure.getAggregator().name(), ""));
-				// We do not encode the aggregation function in the measure, any
-				// more.
-				Node measurePropertyVariable1 = makeUriToParameter(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure1.getUniqueName()));
-
-				Node measureProperty2 = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure2.getUniqueName().replace(
-								" " + measure.getAggregator().name(), ""));
-				Node measurePropertyVariable2 = makeUriToParameter(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure2.getUniqueName()));
-
-				// We take the aggregator from the measure
-				selectClause += " " + measure1.getAggregator().name() + "(?"
-						+ measurePropertyVariable1 + " " + operatorName + " "
-						+ "?" + measurePropertyVariable2 + ")";
-
-				// I have to select them only, if we haven't inserted any
-				// before.
-				if (!measureMap.containsKey(measureProperty1.hashCode())) {
-					whereClause += "?obs <" + measureProperty1 + "> ?"
-							+ measurePropertyVariable1 + ". ";
-					measureMap.put(measureProperty1.hashCode(), true);
-				}
-				if (!measureMap.containsKey(measureProperty2.hashCode())) {
-					whereClause += "?obs <" + measureProperty2 + "> ?"
-							+ measurePropertyVariable2 + ". ";
-					measureMap.put(measureProperty2.hashCode(), true);
-				}
-
-			} else {
-
-				// Measure
-				Node measureProperty = Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure.getUniqueName().replace(
-								" " + measure.getAggregator().name(), ""));
-				Node measurePropertyVariable = makeUriToParameter(Olap4ldLinkedDataUtil
-						.convertMDXtoURI(measure.getUniqueName()));
-
-				// We take the aggregator from the measure
-				// Since we use OPTIONAL, there might be empty columns, which is
-				// why we need
-				// to convert them to decimal.
-				selectClause += " " + measure.getAggregator().name()
-						+ "(xsd:decimal(?" + measurePropertyVariable + "))";
-
-				// Optional clause is used for the case that several measures
-				// are selected.
-				if (!measureMap.containsKey(measureProperty.hashCode())) {
-					whereClause += "OPTIONAL { ?obs <" + measureProperty
-							+ "> ?" + measurePropertyVariable + ". }";
-					measureMap.put(measureProperty.hashCode(), true);
-				}
-			}
-		}
-
-		// Now that we consider DSD in queries, we need to consider DSD
-		// locations
-		String query = Olap4ldLinkedDataUtil.getStandardPrefixes() + "select "
-				+ selectClause + askForFrom(false) + askForFrom(true)
-				+ "where { " + whereClause + "}" + groupByClause
-				+ orderByClause;
-
-		return sparql(query, true);
-	}
-
-	/**
-	 * This method returns graph patterns for a property path for levels.
-	 * 
-	 * @param levelStart
-	 *            startingPoint of level
-	 * @param levelHeight
-	 *            endPoint of level
-	 * @param dimensionProperty
-	 * @param levelURI
-	 * @return
-	 */
-	private String addLevelPropertyPath(Integer levelStart,
-			Integer levelHeight, Node dimensionProperty, Node levelURI) {
-
-		String whereClause = "";
-
-		Node dimensionPropertyVariable = makeUriToParameter(dimensionProperty);
-
-		if (levelHeight == 0) {
-			/*
-			 * For now, we simply query for all and later match it to the pivot
-			 * table. A more performant way would be to filter only for those
-			 * dimension members, that are mentioned by any position. Should be
-			 * easy possible to do that if we simply ask each position for the
-			 * i'th position member.
-			 */
-			whereClause += "?obs <" + dimensionProperty + "> ?"
-					+ dimensionPropertyVariable + levelHeight + ". ";
-
-			// If level height is 0, it could be that no level is existing which
-			// is why we leave that
-			// pattern out.
-
-		} else {
-
-			// Level path will start with ?obs and end with
-			// slicerConcept
-			String levelPath = "";
-
-			for (int i = levelStart; i < levelHeight; i++) {
-				levelPath += " ?" + dimensionPropertyVariable + i + ". ?"
-						+ dimensionPropertyVariable + i + " skos:narrower ";
-			}
-
-			whereClause += "?obs <" + dimensionProperty + "> " + levelPath
-					+ "?" + dimensionPropertyVariable + levelHeight + ". ";
-
-			// And this concept needs to be contained in the level.
-			whereClause += "?" + dimensionPropertyVariable + levelHeight
-					+ " skos:member <" + levelURI + ">. ";
-			// Removed part of hasTopConcept, since we know the members
-			// already.
-
-		}
-
-		return whereClause;
-
-	}
-
-	/**
-	 * SPARQL does not allow all characters as parameter names, e.g.,
-	 * ?sdmx-measure:obsValue. Therefore, we transform the URI representation
-	 * into a parameter.
-	 * 
-	 * @param uriRepresentation
-	 * @return
-	 */
-	private Node makeUriToParameter(Node uriRepresentation) {
-		// We simply remove all special characters
-		return new Variable(uriRepresentation.toString().replaceAll(
-				"[^a-zA-Z0-9]+", ""));
-	}
-
 	@Override
-	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan) {
-		// XXX: Will not work, since OV uses different syntax than Sesame
-		LogicalToPhysical logicaltophysical = new LogicalToPhysical(null);
+	public List<Node[]> executeOlapQuery(LogicalOlapQueryPlan queryplan)
+			throws OlapException {
+		// Log logical query plan
 
-		PhysicalOlapIterator newRoot;
-		newRoot = logicaltophysical.compile(queryplan._root);
+		Olap4ldUtil._log.config("Logical query plan: " + queryplan.toString());
 
-		Olap4ldUtil._log.info("Physical query plan: " + newRoot);
+		Olap4ldUtil._log
+				.info("Execute logical query plan: Generate physical query plan.");
+		long time = System.currentTimeMillis();
 
-		PhysicalOlapQueryPlan ap = new PhysicalOlapQueryPlan(newRoot);
+		// Create physical query plan
+		this.execplan = createExecplan(queryplan);
 
-		PhysicalOlapIterator resultIterator = ap.getIterator();
+		Olap4ldUtil._log
+				.info("Execute logical query plan: Physical query plan: "
+						+ execplan.toString());
 
+		time = System.currentTimeMillis() - time;
+		Olap4ldUtil._log
+				.info("Execute logical query plan: Generate physical query plan finished in "
+						+ time + "ms.");
+
+		Olap4ldUtil._log
+				.info("Execute logical query plan: Execute physical query plan.");
+		time = System.currentTimeMillis();
+		PhysicalOlapIterator resultIterator = this.execplan.getIterator();
+
+		/*
+		 * We create our own List<Node[]> result with every item
+		 * 
+		 * Every Node[] contains for each dimension in the dimension list of the
+		 * metadata a member and for each measure in the measure list a value.
+		 */
 		List<Node[]> result = new ArrayList<Node[]>();
 		while (resultIterator.hasNext()) {
 			Object nextObject = resultIterator.next();
@@ -2471,106 +2674,28 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			Node[] node = (Node[]) nextObject;
 			result.add(node);
 		}
+
+		time = System.currentTimeMillis() - time;
+		Olap4ldUtil._log
+				.info("Execute logical query plan: Execute physical query plan finished in "
+						+ time + "ms.");
+
 		return result;
 	}
 
 	@Override
+	public List<Node[]> executeOlapQuery(Cube cube, List<Level> slicesrollups,
+			List<Position> dices, List<Measure> projections)
+			throws OlapException {
+		throw new UnsupportedOperationException(
+				"Only LogicalOlapQuery trees can be executed!");
+	}
+
+	/**
+	 * Empties store and locationMap.
+	 */
 	public void rollback() {
-		;
+		initialize();
 	}
 
-	public static void main(String[] args) {
-		try {
-
-			List<Node[]> myBindings = new ArrayList<Node[]>();
-
-			String query = "prefix surgipedia: <http://surgipedia.sfb125.de/wiki/Special:URIResolver/> SELECT * WHERE { ?opphase a surgipedia:Category-3AOperation_Phase . ?opphase rdfs:label ?label.} LIMIT 100 ";
-
-			String querysuffix = "?query=" + URLEncoder.encode(query, "UTF-8");
-
-			String serverurl = "http://aifb-ls3-vm2.aifb.kit.edu:8890/sparql";
-
-			String fullurl = serverurl + querysuffix;
-
-			HttpURLConnection con = (HttpURLConnection) new URL(fullurl)
-					.openConnection();
-
-			con.setRequestProperty("Accept", "text/plain");
-			// con.setRequestProperty("Accept", "text/n3");
-			// con.setRequestProperty("Accept",
-			// "application/sparql-results+xml");
-			con.setRequestMethod("POST");
-
-			if (con.getResponseCode() != 200) {
-				throw new RuntimeException("lookup on " + fullurl
-						+ " resulted HTTP in status code "
-						+ con.getResponseCode());
-			}
-
-			InputStream xml = con.getInputStream();
-
-			// // Transform sparql xml to nx
-			// javax.xml.transform.TransformerFactory tf =
-			// javax.xml.transform.TransformerFactory
-			// .newInstance("net.sf.saxon.TransformerFactoryImpl", Thread
-			// .currentThread().getContextClassLoader());
-			//
-			// Transformer t;
-			//
-			// ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			//
-			// t = tf.newTransformer(new
-			// StreamSource(Olap4ldLinkedDataUtil.class
-			// .getResourceAsStream("/xml2nx.xsl")));
-			//
-			// StreamSource ssource = new StreamSource(xml);
-			// StreamResult sresult = new StreamResult(baos);
-			//
-			// t.transform(ssource, sresult);
-			//
-			// // We need to make InputStream out of OutputStream
-			// ByteArrayInputStream nx = new ByteArrayInputStream(
-			// baos.toByteArray());
-			//
-			// // String test2 =
-			// Olap4ldLinkedDataUtil.convertStreamToString(nx);
-			//
-			// nx.reset();
-			//
-			// NxParser nxp = new NxParser(nx);
-
-			NxParser nxp = new NxParser(xml);
-
-			Node[] nxx;
-			while (nxp.hasNext()) {
-				System.out.println();
-				try {
-					nxx = nxp.next();
-					myBindings.add(nxx);
-					for (int i = 0; i < nxx.length; i++) {
-						Node node = nxx[i];
-						System.out.print(node.toString() + "; ");
-					}
-				} catch (Exception e) {
-					System.out.println("Could not parse properly.");
-				}
-				;
-			}
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public PhysicalOlapQueryPlan getExecplan() throws OlapException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

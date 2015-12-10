@@ -17,9 +17,9 @@ public class LogicalToPhysical {
 	private List<List<Node[]>> membercombinations = new ArrayList<List<Node[]>>();
 	private List<Node[]> hierarchysignature = new ArrayList<Node[]>();
 	private List<Node[]> projectedMeasures = new ArrayList<Node[]>();
-	private EmbeddedSesameEngine engine;
+	private LinkedDataCubesEngine engine;
 
-	public LogicalToPhysical(EmbeddedSesameEngine embeddedSesameEngine) {
+	public LogicalToPhysical(LinkedDataCubesEngine embeddedSesameEngine) {
 		this.engine = embeddedSesameEngine;
 	}
 
@@ -376,7 +376,7 @@ public class LogicalToPhysical {
 			// we
 			// only have one node.
 			// We use the OLAP-2-SPARQL algorithm.
-			theIterator = new Olap2SparqlAlgorithmSesameIterator(iterator1,
+			theIterator = new Olap2SparqlAlgorithmIterator(iterator1,
 					this.engine, slicesrollups, levelheights, projections,
 					membercombinations, hierarchysignature);
 

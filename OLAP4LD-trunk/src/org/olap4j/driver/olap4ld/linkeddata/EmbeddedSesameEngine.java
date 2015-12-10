@@ -418,7 +418,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		return "";
 	}
 
-	public void executeCONSTRUCTQuery(String constructquery) {
+	public void executeSparqlConstructQuery(String constructquery) {
 		// We assume one or two cubes, only.
 
 		try {
@@ -512,7 +512,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 	 *            (not used)
 	 * @return
 	 */
-	public List<Node[]> sparql(String query, boolean caching) {
+	public List<Node[]> executeSparqlSelectQuery(String query, boolean caching) {
 
 		Olap4ldUtil._log.config("SPARQL query: " + query);
 
@@ -639,7 +639,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 			// Check max loaded
 			String query = "select (count(?s) as ?count) where {?s ?p ?o}";
-			List<Node[]> result = sparql(query, false);
+			List<Node[]> result = executeSparqlSelectQuery(query, false);
 			this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
 			Olap4ldUtil._log.config("Number of loaded triples before: "
 					+ this.LOADED_TRIPLE_SIZE);
@@ -818,14 +818,14 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				query = "select * where {?s ?p ?o}";
 				Olap4ldUtil._log.config("Check loaded data (10 triples): "
 						+ query);
-				sparql(query, false);
+				executeSparqlSelectQuery(query, false);
 			}
 
 			con.close();
 
 			// Check max loaded
 			query = "select (count(?s) as ?count) where {?s ?p ?o}";
-			result = sparql(query, false);
+			result = executeSparqlSelectQuery(query, false);
 			this.LOADED_TRIPLE_SIZE = new Integer(result.get(1)[0].toString());
 			Olap4ldUtil._log.info("Number of loaded triples after: "
 					+ this.LOADED_TRIPLE_SIZE);
@@ -1489,7 +1489,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 
 		// Check max loaded
 		String query = "PREFIX qb: <http://purl.org/linked-data/cube#> select (count(?s) as ?count) where {?s qb:dataSet ?ds}";
-		List<Node[]> countobservationsresult = sparql(query, false);
+		List<Node[]> countobservationsresult = executeSparqlSelectQuery(query, false);
 		Integer countobservation = new Integer(
 				countobservationsresult.get(1)[0].toString());
 
@@ -1551,7 +1551,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		result = sparql(querytemplate, true);
+		result = executeSparqlSelectQuery(querytemplate, true);
 
 		return result;
 	}
@@ -1588,7 +1588,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// load
 				String query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dsd WHERE {<"
 						+ noninformationuri + "> qb:structure ?dsd}";
-				List<Node[]> dsd = sparql(query, true);
+				List<Node[]> dsd = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -1627,7 +1627,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?comp WHERE {<"
 						+ noninformationuri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp.}";
-				List<Node[]> components = sparql(query, true);
+				List<Node[]> components = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -1647,7 +1647,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?measure WHERE {<"
 						+ noninformationuri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:measure ?measure}";
-				List<Node[]> measures = sparql(query, true);
+				List<Node[]> measures = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -1668,7 +1668,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?dimension WHERE {<"
 						+ noninformationuri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension}";
-				List<Node[]> dimensions = sparql(query, true);
+				List<Node[]> dimensions = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -1717,7 +1717,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				query = "PREFIX qb: <http://purl.org/linked-data/cube#> SELECT ?codelist WHERE {<"
 						+ noninformationuri
 						+ "> qb:structure ?dsd. ?dsd qb:component ?comp. ?comp qb:dimension ?dimension. ?dimension qb:codeList ?codelist}";
-				List<Node[]> codelists = sparql(query, true);
+				List<Node[]> codelists = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -1914,7 +1914,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 				// Find out what went wrong:
 				String query = TYPICALPREFIXES
 						+ "SELECT ?dim { ?dim a qb:DimensionProperty . FILTER NOT EXISTS { ?dim rdfs:range [] }}";
-				List<Node[]> errordimensions = sparql(query, true);
+				List<Node[]> errordimensions = executeSparqlSelectQuery(query, true);
 				// There should be a dsd
 				// Note in spec:
 				// "Every qb:DataSet has exactly one associated qb:DataStructureDefinition."
@@ -2659,7 +2659,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 			// Add all of result2 to result
 			boolean first = true;
 			for (Node[] anIntermediaryresult : myresult) {
@@ -2686,7 +2686,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
@@ -2845,7 +2845,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> result = sparql(querytemplate, true);
+		List<Node[]> result = executeSparqlSelectQuery(querytemplate, true);
 
 		// Here, we also include measures without aggregation function.
 		// We have also added these measures as members to getMembers().
@@ -2858,7 +2858,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> result2 = sparql(querytemplate, true);
+		List<Node[]> result2 = executeSparqlSelectQuery(querytemplate, true);
 
 		// List<Node[]> result = applyRestrictions(measureUris, restrictions);
 
@@ -3041,7 +3041,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// Add all of result to result
 			boolean first = true;
@@ -3072,7 +3072,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
@@ -3113,7 +3113,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result3 = applyRestrictions(memberUris3,
 			// restrictions);
@@ -3301,7 +3301,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 			// Add all of result2 to result
 			boolean first = true;
 			for (Node[] nodes : myresult) {
@@ -3324,7 +3324,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			myresult = sparql(querytemplate, true);
+			myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// Add all of result2 to result
 			first = true;
@@ -3356,7 +3356,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result2 = applyRestrictions(memberUris2,
 			// restrictions);
@@ -3388,7 +3388,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 					additionalFilters);
 
 			// Second, ask for the measures (which are also members)
-			List<Node[]> myresult = sparql(querytemplate, true);
+			List<Node[]> myresult = executeSparqlSelectQuery(querytemplate, true);
 
 			// List<Node[]> result3 = applyRestrictions(memberUris3,
 			// restrictions);
@@ -3688,7 +3688,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> memberUris2 = sparql(querytemplate, true);
+		List<Node[]> memberUris2 = executeSparqlSelectQuery(querytemplate, true);
 
 		return memberUris2;
 	}
@@ -3763,7 +3763,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> memberUris2 = sparql(querytemplate, true);
+		List<Node[]> memberUris2 = executeSparqlSelectQuery(querytemplate, true);
 
 		return memberUris2;
 	}
@@ -3839,7 +3839,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 			querytemplate = querytemplate.replace("{{{FILTERS}}}",
 					additionalFilters);
 
-			List<Node[]> memberUris = sparql(querytemplate, true);
+			List<Node[]> memberUris = executeSparqlSelectQuery(querytemplate, true);
 
 			return memberUris;
 
@@ -3907,7 +3907,7 @@ public class EmbeddedSesameEngine implements LinkedDataCubesEngine {
 		querytemplate = querytemplate.replace("{{{FILTERS}}}",
 				additionalFilters);
 
-		List<Node[]> memberUris1 = sparql(querytemplate, true);
+		List<Node[]> memberUris1 = executeSparqlSelectQuery(querytemplate, true);
 
 		return memberUris1;
 

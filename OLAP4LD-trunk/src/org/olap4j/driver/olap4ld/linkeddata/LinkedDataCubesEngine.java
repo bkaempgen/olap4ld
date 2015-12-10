@@ -227,4 +227,18 @@ public interface LinkedDataCubesEngine {
 
 	public PhysicalOlapQueryPlan getExecplan()
 			throws OlapException;
+
+	/**
+	 * During adding of OV engine added.
+	 * @param observationquery
+	 * @param b
+	 * @return
+	 */
+	public List<Node[]> executeSparqlSelectQuery(String observationquery, boolean b);
+
+	/**
+	 * During adding of OV engine added.
+	 * @param constructquery
+	 */
+	public void executeSparqlConstructQuery(String constructquery);
 }
