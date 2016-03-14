@@ -1426,7 +1426,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 		// Boolean values need to be returned as "true" or "false".
 		// Get all measures
 		String querytemplate = Olap4ldLinkedDataUtil
-				.readInQueryTemplate("sesame_getMeasures.txt");
+				.readInQueryTemplate("virtuoso_getMeasures.txt");
 		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
 				askForFrom(true));
 		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);
@@ -2173,6 +2173,9 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 		// Measure Member
 		if (true) {
+			
+			// XXX From now on, I return only one measure.
+			
 			intermediaryresult = getMeasureMembers(restrictions);
 
 			addToResult(intermediaryresult, result);
@@ -2188,27 +2191,27 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 			addToResult(intermediaryresult, result);
 		}
 
-		// Xkos members
-		// Watch out: No square brackets
-		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
-				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
-
-			intermediaryresult = getXkosMembers(restrictions);
-
-			addToResult(intermediaryresult, result);
-
-		}
-
-		// If we still do not have members, then we might have degenerated
-		// members
-		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
-				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
-			// Members without codeList
-			intermediaryresult = getDegeneratedMembers(restrictions);
-
-			addToResult(intermediaryresult, result);
-
-		}
+//		// Xkos members
+//		// Watch out: No square brackets
+//		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+//				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
+//
+//			intermediaryresult = getXkosMembers(restrictions);
+//
+//			addToResult(intermediaryresult, result);
+//
+//		}
+//
+//		// If we still do not have members, then we might have degenerated
+//		// members
+//		if (!isMeasureQueriedForExplicitly(restrictions.dimensionUniqueName,
+//				restrictions.hierarchyUniqueName, restrictions.levelUniqueName)) {
+//			// Members without codeList
+//			intermediaryresult = getDegeneratedMembers(restrictions);
+//
+//			addToResult(intermediaryresult, result);
+//
+//		}
 
 		// Use canonical identifier
 		// result = replaceIdentifiersWithCanonical(result);
@@ -2269,7 +2272,7 @@ public class OpenVirtuosoEngine implements LinkedDataCubesEngine {
 
 		// Second, ask for the measures (which are also members)
 		String querytemplate = Olap4ldLinkedDataUtil
-				.readInQueryTemplate("sesame_getMembers_measure_members.txt");
+				.readInQueryTemplate("virtuoso_getMembers_measure_members.txt");
 		querytemplate = querytemplate.replace("{{{STANDARDFROM}}}",
 				askForFrom(true));
 		querytemplate = querytemplate.replace("{{{TABLE_CAT}}}", TABLE_CAT);

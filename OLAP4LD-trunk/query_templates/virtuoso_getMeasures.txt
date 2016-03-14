@@ -1,0 +1,36 @@
+PREFIX dcterms: <http://purl.org/dc/terms/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+PREFIX sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> 
+PREFIX qb: <http://purl.org/linked-data/cube#> 
+PREFIX qb4o: <http://purl.org/olap#> 
+PREFIX xkos: <http://purl.org/linked-data/xkos#> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+SELECT DISTINCT 
+?CATALOG_NAME ?SCHEMA_NAME ?CUBE_NAME ?MEASURE_UNIQUE_NAME ?MEASURE_NAME ?MEASURE_CAPTION ?DATA_TYPE ?MEASURE_IS_VISIBLE ?MEASURE_AGGREGATOR ?EXPRESSION 
+{{{STANDARDFROM}}}
+WHERE {
+
+?CUBE_NAME qb:structure ?dsd. 
+?dsd qb:component ?compSpec. 
+?compSpec qb:measure ?MEASURE_UNIQUE_NAME_PREFIX.  
+BIND('http://www.w3.org/2001/XMLSchema#decimal' as ?DATA_TYPE).
+OPTIONAL {?MEASURE_UNIQUE_NAME_PREFIX rdfs:label ?MEASURE_CAPTION FILTER ( lang(?MEASURE_CAPTION) = "en" ) } 
+
+FILTER NOT EXISTS { ?compSpec qb4o:hasAggregateFunction ?MEASURE_AGGREGATOR_PART } 
+BIND('http://purl.org/olap#sum' as ?MEASURE_AGGREGATOR). 
+BIND(CONCAT(STR(?MEASURE_UNIQUE_NAME_PREFIX), "") as ?MEASURE_UNIQUE_NAME). 
+
+OPTIONAL {?compSpec qb:expression ?EXPRESSION } 
+BIND('{{{TABLE_CAT}}}' as ?CATALOG_NAME). 
+BIND('{{{TABLE_SCHEM}}}' as ?SCHEMA_NAME). 
+BIND(?MEASURE_UNIQUE_NAME as ?MEASURE_NAME). 
+BIND('true' as ?MEASURE_IS_VISIBLE). 
+{{{FILTERS}}}
+
+} ORDER BY ?CUBE_NAME ?MEASURE_UNIQUE_NAME
+
+
+

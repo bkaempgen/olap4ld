@@ -59,7 +59,10 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	// private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/estatwrap/tec00114_ds.rdf#ds,http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds";
 	//private static final String TESTURL = "http://estatwrap.ontologycentral.com/id/tec00115#ds";
 	//private static final String TESTURL = "http://pastebin.com/raw.php?i=839G2u72#ds";
-	private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
+	//private static final String TESTURL = "http://olap4ld.googlecode.com/git/OLAP4LD-trunk/tests/ssb001/ttl/example.ttl#ds";
+	//private static final String TESTURL = "http://citydata.ai.wu.ac.at/Linked-UNData/data/240";
+	private static final String TESTURL = "http://estatwrap.ontologycentral.com/id/urb_cenv#ds";
+	
 	// private static final String TESTURL = "http://lod.gesis.org/lodpilot/ALLBUS/ZA4570v590.rdf#ds,http://estatwrap.ontologycentral.com/id/tec00115#ds";
 	
 	// "http://data.webfoundation.org/webindex/dataset/ITUA-Imputed";
@@ -175,15 +178,15 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 		// Set the level to a particular level
 
 		// For debugging purposes
-		//Olap4ldUtil._log.setLevel(Level.CONFIG);
+		Olap4ldUtil._log.setLevel(Level.CONFIG);
 
 		// For monitoring usage
 		// Olap4ldUtil._log.setLevel(Level.INFO);
 
 		// For warnings (and errors) only
-		Olap4ldUtil._log.setLevel(Level.WARNING);
+		//Olap4ldUtil._log.setLevel(Level.WARNING);
 
-		// Olap4ldUtil._isDebug = true;
+		Olap4ldUtil._isDebug = true;
 	}
 
 	protected void tearDown() throws Exception {
@@ -254,22 +257,23 @@ public class GenericCubeReturnMetadataTest extends TestCase {
 	 * @throws SQLException
 	 */
 	public void testDatabaseMetaData() throws SQLException {
-		testDatabaseMetaDataGetDatasources();
-		testDatabaseMetaDataGetCatalogs();
-		testDatabaseMetaDataGetSchemas();
-		testDatabaseMetaDataGetLiterals();
-		testDatabaseMetaDataGetDatabaseProperties();
-		testDatabaseMetaDataGetMdxKeywords();
-		testDatabaseMetaDataGetCubes();
-		testDatabaseMetaDataGetMeasures();
-		testDatabaseMetaDataGetDimensions();
-		testDatabaseMetaDataGetFunctions();
-		testDatabaseMetaDataGetHierarchies();
-		testDatabaseMetaDataGetLevels();
-		testDatabaseMetaDataGetLiterals2();
-		testDatabaseMetaDataGetMeasureMembers();
-		testDatabaseMetaDataGetMembers();
-		testDatabaseMetaDataGetSets();
+//		testDatabaseMetaDataGetDatasources();
+//		testDatabaseMetaDataGetCatalogs();
+//		testDatabaseMetaDataGetSchemas();
+//		testDatabaseMetaDataGetLiterals();
+//		testDatabaseMetaDataGetDatabaseProperties();
+//		testDatabaseMetaDataGetMdxKeywords();
+//		testDatabaseMetaDataGetCubes();
+//		testDatabaseMetaDataGetMeasures();
+//		testDatabaseMetaDataGetDimensions();
+//		testDatabaseMetaDataGetFunctions();
+//		testDatabaseMetaDataGetHierarchies();
+//		testDatabaseMetaDataGetLevels();
+//		testDatabaseMetaDataGetLiterals2();
+//		testDatabaseMetaDataGetMeasureMembers();
+//		testDatabaseMetaDataGetMembers();
+//		testDatabaseMetaDataGetSets();
+		fail("supposed to fail");
 
 	}
 
